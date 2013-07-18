@@ -11,11 +11,6 @@ import java.util.Map;
 public interface Requirement {
 
     /**
-     * Adapt this requirement to another type
-     */
-    <T> T adapt(Class<T> clazz);
-    
-    /**
      * Returns the namespace of this requirement.
      *
      * @return The namespace of this requirement.

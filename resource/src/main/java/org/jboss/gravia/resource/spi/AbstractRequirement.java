@@ -20,15 +20,13 @@
 package org.jboss.gravia.resource.spi;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.Version;
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.VersionRange;
 
 /**
@@ -43,6 +41,7 @@ public class AbstractRequirement implements Requirement {
     private final String namespace;
     private Map<String, Object> attributes;
     private Map<String, String> directives;
+    private String canonicalName;
     private boolean optional;
 
     public AbstractRequirement(AbstractResource resource, String namespace, Map<String, Object> atts, Map<String, String> dirs) {
@@ -101,44 +100,57 @@ public class AbstractRequirement implements Requirement {
     public Object getAttribute(String key) {
         return attributes != null ? attributes.get(key) : null;
     }
-
-
-    @Override
-    public <T> T adapt(Class<T> clazz) {
-        T result = null;
-        return result;
-    }
-
-    public boolean matches(Capability cap) {
-        resource.assertImmutable();
-        Map<String, Object> reqatts = getAttributes();
-        Map<String, Object> capatts = cap.getAttributes();
-
-        // The requirement matches the capability if their namespaces match
-        boolean matches = namespace.equals(cap.getNamespace());
-        
-        // Match the version range
-        VersionRange range = matches ? getVersionRange(this, IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE) : null;
-        if (range != null) {
-            Version version = AbstractCapability.getVersion(cap, IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
-            matches = range.includes(version);
-            reqatts = new HashMap<String, Object>(getAttributes());
-            reqatts.remove(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
-            capatts = new HashMap<String, Object>(cap.getAttributes());
-            capatts.remove(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
-        }
-        
-        // Match the remaining attributes
-        matches &= reqatts.equals(capatts);
-        
-        return matches;
+    
+    public static VersionRange getVersionRange(Requirement req, String attr) {
+        Object value = req.getAttribute(attr);
+        return (value instanceof String) ? new VersionRange((String) value) : (VersionRange) value;
     }
 
     protected void validate() {
+        canonicalName = toString();
     }
     
-    static VersionRange getVersionRange(Requirement req, String attr) {
-        Object value = req.getAttribute(attr);
-        return (value instanceof String) ? new VersionRange((String) value) : (VersionRange) value;
+    @Override
+    public String toString() {
+        String result = canonicalName;
+        if (result == null) {
+            String type;
+            String nsval = null;
+            if (IdentityNamespace.IDENTITY_NAMESPACE.equals(getNamespace())) {
+                type = Requirement.class.getSimpleName();
+            } else {
+                type = getClass().getSimpleName();
+                nsval = namespace;
+            }
+            StringBuffer buffer = new StringBuffer(type + "[");
+            boolean addcomma = false;
+            if (nsval != null) {
+                buffer.append(nsval);
+                addcomma = true;
+            }
+            if (!getAttributes().isEmpty()) {
+                buffer.append(addcomma ? "," : "");
+                buffer.append("atts=" + attributes);
+                addcomma = true;
+            }
+            if (!getDirectives().isEmpty()) {
+                buffer.append(addcomma ? "," : "");
+                buffer.append("dirs=" + directives);
+                addcomma = true;
+            }
+            ResourceIdentity icap = resource.getIdentity();
+            if (icap != null) {
+                buffer.append(addcomma ? "," : "");
+                buffer.append("[" + icap.getSymbolicName() + ":" + icap.getVersion() + "]");
+                addcomma = true;
+            } else {
+                buffer.append(addcomma ? "," : "");
+                buffer.append("[anonymous]");
+                addcomma = true;
+            }
+            buffer.append("]");
+            result = buffer.toString();
+        }
+        return result;
     }
 }

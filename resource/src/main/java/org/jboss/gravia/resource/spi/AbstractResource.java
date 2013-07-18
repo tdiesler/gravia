@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.jboss.gravia.resource.Attachable;
-import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
@@ -15,7 +13,7 @@ import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
 
 /**
- * An abstract resource
+ * An abstract implementation of a {@link Resource}
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
@@ -27,7 +25,6 @@ public class AbstractResource implements Resource {
     private final AtomicBoolean mutable = new AtomicBoolean(true);
     private Capability identityCapability;
     private ResourceIdentity identity;
-    private Attachable attachments; 
 
     void addCapability(AbstractCapability cap) {
         synchronized (capabilities) {
@@ -43,16 +40,6 @@ public class AbstractResource implements Resource {
         }
     }
     
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T adapt(Class<T> type) {
-        T result = null;
-        if (type.isAssignableFrom(getClass())) {
-            result = (T) this;
-        }
-        return result;
-    }
-
     @Override
     public Capability getIdentityCapability() {
         if (identityCapability == null) {
@@ -127,28 +114,6 @@ public class AbstractResource implements Resource {
         return Collections.unmodifiableList(result);
     }
 
-    @Override
-    public <T> T putAttachment(AttachmentKey<T> key, T value) {
-        return getAttachmentsInternal().putAttachment(key, value);
-    }
-
-    @Override
-    public <T> T getAttachment(AttachmentKey<T> key) {
-        return getAttachmentsInternal().getAttachment(key);
-    }
-
-    @Override
-    public <T> T removeAttachment(AttachmentKey<T> key) {
-        return getAttachmentsInternal().getAttachment(key);
-    }
-
-    private Attachable getAttachmentsInternal() {
-        if (attachments == null) {
-            attachments = new AttachableSupport();
-        }
-        return attachments;
-    }
-
     void validate() {
 
         // Make sure we have an identity
@@ -161,7 +126,15 @@ public class AbstractResource implements Resource {
 
         // Validate the requirements
         for (Requirement req : getRequirements(null)) {
-            ((AbstractCapability) req).validate();
+            ((AbstractRequirement) req).validate();
         }
+    }
+
+    @Override
+    public String toString() {
+        ResourceIdentity id = identity;
+        String idstr = (id != null ? id.getSymbolicName() + ":" + id.getVersion() : "anonymous");
+        String prefix = getClass() != AbstractResource.class ? getClass().getSimpleName() : Resource.class.getSimpleName();
+        return prefix + "[" + idstr + "]";
     }
 }

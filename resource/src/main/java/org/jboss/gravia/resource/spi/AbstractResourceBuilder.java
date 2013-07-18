@@ -29,6 +29,7 @@ import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.Version;
+import org.jboss.gravia.resource.VersionRange;
 
 /**
  * A builder for resources
@@ -36,21 +37,15 @@ import org.jboss.gravia.resource.Version;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public class AbstractResourceBuilder implements ResourceBuilder {
+public abstract class AbstractResourceBuilder implements ResourceBuilder {
 
     private AbstractResource resource;
 
-    protected AbstractResource createResource() {
-        return new AbstractResource();
-    }
+    protected abstract AbstractResource createResource();
     
-    protected AbstractCapability createCapability(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives) {
-        return new AbstractCapability(resource, namespace, attributes, directives);
-    }
+    protected abstract AbstractCapability createCapability(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives);
 
-    protected AbstractRequirement createRequirement(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives) {
-        return new AbstractRequirement(resource, namespace, attributes, directives);
-    }
+    protected abstract AbstractRequirement createRequirement(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives);
 
     @Override
     public Capability addIdentityCapability(String symbolicName, Version version) {
@@ -69,6 +64,13 @@ public class AbstractResourceBuilder implements ResourceBuilder {
         AbstractCapability cap = createCapability(getResourceInternal(), namespace, mutableAttributes(atts), mutableDirectives(dirs));
         getResourceInternal().addCapability(cap);
         return cap;
+    }
+
+    @Override
+    public Requirement addIdentityRequirement(String symbolicName, VersionRange version) {
+        Requirement ireq = addRequirement(IdentityNamespace.IDENTITY_NAMESPACE, symbolicName);
+        ireq.getAttributes().put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
+        return ireq;
     }
 
     @Override

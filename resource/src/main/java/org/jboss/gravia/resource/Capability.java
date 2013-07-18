@@ -11,11 +11,6 @@ import java.util.Map;
 public interface Capability {
 
     /**
-     * Adapt the capability to the given type
-     */
-    <T> T adapt(Class<T> type);
-
-    /**
      * Returns the namespace of this capability.
      *
      * @return The namespace of this capability.

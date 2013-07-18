@@ -33,8 +33,8 @@ public interface ResourceBuilder {
     /**
      * Add the {@link IdentityCapability}.
      *
-     * @param symbolicName The bundle symbolic name
-     * @param version The bundle version
+     * @param symbolicName The symbolic name
+     * @param version The version
      */
     Capability addIdentityCapability(String symbolicName, Version version);
 
@@ -55,6 +55,14 @@ public interface ResourceBuilder {
      */
     Capability addCapability(String namespace, Map<String, Object> atts, Map<String, String> dirs);
 
+    /**
+     * Add an identity {@link Requirement}
+     *
+     * @param symbolicName The symbolic name
+     * @param version The version range
+     */
+    Requirement addIdentityRequirement(String symbolicName, VersionRange version);
+    
     /**
      * Add a {@link Requirement}
      *

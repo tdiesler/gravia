@@ -21,6 +21,7 @@ package org.jboss.test.gravia.resource;
 
 
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
@@ -39,7 +40,7 @@ public class ResourceBuilderTestCase  {
 
     @Test
     public void testAttributeMutability() throws Exception {
-        ResourceBuilder builder = new AbstractResourceBuilder();
+        ResourceBuilder builder = new DefaultResourceBuilder();
         Capability cap = builder.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, "test1");
         cap.getAttributes().put("foo", "bar");
         Resource res = builder.getResource();

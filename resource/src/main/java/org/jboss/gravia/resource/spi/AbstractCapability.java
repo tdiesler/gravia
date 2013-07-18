@@ -24,11 +24,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
 
 /**
- * The abstract implementation of a {@link XCapability}.
+ * The abstract implementation of a {@link Capability}.
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
@@ -39,6 +41,7 @@ public class AbstractCapability implements Capability {
     private final String namespace;
     private Map<String, Object> attributes;
     private Map<String, String> directives;
+    private String canonicalName;
 
     public AbstractCapability(AbstractResource resource, String namespace, Map<String, Object> atts, Map<String, String> dirs) {
         if (resource == null)
@@ -93,13 +96,7 @@ public class AbstractCapability implements Capability {
         return attributes != null ? attributes.get(key) : null;
     }
 
-    @Override
-    public <T> T adapt(Class<T> clazz) {
-        T result = null;
-        return result;
-    }
-
-    static Version getVersion(Capability cap, String attname) {
+    public static Version getVersion(Capability cap, String attname) {
         Object attval = cap.getAttributes().get(attname);
         if (attval != null && !(attval instanceof Version)) {
             attval = new Version(attval.toString());
@@ -109,5 +106,50 @@ public class AbstractCapability implements Capability {
     }
     
     protected void validate() {
+        canonicalName = toString();
+    }
+
+    @Override
+    public String toString() {
+        String result = canonicalName;
+        if (result == null) {
+            String type;
+            String nsval = null;
+            if (IdentityNamespace.IDENTITY_NAMESPACE.equals(getNamespace())) {
+                type = Capability.class.getSimpleName();
+            } else {
+                type = getClass().getSimpleName();
+                nsval = namespace;
+            }
+            StringBuffer buffer = new StringBuffer(type + "[");
+            boolean addcomma = false;
+            if (nsval != null) {
+                buffer.append(nsval);
+                addcomma = true;
+            }
+            if (!getAttributes().isEmpty()) {
+                buffer.append(addcomma ? "," : "");
+                buffer.append("atts=" + attributes);
+                addcomma = true;
+            }
+            if (!getDirectives().isEmpty()) {
+                buffer.append(addcomma ? "," : "");
+                buffer.append("dirs=" + directives);
+                addcomma = true;
+            }
+            ResourceIdentity icap = resource.getIdentity();
+            if (icap != null) {
+                buffer.append(addcomma ? "," : "");
+                buffer.append("[" + icap.getSymbolicName() + ":" + icap.getVersion() + "]");
+                addcomma = true;
+            } else {
+                buffer.append(addcomma ? "," : "");
+                buffer.append("[anonymous]");
+                addcomma = true;
+            }
+            buffer.append("]");
+            result = buffer.toString();
+        }
+        return result;
     }
 }

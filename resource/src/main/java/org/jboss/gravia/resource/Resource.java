@@ -8,9 +8,7 @@ import java.util.List;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface Resource extends Attachable {
-
-	<T> T adapt(Class<T> type);
+public interface Resource {
 
     ResourceIdentity getIdentity();
 
