@@ -36,6 +36,7 @@ import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.resource.Wire;
+import org.jboss.gravia.resource.Wiring;
 import org.junit.Test;
 
 
@@ -52,23 +53,43 @@ public class DefaultResolverTest extends AbstractResolverTest {
         
         ResourceBuilder builder = new DefaultResourceBuilder();
         builder.addIdentityCapability("resA", new Version("1.0.0"));
-        Requirement ireqA = builder.addIdentityRequirement("resB", new VersionRange("[1.0,2.0)"));
+        Requirement reqA = builder.addIdentityRequirement("resB", new VersionRange("[1.0,2.0)"));
         Resource resA = builder.getResource();
         
         builder = new DefaultResourceBuilder();
-        Capability icapB = builder.addIdentityCapability("resB", new Version("1.0.0"));
+        Capability capB = builder.addIdentityCapability("resB", new Version("1.0.0"));
         Resource resB = builder.getResource();
         
+        installResources(resA, resB);
+        
         ResolveContext context = getResolveContext(Arrays.asList(resA, resB), null);
-        Map<Resource, List<Wire>> wiremap = resolve(context);
+        Map<Resource, List<Wire>> wiremap = resolveAndApply(context);
         Assert.assertEquals(2, wiremap.size());
         List<Wire> wiresA = wiremap.get(resA);
         Assert.assertEquals(1, wiresA.size());
-        Wire wire = wiresA.get(0);
-        Assert.assertEquals(resA, wire.getRequirer());
-        Assert.assertEquals(ireqA, wire.getRequirement());
-        Assert.assertEquals(resB, wire.getProvider());
-        Assert.assertEquals(icapB, wire.getCapability());
+        Wire wireA = wiresA.get(0);
+        Assert.assertEquals(resA, wireA.getRequirer());
+        Assert.assertEquals(reqA, wireA.getRequirement());
+        Assert.assertEquals(resB, wireA.getProvider());
+        Assert.assertEquals(capB, wireA.getCapability());
+        
+        Wiring wiringA = resA.getWiring();
+        Assert.assertEquals(resA, wiringA.getResource());
+        Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
+        Assert.assertEquals(1, wiringA.getRequiredResourceWires(null).size());
+        Assert.assertEquals(wireA, wiringA.getRequiredResourceWires(null).get(0));
+        Assert.assertEquals(0, wiringA.getResourceCapabilities(null).size());
+        Assert.assertEquals(1, wiringA.getResourceRequirements(null).size());
+        Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
+        
+        Wiring wiringB = resB.getWiring();
+        Assert.assertEquals(resB, wiringB.getResource());
+        Assert.assertEquals(1, wiringB.getProvidedResourceWires(null).size());
+        Assert.assertEquals(0, wiringB.getRequiredResourceWires(null).size());
+        Assert.assertEquals(wireA, wiringB.getProvidedResourceWires(null).get(0));
+        Assert.assertEquals(1, wiringB.getResourceCapabilities(null).size());
+        Assert.assertEquals(0, wiringB.getResourceRequirements(null).size());
+        Assert.assertEquals(capB, wiringB.getResourceCapabilities(null).get(0));
     }
 
 }

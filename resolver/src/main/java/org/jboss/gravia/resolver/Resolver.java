@@ -69,4 +69,18 @@ public interface Resolver {
      * @throws ResolutionException If the resolution cannot be satisfied.
      */
     Map<Resource, List<Wire>> resolve(ResolveContext context) throws ResolutionException;
+
+    /**
+     * Resolve and apply the given {@link ResolveContext}.
+     * <p>
+     * This creates or updates the {@link Wiring} on each resolved {@link Resource}
+     * 
+     * @param context The resolve context for the resolve operation. Must not be
+     *        {@code null}.
+     * @return The new resources and wires required to satisfy the specified
+     *         resolve context. The returned map is the property of the caller
+     *         and can be modified by the caller.
+     * @throws ResolutionException If the resolution cannot be satisfied.
+     */
+    Map<Resource, List<Wire>> resolveAndApply(ResolveContext context) throws ResolutionException;
 }

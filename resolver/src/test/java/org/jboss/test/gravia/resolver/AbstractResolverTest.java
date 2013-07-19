@@ -25,10 +25,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.gravia.resolver.DefaultResolveContext;
+import org.jboss.gravia.resolver.DefaultResolver;
 import org.jboss.gravia.resolver.ResolutionException;
 import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resolver.Resolver;
-import org.jboss.gravia.resolver.spi.DefaultResolver;
 import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceStore;
@@ -68,5 +68,9 @@ public abstract class AbstractResolverTest {
 
     Map<Resource, List<Wire>> resolve(ResolveContext context) throws ResolutionException {
         return resolver.resolve(context);
+    }
+
+    Map<Resource, List<Wire>> resolveAndApply(ResolveContext context) throws ResolutionException {
+        return resolver.resolveAndApply(context);
     }
 }

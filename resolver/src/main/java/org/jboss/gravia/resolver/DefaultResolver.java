@@ -17,9 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.resolver.spi;
+package org.jboss.gravia.resolver;
 
-import org.jboss.gravia.resolver.Resolver;
+import org.jboss.gravia.resolver.spi.AbstractResolver;
 
 /**
  * The default {@link Resolver}.

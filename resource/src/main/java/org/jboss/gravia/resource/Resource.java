@@ -8,7 +8,7 @@ import java.util.List;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface Resource {
+public interface Resource extends Adaptable, Attachable {
 
     ResourceIdentity getIdentity();
 
@@ -17,5 +17,6 @@ public interface Resource {
 	List<Capability> getCapabilities(String namespace);
 
 	List<Requirement> getRequirements(String namespace);
-
+	
+	Wiring getWiring();
 }

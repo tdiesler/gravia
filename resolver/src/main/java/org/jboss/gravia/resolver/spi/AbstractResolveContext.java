@@ -31,7 +31,6 @@ import java.util.Set;
 
 import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceStore;
@@ -46,7 +45,6 @@ import org.jboss.gravia.resource.Wiring;
 public class AbstractResolveContext implements ResolveContext {
 
     private final ResourceStore resourceStore;
-    private final ResourceStore contextStore;
     private final Set<Resource> mandatory;
     private final Set<Resource> optional;
     
@@ -57,6 +55,16 @@ public class AbstractResolveContext implements ResolveContext {
         this.resourceStore = resourceStore;
         this.mandatory = new HashSet<Resource>(manres != null ? manres : Collections.<Resource> emptySet());
         this.optional = new HashSet<Resource>(optres != null ? optres : Collections.<Resource> emptySet());
+        
+        // Verify that all resources are in the store
+        for (Resource res : mandatory) {
+            if (resourceStore.getResource(res.getIdentity()) == null)
+                throw new IllegalArgumentException("Resource not in provided store: " + res);
+        }
+        for (Resource res : optional) {
+            if (resourceStore.getResource(res.getIdentity()) == null)
+                throw new IllegalArgumentException("Resource not in provided store: " + res);
+        }
         
         // Remove already wired resources
         Map<Resource, Wiring> wirings = getWirings();
@@ -74,13 +82,6 @@ public class AbstractResolveContext implements ResolveContext {
                 itres.remove();
             }
         }
-        
-        // Populate the context store
-        contextStore = new DefaultResourceStore("contextStore");
-        for (Resource res : mandatory) 
-            contextStore.addResource(res);
-        for (Resource res : optional) 
-            contextStore.addResource(res);
     }
 
     @Override
@@ -97,7 +98,6 @@ public class AbstractResolveContext implements ResolveContext {
     public List<Capability> findProviders(Requirement req) {
         List<Capability> result = new ArrayList<Capability>();
         result.addAll(resourceStore.findProviders(req));
-        result.addAll(contextStore.findProviders(req));
         return Collections.unmodifiableList(result);
     }
 

@@ -5,12 +5,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.jboss.gravia.resource.Attachable;
+import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
+import org.jboss.gravia.resource.Wiring;
 
 /**
  * An abstract implementation of a {@link Resource}
@@ -25,6 +28,8 @@ public class AbstractResource implements Resource {
     private final AtomicBoolean mutable = new AtomicBoolean(true);
     private Capability identityCapability;
     private ResourceIdentity identity;
+    private Attachable attachments; 
+    private Wiring wiring;
 
     void addCapability(AbstractCapability cap) {
         synchronized (capabilities) {
@@ -38,6 +43,16 @@ public class AbstractResource implements Resource {
             assertMutable();
             requirements.add(req);
         }
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T adapt(Class<T> type) {
+        T result = null;
+        if (type.isAssignableFrom(getClass())) {
+            result = (T) this;
+        }
+        return result;
     }
     
     @Override
@@ -114,6 +129,37 @@ public class AbstractResource implements Resource {
         return Collections.unmodifiableList(result);
     }
 
+    @Override
+    public Wiring getWiring() {
+        return wiring;
+    }
+
+    public void setWiring(Wiring wiring) {
+        this.wiring = wiring;
+    }
+
+    @Override
+    public <T> T putAttachment(AttachmentKey<T> key, T value) {
+        return getAttachmentsInternal().putAttachment(key, value);
+    }
+
+    @Override
+    public <T> T getAttachment(AttachmentKey<T> key) {
+        return getAttachmentsInternal().getAttachment(key);
+    }
+
+    @Override
+    public <T> T removeAttachment(AttachmentKey<T> key) {
+        return getAttachmentsInternal().getAttachment(key);
+    }
+
+    private Attachable getAttachmentsInternal() {
+        if (attachments == null) {
+            attachments = new AttachableSupport();
+        }
+        return attachments;
+    }
+    
     void validate() {
 
         // Make sure we have an identity

@@ -35,11 +35,15 @@ import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.DefaultWire;
+import org.jboss.gravia.resource.DefaultWiring;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceStore;
 import org.jboss.gravia.resource.Wire;
 import org.jboss.gravia.resource.Wiring;
+import org.jboss.gravia.resource.spi.AbstractResource;
+import org.jboss.gravia.resource.spi.AbstractWire;
+import org.jboss.gravia.resource.spi.AbstractWiring;
 import org.jboss.logging.Logger;
 
 /**
@@ -52,12 +56,25 @@ public class AbstractResolver implements Resolver {
 
     static final Logger LOGGER = Logger.getLogger(Resolver.class.getPackage().getName());
 
-    protected Wire createWire(Requirement req, Capability cap) {
+    protected AbstractWire createWire(Requirement req, Capability cap) {
         return new DefaultWire(req, cap);
+    }
+    
+    protected AbstractWiring createWiring(Resource resource, List<Wire> reqwires, List<Wire> provwires) {
+        return new DefaultWiring(resource, reqwires, provwires);
     }
     
     @Override
     public Map<Resource, List<Wire>> resolve(ResolveContext context) throws ResolutionException {
+        return resolveInternal(context, false);
+    }
+    
+    @Override
+    public Map<Resource, List<Wire>> resolveAndApply(ResolveContext context) throws ResolutionException {
+        return resolveInternal(context, true);
+    }
+    
+    private Map<Resource, List<Wire>> resolveInternal(ResolveContext context, boolean apply) throws ResolutionException {
         
         Map<Resource, List<Wire>> result = new HashMap<Resource, List<Wire>>();
         ResolverState state = new ResolverState(context);
@@ -76,17 +93,48 @@ public class AbstractResolver implements Resolver {
             List<Wire> wires = getResourceWires(state, candidates);
             result.put(res, wires);
         }
+        
+        // Apply resolver results
+        if (apply) {
+            for (Entry<Resource, List<Wire>> entry : result.entrySet()) {
+                AbstractResource requirer = (AbstractResource) entry.getKey();
+                List<Wire> reqwires = entry.getValue();
+                AbstractWiring reqwiring = (AbstractWiring) requirer.getWiring();
+                if (reqwiring == null) {
+                    reqwiring = createWiring(requirer, reqwires, null);
+                    requirer.setWiring(reqwiring);
+                } else {
+                    for (Wire wire : reqwires) {
+                        reqwiring.addRequiredWire(wire);
+                    }
+                }
+                for (Wire wire : reqwires) {
+                    AbstractResource provider = (AbstractResource) wire.getProvider();
+                    AbstractWiring provwiring = (AbstractWiring) provider.getWiring();
+                    if (provwiring == null) {
+                        provwiring = createWiring(provider, null, null);
+                        provider.setWiring(provwiring);
+                    }
+                    provwiring.addProvidedWire(wire);
+                }
+            }
+        }
+        
         return result;
     }
 
-    // This reduces the set of given capabilities by the ones that cannot transitively resolve in the same space
+
+    // Reduce the set of given capabilities by the ones that cannot transitively resolve in the same space
     private void verifyTopLevelProviders(ResolverState state, Requirement req, Iterator<Capability> itcap, boolean optional) throws ResolutionException {
         while (itcap.hasNext()) {
             Capability cap = itcap.next();
             Resource capres = cap.getResource();
-            ResourceSpace space = state.getResourceSpaces().getResourceSpace(capres);
-            assert space != null : "No resource space for: " + capres;
-            
+            ResourceSpaces spaces = state.getResourceSpaces();
+            ResourceSpace space = spaces.getResourceSpace(capres);
+            if (space == null) {
+                space = spaces.getDefaultSpace();
+                spaces.addResource(space, capres);
+            }
             if (!transitivelyVerifyResourceInSpace(state, space, capres)) {
                 itcap.remove();
             }
@@ -189,25 +237,21 @@ public class AbstractResolver implements Resolver {
             // Populate the spaces for already wired resources
             for (Entry<Resource, Wiring> entry : wirings.entrySet()) {
                 Resource res = entry.getKey();
-                ResourceSpace space = spaces.getResourceSpace(res);
-                if (space == null) {
-                    space = spaces.addResourceSpace();
-                    spaces.addResource(space, res);
-                }
                 Wiring wiring = entry.getValue();
+                assignResourceToSpace(res, wiring, null);
+            }
+        }
+
+        private void assignResourceToSpace(Resource res, Wiring wiring, ResourceSpace target) {
+            if (spaces.getResourceSpace(res) == null) {
+                if (target == null) {
+                    target = spaces.addResourceSpace();
+                }
+                spaces.addResource(target, res);
                 for (Wire wire : wiring.getRequiredResourceWires(null)) {
                     Resource provider = wire.getProvider();
-                    spaces.addResource(space, provider);
+                    assignResourceToSpace(provider, wiring, target);
                 }
-            }
-            
-            // Add an additional resource space for unwired resources
-            ResourceSpace extraspace = spaces.addResourceSpace();
-            for (Resource res : context.getMandatoryResources()) {
-                spaces.addResource(extraspace, res);
-            }
-            for (Resource res : context.getOptionalResources()) {
-                spaces.addResource(extraspace, res);
             }
         }
 
@@ -274,6 +318,14 @@ public class AbstractResolver implements Resolver {
         private List<ResourceSpace> spaces = new ArrayList<ResourceSpace>();
         private Map<Resource, ResourceSpace> spacemap = new HashMap<Resource, ResourceSpace>();
 
+        ResourceSpaces() {
+            spaces.add(new ResourceSpace("#0"));
+        }
+
+        ResourceSpace getDefaultSpace() {
+            return spaces.get(0);
+        }
+        
         ResourceSpace addResourceSpace() {
             ResourceSpace space = new ResourceSpace("#" + spaces.size());
             spaces.add(space);
