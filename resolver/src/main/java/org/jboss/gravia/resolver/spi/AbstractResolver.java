@@ -21,6 +21,7 @@ package org.jboss.gravia.resolver.spi;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,6 +30,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.jboss.gravia.resolver.DefaultPreferencePolicy;
+import org.jboss.gravia.resolver.PreferencePolicy;
 import org.jboss.gravia.resolver.ResolutionException;
 import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resolver.Resolver;
@@ -55,6 +58,7 @@ import org.jboss.logging.Logger;
 public class AbstractResolver implements Resolver {
 
     static final Logger LOGGER = Logger.getLogger(Resolver.class.getPackage().getName());
+    private PreferencePolicy preferencePolicy;
 
     protected AbstractWire createWire(Requirement req, Capability cap) {
         return new DefaultWire(req, cap);
@@ -64,6 +68,10 @@ public class AbstractResolver implements Resolver {
         return new DefaultWiring(resource, reqwires, provwires);
     }
     
+    protected PreferencePolicy createPreferencePolicy() {
+        return new DefaultPreferencePolicy();
+    }
+
     @Override
     public Map<Resource, List<Wire>> resolve(ResolveContext context) throws ResolutionException {
         return resolveInternal(context, false);
@@ -85,6 +93,7 @@ public class AbstractResolver implements Resolver {
             Map<Requirement, List<Capability>> candidates = new HashMap<Requirement, List<Capability>>();
             for (Requirement req : res.getRequirements(null)) {
                 List<Capability> providers = context.findProviders(req);
+                getPreferencePolicyInternal().sort(providers);
                 verifyTopLevelProviders(state, req, providers.iterator(), req.isOptional());
                 if (providers.isEmpty() && !req.isOptional()) {
                     Set<Requirement> unresolved = Collections.singleton(req);
@@ -138,6 +147,13 @@ public class AbstractResolver implements Resolver {
     }
 
 
+    private PreferencePolicy getPreferencePolicyInternal() {
+        if (preferencePolicy == null) {
+            preferencePolicy = createPreferencePolicy();
+        }
+        return preferencePolicy;
+    }
+
     // Reduce the set of given capabilities by the ones that cannot transitively resolve in the same space
     private void verifyTopLevelProviders(ResolverState state, Requirement req, Iterator<Capability> itcap, boolean optional) throws ResolutionException {
         while (itcap.hasNext()) {
@@ -188,6 +204,9 @@ public class AbstractResolver implements Resolver {
         if (candidates.isEmpty())
             return Collections.emptyList();
         
+        // Get the capability comparator from the policy
+        Comparator<Capability> comp = getPreferencePolicyInternal().getComparator();
+        
         // Separate the wiring candidates into their respective spaces
         Map<ResourceSpace, Map<Requirement, Capability>> spacemap = new HashMap<ResourceSpace, Map<Requirement, Capability>>();
         for (Entry<Requirement, List<Capability>> entry : candidates.entrySet()) {
@@ -202,7 +221,10 @@ public class AbstractResolver implements Resolver {
                     map = new HashMap<Requirement, Capability>();
                     spacemap.put(space, map);
                 }
-                map.put(req, cap);
+                Capability prefcap = map.get(req);
+                if (prefcap == null || comp.compare(prefcap, cap) > 0) {
+                    map.put(req, cap);
+                }
             }
         }
         

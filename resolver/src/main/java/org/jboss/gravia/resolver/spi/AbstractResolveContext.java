@@ -98,7 +98,7 @@ public class AbstractResolveContext implements ResolveContext {
     public List<Capability> findProviders(Requirement req) {
         List<Capability> result = new ArrayList<Capability>();
         result.addAll(resourceStore.findProviders(req));
-        return Collections.unmodifiableList(result);
+        return result;
     }
 
     @Override

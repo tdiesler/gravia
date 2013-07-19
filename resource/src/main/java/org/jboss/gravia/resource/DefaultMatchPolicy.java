@@ -35,12 +35,6 @@ import org.jboss.gravia.resource.spi.AbstractRequirement;
  */
 public class DefaultMatchPolicy implements MatchPolicy {
     
-    private static MatchPolicy DEFAULT_POLICY = new DefaultMatchPolicy();
-    
-    public static MatchPolicy getDefault() {
-        return DEFAULT_POLICY;
-    }
-
     @Override
     public boolean match(Capability cap, Requirement req) {
         Map<String, Object> reqatts = req.getAttributes();

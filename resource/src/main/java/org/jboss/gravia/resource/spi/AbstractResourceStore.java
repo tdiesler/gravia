@@ -35,6 +35,7 @@ public class AbstractResourceStore implements ResourceStore {
     private final boolean logCapsReqs;
     private final Map<ResourceIdentity, Resource> resources = new LinkedHashMap<ResourceIdentity, Resource>();
     private final Map<CacheKey, Set<Capability>> capabilityCache = new ConcurrentHashMap<CacheKey, Set<Capability>>();
+    private MatchPolicy matchPolicy;
     
     public AbstractResourceStore(String storeName) {
         this(storeName, false);
@@ -43,6 +44,10 @@ public class AbstractResourceStore implements ResourceStore {
     public AbstractResourceStore(String storeName, boolean logCapsReqs) {
         this.storeName = storeName;
         this.logCapsReqs = logCapsReqs;
+    }
+
+    protected MatchPolicy createMatchPolicy() {
+        return new DefaultMatchPolicy();
     }
 
     @Override
@@ -111,13 +116,19 @@ public class AbstractResourceStore implements ResourceStore {
     public Set<Capability> findProviders(Requirement req) {
         CacheKey cachekey = CacheKey.create(req);
         Set<Capability> result = new HashSet<Capability>();
-        MatchPolicy policy = DefaultMatchPolicy.getDefault();
         for (Capability cap : findCachedCapabilities(cachekey)) {
-            if (policy.match(cap, req)) {
+            if (getMatchPolicyInternal().match(cap, req)) {
                 result.add(cap);
             }
         }
         return Collections.unmodifiableSet(result);
+    }
+
+    private MatchPolicy getMatchPolicyInternal() {
+        if (matchPolicy == null) {
+            matchPolicy = createMatchPolicy();
+        }
+        return matchPolicy;
     }
 
     private synchronized Set<Capability> getCachedCapabilities(CacheKey key) {

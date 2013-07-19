@@ -32,7 +32,6 @@ import org.jboss.gravia.resolver.ResolutionException;
 import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
-import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Namespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
@@ -41,6 +40,7 @@ import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.resource.Wire;
 import org.jboss.gravia.resource.Wiring;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -221,5 +221,55 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(0, wiringA.getRequiredResourceWires(null).size());
         Assert.assertEquals(0, wiringA.getResourceCapabilities(null).size());
         Assert.assertEquals(0, wiringA.getResourceRequirements(null).size());
+    }
+
+    @Test
+    public void testPreferHigherVersion() throws Exception {
+        
+        ResourceBuilder builder = new DefaultResourceBuilder();
+        builder.addIdentityCapability("resA", new Version("1.0.0"));
+        Requirement reqA = builder.addIdentityRequirement("resB", new VersionRange("[1.0,2.0)"));
+        Resource resA = builder.getResource();
+        
+        builder = new DefaultResourceBuilder();
+        builder.addIdentityCapability("resB", new Version("1.0.0"));
+        Resource resB1 = builder.getResource();
+        
+        builder = new DefaultResourceBuilder();
+        Capability capB2 = builder.addIdentityCapability("resB", new Version("1.1.0"));
+        Resource resB2 = builder.getResource();
+        
+        installResources(resA, resB1, resB2);
+        
+        ResolveContext context = getResolveContext(Arrays.asList(resA), null);
+        Map<Resource, List<Wire>> wiremap = resolveAndApply(context);
+        Assert.assertEquals(1, wiremap.size());
+        
+        List<Wire> wiresA = wiremap.get(resA);
+        Wire wireA = wiresA.get(0);
+        Assert.assertEquals(resA, wireA.getRequirer());
+        Assert.assertEquals(reqA, wireA.getRequirement());
+        Assert.assertEquals(resB2, wireA.getProvider());
+        Assert.assertEquals(capB2, wireA.getCapability());
+        
+        Wiring wiringA = resA.getWiring();
+        Assert.assertEquals(resA, wiringA.getResource());
+        Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
+        Assert.assertEquals(1, wiringA.getRequiredResourceWires(null).size());
+        Assert.assertEquals(wireA, wiringA.getRequiredResourceWires(null).get(0));
+        Assert.assertEquals(0, wiringA.getResourceCapabilities(null).size());
+        Assert.assertEquals(1, wiringA.getResourceRequirements(null).size());
+        Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
+    }
+
+    @Test
+    @Ignore
+    public void testPreferAlreadyResolved() throws Exception {
+    }
+
+
+    @Test
+    @Ignore
+    public void testInconsistentClassSpace() throws Exception {
     }
 }
