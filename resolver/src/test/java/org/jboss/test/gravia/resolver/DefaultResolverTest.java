@@ -23,6 +23,7 @@ package org.jboss.test.gravia.resolver;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +41,6 @@ import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.resource.Wire;
 import org.jboss.gravia.resource.Wiring;
-import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -67,6 +67,59 @@ public class DefaultResolverTest extends AbstractResolverTest {
         installResources(resA, resB);
         
         ResolveContext context = getResolveContext(Arrays.asList(resA, resB), null);
+        Map<Resource, List<Wire>> wiremap = resolveAndApply(context);
+        Assert.assertEquals(2, wiremap.size());
+        
+        List<Wire> wiresA = wiremap.get(resA);
+        Assert.assertEquals(1, wiresA.size());
+        Wire wireA = wiresA.get(0);
+        Assert.assertEquals(resA, wireA.getRequirer());
+        Assert.assertEquals(reqA, wireA.getRequirement());
+        Assert.assertEquals(resB, wireA.getProvider());
+        Assert.assertEquals(capB, wireA.getCapability());
+        
+        List<Wire> wiresB = wiremap.get(resB);
+        Assert.assertEquals(0, wiresB.size());
+        
+        Wiring wiringA = resA.getWiring();
+        Assert.assertEquals(resA, wiringA.getResource());
+        Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
+        Assert.assertEquals(1, wiringA.getRequiredResourceWires(null).size());
+        Assert.assertEquals(wireA, wiringA.getRequiredResourceWires(null).get(0));
+        Assert.assertEquals(0, wiringA.getResourceCapabilities(null).size());
+        Assert.assertEquals(1, wiringA.getResourceRequirements(null).size());
+        Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
+        
+        Wiring wiringB = resB.getWiring();
+        Assert.assertEquals(resB, wiringB.getResource());
+        Assert.assertEquals(1, wiringB.getProvidedResourceWires(null).size());
+        Assert.assertEquals(0, wiringB.getRequiredResourceWires(null).size());
+        Assert.assertEquals(wireA, wiringB.getProvidedResourceWires(null).get(0));
+        Assert.assertEquals(1, wiringB.getResourceCapabilities(null).size());
+        Assert.assertEquals(0, wiringB.getResourceRequirements(null).size());
+        Assert.assertEquals(capB, wiringB.getResourceCapabilities(null).get(0));
+        
+        // Resolve again
+        context = getResolveContext(Arrays.asList(resA, resB), null);
+        wiremap = resolveAndApply(context);
+        Assert.assertEquals(0, wiremap.size());
+    }
+
+    @Test
+    public void testSingleDependencyResolveOptional() throws Exception {
+        
+        ResourceBuilder builder = new DefaultResourceBuilder();
+        builder.addIdentityCapability("resA", new Version("1.0.0"));
+        Requirement reqA = builder.addIdentityRequirement("resB", new VersionRange("[1.0,2.0)"));
+        Resource resA = builder.getResource();
+        
+        builder = new DefaultResourceBuilder();
+        Capability capB = builder.addIdentityCapability("resB", new Version("1.0.0"));
+        Resource resB = builder.getResource();
+        
+        installResources(resA, resB);
+        
+        ResolveContext context = getResolveContext(null, Arrays.asList(resA, resB));
         Map<Resource, List<Wire>> wiremap = resolveAndApply(context);
         Assert.assertEquals(2, wiremap.size());
         
@@ -243,9 +296,10 @@ public class DefaultResolverTest extends AbstractResolverTest {
         
         ResolveContext context = getResolveContext(Arrays.asList(resA), null);
         Map<Resource, List<Wire>> wiremap = resolveAndApply(context);
-        Assert.assertEquals(1, wiremap.size());
+        Assert.assertEquals(2, wiremap.size());
         
         List<Wire> wiresA = wiremap.get(resA);
+        Assert.assertEquals(1, wiresA.size());
         Wire wireA = wiresA.get(0);
         Assert.assertEquals(resA, wireA.getRequirer());
         Assert.assertEquals(reqA, wireA.getRequirement());
@@ -260,6 +314,9 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(0, wiringA.getResourceCapabilities(null).size());
         Assert.assertEquals(1, wiringA.getResourceRequirements(null).size());
         Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
+        
+        List<Wire> wiresB2 = wiremap.get(resB2);
+        Assert.assertEquals(0, wiresB2.size());
     }
 
     @Test
@@ -307,9 +364,116 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
     }
 
+    @Test
+    public void testCascadingResolve() throws Exception {
+        
+        ResourceBuilder builder = new DefaultResourceBuilder();
+        builder.addIdentityCapability("resA", new Version("1.0.0"));
+        Requirement reqA = builder.addIdentityRequirement("resB", new VersionRange("[1.0,2.0)"));
+        Resource resA = builder.getResource();
+        
+        builder = new DefaultResourceBuilder();
+        Capability capB = builder.addIdentityCapability("resB", new Version("1.0.0"));
+        Requirement reqB = builder.addIdentityRequirement("resC", new VersionRange("[1.0,2.0)"));
+        Resource resB = builder.getResource();
+        
+        builder = new DefaultResourceBuilder();
+        Capability capC = builder.addIdentityCapability("resC", new Version("1.0.0"));
+        Resource resC = builder.getResource();
+        
+        installResources(resA, resB, resC);
+        
+        ResolveContext context = getResolveContext(Arrays.asList(resA), null);
+        Map<Resource, List<Wire>> wiremap = resolveAndApply(context);
+        Assert.assertEquals(3, wiremap.size());
+        
+        List<Wire> wiresA = wiremap.get(resA);
+        Assert.assertEquals(1, wiresA.size());
+        Wire wireA = wiresA.get(0);
+        Assert.assertEquals(resA, wireA.getRequirer());
+        Assert.assertEquals(reqA, wireA.getRequirement());
+        Assert.assertEquals(resB, wireA.getProvider());
+        Assert.assertEquals(capB, wireA.getCapability());
+        
+        List<Wire> wiresB = wiremap.get(resB);
+        Assert.assertEquals(1, wiresB.size());
+        Wire wireB = wiresB.get(0);
+        Assert.assertEquals(resB, wireB.getRequirer());
+        Assert.assertEquals(reqB, wireB.getRequirement());
+        Assert.assertEquals(resC, wireB.getProvider());
+        Assert.assertEquals(capC, wireB.getCapability());
+        
+        Wiring wiringA = resA.getWiring();
+        Assert.assertEquals(resA, wiringA.getResource());
+        Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
+        Assert.assertEquals(1, wiringA.getRequiredResourceWires(null).size());
+        Assert.assertEquals(wireA, wiringA.getRequiredResourceWires(null).get(0));
+        Assert.assertEquals(0, wiringA.getResourceCapabilities(null).size());
+        Assert.assertEquals(1, wiringA.getResourceRequirements(null).size());
+        Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
+        
+        Wiring wiringB = resB.getWiring();
+        Assert.assertEquals(resB, wiringB.getResource());
+        Assert.assertEquals(1, wiringB.getProvidedResourceWires(null).size());
+        Assert.assertEquals(1, wiringB.getRequiredResourceWires(null).size());
+        Assert.assertEquals(wireA, wiringB.getProvidedResourceWires(null).get(0));
+        Assert.assertEquals(wireB, wiringB.getRequiredResourceWires(null).get(0));
+        Assert.assertEquals(1, wiringB.getResourceCapabilities(null).size());
+        Assert.assertEquals(1, wiringB.getResourceRequirements(null).size());
+        Assert.assertEquals(capB, wiringB.getResourceCapabilities(null).get(0));
+        Assert.assertEquals(reqB, wiringB.getResourceRequirements(null).get(0));
+
+        Wiring wiringC = resC.getWiring();
+        Assert.assertEquals(resC, wiringC.getResource());
+        Assert.assertEquals(1, wiringC.getProvidedResourceWires(null).size());
+        Assert.assertEquals(0, wiringC.getRequiredResourceWires(null).size());
+        Assert.assertEquals(wireB, wiringC.getProvidedResourceWires(null).get(0));
+        Assert.assertEquals(1, wiringC.getResourceCapabilities(null).size());
+        Assert.assertEquals(0, wiringC.getResourceRequirements(null).size());
+        Assert.assertEquals(capC, wiringC.getResourceCapabilities(null).get(0));
+    }
 
     @Test
-    @Ignore
     public void testInconsistentClassSpace() throws Exception {
+        
+        // A-1.0.0 => B-1.0.0
+        
+        ResourceBuilder builder = new DefaultResourceBuilder();
+        builder.addIdentityCapability("resA", new Version("1.0.0"));
+        builder.addIdentityRequirement("resB", new VersionRange("[1.0,2.0)"));
+        Resource resA = builder.getResource();
+        
+        builder = new DefaultResourceBuilder();
+        builder.addIdentityCapability("resB", new Version("1.0.0"));
+        Resource resB1 = builder.getResource();
+        
+        installResources(resA, resB1);
+        
+        ResolveContext context = getResolveContext(Arrays.asList(resA), null);
+        Map<Resource, List<Wire>> wiremap = resolveAndApply(context);
+        Assert.assertEquals(2, wiremap.size());
+
+        // C-1.0.0 => A-1.0.0,B-1.1.0
+        
+        builder = new DefaultResourceBuilder();
+        builder.addIdentityCapability("resB", new Version("1.1.0"));
+        Resource resB2 = builder.getResource();
+        
+        builder = new DefaultResourceBuilder();
+        builder.addIdentityCapability("resC", new Version("1.0.0"));
+        builder.addIdentityRequirement("resA", new VersionRange("[1.0,2.0)"));
+        Requirement reqC2 = builder.addIdentityRequirement("resB", new VersionRange("[1.1,2.0)"));
+        Resource resC = builder.getResource();
+        
+        installResources(resC, resB2);
+        
+        context = getResolveContext(Arrays.asList(resC), null);
+        try {
+            resolveAndApply(context);
+            Assert.fail("ResolutionException expected");
+        } catch (ResolutionException ex) {
+            Collection<Requirement> unresolved = ex.getUnresolvedRequirements();
+            Assert.assertTrue(unresolved.contains(reqC2));
+        }
     }
 }

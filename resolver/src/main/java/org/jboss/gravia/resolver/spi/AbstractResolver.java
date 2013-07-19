@@ -86,30 +86,21 @@ public class AbstractResolver implements Resolver {
         
         LOGGER.debugf("Resolve: mandatory%s optional%s", context.getMandatoryResources(), context.getOptionalResources());
         
-        Map<Resource, List<Wire>> result = new HashMap<Resource, List<Wire>>();
-        ResolverState state = new ResolverState(context);
+        // Get the combined set of resources in the context
+        Set<Resource> combined = new HashSet<Resource>();
+        combined.addAll(context.getMandatoryResources());
+        combined.addAll(context.getOptionalResources());
         
-        for (Resource res : context.getMandatoryResources()) {
-            Map<Requirement, List<Capability>> candidates = new HashMap<Requirement, List<Capability>>();
-            for (Requirement req : res.getRequirements(null)) {
-                List<Capability> providers = context.findProviders(req);
-                getPreferencePolicyInternal().sort(providers);
-                verifyTopLevelProviders(state, req, providers.iterator(), req.isOptional());
-                if (providers.isEmpty() && !req.isOptional()) {
-                    Set<Requirement> unresolved = Collections.singleton(req);
-                    throw new ResolutionException("Cannot find provider for: " + req, null, unresolved);
-                } 
-                if (!providers.isEmpty()) {
-                    candidates.put(req, providers);
-                }
-            }
-            List<Wire> wires = getResourceWires(state, candidates);
-            result.put(res, wires);
+        // Resolve combined resources
+        ResolverState state = new ResolverState(context);
+        for (Resource res : combined) {
+            resolveResource(state, res);
         }
 
         // Log resolver result
+        Map<Resource, List<Wire>> resourceWires = state.getResourceWires();
         if (LOGGER.isDebugEnabled()) {
-            for (Entry<Resource, List<Wire>> entry : result.entrySet()) {
+            for (Entry<Resource, List<Wire>> entry : resourceWires.entrySet()) {
                 LOGGER.debugf("Resolved: %s", entry.getKey());
                 for (Wire wire : entry.getValue()) {
                     LOGGER.debugf("   %s", wire);
@@ -119,7 +110,7 @@ public class AbstractResolver implements Resolver {
         
         // Apply resolver results
         if (apply) {
-            for (Entry<Resource, List<Wire>> entry : result.entrySet()) {
+            for (Entry<Resource, List<Wire>> entry : resourceWires.entrySet()) {
                 AbstractResource requirer = (AbstractResource) entry.getKey();
                 List<Wire> reqwires = entry.getValue();
                 AbstractWiring reqwiring = (AbstractWiring) requirer.getWiring();
@@ -143,7 +134,43 @@ public class AbstractResolver implements Resolver {
             }
         }
         
-        return result;
+        return resourceWires;
+    }
+
+    private void resolveResource(ResolverState state, Resource res) throws ResolutionException {
+        
+        // We already have a result for the given resource
+        if (state.hasWiring(res) || state.getResourceWires().get(res) != null)
+            return;
+        
+        Map<Requirement, List<Capability>> candidates = new HashMap<Requirement, List<Capability>>();
+        for (Requirement req : res.getRequirements(null)) {
+            
+            List<Capability> providers = state.getResolveContext().findProviders(req);
+            getPreferencePolicyInternal().sort(providers);
+            
+            verifyTopLevelProviders(state, req, providers.iterator(), false);
+            
+            // Fail early if we don't have providers for non-optional requirements
+            if (providers.isEmpty() && !(req.isOptional() || isOptionalResource(state, res))) {
+                Set<Requirement> unresolved = Collections.singleton(req);
+                throw new ResolutionException("Cannot find provider for: " + req, null, unresolved);
+            }
+            
+            if (!providers.isEmpty()) {
+                candidates.put(req, providers);
+            }
+        }
+        
+        // Reduce the candidates to a consistent set of wires
+        List<Wire> wires = reduceCandidatesToResourceWires(state, res, candidates);
+        if (wires != null) {
+            state.getResourceWires().put(res, wires);
+            for (Wire wire : wires) {
+                Resource provider = wire.getProvider();
+                resolveResource(state, provider);
+            }
+        }
     }
 
 
@@ -180,7 +207,7 @@ public class AbstractResolver implements Resolver {
         if (state.isBlacklisted(res, space))
             return false;
         
-        if (state.getWirings().containsKey(res)) {
+        if (state.hasWiring(res)) {
             state.whitelist(res, space);
             return true;
         }
@@ -199,13 +226,32 @@ public class AbstractResolver implements Resolver {
         return true;
     }
 
-    private List<Wire> getResourceWires(ResolverState state, Map<Requirement, List<Capability>> candidates) throws ResolutionException {
+    private List<Wire> reduceCandidatesToResourceWires(ResolverState state, Resource res, Map<Requirement, List<Capability>> candidates) throws ResolutionException {
+        
+        // Check non-optional requirements on optional resources
+        if (isOptionalResource(state, res)) {
+            for (Requirement req : res.getRequirements(null)) {
+                if (!req.isOptional() && candidates.get(req) == null)
+                    return null;
+            }
+        }
         
         if (candidates.isEmpty())
             return Collections.emptyList();
         
-        // Get the capability comparator from the policy
-        Comparator<Capability> comp = getPreferencePolicyInternal().getComparator();
+        // Remove candidates that are not wired if we have a wired candidate
+        for (Entry<Requirement, List<Capability>> entry : candidates.entrySet()) {
+            List<Capability> caps = entry.getValue();
+            if (caps.size() > 1 && state.hasWiring(caps.get(0).getResource())) {
+                Iterator<Capability> itcaps = caps.iterator();
+                while(itcaps.hasNext()) {
+                    Resource capres = itcaps.next().getResource();
+                    if (!state.hasWiring(capres)) {
+                        itcaps.remove();
+                    }
+                }
+            }
+        }
         
         // Separate the wiring candidates into their respective spaces
         Map<ResourceSpace, Map<Requirement, Capability>> spacemap = new HashMap<ResourceSpace, Map<Requirement, Capability>>();
@@ -222,6 +268,7 @@ public class AbstractResolver implements Resolver {
                     spacemap.put(space, map);
                 }
                 Capability prefcap = map.get(req);
+                Comparator<Capability> comp = getPreferencePolicyInternal().getComparator();
                 if (prefcap == null || comp.compare(prefcap, cap) > 0) {
                     map.put(req, cap);
                 }
@@ -241,19 +288,23 @@ public class AbstractResolver implements Resolver {
         }
         
         List<Wire> wires = new ArrayList<Wire>();
-        Map<Requirement, Capability> mapping = selectSingleResourceSpace(spacemap);
+        Map<Requirement, Capability> mapping = selectSingleResourceSpace(allreqs, spacemap);
         for (Entry<Requirement, Capability> entry : mapping.entrySet()) {
             wires.add(createWire(entry.getKey(), entry.getValue()));
         }
         return wires;
     }
 
-    private Map<Requirement, Capability> selectSingleResourceSpace(Map<ResourceSpace, Map<Requirement, Capability>> spacemap) throws ResolutionException {
+    private boolean isOptionalResource(ResolverState state, Resource res) {
+        return state.getResolveContext().getOptionalResources().contains(res);
+    }
+
+    private Map<Requirement, Capability> selectSingleResourceSpace(Set<Requirement> allreqs, Map<ResourceSpace, Map<Requirement, Capability>> spacemap) throws ResolutionException {
         if (spacemap.isEmpty())
-            throw new ResolutionException("Requirements map to candidates in disconnetced spaces");
+            throw new ResolutionException("Requirements map to candidates in disconnetced spaces", null, allreqs);
         
         if (spacemap.size() > 1)
-            throw new ResolutionException("Requirements map to candidates in multiple spaces");
+            throw new ResolutionException("Requirements map to candidates in multiple spaces", null, allreqs);
         
         return spacemap.values().iterator().next();
     }
@@ -263,8 +314,9 @@ public class AbstractResolver implements Resolver {
         private final ResolveContext resolveContext;
         private final Map<Resource, Wiring> wirings;
         private final ResourceSpaces spaces = new ResourceSpaces();
-        private Map<Resource, Set<ResourceSpace>> blacklist = new HashMap<Resource, Set<ResourceSpace>>();
-        private Map<Resource, Set<ResourceSpace>> whitelist = new HashMap<Resource, Set<ResourceSpace>>();
+        private final Map<Resource, Set<ResourceSpace>> blacklist = new HashMap<Resource, Set<ResourceSpace>>();
+        private final Map<Resource, Set<ResourceSpace>> whitelist = new HashMap<Resource, Set<ResourceSpace>>();
+        private final Map<Resource, List<Wire>> resourceWires = new HashMap<Resource, List<Wire>>();
 
         ResolverState(ResolveContext context) {
             this.resolveContext = context;
@@ -327,8 +379,12 @@ public class AbstractResolver implements Resolver {
             return resolveContext;
         }
         
-        Map<Resource, Wiring> getWirings() {
-            return wirings;
+        boolean hasWiring(Resource res) {
+            return wirings.get(res) != null;
+        }
+        
+        Map<Resource, List<Wire>> getResourceWires() {
+            return resourceWires;
         }
     }
     

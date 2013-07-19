@@ -23,6 +23,7 @@ package org.jboss.gravia.resolver.spi;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -47,15 +48,15 @@ public class AbstractResolveContext implements ResolveContext {
     private final ResourceStore resourceStore;
     private final Set<Resource> mandatory;
     private final Set<Resource> optional;
-    
+
     public AbstractResolveContext(ResourceStore resourceStore, Set<Resource> manres, Set<Resource> optres) {
         if (resourceStore == null)
             throw new IllegalArgumentException("Null resourceStore");
-        
+
         this.resourceStore = resourceStore;
         this.mandatory = new HashSet<Resource>(manres != null ? manres : Collections.<Resource> emptySet());
         this.optional = new HashSet<Resource>(optres != null ? optres : Collections.<Resource> emptySet());
-        
+
         // Verify that all resources are in the store
         for (Resource res : mandatory) {
             if (resourceStore.getResource(res.getIdentity()) == null)
@@ -65,18 +66,18 @@ public class AbstractResolveContext implements ResolveContext {
             if (resourceStore.getResource(res.getIdentity()) == null)
                 throw new IllegalArgumentException("Resource not in provided store: " + res);
         }
-        
+
         // Remove already wired resources
         Map<Resource, Wiring> wirings = getWirings();
         Iterator<Resource> itres = mandatory.iterator();
-        while(itres.hasNext()) {
+        while (itres.hasNext()) {
             Resource res = itres.next();
             if (wirings.get(res) != null) {
                 itres.remove();
             }
         }
         itres = optional.iterator();
-        while(itres.hasNext()) {
+        while (itres.hasNext()) {
             Resource res = itres.next();
             if (wirings.get(res) != null) {
                 itres.remove();
@@ -103,7 +104,16 @@ public class AbstractResolveContext implements ResolveContext {
 
     @Override
     public Map<Resource, Wiring> getWirings() {
-        return Collections.emptyMap();
+        Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
+        Iterator<Resource> itres = resourceStore.getResources();
+        while (itres.hasNext()) {
+            Resource res = itres.next();
+            Wiring wiring = res.getWiring();
+            if (wiring != null) {
+                wirings.put(res, wiring);
+            }
+        }
+        return Collections.unmodifiableMap(wirings);
     }
 
 }
