@@ -32,7 +32,7 @@ import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
 
 /**
- * A builder for resources
+ * An abstract {@link Resource} builder.
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010

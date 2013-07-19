@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.Namespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
@@ -107,6 +108,8 @@ public class AbstractRequirement implements Requirement {
     }
 
     protected void validate() {
+        String resdir = getDirective(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+        optional = Namespace.RESOLUTION_OPTIONAL.equals(resdir);
         canonicalName = toString();
     }
     
@@ -117,7 +120,7 @@ public class AbstractRequirement implements Requirement {
             String type;
             String nsval = null;
             if (IdentityNamespace.IDENTITY_NAMESPACE.equals(getNamespace())) {
-                type = Requirement.class.getSimpleName();
+                type = "IdentityRequirement";
             } else {
                 type = getClass().getSimpleName();
                 nsval = namespace;

@@ -64,4 +64,9 @@ public class AbstractWire implements Wire {
         return requirement.getResource();
     }
 
+    @Override
+    public String toString() {
+        return requirement + " => " + capability;
+    }
+
 }

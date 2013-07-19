@@ -6,7 +6,7 @@ package org.jboss.gravia.resource;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface IdentityNamespace {
+public interface IdentityNamespace extends Namespace {
 
     /**
      * Namespace name for identity capabilities and requirements.

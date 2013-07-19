@@ -13,4 +13,8 @@ public class DefaultResourceStore extends AbstractResourceStore {
     public DefaultResourceStore(String storeName) {
         super(storeName);
     }
+
+    public DefaultResourceStore(String storeName, boolean logCapsReqs) {
+        super(storeName, logCapsReqs);
+    }
 }

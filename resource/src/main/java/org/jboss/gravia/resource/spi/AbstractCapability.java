@@ -116,7 +116,7 @@ public class AbstractCapability implements Capability {
             String type;
             String nsval = null;
             if (IdentityNamespace.IDENTITY_NAMESPACE.equals(getNamespace())) {
-                type = Capability.class.getSimpleName();
+                type = "IdentityCapability";
             } else {
                 type = getClass().getSimpleName();
                 nsval = namespace;

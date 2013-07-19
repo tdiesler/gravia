@@ -76,6 +76,8 @@ public class AbstractResolver implements Resolver {
     
     private Map<Resource, List<Wire>> resolveInternal(ResolveContext context, boolean apply) throws ResolutionException {
         
+        LOGGER.debugf("Resolve: mandatory%s optional%s", context.getMandatoryResources(), context.getOptionalResources());
+        
         Map<Resource, List<Wire>> result = new HashMap<Resource, List<Wire>>();
         ResolverState state = new ResolverState(context);
         
@@ -87,11 +89,23 @@ public class AbstractResolver implements Resolver {
                 if (providers.isEmpty() && !req.isOptional()) {
                     Set<Requirement> unresolved = Collections.singleton(req);
                     throw new ResolutionException("Cannot find provider for: " + req, null, unresolved);
+                } 
+                if (!providers.isEmpty()) {
+                    candidates.put(req, providers);
                 }
-                candidates.put(req, providers);
             }
             List<Wire> wires = getResourceWires(state, candidates);
             result.put(res, wires);
+        }
+
+        // Log resolver result
+        if (LOGGER.isDebugEnabled()) {
+            for (Entry<Resource, List<Wire>> entry : result.entrySet()) {
+                LOGGER.debugf("Resolved: %s", entry.getKey());
+                for (Wire wire : entry.getValue()) {
+                    LOGGER.debugf("   %s", wire);
+                }
+            }
         }
         
         // Apply resolver results

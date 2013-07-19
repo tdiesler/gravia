@@ -176,11 +176,14 @@ public class AbstractResource implements Resource {
         }
     }
 
+    protected String getSimpleTypeName() {
+        return getClass().getSimpleName();
+    }
+    
     @Override
     public String toString() {
         ResourceIdentity id = identity;
         String idstr = (id != null ? id.getSymbolicName() + ":" + id.getVersion() : "anonymous");
-        String prefix = getClass() != AbstractResource.class ? getClass().getSimpleName() : Resource.class.getSimpleName();
-        return prefix + "[" + idstr + "]";
+        return getSimpleTypeName() + "[" + idstr + "]";
     }
 }

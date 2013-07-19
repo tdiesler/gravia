@@ -33,7 +33,11 @@ import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceStore;
 import org.jboss.gravia.resource.Wire;
+import org.jboss.logging.Logger;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 
 /**
@@ -44,13 +48,23 @@ import org.junit.Before;
  */
 public abstract class AbstractResolverTest {
 
+    final Logger log = Logger.getLogger(getClass());
+    
+    @Rule public TestName testName = new TestName();
+    
     Resolver resolver;
     ResourceStore resourceStore;
 
     @Before
     public void setUp() throws Exception {
+        log.debugf("Start: %s.%s", getClass().getSimpleName(), testName.getMethodName());
         resolver = new DefaultResolver();
-        resourceStore = new DefaultResourceStore("testStore");
+        resourceStore = new DefaultResourceStore("testStore", true);
+    }
+    
+    @After
+    public void tearDown() throws Exception {
+        log.debugf("End: %s.%s", getClass().getSimpleName(), testName.getMethodName());
     }
 
     ResourceStore installResources(Resource... resources) {

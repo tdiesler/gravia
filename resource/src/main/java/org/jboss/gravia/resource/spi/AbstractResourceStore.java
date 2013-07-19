@@ -29,14 +29,20 @@ import org.jboss.logging.Logger;
  */
 public class AbstractResourceStore implements ResourceStore {
     
-    private static Logger log = Logger.getLogger(ResourceStore.class.getPackage().getName());
+    static final Logger LOGGER = Logger.getLogger(Resource.class.getPackage().getName());
     
     private final String storeName;
+    private final boolean logCapsReqs;
     private final Map<ResourceIdentity, Resource> resources = new LinkedHashMap<ResourceIdentity, Resource>();
     private final Map<CacheKey, Set<Capability>> capabilityCache = new ConcurrentHashMap<CacheKey, Set<Capability>>();
     
     public AbstractResourceStore(String storeName) {
+        this(storeName, false);
+    }
+
+    public AbstractResourceStore(String storeName, boolean logCapsReqs) {
         this.storeName = storeName;
+        this.logCapsReqs = logCapsReqs;
     }
 
     @Override
@@ -50,19 +56,24 @@ public class AbstractResourceStore implements ResourceStore {
     @Override
     public Resource addResource(Resource resource) {
         synchronized (resources) {
-            log.debugf("Add resource: %s", resource);
+            LOGGER.debugf("Add to %s: %s", storeName, resource);
             
             // Add resource capabilites
             for (Capability cap : resource.getCapabilities(null)) {
                 CacheKey cachekey = CacheKey.create(cap);
                 getCachedCapabilities(cachekey).add(cap);
-                log.debugf("   %s", cap);
             }
-            if (log.isDebugEnabled()) {
+
+            // Log cap/req details
+            if (logCapsReqs) {
+                for (Capability cap : resource.getCapabilities(null)) {
+                    LOGGER.debugf("   %s", cap);
+                }
                 for (Requirement req : resource.getRequirements(null)) {
-                    log.debugf("   %s", req);
+                    LOGGER.debugf("   %s", req);
                 }
             }
+            
             return resources.put(resource.getIdentity(), resource);
         }
     }
@@ -73,7 +84,7 @@ public class AbstractResourceStore implements ResourceStore {
             Resource res = resources.remove(identity);
             if (res != null) {
                 
-                log.debugf("Remove resource: %s", res);
+                LOGGER.debugf("Remove from %s: %s", storeName, res);
 
                 // Remove resource capabilities
                 for (Capability cap : res.getCapabilities(null)) {
