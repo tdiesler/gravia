@@ -263,8 +263,48 @@ public class DefaultResolverTest extends AbstractResolverTest {
     }
 
     @Test
-    @Ignore
-    public void testPreferAlreadyResolved() throws Exception {
+    public void testPreferAlreadyWired() throws Exception {
+        
+        ResourceBuilder builder = new DefaultResourceBuilder();
+        builder.addIdentityCapability("resA", new Version("1.0.0"));
+        Requirement reqA = builder.addIdentityRequirement("resB", new VersionRange("[1.0,2.0)"));
+        Resource resA = builder.getResource();
+        
+        builder = new DefaultResourceBuilder();
+        Capability capB1 = builder.addIdentityCapability("resB", new Version("1.0.0"));
+        Resource resB1 = builder.getResource();
+        
+        builder = new DefaultResourceBuilder();
+        builder.addIdentityCapability("resB", new Version("1.1.0"));
+        Resource resB2 = builder.getResource();
+        
+        installResources(resB1);
+        
+        ResolveContext context = getResolveContext(Arrays.asList(resB1), null);
+        Map<Resource, List<Wire>> wiremap = resolveAndApply(context);
+        Assert.assertEquals(1, wiremap.size());
+        
+        installResources(resA, resB2);
+        
+        context = getResolveContext(Arrays.asList(resA), null);
+        wiremap = resolveAndApply(context);
+        Assert.assertEquals(1, wiremap.size());
+        
+        List<Wire> wiresA = wiremap.get(resA);
+        Wire wireA = wiresA.get(0);
+        Assert.assertEquals(resA, wireA.getRequirer());
+        Assert.assertEquals(reqA, wireA.getRequirement());
+        Assert.assertEquals(resB1, wireA.getProvider());
+        Assert.assertEquals(capB1, wireA.getCapability());
+        
+        Wiring wiringA = resA.getWiring();
+        Assert.assertEquals(resA, wiringA.getResource());
+        Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
+        Assert.assertEquals(1, wiringA.getRequiredResourceWires(null).size());
+        Assert.assertEquals(wireA, wiringA.getRequiredResourceWires(null).get(0));
+        Assert.assertEquals(0, wiringA.getResourceCapabilities(null).size());
+        Assert.assertEquals(1, wiringA.getResourceRequirements(null).size());
+        Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
     }
 
 

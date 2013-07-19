@@ -27,6 +27,7 @@ import java.util.List;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Version;
+import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.resource.spi.AbstractCapability;
 
 /**
@@ -40,6 +41,16 @@ public class DefaultPreferencePolicy implements PreferencePolicy {
     private static final Comparator<Capability> COMPARATOR_INSTANCE = new Comparator<Capability>() {
         @Override
         public int compare(Capability cap1, Capability cap2) {
+            
+            // Prefer already wired
+            Wiring w1 = cap1.getResource().getWiring();
+            Wiring w2 = cap2.getResource().getWiring();
+            if (w1 != null && w2 == null)
+                return -1;
+            if (w1 == null && w2 != null)
+                return +1;
+            
+            // Prefer higher version
             Version v1 = AbstractCapability.getVersion(cap1, IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
             Version v2 = AbstractCapability.getVersion(cap2, IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
             return v2.compareTo(v1);

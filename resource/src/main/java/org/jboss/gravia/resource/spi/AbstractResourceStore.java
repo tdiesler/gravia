@@ -59,34 +59,38 @@ public class AbstractResourceStore implements ResourceStore {
     }
 
     @Override
-    public Resource addResource(Resource resource) {
+    public Resource addResource(Resource res) {
         synchronized (resources) {
-            LOGGER.debugf("Add to %s: %s", storeName, resource);
+            
+            if (getResource(res.getIdentity()) != null)
+                throw new IllegalArgumentException("Resource already added: " + res);
+            
+            LOGGER.debugf("Add to %s: %s", storeName, res);
             
             // Add resource capabilites
-            for (Capability cap : resource.getCapabilities(null)) {
+            for (Capability cap : res.getCapabilities(null)) {
                 CacheKey cachekey = CacheKey.create(cap);
                 getCachedCapabilities(cachekey).add(cap);
             }
 
             // Log cap/req details
             if (logCapsReqs) {
-                for (Capability cap : resource.getCapabilities(null)) {
+                for (Capability cap : res.getCapabilities(null)) {
                     LOGGER.debugf("   %s", cap);
                 }
-                for (Requirement req : resource.getRequirements(null)) {
+                for (Requirement req : res.getRequirements(null)) {
                     LOGGER.debugf("   %s", req);
                 }
             }
             
-            return resources.put(resource.getIdentity(), resource);
+            return resources.put(res.getIdentity(), res);
         }
     }
 
     @Override
-    public Resource removeResource(ResourceIdentity identity) {
+    public Resource removeResource(ResourceIdentity resid) {
         synchronized (resources) {
-            Resource res = resources.remove(identity);
+            Resource res = resources.remove(resid);
             if (res != null) {
                 
                 LOGGER.debugf("Remove from %s: %s", storeName, res);
@@ -106,9 +110,9 @@ public class AbstractResourceStore implements ResourceStore {
     }
 
     @Override
-    public Resource getResource(ResourceIdentity identity) {
+    public Resource getResource(ResourceIdentity resid) {
         synchronized (resources) {
-            return resources.get(identity);
+            return resources.get(resid);
         }
     }
 
