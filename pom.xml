@@ -39,6 +39,7 @@
         <version.jboss.logmanager>1.4.1.Final</version.jboss.logmanager>
         <version.jboss.shrinkwrap>1.0.0</version.jboss.shrinkwrap>
         <version.junit>4.10</version.junit>
+        <version.mockito>1.8.4</version.mockito>
         
 		<surefire.system.args>-ea</surefire.system.args>
     </properties>
@@ -70,6 +71,11 @@
                 <artifactId>junit</artifactId>
                 <version>${version.junit}</version>
             </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>${version.mockito}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
@@ -78,6 +84,7 @@
     <modules>
     	<module>resource</module>
     	<module>resolver</module>
+    	<module>repository</module>
     </modules>
 
     <!-- Repositories -->

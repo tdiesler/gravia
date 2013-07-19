@@ -1,12 +1,10 @@
 package org.jboss.gravia.resource.spi;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -28,15 +26,15 @@ import org.jboss.logging.Logger;
  * @since 02-Jul-2010
  */
 public class AbstractResourceStore implements ResourceStore {
-    
+
     static final Logger LOGGER = Logger.getLogger(Resource.class.getPackage().getName());
-    
+
     private final String storeName;
     private final boolean logCapsReqs;
     private final Map<ResourceIdentity, Resource> resources = new LinkedHashMap<ResourceIdentity, Resource>();
     private final Map<CacheKey, Set<Capability>> capabilityCache = new ConcurrentHashMap<CacheKey, Set<Capability>>();
     private MatchPolicy matchPolicy;
-    
+
     public AbstractResourceStore(String storeName) {
         this(storeName, false);
     }
@@ -52,21 +50,42 @@ public class AbstractResourceStore implements ResourceStore {
 
     @Override
     public Iterator<Resource> getResources() {
+        final Iterator<Resource> itres;
         synchronized (resources) {
-            List<Resource> snapshot = new ArrayList<Resource>(resources.values());
-            return snapshot.iterator();
+            itres = resources.values().iterator();
         }
+        return new Iterator<Resource>() {
+
+            @Override
+            public boolean hasNext() {
+                synchronized (resources) {
+                    return itres.hasNext();
+                }
+            }
+
+            @Override
+            public Resource next() {
+                synchronized (resources) {
+                    return itres.next();
+                }
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     @Override
     public Resource addResource(Resource res) {
         synchronized (resources) {
-            
+
             if (getResource(res.getIdentity()) != null)
                 throw new IllegalArgumentException("Resource already added: " + res);
-            
+
             LOGGER.debugf("Add to %s: %s", storeName, res);
-            
+
             // Add resource capabilites
             for (Capability cap : res.getCapabilities(null)) {
                 CacheKey cachekey = CacheKey.create(cap);
@@ -82,7 +101,7 @@ public class AbstractResourceStore implements ResourceStore {
                     LOGGER.debugf("   %s", req);
                 }
             }
-            
+
             return resources.put(res.getIdentity(), res);
         }
     }
@@ -92,7 +111,7 @@ public class AbstractResourceStore implements ResourceStore {
         synchronized (resources) {
             Resource res = resources.remove(resid);
             if (res != null) {
-                
+
                 LOGGER.debugf("Remove from %s: %s", storeName, res);
 
                 // Remove resource capabilities
@@ -160,13 +179,13 @@ public class AbstractResourceStore implements ResourceStore {
         }
         return Collections.unmodifiableSet(capset);
     }
-    
+
     @Override
     public String toString() {
         String prefix = getClass() != AbstractResourceStore.class ? getClass().getSimpleName() : ResourceStore.class.getSimpleName();
         return prefix + "[" + storeName + "]";
     }
-    
+
     private static class CacheKey {
 
         private final String namespace;

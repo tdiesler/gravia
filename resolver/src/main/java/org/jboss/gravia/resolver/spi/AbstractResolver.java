@@ -58,6 +58,7 @@ import org.jboss.logging.Logger;
 public class AbstractResolver implements Resolver {
 
     static final Logger LOGGER = Logger.getLogger(Resolver.class.getPackage().getName());
+    
     private PreferencePolicy preferencePolicy;
 
     protected AbstractWire createWire(Requirement req, Capability cap) {
@@ -183,10 +184,11 @@ public class AbstractResolver implements Resolver {
 
     // Reduce the set of given capabilities by the ones that cannot transitively resolve in the same space
     private void verifyTopLevelProviders(ResolverState state, Requirement req, Iterator<Capability> itcap, boolean optional) throws ResolutionException {
+        
+        ResourceSpaces spaces = state.getResourceSpaces();
         while (itcap.hasNext()) {
             Capability cap = itcap.next();
             Resource capres = cap.getResource();
-            ResourceSpaces spaces = state.getResourceSpaces();
             ResourceSpace space = spaces.getResourceSpace(capres);
             if (space == null) {
                 space = spaces.getDefaultSpace();
@@ -199,30 +201,39 @@ public class AbstractResolver implements Resolver {
     }
 
     // True if the given resource transitively resloves in the given space
-    private boolean transitivelyVerifyResourceInSpace(ResolverState state, ResourceSpace space, Resource res) {
+    private boolean transitivelyVerifyResourceInSpace(ResolverState state, ResourceSpace target, Resource res) {
+        assert target != null : "Null target";
+        assert res != null : "Null res";
         
-        if (state.isWhitelisted(res, space))
+        if (state.isWhitelisted(res, target))
             return true;
         
-        if (state.isBlacklisted(res, space))
+        if (state.isBlacklisted(res, target))
             return false;
         
         if (state.hasWiring(res)) {
-            state.whitelist(res, space);
+            state.whitelist(res, target);
             return true;
         }
         
+        ResourceSpaces spaces = state.getResourceSpaces();
+        ResolveContext context = state.getResolveContext();
         for (Requirement req : res.getRequirements(null)) {
-            for (Capability cap : state.getResolveContext().findProviders(req)) {
+            List<Capability> providers = context.findProviders(req);
+            for (Capability cap : providers) {
                 Resource capres = cap.getResource();
-                if (!transitivelyVerifyResourceInSpace(state, space, capres)) {
-                    state.blacklist(res, space);
+                if (!transitivelyVerifyResourceInSpace(state, target, capres)) {
+                    state.blacklist(res, target);
                     return false;
+                }
+                ResourceSpace space = spaces.getResourceSpace(capres);
+                if (space == null) {
+                    spaces.addResource(target, capres);
                 }
             }
         }
         
-        state.whitelist(res, space);
+        state.whitelist(res, target);
         return true;
     }
 
@@ -253,13 +264,15 @@ public class AbstractResolver implements Resolver {
             }
         }
         
-        // Separate the wiring candidates into their respective spaces
         Map<ResourceSpace, Map<Requirement, Capability>> spacemap = new HashMap<ResourceSpace, Map<Requirement, Capability>>();
+        ResourceSpaces spaces = state.getResourceSpaces();
+        
+        // Separate the wiring candidates into their respective spaces
         for (Entry<Requirement, List<Capability>> entry : candidates.entrySet()) {
             Requirement req = entry.getKey();
             for (Capability cap : entry.getValue()) {
                 Resource capres = cap.getResource();
-                ResourceSpace space = state.getResourceSpaces().getResourceSpace(capres);
+                ResourceSpace space = spaces.getResourceSpace(capres);
                 assert space != null : "No resource space for: " + capres;
                 
                 Map<Requirement, Capability> map = spacemap.get(space);

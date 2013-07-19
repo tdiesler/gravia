@@ -62,6 +62,16 @@ public class AbstractRequirement implements Requirement {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public <T> T adapt(Class<T> type) {
+        T result = null;
+        if (type.isAssignableFrom(getClass())) {
+            result = (T) this;
+        }
+        return result;
+    }
+
+    @Override
     public Resource getResource() {
         return resource;
     }

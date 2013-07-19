@@ -1,0 +1,107 @@
+/*
+ * #%L
+ * JBossOSGi Repository
+ * %%
+ * Copyright (C) 2010 - 2012 JBoss by Red Hat
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package org.jboss.gravia.repository.spi;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
+import org.jboss.gravia.repository.Repository;
+import org.jboss.gravia.repository.RepositoryReader;
+import org.jboss.gravia.repository.RepositoryStorage;
+import org.jboss.gravia.repository.RepositoryStorageFactory;
+import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.resource.spi.AbstractResourceStore;
+import org.jboss.logging.Logger;
+
+/**
+ * A {@link RepositoryStorage} that maintains its state in local memory
+ *
+ * @author thomas.diesler@jboss.com
+ * @since 16-Jan-2012
+ */
+public class MemoryRepositoryStorage extends AbstractResourceStore implements RepositoryStorage {
+
+    static final Logger LOGGER = Logger.getLogger(Repository.class.getPackage().getName());
+    
+    private final Repository repository;
+    private final AtomicLong increment = new AtomicLong();
+
+    public static final class Factory implements RepositoryStorageFactory {
+        @Override
+        public RepositoryStorage create(Repository repository) {
+            return new MemoryRepositoryStorage(repository);
+        }
+    }
+
+    public MemoryRepositoryStorage(Repository repository) {
+        super(MemoryRepositoryStorage.class.getSimpleName(), true);
+        if (repository == null)
+            throw new IllegalArgumentException("Null repository");
+        this.repository = repository;
+    }
+
+    @Override
+    public Repository getRepository() {
+        return repository;
+    }
+
+    @Override
+    public RepositoryReader getRepositoryReader() {
+        final Iterator<Resource> itres = getResources();
+        return new RepositoryReader() {
+
+            @Override
+            public Map<String, String> getRepositoryAttributes() {
+                HashMap<String, String> attributes = new HashMap<String, String>();
+                attributes.put("name", getRepository().getName());
+                attributes.put("increment", new Long(increment.get()).toString());
+                return Collections.unmodifiableMap(attributes);
+            }
+
+            @Override
+            public Resource nextResource() {
+                return itres.hasNext() ? itres.next() : null;
+            }
+
+            @Override
+            public void close() {
+                // do nothing
+            }
+        };
+    }
+
+    @Override
+    public Resource addResource(Resource res) {
+        Resource result = super.addResource(res);
+        increment.incrementAndGet();
+        return result;
+    }
+
+    @Override
+    public Resource removeResource(ResourceIdentity resid) {
+        Resource result = super.removeResource(resid);
+        increment.incrementAndGet();
+        return result;
+    }
+}

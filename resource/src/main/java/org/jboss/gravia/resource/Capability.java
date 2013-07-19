@@ -8,7 +8,7 @@ import java.util.Map;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface Capability {
+public interface Capability extends Adaptable {
 
     /**
      * Returns the namespace of this capability.
