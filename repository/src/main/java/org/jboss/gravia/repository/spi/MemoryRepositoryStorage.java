@@ -29,9 +29,9 @@ import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.repository.RepositoryStorageFactory;
+import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.resource.spi.AbstractResourceStore;
 import org.jboss.logging.Logger;
 
 /**
@@ -40,7 +40,7 @@ import org.jboss.logging.Logger;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public class MemoryRepositoryStorage extends AbstractResourceStore implements RepositoryStorage {
+public class MemoryRepositoryStorage extends DefaultResourceStore implements RepositoryStorage {
 
     static final Logger LOGGER = Logger.getLogger(Repository.class.getPackage().getName());
     

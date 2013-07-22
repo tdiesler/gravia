@@ -38,4 +38,8 @@ public class DefaultResolveContext extends AbstractResolveContext {
         super(resourceStore, mandatory, optional);
     }
 
+    @Override
+    protected PreferencePolicy createPreferencePolicy() {
+        return new DefaultPreferencePolicy();
+    }
 }

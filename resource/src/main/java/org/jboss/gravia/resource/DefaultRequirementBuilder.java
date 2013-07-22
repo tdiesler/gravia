@@ -38,4 +38,8 @@ public class DefaultRequirementBuilder extends AbstractRequirementBuilder {
     public DefaultRequirementBuilder(String namespace, String nsvalue) {
         super(namespace, nsvalue);
     }
+
+    protected ResourceBuilder createResourceBuilder() {
+        return new DefaultResourceBuilder();
+    }
 }

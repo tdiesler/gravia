@@ -20,28 +20,24 @@
 package org.jboss.gravia.resolver.spi;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.jboss.gravia.resolver.DefaultPreferencePolicy;
-import org.jboss.gravia.resolver.PreferencePolicy;
 import org.jboss.gravia.resolver.ResolutionException;
 import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.DefaultResourceStore;
-import org.jboss.gravia.resource.DefaultWire;
-import org.jboss.gravia.resource.DefaultWiring;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.ResourceStore;
 import org.jboss.gravia.resource.Wire;
 import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.resource.spi.AbstractResource;
@@ -55,43 +51,41 @@ import org.jboss.logging.Logger;
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
-public class AbstractResolver implements Resolver {
+public abstract class AbstractResolver implements Resolver {
 
     static final Logger LOGGER = Logger.getLogger(Resolver.class.getPackage().getName());
-    
-    private PreferencePolicy preferencePolicy;
 
-    protected AbstractWire createWire(Requirement req, Capability cap) {
-        return new DefaultWire(req, cap);
-    }
-    
-    protected AbstractWiring createWiring(Resource resource, List<Wire> reqwires, List<Wire> provwires) {
-        return new DefaultWiring(resource, reqwires, provwires);
-    }
-    
-    protected PreferencePolicy createPreferencePolicy() {
-        return new DefaultPreferencePolicy();
-    }
+    protected abstract AbstractWire createWire(Requirement req, Capability cap);
+
+    protected abstract AbstractWiring createWiring(Resource resource, List<Wire> reqwires, List<Wire> provwires);
 
     @Override
     public Map<Resource, List<Wire>> resolve(ResolveContext context) throws ResolutionException {
         return resolveInternal(context, false);
     }
-    
+
     @Override
     public Map<Resource, List<Wire>> resolveAndApply(ResolveContext context) throws ResolutionException {
         return resolveInternal(context, true);
     }
-    
+
+    ResourceSpaces createResourceSpaces(ResolveContext context) {
+        return new ResourceSpaces(context);
+    }
+
+    ResourceCandidates createResourceCandidates(Resource res) {
+        return new ResourceCandidates(res);
+    }
+
     private Map<Resource, List<Wire>> resolveInternal(ResolveContext context, boolean apply) throws ResolutionException {
-        
+
         LOGGER.debugf("Resolve: mandatory%s optional%s", context.getMandatoryResources(), context.getOptionalResources());
-        
+
         // Get the combined set of resources in the context
         Set<Resource> combined = new HashSet<Resource>();
         combined.addAll(context.getMandatoryResources());
         combined.addAll(context.getOptionalResources());
-        
+
         // Resolve combined resources
         ResolverState state = new ResolverState(context);
         for (Resource res : combined) {
@@ -99,7 +93,7 @@ public class AbstractResolver implements Resolver {
         }
 
         // Log resolver result
-        Map<Resource, List<Wire>> resourceWires = state.getResourceWires();
+        Map<Resource, List<Wire>> resourceWires = state.getResult();
         if (LOGGER.isDebugEnabled()) {
             for (Entry<Resource, List<Wire>> entry : resourceWires.entrySet()) {
                 LOGGER.debugf("Resolved: %s", entry.getKey());
@@ -108,7 +102,7 @@ public class AbstractResolver implements Resolver {
                 }
             }
         }
-        
+
         // Apply resolver results
         if (apply) {
             for (Entry<Resource, List<Wire>> entry : resourceWires.entrySet()) {
@@ -134,254 +128,67 @@ public class AbstractResolver implements Resolver {
                 }
             }
         }
-        
+
         return resourceWires;
     }
 
-    private void resolveResource(ResolverState state, Resource res) throws ResolutionException {
+    private ResourceSpace resolveResource(ResolverState state, Resource res) throws ResolutionException {
+
+        // Check if we already have a resolved space for resource
+        ResourceSpaces spaces = state.getResourceSpaces();
+        ResourceSpace resspace = spaces.getResourceSpace(res);
+        if (resspace != null) 
+            return resspace;
         
-        // We already have a result for the given resource
-        if (state.hasWiring(res) || state.getResourceWires().get(res) != null)
-            return;
-        
-        Map<Requirement, List<Capability>> candidates = new HashMap<Requirement, List<Capability>>();
-        for (Requirement req : res.getRequirements(null)) {
-            
-            List<Capability> providers = state.getResolveContext().findProviders(req);
-            getPreferencePolicyInternal().sort(providers);
-            
-            verifyTopLevelProviders(state, req, providers.iterator(), false);
-            
-            // Fail early if we don't have providers for non-optional requirements
-            if (providers.isEmpty() && !(req.isOptional() || isOptionalResource(state, res))) {
-                Set<Requirement> unresolved = Collections.singleton(req);
-                throw new ResolutionException("Cannot find provider for: " + req, null, unresolved);
-            }
-            
-            if (!providers.isEmpty()) {
-                candidates.put(req, providers);
-            }
-        }
-        
-        // Reduce the candidates to a consistent set of wires
-        List<Wire> wires = reduceCandidatesToResourceWires(state, res, candidates);
-        if (wires != null) {
-            state.getResourceWires().put(res, wires);
+        // A resource can resolve when the spaces of all its immediate dependencies can be added
+        ResourceCandidates rescan = new ResourceCandidates(res);
+        Iterator<List<Wire>> itres = rescan.iterator(state.getResolveContext());
+        while (itres.hasNext()) {
+            ResourceSpace space = new ResourceSpace(res);
+            List<Wire> wires = itres.next();
+            boolean allgood = true;
             for (Wire wire : wires) {
                 Resource provider = wire.getProvider();
-                resolveResource(state, provider);
-            }
-        }
-    }
-
-
-    private PreferencePolicy getPreferencePolicyInternal() {
-        if (preferencePolicy == null) {
-            preferencePolicy = createPreferencePolicy();
-        }
-        return preferencePolicy;
-    }
-
-    // Reduce the set of given capabilities by the ones that cannot transitively resolve in the same space
-    private void verifyTopLevelProviders(ResolverState state, Requirement req, Iterator<Capability> itcap, boolean optional) throws ResolutionException {
-        
-        ResourceSpaces spaces = state.getResourceSpaces();
-        while (itcap.hasNext()) {
-            Capability cap = itcap.next();
-            Resource capres = cap.getResource();
-            ResourceSpace space = spaces.getResourceSpace(capres);
-            if (space == null) {
-                space = spaces.getDefaultSpace();
-                spaces.addResource(space, capres);
-            }
-            if (!transitivelyVerifyResourceInSpace(state, space, capres)) {
-                itcap.remove();
-            }
-        }
-    }
-
-    // True if the given resource transitively resloves in the given space
-    private boolean transitivelyVerifyResourceInSpace(ResolverState state, ResourceSpace target, Resource res) {
-        assert target != null : "Null target";
-        assert res != null : "Null res";
-        
-        if (state.isWhitelisted(res, target))
-            return true;
-        
-        if (state.isBlacklisted(res, target))
-            return false;
-        
-        if (state.hasWiring(res)) {
-            state.whitelist(res, target);
-            return true;
-        }
-        
-        ResourceSpaces spaces = state.getResourceSpaces();
-        ResolveContext context = state.getResolveContext();
-        for (Requirement req : res.getRequirements(null)) {
-            List<Capability> providers = context.findProviders(req);
-            for (Capability cap : providers) {
-                Resource capres = cap.getResource();
-                if (!transitivelyVerifyResourceInSpace(state, target, capres)) {
-                    state.blacklist(res, target);
-                    return false;
-                }
-                ResourceSpace space = spaces.getResourceSpace(capres);
-                if (space == null) {
-                    spaces.addResource(target, capres);
+                ResourceSpace provspace = resolveResource(state, provider);
+                if (!space.addDependencySpace(provspace)) {
+                    allgood = false;
+                    break;
                 }
             }
-        }
-        
-        state.whitelist(res, target);
-        return true;
-    }
-
-    private List<Wire> reduceCandidatesToResourceWires(ResolverState state, Resource res, Map<Requirement, List<Capability>> candidates) throws ResolutionException {
-        
-        // Check non-optional requirements on optional resources
-        if (isOptionalResource(state, res)) {
-            for (Requirement req : res.getRequirements(null)) {
-                if (!req.isOptional() && candidates.get(req) == null)
-                    return null;
+            if (allgood) {
+                spaces.addResourceSpace(space);
+                state.getResult().put(res, wires);
+                return space;
             }
         }
         
-        if (candidates.isEmpty())
-            return Collections.emptyList();
+        ResolutionException resex = rescan.getResolutionException();
+        if (resex != null) {
+            throw resex;
+        }
         
-        // Remove candidates that are not wired if we have a wired candidate
-        for (Entry<Requirement, List<Capability>> entry : candidates.entrySet()) {
-            List<Capability> caps = entry.getValue();
-            if (caps.size() > 1 && state.hasWiring(caps.get(0).getResource())) {
-                Iterator<Capability> itcaps = caps.iterator();
-                while(itcaps.hasNext()) {
-                    Resource capres = itcaps.next().getResource();
-                    if (!state.hasWiring(capres)) {
-                        itcaps.remove();
-                    }
+        if (spaces.getResourceSpace(res) == null) {
+            List<Requirement> manreqs = res.getRequirements(null);
+            Iterator<Requirement> itreqs = manreqs.iterator();
+            while (itreqs.hasNext()) {
+                if (itreqs.next().isOptional()) {
+                    itreqs.remove();
                 }
             }
+            throw new ResolutionException("Requirements map to candidates in disconnetced spaces", null, manreqs);
         }
-        
-        Map<ResourceSpace, Map<Requirement, Capability>> spacemap = new HashMap<ResourceSpace, Map<Requirement, Capability>>();
-        ResourceSpaces spaces = state.getResourceSpaces();
-        
-        // Separate the wiring candidates into their respective spaces
-        for (Entry<Requirement, List<Capability>> entry : candidates.entrySet()) {
-            Requirement req = entry.getKey();
-            for (Capability cap : entry.getValue()) {
-                Resource capres = cap.getResource();
-                ResourceSpace space = spaces.getResourceSpace(capres);
-                assert space != null : "No resource space for: " + capres;
-                
-                Map<Requirement, Capability> map = spacemap.get(space);
-                if (map == null) {
-                    map = new HashMap<Requirement, Capability>();
-                    spacemap.put(space, map);
-                }
-                Capability prefcap = map.get(req);
-                Comparator<Capability> comp = getPreferencePolicyInternal().getComparator();
-                if (prefcap == null || comp.compare(prefcap, cap) > 0) {
-                    map.put(req, cap);
-                }
-            }
-        }
-        
-        // Remove spaces that do not contain all requirements
-        Set<Requirement> allreqs = candidates.keySet();
-        Iterator<ResourceSpace> itspace = spacemap.keySet().iterator();
-        while (itspace.hasNext()) {
-            ResourceSpace space = itspace.next();
-            Map<Requirement, Capability> map = spacemap.get(space);
-            Set<Requirement> spacereqs = map.keySet();
-            if (!spacereqs.equals(allreqs)) {
-                itspace.remove();
-            }
-        }
-        
-        List<Wire> wires = new ArrayList<Wire>();
-        Map<Requirement, Capability> mapping = selectSingleResourceSpace(allreqs, spacemap);
-        for (Entry<Requirement, Capability> entry : mapping.entrySet()) {
-            wires.add(createWire(entry.getKey(), entry.getValue()));
-        }
-        return wires;
+        return null;
     }
 
-    private boolean isOptionalResource(ResolverState state, Resource res) {
-        return state.getResolveContext().getOptionalResources().contains(res);
-    }
+    private class ResolverState {
 
-    private Map<Requirement, Capability> selectSingleResourceSpace(Set<Requirement> allreqs, Map<ResourceSpace, Map<Requirement, Capability>> spacemap) throws ResolutionException {
-        if (spacemap.isEmpty())
-            throw new ResolutionException("Requirements map to candidates in disconnetced spaces", null, allreqs);
-        
-        if (spacemap.size() > 1)
-            throw new ResolutionException("Requirements map to candidates in multiple spaces", null, allreqs);
-        
-        return spacemap.values().iterator().next();
-    }
-
-    private static class ResolverState {
-
-        private final ResolveContext resolveContext;
-        private final Map<Resource, Wiring> wirings;
-        private final ResourceSpaces spaces = new ResourceSpaces();
-        private final Map<Resource, Set<ResourceSpace>> blacklist = new HashMap<Resource, Set<ResourceSpace>>();
-        private final Map<Resource, Set<ResourceSpace>> whitelist = new HashMap<Resource, Set<ResourceSpace>>();
-        private final Map<Resource, List<Wire>> resourceWires = new HashMap<Resource, List<Wire>>();
+        private final ResourceSpaces spaces;
+        private final ResolveContext context;
+        private final Map<Resource, List<Wire>> wiremap = new HashMap<Resource, List<Wire>>();
 
         ResolverState(ResolveContext context) {
-            this.resolveContext = context;
-            this.wirings = context.getWirings();
-            
-            // Populate the spaces for already wired resources
-            for (Entry<Resource, Wiring> entry : wirings.entrySet()) {
-                Resource res = entry.getKey();
-                Wiring wiring = entry.getValue();
-                assignResourceToSpace(res, wiring, null);
-            }
-        }
-
-        private void assignResourceToSpace(Resource res, Wiring wiring, ResourceSpace target) {
-            if (spaces.getResourceSpace(res) == null) {
-                if (target == null) {
-                    target = spaces.addResourceSpace();
-                }
-                spaces.addResource(target, res);
-                for (Wire wire : wiring.getRequiredResourceWires(null)) {
-                    Resource provider = wire.getProvider();
-                    assignResourceToSpace(provider, wiring, target);
-                }
-            }
-        }
-
-        void whitelist(Resource res, ResourceSpace space) {
-            Set<ResourceSpace> spaces = whitelist.get(res);
-            if (spaces == null) {
-                spaces = new HashSet<ResourceSpace>();
-                whitelist.put(res, spaces);
-            }
-            spaces.add(space);
-        }
-
-        void blacklist(Resource res, ResourceSpace space) {
-            Set<ResourceSpace> spaces = blacklist.get(res);
-            if (spaces == null) {
-                spaces = new HashSet<ResourceSpace>();
-                blacklist.put(res, spaces);
-            }
-            spaces.add(space);
-        }
-        
-        boolean isBlacklisted(Resource res, ResourceSpace space) {
-            Set<ResourceSpace> spaces = blacklist.get(res);
-            return spaces != null && spaces.contains(space);
-        }
-
-        boolean isWhitelisted(Resource res, ResourceSpace space) {
-            Set<ResourceSpace> spaces = whitelist.get(res);
-            return spaces != null && spaces.contains(space);
+            this.context = context;
+            this.spaces = new ResourceSpaces(context);
         }
 
         ResourceSpaces getResourceSpaces() {
@@ -389,61 +196,225 @@ public class AbstractResolver implements Resolver {
         }
 
         ResolveContext getResolveContext() {
-            return resolveContext;
-        }
-        
-        boolean hasWiring(Resource res) {
-            return wirings.get(res) != null;
-        }
-        
-        Map<Resource, List<Wire>> getResourceWires() {
-            return resourceWires;
-        }
-    }
-    
-    private static class ResourceSpace {
-        private ResourceStore delegate;
-        
-        ResourceSpace(String spaceName) {
-            delegate = new DefaultResourceStore(spaceName);
+            return context;
         }
 
-        void addResource(Resource res) {
-            delegate.addResource(res);
+        Map<Resource, List<Wire>> getResult() {
+            return wiremap;
+        }
+    }
+
+    class ResourceSpaces {
+
+        private final Map<Resource, ResourceSpace> spacemap = new LinkedHashMap<Resource, ResourceSpace>();
+
+        // Initially contain spaces for all wired resources
+        ResourceSpaces(ResolveContext context) {
+            for (Resource res : context.getWirings().keySet()) {
+                spacemap.put(res, new ResourceSpace(res));
+            }
+        }
+
+        ResourceSpaces(ResourceSpaces parent) {
+            spacemap.putAll(parent.spacemap);
+        }
+
+        void addResourceSpace(ResourceSpace space) {
+            Resource primary = space.getPrimary();
+            assert !spacemap.containsKey(primary) : "spaces does not contain: " + primary;
+            spacemap.put(primary, space);
+        }
+
+        Map<Resource, ResourceSpace> getResourceSpaces() {
+            return Collections.unmodifiableMap(spacemap);
+        }
+
+        ResourceSpace getResourceSpace(Resource res) {
+            return spacemap.get(res);
+        }
+    }
+
+    /**
+     * A {@link ResourceSpace} is that of a primary {@link Resource} and its immediate dependencies.
+     * A space cannot contain two versions of the same {@link Resource}. 
+     */
+    class ResourceSpace {
+
+        private final Resource primary;
+        private final Map<String, Resource> resources = new HashMap<String, Resource>();
+        
+        ResourceSpace(Resource primary) {
+            this.primary = primary;
+            
+            String uniquekey = primary.getIdentity().getSymbolicName();
+            resources.put(uniquekey, primary);
+
+            Wiring wiring = primary.getWiring();
+            if (wiring != null) {
+                for (Wire wire : wiring.getRequiredResourceWires(null)) {
+                    Resource provider = wire.getProvider();
+                    uniquekey = provider.getIdentity().getSymbolicName();
+                    resources.put(uniquekey, provider);
+                }
+            }
+        }
+
+        Resource getPrimary() {
+            return primary;
+        }
+
+        Collection<Resource> getResources() {
+            return Collections.unmodifiableCollection(resources.values());
+        }
+
+        boolean addDependencySpace(ResourceSpace dependency) {
+            if (dependency == null)
+                return false;
+            
+            for (Resource aux : dependency.getResources()) {
+                String uniquekey = aux.getIdentity().getSymbolicName();
+                Resource other = resources.get(uniquekey);
+                if (other != null && other != aux) {
+                    return false;
+                }
+            }
+            for (Resource aux : dependency.getResources()) {
+                String uniquekey = aux.getIdentity().getSymbolicName();
+                resources.put(uniquekey, aux);
+            }
+            return true;
         }
 
         @Override
         public String toString() {
-            return delegate.toString();
+            return "ResourceSpace[" + primary.getIdentity() + "]";
         }
     }
-    
-    private static class ResourceSpaces {
 
-        private List<ResourceSpace> spaces = new ArrayList<ResourceSpace>();
-        private Map<Resource, ResourceSpace> spacemap = new HashMap<Resource, ResourceSpace>();
+    /**
+     * Provides an iterator over all possible wires for a given resource
+     */
+    class ResourceCandidates {
+        private final Resource res;
+        private ResolutionException resolutionException;
 
-        ResourceSpaces() {
-            spaces.add(new ResourceSpace("#0"));
+        ResourceCandidates(Resource res) {
+            this.res = res;
         }
 
-        ResourceSpace getDefaultSpace() {
-            return spaces.get(0);
-        }
-        
-        ResourceSpace addResourceSpace() {
-            ResourceSpace space = new ResourceSpace("#" + spaces.size());
-            spaces.add(space);
-            return space;
+        ResolutionException getResolutionException() {
+            return resolutionException;
         }
 
-        void addResource(ResourceSpace space, Resource res) {
-            space.addResource(res);
-            spacemap.put(res, space);
+        Iterator<List<Wire>> iterator(final ResolveContext context) throws ResolutionException {
+            return new Iterator<List<Wire>>() {
+                private List<Iterator<Wire>> candidates = new ArrayList<Iterator<Wire>>();
+                private List<Requirement> reqs = res.getRequirements(null);
+                private Map<Requirement, Wire> wires;
+                private boolean hasNext;
+
+                @Override
+                public boolean hasNext() {
+                    try {
+                        if (wires == null) {
+                            wires = new LinkedHashMap<Requirement, Wire>();
+                            initWiremap(context, 0);
+                            hasNext = true;
+                            return true;
+                        }
+                        int index = reqs.size() - 1;
+                        while (index >= 0) {
+                            if (candidates.get(index).hasNext()) {
+                                Wire wire = candidates.get(index).next();
+                                Requirement req = wire.getRequirement();
+                                wires.put(req, wire);
+                                hasNext = true;
+                                return true;
+                            } else {
+                                if (index > 0 && candidates.get(index - 1).hasNext()) {
+                                    initWiremap(context, index);
+                                }
+                                index--;
+                            }
+                        }
+                    } catch (ResolutionException ex) {
+                        resolutionException = ex;
+                    }
+                    hasNext = false;
+                    return false;
+                }
+
+                private void initWiremap(final ResolveContext context, int start) throws ResolutionException {
+                    for (int i = start; i < reqs.size(); i++) {
+                        Requirement req = reqs.get(i);
+                        RequirementCandidates reqcan = new RequirementCandidates(req);
+                        Iterator<Wire> itcan = reqcan.iterator(context);
+                        if (start == 0) { 
+                            candidates.add(itcan);
+                        } else {
+                            candidates.set(i, itcan);
+                        }
+                        if (itcan.hasNext()) {
+                            wires.put(req, itcan.next());
+                        }
+                    }
+                }
+
+                @Override
+                public List<Wire> next() {
+                    if (!hasNext)
+                        throw new NoSuchElementException();
+                    ArrayList<Wire> next = new ArrayList<Wire>(wires.values());
+                    return Collections.unmodifiableList(next);
+                }
+
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+            };
         }
-        
-        ResourceSpace getResourceSpace(Resource res) {
-            return spacemap.get(res);
+    }
+
+    /**
+     * Provides an iterator over all possible wires for a given requirement
+     */
+    class RequirementCandidates {
+        private final Requirement req;
+
+        RequirementCandidates(Requirement req) {
+            this.req = req;
+        }
+
+        Iterator<Wire> iterator(ResolveContext context) throws ResolutionException {
+            final Collection<Resource> optres = context.getOptionalResources();
+            final List<Capability> providers = context.findProviders(req);
+
+            // Fail early if there are no providers for a non-optional requirement
+            if (!optres.contains(req.getResource()) && !req.isOptional() && providers.isEmpty()) {
+                Set<Requirement> unresolved = Collections.singleton(req);
+                throw new ResolutionException("Cannot find provider for: " + req, null, unresolved);
+            }
+
+            return new Iterator<Wire>() {
+                Iterator<Capability> delagate = providers.iterator();
+
+                @Override
+                public boolean hasNext() {
+                    return delagate.hasNext();
+                }
+
+                @Override
+                public Wire next() {
+                    Capability cap = delagate.next();
+                    return createWire(req, cap);
+                }
+
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+            };
         }
     }
 }

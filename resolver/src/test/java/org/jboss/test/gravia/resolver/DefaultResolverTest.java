@@ -247,7 +247,10 @@ public class DefaultResolverTest extends AbstractResolverTest {
         
         ResolveContext context = getResolveContext(null, Arrays.asList(resA));
         Map<Resource, List<Wire>> wiremap = resolveAndApply(context);
-        Assert.assertEquals(0, wiremap.size());
+        Assert.assertEquals(1, wiremap.size());
+        
+        List<Wire> wiresA = wiremap.get(resA);
+        Assert.assertEquals(0, wiresA.size());
     }
 
     @Test

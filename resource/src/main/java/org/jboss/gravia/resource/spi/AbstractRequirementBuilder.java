@@ -21,7 +21,6 @@ package org.jboss.gravia.resource.spi;
 
 import java.util.Map;
 
-import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.RequirementBuilder;
@@ -34,7 +33,7 @@ import org.jboss.gravia.resource.ResourceBuilder;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public class AbstractRequirementBuilder implements RequirementBuilder {
+public abstract class AbstractRequirementBuilder implements RequirementBuilder {
 
     private Requirement requirement;
     private ResourceBuilder resbuilder;
@@ -49,9 +48,7 @@ public class AbstractRequirementBuilder implements RequirementBuilder {
         requirement = resbuilder.addRequirement(namespace, nsvalue);
     }
 
-    protected ResourceBuilder createResourceBuilder() {
-        return new DefaultResourceBuilder();
-    }
+    protected abstract ResourceBuilder createResourceBuilder();
 
     private ResourceBuilder getResourceBuilderInternal() {
         if (resbuilder == null) {

@@ -15,13 +15,18 @@ public final class ResourceIdentity {
         return new ResourceIdentity(symbolicName, version);
     }
 
+    public static ResourceIdentity fromString(String identity) {
+        int index = identity.indexOf(':');
+        String namePart = index > 0 ? identity.substring(0, index) : identity;
+        String versionPart = index > 0 ? identity.substring(index + 1) : "0.0.0";
+        return new ResourceIdentity(namePart, Version.parseVersion(versionPart));
+    }
+
     private ResourceIdentity(String symbolicName, Version version) {
         if (symbolicName == null)
             throw new IllegalArgumentException("Null symbolicName");
-        if (version == null)
-            throw new IllegalArgumentException("Null version");
         this.symbolicName = symbolicName;
-        this.version = version;
+        this.version = version != null ? version : Version.emptyVersion;
     }
 
     public String getSymbolicName() {

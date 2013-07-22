@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.DefaultMatchPolicy;
 import org.jboss.gravia.resource.MatchPolicy;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
@@ -25,7 +24,7 @@ import org.jboss.logging.Logger;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public class AbstractResourceStore implements ResourceStore {
+public abstract class AbstractResourceStore implements ResourceStore {
 
     static final Logger LOGGER = Logger.getLogger(Resource.class.getPackage().getName());
 
@@ -44,9 +43,7 @@ public class AbstractResourceStore implements ResourceStore {
         this.logCapsReqs = logCapsReqs;
     }
 
-    protected MatchPolicy createMatchPolicy() {
-        return new DefaultMatchPolicy();
-    }
+    protected abstract MatchPolicy createMatchPolicy();
 
     @Override
     public Iterator<Resource> getResources() {

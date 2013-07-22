@@ -19,7 +19,17 @@
  */
 package org.jboss.gravia.resolver;
 
+import java.util.List;
+
 import org.jboss.gravia.resolver.spi.AbstractResolver;
+import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.DefaultWire;
+import org.jboss.gravia.resource.DefaultWiring;
+import org.jboss.gravia.resource.Requirement;
+import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.Wire;
+import org.jboss.gravia.resource.spi.AbstractWire;
+import org.jboss.gravia.resource.spi.AbstractWiring;
 
 /**
  * The default {@link Resolver}.
@@ -28,5 +38,17 @@ import org.jboss.gravia.resolver.spi.AbstractResolver;
  * @since 31-May-2010
  */
 public class DefaultResolver extends AbstractResolver {
+
+    protected AbstractWire createWire(Requirement req, Capability cap) {
+        return new DefaultWire(req, cap);
+    }
+    
+    protected AbstractWiring createWiring(Resource resource, List<Wire> reqwires, List<Wire> provwires) {
+        return new DefaultWiring(resource, reqwires, provwires);
+    }
+    
+    protected PreferencePolicy createPreferencePolicy() {
+        return new DefaultPreferencePolicy();
+    }
 
 }

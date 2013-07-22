@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.gravia.resolver.PreferencePolicy;
 import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.Requirement;
@@ -43,11 +44,12 @@ import org.jboss.gravia.resource.Wiring;
  * @author thomas.diesler@jboss.com
  * @since 02-Apr-2012
  */
-public class AbstractResolveContext implements ResolveContext {
+public abstract class AbstractResolveContext implements ResolveContext {
 
     private final ResourceStore resourceStore;
     private final Set<Resource> mandatory;
     private final Set<Resource> optional;
+    private PreferencePolicy preferencePolicy;
 
     public AbstractResolveContext(ResourceStore resourceStore, Set<Resource> manres, Set<Resource> optres) {
         if (resourceStore == null)
@@ -85,6 +87,8 @@ public class AbstractResolveContext implements ResolveContext {
         }
     }
 
+    protected abstract PreferencePolicy createPreferencePolicy();
+
     @Override
     public Collection<Resource> getMandatoryResources() {
         return Collections.unmodifiableSet(mandatory);
@@ -93,13 +97,6 @@ public class AbstractResolveContext implements ResolveContext {
     @Override
     public Collection<Resource> getOptionalResources() {
         return Collections.unmodifiableSet(optional);
-    }
-
-    @Override
-    public List<Capability> findProviders(Requirement req) {
-        List<Capability> result = new ArrayList<Capability>();
-        result.addAll(resourceStore.findProviders(req));
-        return result;
     }
 
     @Override
@@ -115,5 +112,19 @@ public class AbstractResolveContext implements ResolveContext {
         }
         return Collections.unmodifiableMap(wirings);
     }
+    
+    @Override
+    public List<Capability> findProviders(Requirement req) {
+        List<Capability> result = new ArrayList<Capability>();
+        result.addAll(resourceStore.findProviders(req));
+        getPreferencePolicyInternal().sort(result);
+        return result;
+    }
 
+    private PreferencePolicy getPreferencePolicyInternal() {
+        if (preferencePolicy == null) {
+            preferencePolicy = createPreferencePolicy();
+        }
+        return preferencePolicy;
+    }
 }
