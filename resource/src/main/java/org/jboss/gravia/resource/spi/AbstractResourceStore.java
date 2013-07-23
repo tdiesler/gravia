@@ -39,6 +39,8 @@ public abstract class AbstractResourceStore implements ResourceStore {
     }
 
     public AbstractResourceStore(String storeName, boolean logCapsReqs) {
+        if (storeName == null)
+            throw new IllegalArgumentException("Null storeName");
         this.storeName = storeName;
         this.logCapsReqs = logCapsReqs;
     }

@@ -17,10 +17,10 @@
   limitations under the License.
   #L%
   -->
-<repository name='OSGi Repository' increment='1' xmlns='http://www.osgi.org/xmlns/repository/v1.0.0'>
+<repository name='Gravia Repository' increment='1' xmlns='http://www.osgi.org/xmlns/repository/v1.0.0'>
 	<resource>
-		<capability namespace='osgi.identity'>
-			<attribute name='osgi.identity' value='acme-pool-feature' />
+		<capability namespace='gravia.identity'>
+			<attribute name='gravia.identity' value='acme-pool-feature' />
 			<attribute name='type' value='abstract' />
 		</capability>
 	</resource>

@@ -110,12 +110,4 @@ public interface Namespace100 {
             return element == null ? UNKNOWN : element;
         }
     }
-
-    enum Type {
-        String,
-        Version,
-        VersionRange,
-        Long,
-        Double
-    }
 }

@@ -34,7 +34,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.jboss.gravia.repository.AttributeValueHandler.AttributeValue;
 import org.jboss.gravia.repository.Namespace100.Attribute;
 import org.jboss.gravia.repository.Namespace100.Element;
 import org.jboss.gravia.resource.Capability;
@@ -42,6 +41,8 @@ import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
+import org.jboss.gravia.resource.spi.AttributeValueHandler;
+import org.jboss.gravia.resource.spi.AttributeValueHandler.AttributeValue;
 
 
 /**
@@ -50,16 +51,12 @@ import org.jboss.gravia.resource.ResourceBuilder;
  * @author thomas.diesler@jboss.com
  * @since 21-May-2012
  */
-public class RepositoryXMLReader implements RepositoryReader {
+public class DefaultRepositoryXMLReader implements RepositoryReader {
 
     private final Map<String, String> attributes = new HashMap<String, String>();
     private final XMLStreamReader reader;
 
-    public static RepositoryReader create(InputStream input) {
-        return new RepositoryXMLReader(input);
-    }
-
-    private RepositoryXMLReader(InputStream input) {
+    public DefaultRepositoryXMLReader(InputStream input) {
         try {
             reader = XMLInputFactory.newInstance().createXMLStreamReader(input);
         } catch (Exception ex) {

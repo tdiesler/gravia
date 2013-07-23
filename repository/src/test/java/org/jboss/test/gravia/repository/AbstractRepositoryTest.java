@@ -27,7 +27,7 @@ import java.util.List;
 import javax.xml.stream.XMLStreamException;
 
 import org.jboss.gravia.repository.RepositoryReader;
-import org.jboss.gravia.repository.RepositoryXMLReader;
+import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.resource.Resource;
 
 /**
@@ -39,7 +39,7 @@ public abstract class AbstractRepositoryTest {
 
     protected RepositoryReader getRepositoryReader(String xmlres) throws XMLStreamException {
         InputStream input = getClass().getClassLoader().getResourceAsStream(xmlres);
-        return RepositoryXMLReader.create(input);
+        return new DefaultRepositoryXMLReader(input);
     }
 
     protected List<Resource> getResources(RepositoryReader reader) {

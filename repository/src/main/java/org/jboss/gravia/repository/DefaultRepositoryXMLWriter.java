@@ -27,13 +27,14 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jboss.gravia.repository.AttributeValueHandler.AttributeValue;
 import org.jboss.gravia.repository.Namespace100.Attribute;
 import org.jboss.gravia.repository.Namespace100.Element;
-import org.jboss.gravia.repository.Namespace100.Type;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.spi.AttributeValueHandler;
+import org.jboss.gravia.resource.spi.AttributeValueHandler.AttributeValue;
+import org.jboss.gravia.resource.spi.AttributeValueHandler.Type;
 
 
 /**
@@ -42,15 +43,11 @@ import org.jboss.gravia.resource.Resource;
  * @author thomas.diesler@jboss.com
  * @since 21-May-2012
  */
-public class RepositoryXMLWriter implements RepositoryWriter {
+public class DefaultRepositoryXMLWriter implements RepositoryWriter {
 
     private final XMLStreamWriter writer;
 
-    public static RepositoryWriter create(OutputStream output) {
-        return new RepositoryXMLWriter(output);
-    }
-
-    private RepositoryXMLWriter(OutputStream output) {
+    public DefaultRepositoryXMLWriter(OutputStream output) {
         try {
             writer = XMLOutputFactory.newInstance().createXMLStreamWriter(output);
         } catch (Exception ex) {
@@ -118,7 +115,7 @@ public class RepositoryXMLWriter implements RepositoryWriter {
                 writer.writeAttribute(Attribute.TYPE.getLocalName(), "List<" + attval.getType() + ">");
             } else {
                 writer.writeAttribute(Attribute.VALUE.getLocalName(), attval.getValueString());
-                if (attval.getType() != Type.String) {
+                if (attval.getType() != AttributeValueHandler.Type.String) {
                     writer.writeAttribute(Attribute.TYPE.getLocalName(), attval.getType().toString());
                 }
             }

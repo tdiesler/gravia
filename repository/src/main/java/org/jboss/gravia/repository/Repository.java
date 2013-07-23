@@ -74,4 +74,11 @@ public interface Repository extends Adaptable {
      *         caller and can be modified by the caller.
      */
     Map<Requirement, Collection<Capability>> findProviders(Collection<Requirement> requirements);
+
+    /** A configuration property provider */
+    interface ConfigurationPropertyProvider {
+
+        /** Get the list of configured base URLs */
+        String getProperty(String key, String defaultValue);
+    }
 }

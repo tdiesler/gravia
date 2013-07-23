@@ -17,12 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.repository;
+package org.jboss.gravia.resource.spi;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.gravia.repository.Namespace100.Type;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
 
@@ -34,6 +33,14 @@ import org.jboss.gravia.resource.VersionRange;
  */
 public final class AttributeValueHandler {
 
+    public static enum Type {
+        String,
+        Version,
+        VersionRange,
+        Long,
+        Double
+    }
+    
     /**
      * Read attribute values according to
      * 132.5.6 Attribute Element

@@ -49,11 +49,24 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
 
     @Override
     public Capability addIdentityCapability(String symbolicName, Version version) {
-        Capability icap = addCapability(IdentityNamespace.IDENTITY_NAMESPACE, symbolicName);
-        icap.getAttributes().put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
-        return icap;
+        return addIdentityCapability(symbolicName, version, null, null);
     }
 
+    @Override
+    public Capability addIdentityCapability(String symbolicName, Version version, Map<String, Object> atts, Map<String, String> dirs) {
+        Capability icap = addCapability(IdentityNamespace.IDENTITY_NAMESPACE, symbolicName);
+        if (version != null) {
+            icap.getAttributes().put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
+        }
+        if (atts != null) {
+            icap.getAttributes().putAll(atts);
+        }
+        if (dirs != null) {
+            icap.getDirectives().putAll(dirs);
+        }
+        return icap;
+    }
+    
     @Override
     public Capability addCapability(String namespace, String nsvalue) {
         return addCapability(namespace, Collections.singletonMap(namespace, (Object)nsvalue), null);
@@ -73,6 +86,21 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
         return ireq;
     }
 
+    @Override
+    public Requirement addIdentityRequirement(String symbolicName, VersionRange version, Map<String, Object> atts, Map<String, String> dirs) {
+        Requirement ireq = addRequirement(IdentityNamespace.IDENTITY_NAMESPACE, symbolicName);
+        if (version != null) {
+            ireq.getAttributes().put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
+        }
+        if (atts != null) {
+            ireq.getAttributes().putAll(atts);
+        }
+        if (dirs != null) {
+            ireq.getDirectives().putAll(dirs);
+        }
+        return ireq;
+    }
+    
     @Override
     public Requirement addRequirement(String namespace, String nsvalue) {
         return addRequirement(namespace, Collections.singletonMap(namespace, (Object)nsvalue), null);
