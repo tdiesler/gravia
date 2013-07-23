@@ -35,14 +35,17 @@ import org.jboss.gravia.resource.spi.AbstractResourceBuilder;
  */
 public class DefaultResourceBuilder extends AbstractResourceBuilder {
 
+    @Override
     protected AbstractResource createResource() {
         return new DefaultResource();
     }
     
+    @Override
     protected AbstractCapability createCapability(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives) {
         return new DefaultCapability(resource, namespace, attributes, directives);
     }
 
+    @Override
     protected AbstractRequirement createRequirement(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives) {
         return new DefaultRequirement(resource, namespace, attributes, directives);
     }

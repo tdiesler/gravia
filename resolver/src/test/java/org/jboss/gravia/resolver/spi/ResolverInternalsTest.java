@@ -204,21 +204,36 @@ public class ResolverInternalsTest extends AbstractResolverInternalsTest {
         Map<Resource, List<Wire>> wiremap = resolver.resolveAndApply(context);
         Assert.assertEquals(4, wiremap.size());
         
-        List<Wire> wires = wiremap.get(resA10);
-        Assert.assertEquals(2, wires.size());
-        Assert.assertEquals(resB11, wires.get(0).getProvider());
-        Assert.assertEquals(resD10, wires.get(1).getProvider());
+        // The resolver maintains order on all levels
+        // This should guarantee reproducable results
         
-        wires = wiremap.get(resB11);
+        Iterator<Resource> itres = wiremap.keySet().iterator();
+        
+        Resource res = itres.next();
+        Assert.assertEquals(resE11, res);
+        List<Wire> wires = wiremap.get(res);
+        Assert.assertEquals(0, wires.size());
+        
+        res = itres.next();
+        Assert.assertEquals(resB11, res);
+        wires = wiremap.get(res);
         Assert.assertEquals(2, wires.size());
         Assert.assertEquals(resC10, wires.get(0).getProvider());
         Assert.assertEquals(resE11, wires.get(1).getProvider());
         
-        wires = wiremap.get(resD10);
+        res = itres.next();
+        Assert.assertEquals(resD10, res);
+        wires = wiremap.get(res);
         Assert.assertEquals(1, wires.size());
         Assert.assertEquals(resC10, wires.get(0).getProvider());
+
+        res = itres.next();
+        Assert.assertEquals(resA10, res);
+        wires = wiremap.get(res);
+        Assert.assertEquals(2, wires.size());
+        Assert.assertEquals(resB11, wires.get(0).getProvider());
+        Assert.assertEquals(resD10, wires.get(1).getProvider());
         
-        wires = wiremap.get(resE11);
-        Assert.assertEquals(0, wires.size());
+        Assert.assertFalse(itres.hasNext());
     }
 }

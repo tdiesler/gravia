@@ -40,6 +40,6 @@ public class DefaultResolveContext extends AbstractResolveContext {
 
     @Override
     protected PreferencePolicy createPreferencePolicy() {
-        return new DefaultPreferencePolicy();
+        return new DefaultPreferencePolicy(getWirings());
     }
 }

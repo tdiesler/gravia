@@ -23,9 +23,11 @@ package org.jboss.gravia.resolver;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.resource.spi.AbstractCapability;
@@ -38,32 +40,35 @@ import org.jboss.gravia.resource.spi.AbstractCapability;
  */
 public class DefaultPreferencePolicy implements PreferencePolicy {
     
-    private static final Comparator<Capability> COMPARATOR_INSTANCE = new Comparator<Capability>() {
-        @Override
-        public int compare(Capability cap1, Capability cap2) {
-            
-            // Prefer already wired
-            Wiring w1 = cap1.getResource().getWiring();
-            Wiring w2 = cap2.getResource().getWiring();
-            if (w1 != null && w2 == null)
-                return -1;
-            if (w1 == null && w2 != null)
-                return +1;
-            
-            // Prefer higher version
-            Version v1 = AbstractCapability.getVersion(cap1, IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
-            Version v2 = AbstractCapability.getVersion(cap2, IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
-            return v2.compareTo(v1);
-        }
-    };
+    private final Comparator<Capability> comparator;
+    
+    public DefaultPreferencePolicy(final Map<Resource, Wiring> wirings) {
+        comparator = new Comparator<Capability>() {
+            @Override
+            public int compare(Capability cap1, Capability cap2) {
+                
+                // Prefer already wired
+                Wiring w1 = wirings.get(cap1.getResource());
+                Wiring w2 = wirings.get(cap2.getResource());
+                if (w1 != null && w2 == null)
+                    return -1;
+                if (w1 == null && w2 != null)
+                    return +1;
+                
+                // Prefer higher version
+                Version v1 = AbstractCapability.getVersion(cap1, IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+                Version v2 = AbstractCapability.getVersion(cap2, IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+                return v2.compareTo(v1);
+            }
+        };    }
     
     @Override
     public void sort(List<Capability> providers) {
-        Collections.sort(providers, COMPARATOR_INSTANCE);
+        Collections.sort(providers, comparator);
     }
 
     @Override
     public Comparator<Capability> getComparator() {
-        return COMPARATOR_INSTANCE;
+        return comparator;
     }
 }

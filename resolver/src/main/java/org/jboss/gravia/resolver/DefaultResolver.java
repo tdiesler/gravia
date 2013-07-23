@@ -39,16 +39,14 @@ import org.jboss.gravia.resource.spi.AbstractWiring;
  */
 public class DefaultResolver extends AbstractResolver {
 
+    @Override
     protected AbstractWire createWire(Requirement req, Capability cap) {
         return new DefaultWire(req, cap);
     }
-    
+
+    @Override
     protected AbstractWiring createWiring(Resource resource, List<Wire> reqwires, List<Wire> provwires) {
         return new DefaultWiring(resource, reqwires, provwires);
     }
     
-    protected PreferencePolicy createPreferencePolicy() {
-        return new DefaultPreferencePolicy();
-    }
-
 }

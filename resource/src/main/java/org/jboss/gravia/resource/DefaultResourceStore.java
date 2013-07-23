@@ -18,6 +18,7 @@ public class DefaultResourceStore extends AbstractResourceStore {
         super(storeName, logCapsReqs);
     }
 
+    @Override
     protected MatchPolicy createMatchPolicy() {
         return new DefaultMatchPolicy();
     }

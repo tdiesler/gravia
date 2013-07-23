@@ -22,10 +22,9 @@ package org.jboss.gravia.resolver.spi;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,6 +47,9 @@ import org.jboss.logging.Logger;
 /**
  * An abstract resolver {@link Resolver}.
  *
+ * The resolver maintains order on all levels.
+ * This should guarantee reproducable results.
+ * 
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
@@ -82,7 +84,7 @@ public abstract class AbstractResolver implements Resolver {
         LOGGER.debugf("Resolve: mandatory%s optional%s", context.getMandatoryResources(), context.getOptionalResources());
 
         // Get the combined set of resources in the context
-        Set<Resource> combined = new HashSet<Resource>();
+        Set<Resource> combined = new LinkedHashSet<Resource>();
         combined.addAll(context.getMandatoryResources());
         combined.addAll(context.getOptionalResources());
 
@@ -137,9 +139,9 @@ public abstract class AbstractResolver implements Resolver {
         // Check if we already have a resolved space for resource
         ResourceSpaces spaces = state.getResourceSpaces();
         ResourceSpace resspace = spaces.getResourceSpace(res);
-        if (resspace != null) 
+        if (resspace != null)
             return resspace;
-        
+
         // A resource can resolve when the spaces of all its immediate dependencies can be added
         ResourceCandidates rescan = new ResourceCandidates(res);
         Iterator<List<Wire>> itres = rescan.iterator(state.getResolveContext());
@@ -161,12 +163,12 @@ public abstract class AbstractResolver implements Resolver {
                 return space;
             }
         }
-        
+
         ResolutionException resex = rescan.getResolutionException();
         if (resex != null) {
             throw resex;
         }
-        
+
         if (spaces.getResourceSpace(res) == null) {
             List<Requirement> manreqs = res.getRequirements(null);
             Iterator<Requirement> itreqs = manreqs.iterator();
@@ -184,7 +186,7 @@ public abstract class AbstractResolver implements Resolver {
 
         private final ResourceSpaces spaces;
         private final ResolveContext context;
-        private final Map<Resource, List<Wire>> wiremap = new HashMap<Resource, List<Wire>>();
+        private final Map<Resource, List<Wire>> wiremap = new LinkedHashMap<Resource, List<Wire>>();
 
         ResolverState(ResolveContext context) {
             this.context = context;
@@ -241,11 +243,11 @@ public abstract class AbstractResolver implements Resolver {
     class ResourceSpace {
 
         private final Resource primary;
-        private final Map<String, Resource> resources = new HashMap<String, Resource>();
-        
+        private final Map<String, Resource> resources = new LinkedHashMap<String, Resource>();
+
         ResourceSpace(Resource primary) {
             this.primary = primary;
-            
+
             String uniquekey = primary.getIdentity().getSymbolicName();
             resources.put(uniquekey, primary);
 
@@ -270,7 +272,7 @@ public abstract class AbstractResolver implements Resolver {
         boolean addDependencySpace(ResourceSpace dependency) {
             if (dependency == null)
                 return false;
-            
+
             for (Resource aux : dependency.getResources()) {
                 String uniquekey = aux.getIdentity().getSymbolicName();
                 Resource other = resources.get(uniquekey);
@@ -349,7 +351,7 @@ public abstract class AbstractResolver implements Resolver {
                         Requirement req = reqs.get(i);
                         RequirementCandidates reqcan = new RequirementCandidates(req);
                         Iterator<Wire> itcan = reqcan.iterator(context);
-                        if (start == 0) { 
+                        if (start == 0) {
                             candidates.add(itcan);
                         } else {
                             candidates.set(i, itcan);

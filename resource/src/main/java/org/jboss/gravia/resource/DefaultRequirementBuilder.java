@@ -39,6 +39,7 @@ public class DefaultRequirementBuilder extends AbstractRequirementBuilder {
         super(namespace, nsvalue);
     }
 
+    @Override
     protected ResourceBuilder createResourceBuilder() {
         return new DefaultResourceBuilder();
     }

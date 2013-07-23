@@ -24,6 +24,7 @@ package org.jboss.test.gravia.resolver;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -70,16 +71,22 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Map<Resource, List<Wire>> wiremap = resolveAndApply(context);
         Assert.assertEquals(2, wiremap.size());
         
-        List<Wire> wiresA = wiremap.get(resA);
+        Iterator<Resource> itres = wiremap.keySet().iterator();
+        
+        Resource res = itres.next();
+        Assert.assertEquals(resB, res);
+        List<Wire> wiresB = wiremap.get(res);
+        Assert.assertEquals(0, wiresB.size());
+        
+        res = itres.next();
+        Assert.assertEquals(resA, res);
+        List<Wire> wiresA = wiremap.get(res);
         Assert.assertEquals(1, wiresA.size());
         Wire wireA = wiresA.get(0);
         Assert.assertEquals(resA, wireA.getRequirer());
         Assert.assertEquals(reqA, wireA.getRequirement());
         Assert.assertEquals(resB, wireA.getProvider());
         Assert.assertEquals(capB, wireA.getCapability());
-        
-        List<Wire> wiresB = wiremap.get(resB);
-        Assert.assertEquals(0, wiresB.size());
         
         Wiring wiringA = resA.getWiring();
         Assert.assertEquals(resA, wiringA.getResource());
@@ -123,16 +130,22 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Map<Resource, List<Wire>> wiremap = resolveAndApply(context);
         Assert.assertEquals(2, wiremap.size());
         
-        List<Wire> wiresA = wiremap.get(resA);
+        Iterator<Resource> itres = wiremap.keySet().iterator();
+        
+        Resource res = itres.next();
+        Assert.assertEquals(resB, res);
+        List<Wire> wiresB = wiremap.get(res);
+        Assert.assertEquals(0, wiresB.size());
+        
+        res = itres.next();
+        Assert.assertEquals(resA, res);
+        List<Wire> wiresA = wiremap.get(res);
         Assert.assertEquals(1, wiresA.size());
         Wire wireA = wiresA.get(0);
         Assert.assertEquals(resA, wireA.getRequirer());
         Assert.assertEquals(reqA, wireA.getRequirement());
         Assert.assertEquals(resB, wireA.getProvider());
         Assert.assertEquals(capB, wireA.getCapability());
-        
-        List<Wire> wiresB = wiremap.get(resB);
-        Assert.assertEquals(0, wiresB.size());
         
         Wiring wiringA = resA.getWiring();
         Assert.assertEquals(resA, wiringA.getResource());
@@ -309,6 +322,9 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(resB2, wireA.getProvider());
         Assert.assertEquals(capB2, wireA.getCapability());
         
+        List<Wire> wiresB2 = wiremap.get(resB2);
+        Assert.assertEquals(0, wiresB2.size());
+        
         Wiring wiringA = resA.getWiring();
         Assert.assertEquals(resA, wiringA.getResource());
         Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
@@ -318,8 +334,17 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(1, wiringA.getResourceRequirements(null).size());
         Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
         
-        List<Wire> wiresB2 = wiremap.get(resB2);
-        Assert.assertEquals(0, wiresB2.size());
+        Wiring wiringB1 = resB1.getWiring();
+        Assert.assertNull(wiringB1);
+
+        Wiring wiringB2 = resB2.getWiring();
+        Assert.assertEquals(resB2, wiringB2.getResource());
+        Assert.assertEquals(1, wiringB2.getProvidedResourceWires(null).size());
+        Assert.assertEquals(0, wiringB2.getRequiredResourceWires(null).size());
+        Assert.assertEquals(wireA, wiringB2.getProvidedResourceWires(null).get(0));
+        Assert.assertEquals(1, wiringB2.getResourceCapabilities(null).size());
+        Assert.assertEquals(0, wiringB2.getResourceRequirements(null).size());
+        Assert.assertEquals(capB2, wiringB2.getResourceCapabilities(null).get(0));
     }
 
     @Test
@@ -390,21 +415,32 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Map<Resource, List<Wire>> wiremap = resolveAndApply(context);
         Assert.assertEquals(3, wiremap.size());
         
-        List<Wire> wiresA = wiremap.get(resA);
-        Assert.assertEquals(1, wiresA.size());
-        Wire wireA = wiresA.get(0);
-        Assert.assertEquals(resA, wireA.getRequirer());
-        Assert.assertEquals(reqA, wireA.getRequirement());
-        Assert.assertEquals(resB, wireA.getProvider());
-        Assert.assertEquals(capB, wireA.getCapability());
+        Iterator<Resource> itres = wiremap.keySet().iterator();
         
-        List<Wire> wiresB = wiremap.get(resB);
+        Resource res = itres.next();
+        Assert.assertEquals(resC, res);
+        List<Wire> wiresC = wiremap.get(res);
+        Assert.assertEquals(0, wiresC.size());
+        
+        res = itres.next();
+        Assert.assertEquals(resB, res);
+        List<Wire> wiresB = wiremap.get(res);
         Assert.assertEquals(1, wiresB.size());
         Wire wireB = wiresB.get(0);
         Assert.assertEquals(resB, wireB.getRequirer());
         Assert.assertEquals(reqB, wireB.getRequirement());
         Assert.assertEquals(resC, wireB.getProvider());
         Assert.assertEquals(capC, wireB.getCapability());
+        
+        res = itres.next();
+        Assert.assertEquals(resA, res);
+        List<Wire> wiresA = wiremap.get(res);
+        Assert.assertEquals(1, wiresA.size());
+        Wire wireA = wiresA.get(0);
+        Assert.assertEquals(resA, wireA.getRequirer());
+        Assert.assertEquals(reqA, wireA.getRequirement());
+        Assert.assertEquals(resB, wireA.getProvider());
+        Assert.assertEquals(capB, wireA.getCapability());
         
         Wiring wiringA = resA.getWiring();
         Assert.assertEquals(resA, wiringA.getResource());

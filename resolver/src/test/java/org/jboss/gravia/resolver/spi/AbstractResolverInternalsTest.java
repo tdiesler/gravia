@@ -19,7 +19,7 @@
  */
 package org.jboss.gravia.resolver.spi;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -120,8 +120,8 @@ public abstract class AbstractResolverInternalsTest {
     }
 
     ResolveContext getResolveContext(List<Resource> mandatory, List<Resource> optional) {
-        Set<Resource> manres = mandatory != null ? new HashSet<Resource>(mandatory) : null;
-        Set<Resource> optres = optional != null ? new HashSet<Resource>(optional) : null;
+        Set<Resource> manres = mandatory != null ? new LinkedHashSet<Resource>(mandatory) : null;
+        Set<Resource> optres = optional != null ? new LinkedHashSet<Resource>(optional) : null;
         return new DefaultResolveContext(store, manres, optres);
     }
 }

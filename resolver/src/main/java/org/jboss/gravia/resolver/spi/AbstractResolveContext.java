@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +46,8 @@ import org.jboss.gravia.resource.Wiring;
 public abstract class AbstractResolveContext implements ResolveContext {
 
     private final ResourceStore resourceStore;
-    private final Set<Resource> mandatory;
-    private final Set<Resource> optional;
+    private final List<Resource> mandatory;
+    private final List<Resource> optional;
     private PreferencePolicy preferencePolicy;
 
     public AbstractResolveContext(ResourceStore resourceStore, Set<Resource> manres, Set<Resource> optres) {
@@ -56,8 +55,8 @@ public abstract class AbstractResolveContext implements ResolveContext {
             throw new IllegalArgumentException("Null resourceStore");
 
         this.resourceStore = resourceStore;
-        this.mandatory = new HashSet<Resource>(manres != null ? manres : Collections.<Resource> emptySet());
-        this.optional = new HashSet<Resource>(optres != null ? optres : Collections.<Resource> emptySet());
+        this.mandatory = new ArrayList<Resource>(manres != null ? manres : Collections.<Resource> emptyList());
+        this.optional = new ArrayList<Resource>(optres != null ? optres : Collections.<Resource> emptyList());
 
         // Verify that all resources are in the store
         for (Resource res : mandatory) {
@@ -91,12 +90,12 @@ public abstract class AbstractResolveContext implements ResolveContext {
 
     @Override
     public Collection<Resource> getMandatoryResources() {
-        return Collections.unmodifiableSet(mandatory);
+        return Collections.unmodifiableList(mandatory);
     }
 
     @Override
     public Collection<Resource> getOptionalResources() {
-        return Collections.unmodifiableSet(optional);
+        return Collections.unmodifiableList(optional);
     }
 
     @Override
