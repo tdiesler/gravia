@@ -1,3 +1,5 @@
+
+package org.jboss.gravia.repository;
 /*
  * #%L
  * JBossOSGi Repository
@@ -17,29 +19,29 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.repository;
 
-import java.io.InputStream;
+import java.util.Map;
 
-import org.jboss.gravia.repository.spi.AbstractRepositoryXMLReader;
-import org.jboss.gravia.resource.ResourceBuilder;
-
+import org.jboss.gravia.repository.spi.AbstractRepositoryResourceBuilder;
+import org.jboss.gravia.resource.spi.AbstractCapability;
+import org.jboss.gravia.resource.spi.AbstractResource;
 
 /**
- * Read repository contnet from XML.
+ * Create an URL based resource
  *
  * @author thomas.diesler@jboss.com
- * @since 21-May-2012
+ * @since 16-Jan-2012
  */
-public class DefaultRepositoryXMLReader extends AbstractRepositoryXMLReader {
+public class DefaultRepositoryResourceBuilder extends AbstractRepositoryResourceBuilder {
 
-
-    public DefaultRepositoryXMLReader(InputStream inputStream) {
-        super(inputStream);
+    @Override
+    protected AbstractResource createResource() {
+        return new DefaultRepositoryResource();
     }
 
     @Override
-    protected ResourceBuilder createResourceBuilder() {
-        return new DefaultRepositoryResourceBuilder();
+    protected AbstractCapability createContentCapability(AbstractResource resource, String namespace, Map<String, Object> atts, Map<String, String> dirs) {
+        return new DefaultContentCapability(resource, namespace, atts, dirs);
     }
+
 }

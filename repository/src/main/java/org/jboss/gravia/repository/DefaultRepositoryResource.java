@@ -1,3 +1,7 @@
+
+package org.jboss.gravia.repository;
+
+import org.jboss.gravia.repository.spi.AbstractRepositoryResource;
 /*
  * #%L
  * JBossOSGi Repository
@@ -17,29 +21,12 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.repository;
-
-import java.io.InputStream;
-
-import org.jboss.gravia.repository.spi.AbstractRepositoryXMLReader;
-import org.jboss.gravia.resource.ResourceBuilder;
 
 
 /**
- * Read repository contnet from XML.
- *
  * @author thomas.diesler@jboss.com
- * @since 21-May-2012
+ * @since 16-Jan-2012
  */
-public class DefaultRepositoryXMLReader extends AbstractRepositoryXMLReader {
+public class DefaultRepositoryResource extends AbstractRepositoryResource {
 
-
-    public DefaultRepositoryXMLReader(InputStream inputStream) {
-        super(inputStream);
-    }
-
-    @Override
-    protected ResourceBuilder createResourceBuilder() {
-        return new DefaultRepositoryResourceBuilder();
-    }
 }

@@ -69,7 +69,7 @@ public class MemoryRepositoryStorageTestCase extends AbstractRepositoryTest {
         Assert.assertNotNull("Providers not null", providers);
         Assert.assertEquals("One provider", 1, providers.size());
 
-        Capability cap = (Capability) providers.iterator().next();
+        Capability cap = providers.iterator().next();
         Assert.assertNotNull("Capability not null", cap);
         Assert.assertSame(resource, cap.getResource());
     }

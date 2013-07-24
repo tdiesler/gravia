@@ -27,7 +27,7 @@
 			<attribute name='osgi.content' value='e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' />
 			<attribute name='url' value='http://www.acme.com/repository/org/acme/pool/org.acme.pool-1.5.6.jar' />
 			<attribute name='size' type='Long' value='4405' />
-			<attribute name='mime' value='application/vnd.osgi.bundle' />
+			<attribute name='mime' value='application/java-archive' />
 		</capability>
 		<requirement namespace='gravia.identity'>
 			<attribute name='gravia.identity' value='org.acme.other' />

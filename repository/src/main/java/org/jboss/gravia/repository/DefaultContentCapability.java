@@ -1,6 +1,6 @@
 /*
  * #%L
- * JBossOSGi Repository
+ * JBossOSGi Resolver API
  * %%
  * Copyright (C) 2010 - 2012 JBoss by Red Hat
  * %%
@@ -17,29 +17,23 @@
  * limitations under the License.
  * #L%
  */
+
 package org.jboss.gravia.repository;
 
-import java.io.InputStream;
+import java.util.Map;
 
-import org.jboss.gravia.repository.spi.AbstractRepositoryXMLReader;
-import org.jboss.gravia.resource.ResourceBuilder;
-
+import org.jboss.gravia.repository.spi.AbstractContentCapability;
+import org.jboss.gravia.resource.spi.AbstractResource;
 
 /**
- * Read repository contnet from XML.
+ * The default implementation of a {@link ContentCapability}.
  *
  * @author thomas.diesler@jboss.com
- * @since 21-May-2012
+ * @since 05-Jul-2012
  */
-public class DefaultRepositoryXMLReader extends AbstractRepositoryXMLReader {
+public class DefaultContentCapability extends AbstractContentCapability {
 
-
-    public DefaultRepositoryXMLReader(InputStream inputStream) {
-        super(inputStream);
-    }
-
-    @Override
-    protected ResourceBuilder createResourceBuilder() {
-        return new DefaultRepositoryResourceBuilder();
+    public DefaultContentCapability(AbstractResource resource, String namespace, Map<String, Object> atts, Map<String, String> dirs) {
+        super(resource, namespace, atts, dirs);
     }
 }

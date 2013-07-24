@@ -29,8 +29,8 @@ import org.jboss.gravia.resource.Namespace;
  * associated with the specified directive and attribute keys are of type
  * {@code String}, unless otherwise indicated.
  * 
- * @Immutable
- * @version $Id: 24fa1339b403f5e6fb8b1f639bedc8917744713e $
+ * @author thomas.diesler@jboss.com
+ * @since 05-Jul-2012
  */
 public interface ContentNamespace extends Namespace {
 
@@ -41,7 +41,7 @@ public interface ContentNamespace extends Namespace {
 	 * Also, the capability attribute used to specify the unique identifier of
 	 * the content. This identifier is the {@code SHA-256} hash of the content.
 	 */
-	String	CONTENT_NAMESPACE			= "osgi.content";
+	String	CONTENT_NAMESPACE			= "gravia.content";
 
 	/**
 	 * The capability attribute that contains the URL to the content.

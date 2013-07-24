@@ -101,7 +101,8 @@ public abstract class AbstractResourceStore implements ResourceStore {
                 }
             }
 
-            return resources.put(res.getIdentity(), res);
+            resources.put(res.getIdentity(), res);
+            return res;
         }
     }
 

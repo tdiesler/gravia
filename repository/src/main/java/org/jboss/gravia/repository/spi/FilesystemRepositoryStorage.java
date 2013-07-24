@@ -33,9 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.jboss.gravia.repository.ContentCapability;
 import org.jboss.gravia.repository.ContentNamespace;
-import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
-import org.jboss.gravia.repository.DefaultRepositoryXMLWriter;
 import org.jboss.gravia.repository.Namespace100.Attribute;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
@@ -44,7 +43,6 @@ import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.repository.RepositoryStorageException;
 import org.jboss.gravia.repository.RepositoryWriter;
-import org.jboss.gravia.repository.URLResourceBuilder;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
@@ -59,15 +57,18 @@ import org.jboss.gravia.resource.ResourceIdentity;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
+public abstract class FilesystemRepositoryStorage extends MemoryRepositoryStorage {
 
     public static final String REPOSITORY_XML_NAME = "repository.xml";
 
     private final File storageDir;
     private final File repoFile;
-    private AtomicLong increment;
+    private final AtomicLong increment = new AtomicLong();
+    private RepositoryReader repositoryReader;
+    private RepositoryWriter repositoryWriter;
+    private ResourceBuilder resourceBuilder;
 
-    public FileBasedRepositoryStorage(Repository repository, File storageDir, ConfigurationPropertyProvider propProvider) {
+    public FilesystemRepositoryStorage(Repository repository, File storageDir, ConfigurationPropertyProvider propProvider) {
         super(repository);
         if (storageDir == null)
             throw new IllegalArgumentException("Null storageDir");
@@ -83,12 +84,12 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
         if (repoFile.exists()) {
             RepositoryReader reader;
             try {
-                reader = new DefaultRepositoryXMLReader(new FileInputStream(repoFile));
+                reader = getRepositoryReader(new FileInputStream(repoFile));
             } catch (IOException ex) {
                 throw new IllegalStateException("Cannot initialize repository reader", ex);
             }
             String incatt = reader.getRepositoryAttributes().get(Attribute.INCREMENT.getLocalName());
-            increment = new AtomicLong(new Long(incatt != null ? incatt : "0"));
+            increment.set(incatt != null ? new Long(incatt) : increment.get());
             Resource res = reader.nextResource();
             while(res != null) {
                 addResourceInternal(res, false);
@@ -96,6 +97,33 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
             }
             reader.close();
         }
+    }
+
+    protected abstract RepositoryReader createRepositoryReader(InputStream inputStream);
+
+    protected abstract RepositoryWriter createRepositoryWriter(OutputStream outputStream);
+
+    protected abstract ResourceBuilder createResourceBuilder();
+
+    private RepositoryReader getRepositoryReader(InputStream inputStream) {
+        if (repositoryReader == null) {
+            repositoryReader = createRepositoryReader(inputStream);
+        }
+        return repositoryReader;
+    }
+
+    private RepositoryWriter getRepositoryWriter(OutputStream outputStream) {
+        if (repositoryWriter == null) {
+            repositoryWriter = createRepositoryWriter(outputStream);
+        }
+        return repositoryWriter;
+    }
+
+    private ResourceBuilder getResourceBuilder() {
+        if (resourceBuilder == null) {
+            resourceBuilder = createResourceBuilder();
+        }
+        return resourceBuilder;
     }
 
     @Override
@@ -117,20 +145,32 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
 
     private Resource addContentResource(Resource res, List<Capability> ccaps, boolean writeXML) throws RepositoryStorageException {
 
-        Capability ccap = (Capability) ccaps.get(0);
-        
-        String contentURL = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
-        if (contentURL == null)
-            throw new IllegalArgumentException("Cannot obtain content URL from: " + ccap);
+        String urlspec = (String) ccaps.get(0).getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+        if (urlspec == null)
+            throw new IllegalArgumentException("Cannot obtain content URL from: " + res);
 
         Resource result;
 
         // Copy the resource to this storage, if the content URL does not match
-        if (contentURL.startsWith(getBaseURL().toExternalForm()) == false) {
-            ResourceBuilder builder = createResourceInternal(res);
+        if (urlspec.startsWith(getBaseURL().toExternalForm()) == false) {
+            ResourceBuilder builder = getResourceBuilder();
             for (Capability cap : res.getCapabilities(null)) {
                 if (!ContentNamespace.CONTENT_NAMESPACE.equals(cap.getNamespace())) {
                     builder.addCapability(cap.getNamespace(), cap.getAttributes(), cap.getDirectives());
+                } else {
+                    ContentCapability ccap = cap.adapt(ContentCapability.class);
+                    Map<String, Object> contentAtts = new HashMap<String, Object>();
+                    String mimeType = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);
+                    if (mimeType != null) {
+                        contentAtts.put(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE, mimeType);
+                    }
+                    InputStream input = getResourceContent(ccap);
+                    try {
+                        addResourceContent(input, contentAtts);
+                        builder.addCapability(ContentNamespace.CONTENT_NAMESPACE, contentAtts, cap.getDirectives());
+                    } catch (IOException ex) {
+                        throw new RepositoryStorageException("Cannot add resource to storeage: " + mimeType, ex);
+                    }
                 }
             }
             for (Requirement req : res.getRequirements(null)) {
@@ -141,10 +181,12 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
         } else {
             result = res;
         }
+
         result = super.addResource(result);
         if (writeXML == true) {
             writeRepositoryXML();
         }
+
         return result;
     }
 
@@ -165,7 +207,7 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
         Resource res = getResource(resid);
         List<Capability> ccaps = res.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
         if (!ccaps.isEmpty()) {
-            Capability ccap = (Capability) ccaps.iterator().next();
+            Capability ccap = ccaps.iterator().next();
             String fileURL = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
             File contentFile = new File(fileURL.substring("file:".length()));
             if (contentFile.exists()) {
@@ -179,38 +221,14 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
         return res;
     }
 
-    private ResourceBuilder createResourceInternal(Resource resource) {
-        ResourceBuilder builder = null;
-        for (Capability cap : resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE)) {
-            Capability ccap = (Capability)cap;
-            Map<String, Object> contentAtts = new HashMap<String, Object>();
-            String mimeType = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);
-            if (mimeType != null) {
-                contentAtts.put(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE, mimeType);
-            }
-            InputStream input = getResourceContent(ccap);
-            try {
-                URL contentURL = addResourceContent(input, contentAtts);
-                if (builder == null) {
-                    builder = new URLResourceBuilder(contentURL, contentAtts);
-                } else {
-                    builder.addCapability(ContentNamespace.CONTENT_NAMESPACE, contentAtts, null);
-                }
-            } catch (IOException ex) {
-                throw new RepositoryStorageException("Cannot add resource to storeage: " + mimeType, ex);
-            }
-        }
-        return builder;
-    }
-
-    private InputStream getResourceContent(Capability ccap) {
+    private InputStream getResourceContent(ContentCapability ccap) {
         InputStream input;
         Resource resource = ccap.getResource();
         Capability defaultContent = resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).get(0);
-        if (defaultContent == ccap && resource instanceof RepositoryContent) {
-            input = ((RepositoryContent) resource).getContent();
+        if (defaultContent == ccap) {
+            input = resource.adapt(RepositoryContent.class).getContent();
         } else {
-            String contentURL = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+            String contentURL = ccap.getContentURL();
             try {
                 input = new URL(contentURL).openStream();
             } catch (IOException ex) {
@@ -220,7 +238,7 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
         return input;
     }
 
-    private URL addResourceContent(InputStream input, Map<String, Object> atts) throws IOException {
+    private void addResourceContent(InputStream input, Map<String, Object> atts) throws IOException {
         synchronized (storageDir) {
             // Copy the input stream to temporary storage
             File tempFile = new File(storageDir.getAbsolutePath() + File.separator + "temp-content");
@@ -242,7 +260,6 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
             tempFile.renameTo(targetFile);
             URL url = targetFile.toURI().toURL();
             atts.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, url.toExternalForm());
-            return url;
         }
     }
 
@@ -274,7 +291,7 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
         RepositoryWriter writer;
         try {
             repoFile.getParentFile().mkdirs();
-            writer = new DefaultRepositoryXMLWriter(new FileOutputStream(repoFile));
+            writer = getRepositoryWriter(new FileOutputStream(repoFile));
         } catch (IOException ex) {
             throw new IllegalStateException("Cannot initialize repository writer", ex);
         }

@@ -1,5 +1,5 @@
 
-package org.jboss.gravia.repository;
+package org.jboss.gravia.repository.spi;
 /*
  * #%L
  * JBossOSGi Repository
@@ -27,7 +27,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 
-import org.jboss.gravia.repository.spi.AbstractContentCapability;
+import org.jboss.gravia.repository.ContentCapability;
+import org.jboss.gravia.repository.ContentNamespace;
+import org.jboss.gravia.repository.RepositoryContent;
+import org.jboss.gravia.repository.RepositoryStorageException;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.spi.AbstractCapability;
@@ -39,13 +42,11 @@ import org.jboss.gravia.resource.spi.AbstractResource;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public final class URLResourceBuilder extends DefaultResourceBuilder {
+public abstract class AbstractRepositoryResourceBuilder extends DefaultResourceBuilder {
 
-    private final URL contentURL;
+    protected abstract AbstractCapability createContentCapability(AbstractResource resource, String namespace, Map<String, Object> atts, Map<String, String> dirs);
 
-    public URLResourceBuilder(URL contentURL, Map<String, Object> contentAtts) {
-        this.contentURL = contentURL;
-        
+    private void oldAbstractRepositoryResourceBuilder(URL contentURL, Map<String, Object> contentAtts) {
         Capability ccap = addCapability(ContentNamespace.CONTENT_NAMESPACE, contentAtts, null);
         Map<String, Object> atts = ccap.getAttributes();
         atts.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, contentURL.toExternalForm());
@@ -57,16 +58,12 @@ public final class URLResourceBuilder extends DefaultResourceBuilder {
             atts.put(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE, ContentCapability.DEFAULT_SIZE);
     }
 
+    @Override
     protected AbstractCapability createCapability(AbstractResource resource, String namespace, Map<String, Object> atts, Map<String, String> dirs) {
         if (ContentNamespace.CONTENT_NAMESPACE.equals(namespace))
-            return new AbstractContentCapability(resource, namespace, atts, dirs);
-        else 
+            return createContentCapability(resource, namespace, atts, dirs);
+        else
             return super.createCapability(resource, namespace, atts, dirs);
-    }
-
-    @Override
-    protected AbstractResource createResource() {
-        return new URLResource(contentURL);
     }
 
     static class URLResource extends AbstractResource implements RepositoryContent {

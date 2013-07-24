@@ -30,14 +30,12 @@ import java.util.jar.Manifest;
 import junit.framework.Assert;
 
 import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
 import org.junit.Test;
-import org.omg.Dynamic.Parameter;
 
 /**
  * Test the Manifest parser
@@ -45,24 +43,24 @@ import org.omg.Dynamic.Parameter;
  * @author thomas.diesler@jboss.com
  * @since 20-Nov-2012
  */
-public class ManifestProvideCapabilityTestCase {
+public class ManifestResourceBuilderTestCase {
 
     @Test
-    public void testProvideCapability() throws Exception {
+    public void testGenericCapabilities() throws Exception {
         ManifestBuilder builder = new ManifestBuilder();
         builder.addIdentityCapability("some.name", "1.0.0");
-        builder.addGenericCapabilities("test; effective:=\"resolve\"; test =\"aName\"; version : Version=\"1.0\"; long :Long=\"100\"; double: Double=\"1.001\"; string:String =\"aString\"; version.list:List < Version > = \"1.0, 1.1, 1.2\"; long.list : List  <Long  >=\"1, 2, 3, 4\"; double.list: List<  Double>= \"1.001, 1.002, 1.003\"; string.list :List<String  >= \"aString,bString,cString\"; string.list2:List=\"a\\\"quote,a\\,comma, aSpace ,\\\"start,\\,start,end\\\",end\\,\"; string.list3 :List<String>= \" aString , bString , cString \"");
+        builder.addGenericCapabilities("test; effective:=\"resolve\"; test =\"aName\"; version : Version=\"1.0\"; long :Long=\"100\"; double: Double=\"1.001\"; string:String =\"aString\"; version.list:List < Version > = \"1.0, 1.1, 1.2\"; long.list : List  <Long  >=\"1, 2, 3, 4\"; double.list: List<  Double>= \"1.001, 1.002, 1.003\"; string.list :List<String  >= \"aString,bString,cString\"; string.list2:List=\"a\\\"quote,a\\,comma, aSpace ,\\start,\\,start,end\\\",end\\,\"; string.list3 :List<String>= \" aString , bString , cString \"");
         builder.addGenericCapabilities("test.multiple; attr=\"value1\"", "test.multiple; attr=\"value2\"", "test.no.attrs");
         Manifest manifest = builder.getManifest();
-        
+
         //manifest.write(System.out);
-        
+
         ManifestResourceBuilder resbuilder = new ManifestResourceBuilder();
         Resource resource = resbuilder.load(manifest).getResource();
         Assert.assertEquals(ResourceIdentity.fromString("some.name:1.0.0"), resource.getIdentity());
         List<Capability> caps = resource.getCapabilities("test");
         Assert.assertEquals(1, caps.size());
-        
+
         Assert.assertEquals("test", caps.get(0).getNamespace());
         Map<String, String> dirs = caps.get(0).getDirectives();
         Assert.assertEquals(1, dirs.size());
@@ -93,15 +91,15 @@ public class ManifestProvideCapabilityTestCase {
         List<String> strings = Arrays.asList("aString", "bString", "cString");
         Assert.assertEquals(strings, atts.get(keys.get(8)));
         Assert.assertEquals("string.list2", keys.get(9));
-        strings = Arrays.asList("a\\\"quote", "a,comma", "aSpace", "\\\"start", ",start", "end\\\"", "end,");
+        strings = Arrays.asList("a\"quote", "a,comma", "aSpace", "\\start", ",start", "end\"", "end,");
         Assert.assertEquals(strings, atts.get(keys.get(9)));
         Assert.assertEquals("string.list3", keys.get(10));
         strings = Arrays.asList("aString", "bString", "cString");
         Assert.assertEquals(strings, atts.get(keys.get(10)));
-        
+
         caps = resource.getCapabilities("test.multiple");
         Assert.assertEquals(2, caps.size());
-        
+
         Assert.assertEquals("test.multiple", caps.get(0).getNamespace());
         atts = caps.get(0).getAttributes();
         keys = new ArrayList<String>(atts.keySet());
@@ -118,7 +116,7 @@ public class ManifestProvideCapabilityTestCase {
 
         caps = resource.getCapabilities("test.no.attrs");
         Assert.assertEquals(1, caps.size());
-        
+
         Assert.assertEquals("test.no.attrs", caps.get(0).getNamespace());
         atts = caps.get(0).getAttributes();
         Assert.assertEquals(0, atts.size());

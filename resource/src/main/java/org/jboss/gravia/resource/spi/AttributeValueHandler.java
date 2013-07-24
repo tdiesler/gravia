@@ -131,7 +131,7 @@ public final class AttributeValueHandler {
                 escape = true;
                 continue;
             }
-            if (escape && ch != '\\' && ch != ',') {
+            if (escape && ch != '\\' && ch != ',' && ch != '"') {
                 tok.append('\\');
                 escape = false;
             }

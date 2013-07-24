@@ -28,7 +28,6 @@ import junit.framework.Assert;
 
 import org.jboss.gravia.resource.spi.AttributeValueHandler;
 import org.jboss.gravia.resource.spi.AttributeValueHandler.AttributeValue;
-import org.jboss.gravia.resource.spi.AttributeValueHandler.Type;
 import org.jboss.test.gravia.repository.AbstractRepositoryTest;
 import org.junit.Test;
 
@@ -42,7 +41,7 @@ public class AttributeValueTestCase extends AbstractRepositoryTest {
 
     @Test
     public void testSimpleParsing() throws Exception {
-        // String 
+        // String
         AttributeValue value = AttributeValueHandler.readAttributeValue(null, "a");
         Assert.assertEquals("a", value.getValue());
         Assert.assertEquals("a", value.getValueString());
@@ -90,16 +89,16 @@ public class AttributeValueTestCase extends AbstractRepositoryTest {
         Assert.assertEquals(Arrays.asList(new Long(100), new Long(200)), value.getValue());
         Assert.assertEquals(value, AttributeValueHandler.readAttributeValue("List<Long>", value.getValueString()));
         Assert.assertEquals(value, AttributeValue.create(Arrays.asList(new Long(100), new Long(200))));
-        
+
         // List<Object> [100, 200]
         List<Object> listA = Arrays.asList((Object)new Long(100), (Object)new Long(200));
         Assert.assertEquals(value, AttributeValue.create(listA));
-        
+
         // List<Long> (empty)
         value = AttributeValueHandler.readAttributeValue("List<Long>", "");
         Assert.assertEquals(Arrays.asList(), value.getValue());
         Assert.assertEquals(value, AttributeValueHandler.readAttributeValue("List<Long>", value.getValueString()));
-        
+
         // Note, the component type of an empty list cannot by determined
         value = AttributeValue.create(new ArrayList<Long>());
         Assert.assertEquals(Collections.emptyList(),  value.getValue());

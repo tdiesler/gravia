@@ -19,23 +19,36 @@
  */
 package org.jboss.gravia.repository;
 
+import java.io.File;
 import java.io.InputStream;
+import java.io.OutputStream;
 
-import org.jboss.gravia.repository.spi.AbstractRepositoryXMLReader;
+import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
+import org.jboss.gravia.repository.spi.FilesystemRepositoryStorage;
 import org.jboss.gravia.resource.ResourceBuilder;
 
 
 /**
- * Read repository contnet from XML.
+ * A simple {@link RepositoryStorage} that uses
+ * the local file system.
  *
  * @author thomas.diesler@jboss.com
- * @since 21-May-2012
+ * @since 16-Jan-2012
  */
-public class DefaultRepositoryXMLReader extends AbstractRepositoryXMLReader {
+public class DefaultFilesystemRepositoryStorage extends FilesystemRepositoryStorage {
 
+    public DefaultFilesystemRepositoryStorage(Repository repository, File storageDir, ConfigurationPropertyProvider propProvider) {
+        super(repository, storageDir, propProvider);
+    }
 
-    public DefaultRepositoryXMLReader(InputStream inputStream) {
-        super(inputStream);
+    @Override
+    protected RepositoryReader createRepositoryReader(InputStream inputStream) {
+        return new DefaultRepositoryXMLReader(inputStream);
+    }
+
+    @Override
+    protected RepositoryWriter createRepositoryWriter(OutputStream outputStream) {
+        return new DefaultRepositoryXMLWriter(outputStream);
     }
 
     @Override
