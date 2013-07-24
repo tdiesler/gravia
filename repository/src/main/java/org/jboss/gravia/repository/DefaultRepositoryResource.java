@@ -1,6 +1,8 @@
 
 package org.jboss.gravia.repository;
 
+import java.util.Map;
+
 import org.jboss.gravia.repository.spi.AbstractRepositoryResource;
 /*
  * #%L
@@ -21,6 +23,7 @@ import org.jboss.gravia.repository.spi.AbstractRepositoryResource;
  * limitations under the License.
  * #L%
  */
+import org.jboss.gravia.resource.spi.AbstractCapability;
 
 
 /**
@@ -29,4 +32,11 @@ import org.jboss.gravia.repository.spi.AbstractRepositoryResource;
  */
 public class DefaultRepositoryResource extends AbstractRepositoryResource {
 
+    @Override
+    protected AbstractCapability createCapability(String namespace, Map<String, Object> atts, Map<String, String> dirs) {
+        if (ContentNamespace.CONTENT_NAMESPACE.equals(namespace))
+            return new DefaultContentCapability(this, namespace, atts, dirs);
+        else
+            return super.createCapability(namespace, atts, dirs);
+    }
 }

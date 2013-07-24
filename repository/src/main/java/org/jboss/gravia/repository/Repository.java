@@ -35,15 +35,15 @@ public interface Repository extends Adaptable {
     /**
      * The property that defines the Maven Repository base URLs.
      */
-    String PROPERTY_MAVEN_REPOSITORY_BASE_URLS = "org.jboss.osgi.repository.maven.base.urls";
+    String PROPERTY_MAVEN_REPOSITORY_BASE_URLS = "org.jboss.gravia.repository.maven.base.urls";
     /**
      * The property that defines the repository storage directory.
      */
-    String PROPERTY_REPOSITORY_STORAGE_DIR = "org.jboss.osgi.repository.storage.dir";
+    String PROPERTY_REPOSITORY_STORAGE_DIR = "org.jboss.gravia.repository.storage.dir";
     /**
      * The property that defines the repository storage file.
      */
-    String PROPERTY_REPOSITORY_STORAGE_FILE = "org.jboss.osgi.repository.storage.file";
+    String PROPERTY_REPOSITORY_STORAGE_FILE = "org.jboss.gravia.repository.storage.file";
 
     /**
      * Get the name for this repository

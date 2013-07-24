@@ -43,6 +43,12 @@ public class AbstractContentCapability extends AbstractCapability implements Con
 
     public AbstractContentCapability(AbstractResource resource, String namespace, Map<String, Object> atts, Map<String, String> dirs) {
         super(resource, namespace, replaceAttributeTypes(atts), dirs);
+        if (getAttribute(ContentNamespace.CONTENT_NAMESPACE) == null)
+            getAttributes().put(ContentNamespace.CONTENT_NAMESPACE, ContentCapability.DEFAULT_DIGEST);
+        if (getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE) == null)
+            getAttributes().put(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE, ContentCapability.DEFAULT_MIME_TYPE);
+        if (getAttribute(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE) == null)
+            getAttributes().put(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE, ContentCapability.DEFAULT_SIZE);
     }
 
     private static Map<String, Object> replaceAttributeTypes(Map<String, Object> atts) {
@@ -81,9 +87,6 @@ public class AbstractContentCapability extends AbstractCapability implements Con
             digest = (String) getAttribute(ContentNamespace.CONTENT_NAMESPACE);
             if (digest == null)
                 throw illegalStateCannotObtainAttribute(ContentNamespace.CONTENT_NAMESPACE);
-            mimeType = (String) getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);
-            if (mimeType == null)
-                throw illegalStateCannotObtainAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);
             mimeType = (String) getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);
             if (mimeType == null)
                 throw illegalStateCannotObtainAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);

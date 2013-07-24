@@ -15,14 +15,20 @@ public interface IdentityNamespace extends Namespace {
      * Also, the capability attribute used to specify the symbolic name of the
      * resource.
      */
-    public static final String  IDENTITY_NAMESPACE                  = "gravia.identity";
+    String IDENTITY_NAMESPACE = "gravia.identity";
+
+    /**
+     * Artifact coordinates may be defined by the simple groupId:artifactId:version form,
+     * or the fully qualified form groupId:artifactId:type:version[:classifier]
+     */
+    String CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE = "maven.identity";
 
     /**
      * The capability attribute identifying the {@code Version} of the resource
      * if one is specified or {@code 0.0.0} if not specified. The value of this
      * attribute must be of type {@code Version}.
      */
-    public static final String  CAPABILITY_VERSION_ATTRIBUTE        = "version";
+    String CAPABILITY_VERSION_ATTRIBUTE = "version";
 
     /**
      * The capability attribute identifying the resource type. If the resource
@@ -33,7 +39,7 @@ public interface IdentityNamespace extends Namespace {
      * @see #TYPE_MODULE
      * @see #TYPE_UNKNOWN
      */
-    public static final String  CAPABILITY_TYPE_ATTRIBUTE           = "type";
+    String CAPABILITY_TYPE_ATTRIBUTE = "type";
 
     /**
      * The attribute value identifying the resource
@@ -41,7 +47,7 @@ public interface IdentityNamespace extends Namespace {
      *
      * @see #CAPABILITY_TYPE_ATTRIBUTE
      */
-    public static final String  TYPE_BUNDLE                         = "type.bundle";
+    String TYPE_BUNDLE = "type.bundle";
 
     /**
      * The attribute value identifying the resource
@@ -49,7 +55,15 @@ public interface IdentityNamespace extends Namespace {
      *
      * @see #CAPABILITY_TYPE_ATTRIBUTE
      */
-    public static final String  TYPE_MODULE                       = "type.module";
+    String TYPE_MODULE = "type.module";
+
+    /**
+     * The attribute value identifying the resource
+     * {@link #CAPABILITY_TYPE_ATTRIBUTE type} as an abstract resource.
+     *
+     * @see #CAPABILITY_TYPE_ATTRIBUTE
+     */
+    String TYPE_ABSTRACT = "abstract";
 
     /**
      * The attribute value identifying the resource
@@ -57,5 +71,5 @@ public interface IdentityNamespace extends Namespace {
      *
      * @see #CAPABILITY_TYPE_ATTRIBUTE
      */
-    public static final String  TYPE_UNKNOWN                        = "type.unknown";
+    String TYPE_UNKNOWN = "type.unknown";
 }

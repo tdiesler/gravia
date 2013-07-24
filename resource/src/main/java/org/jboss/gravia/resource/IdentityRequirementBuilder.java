@@ -51,4 +51,9 @@ public class IdentityRequirementBuilder extends DefaultRequirementBuilder {
             getDirectives().putAll(dirs);
         }
     }
+
+    public IdentityRequirementBuilder(MavenCoordinates mavenid) {
+        this(MavenResourceBuilder.getSymbolicName(mavenid), MavenResourceBuilder.getVersion(mavenid).toString());
+        getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid);
+    }
 }

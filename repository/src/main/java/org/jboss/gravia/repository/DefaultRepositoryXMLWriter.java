@@ -36,14 +36,14 @@ import org.jboss.gravia.repository.spi.AbstractRepositoryXMLWriter;
 public class DefaultRepositoryXMLWriter extends AbstractRepositoryXMLWriter {
 
 
-    public DefaultRepositoryXMLWriter(OutputStream output) {
-        super(output);
+    public DefaultRepositoryXMLWriter(OutputStream outputStream) {
+        super(outputStream);
     }
 
     @Override
-    protected XMLStreamWriter createXMLStreamWriter(OutputStream outputSteam) {
+    protected XMLStreamWriter createXMLStreamWriter(OutputStream outputStream) {
         try {
-            return XMLOutputFactory.newInstance().createXMLStreamWriter(outputSteam);
+            return XMLOutputFactory.newInstance().createXMLStreamWriter(outputStream);
         } catch (Exception ex) {
             throw new IllegalStateException("Cannot initialize repository writer", ex);
         }

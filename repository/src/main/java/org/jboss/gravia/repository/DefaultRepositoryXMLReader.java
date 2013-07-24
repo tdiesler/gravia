@@ -21,6 +21,9 @@ package org.jboss.gravia.repository;
 
 import java.io.InputStream;
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
+
 import org.jboss.gravia.repository.spi.AbstractRepositoryXMLReader;
 import org.jboss.gravia.resource.ResourceBuilder;
 
@@ -33,9 +36,17 @@ import org.jboss.gravia.resource.ResourceBuilder;
  */
 public class DefaultRepositoryXMLReader extends AbstractRepositoryXMLReader {
 
-
     public DefaultRepositoryXMLReader(InputStream inputStream) {
         super(inputStream);
+    }
+
+    @Override
+    protected XMLStreamReader createXMLStreamReader(InputStream inputStream) {
+        try {
+            return XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Cannot initialize repository reader", ex);
+        }
     }
 
     @Override

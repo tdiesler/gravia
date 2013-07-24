@@ -19,12 +19,11 @@
  */
 package org.jboss.gravia.repository;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
-import org.jboss.gravia.repository.spi.FilesystemRepositoryStorage;
+import org.jboss.gravia.repository.spi.AbstractPersistentRepositoryStorage;
 import org.jboss.gravia.resource.ResourceBuilder;
 
 
@@ -35,24 +34,24 @@ import org.jboss.gravia.resource.ResourceBuilder;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public class DefaultFilesystemRepositoryStorage extends FilesystemRepositoryStorage {
+public class DefaultPersistentRepositoryStorage extends AbstractPersistentRepositoryStorage {
 
-    public DefaultFilesystemRepositoryStorage(Repository repository, File storageDir, ConfigurationPropertyProvider propProvider) {
-        super(repository, storageDir, propProvider);
+    public DefaultPersistentRepositoryStorage(Repository repository, ConfigurationPropertyProvider propertyProvider) {
+        super(repository, propertyProvider);
     }
 
     @Override
-    protected RepositoryReader createRepositoryReader(InputStream inputStream) {
+    public RepositoryReader createRepositoryReader(InputStream inputStream) {
         return new DefaultRepositoryXMLReader(inputStream);
     }
 
     @Override
-    protected RepositoryWriter createRepositoryWriter(OutputStream outputStream) {
+    public RepositoryWriter createRepositoryWriter(OutputStream outputStream) {
         return new DefaultRepositoryXMLWriter(outputStream);
     }
 
     @Override
-    protected ResourceBuilder createResourceBuilder() {
+    public ResourceBuilder createResourceBuilder() {
         return new DefaultRepositoryResourceBuilder();
     }
 }

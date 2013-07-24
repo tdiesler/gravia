@@ -34,36 +34,19 @@ import org.jboss.gravia.resource.DefaultResource;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public abstract class AbstractRepositoryResource extends DefaultResource {
+public abstract class AbstractRepositoryResource extends DefaultResource implements RepositoryContent {
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T adapt(Class<T> type) {
-        T result = super.adapt(type);
-        if (result == null) {
-            if (type == RepositoryContent.class) {
-                result = (T) getRepositoryContent();
-            }
-        }
-        return result;
-    }
-
-    private RepositoryContent getRepositoryContent() {
+    public InputStream getContent() {
         for (Capability cap : getCapabilities(ContentNamespace.CONTENT_NAMESPACE)) {
             ContentCapability ccap = cap.adapt(ContentCapability.class);
-            final String contentURL = ccap.getContentURL();
-            return new RepositoryContent() {
-                @Override
-                public InputStream getContent() {
-                    try {
-                        return new URL(contentURL).openStream();
-                    } catch (IOException ex) {
-                        throw new IllegalStateException("Cannot access content URL: " + contentURL, ex);
-                    }
-                }
-            };
+            String contentURL = ccap.getContentURL();
+            try {
+                return new URL(contentURL).openStream();
+            } catch (IOException ex) {
+                throw new IllegalStateException("Cannot access content URL: " + contentURL, ex);
+            }
         }
         return null;
     }
-
 }

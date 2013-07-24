@@ -57,7 +57,7 @@ import org.jboss.gravia.resource.ResourceIdentity;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public abstract class FilesystemRepositoryStorage extends MemoryRepositoryStorage {
+public abstract class AbstractPersistentRepositoryStorage extends MemoryRepositoryStorage {
 
     public static final String REPOSITORY_XML_NAME = "repository.xml";
 
@@ -68,17 +68,18 @@ public abstract class FilesystemRepositoryStorage extends MemoryRepositoryStorag
     private RepositoryWriter repositoryWriter;
     private ResourceBuilder resourceBuilder;
 
-    public FilesystemRepositoryStorage(Repository repository, File storageDir, ConfigurationPropertyProvider propProvider) {
+    public AbstractPersistentRepositoryStorage(Repository repository, ConfigurationPropertyProvider propProvider) {
         super(repository);
-        if (storageDir == null)
-            throw new IllegalArgumentException("Null storageDir");
         if (propProvider == null)
             throw new IllegalArgumentException("Null propProvider");
 
-        this.storageDir = storageDir;
-
         String filename = propProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_FILE, REPOSITORY_XML_NAME);
-        repoFile = new File(storageDir.getAbsolutePath() + File.separator + filename).getAbsoluteFile();
+        String dirname = propProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null);
+        if (dirname == null)
+            throw new IllegalArgumentException("Cannot obtain property: " + Repository.PROPERTY_REPOSITORY_STORAGE_DIR);
+
+        storageDir = new File(dirname).getAbsoluteFile();
+        repoFile = new File(dirname + File.separator + filename).getAbsoluteFile();
 
         // Initialize repository content
         if (repoFile.exists()) {
@@ -98,12 +99,6 @@ public abstract class FilesystemRepositoryStorage extends MemoryRepositoryStorag
             reader.close();
         }
     }
-
-    protected abstract RepositoryReader createRepositoryReader(InputStream inputStream);
-
-    protected abstract RepositoryWriter createRepositoryWriter(OutputStream outputStream);
-
-    protected abstract ResourceBuilder createResourceBuilder();
 
     private RepositoryReader getRepositoryReader(InputStream inputStream) {
         if (repositoryReader == null) {

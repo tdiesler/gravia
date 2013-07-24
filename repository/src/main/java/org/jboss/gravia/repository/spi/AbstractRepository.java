@@ -1,4 +1,5 @@
 package org.jboss.gravia.repository.spi;
+
 /*
  * #%L
  * JBossOSGi Repository
@@ -37,7 +38,7 @@ import org.jboss.logging.Logger;
 public abstract class AbstractRepository implements Repository {
 
     static final Logger LOGGER = Logger.getLogger(Repository.class.getPackage().getName());
-    
+
     @Override
     public String getName() {
         return getClass().getSimpleName();
@@ -57,13 +58,13 @@ public abstract class AbstractRepository implements Repository {
     public Map<Requirement, Collection<Capability>> findProviders(Collection<Requirement> reqs) {
         if (reqs == null)
             throw new IllegalArgumentException("Null reqs");
-        
+
         Map<Requirement, Collection<Capability>> result = new HashMap<Requirement, Collection<Capability>>();
         for (Requirement req : reqs) {
             Collection<Capability> providers = findProviders(req);
             result.put(req, providers);
         }
-        
+
         return result;
     }
 }

@@ -31,13 +31,13 @@ import java.util.List;
 
 import org.jboss.gravia.repository.ContentCapability;
 import org.jboss.gravia.repository.ContentNamespace;
-import org.jboss.gravia.repository.DefaultFilesystemRepositoryStorage;
+import org.jboss.gravia.repository.DefaultPersistentRepositoryStorage;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
 import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
-import org.jboss.gravia.repository.spi.FilesystemRepositoryStorage;
+import org.jboss.gravia.repository.spi.AbstractPersistentRepositoryStorage;
 import org.jboss.gravia.repository.spi.RepositoryContentHelper;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultRequirementBuilder;
@@ -57,7 +57,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 /**
- * Test the {@link FilesystemRepositoryStorage}
+ * Test the {@link AbstractPersistentRepositoryStorage}
  *
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
@@ -67,6 +67,7 @@ public class FilesystemRepositoryStorageTestCase extends AbstractRepositoryTest 
     private File storageDir;
     private Repository repository;
     private RepositoryStorage storage;
+    private ConfigurationPropertyProvider propertyProvider;
     private File resAjar;
     private File resAtxt;
 
@@ -75,7 +76,9 @@ public class FilesystemRepositoryStorageTestCase extends AbstractRepositoryTest 
         storageDir = new File("./target/repository/" + System.currentTimeMillis()).getCanonicalFile();
         repository = Mockito.mock(Repository.class);
         Mockito.when(repository.getName()).thenReturn("MockedRepo");
-        storage = new DefaultFilesystemRepositoryStorage(repository, storageDir, Mockito.mock(ConfigurationPropertyProvider.class));
+        propertyProvider = Mockito.mock(ConfigurationPropertyProvider.class);
+        Mockito.when(propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
+        storage = new DefaultPersistentRepositoryStorage(repository, propertyProvider);
 
         // Write the bundle to the location referenced by repository-testA.xml
         resAjar = new File("./target/resA.jar");
@@ -97,10 +100,8 @@ public class FilesystemRepositoryStorageTestCase extends AbstractRepositoryTest 
 
     @Test
     public void testAddResourceFromXML() throws Exception {
-        // Add a resource from XML
         RepositoryReader reader = getRepositoryReader("xml/repository-testA.xml");
         Resource resource = storage.addResource(reader.nextResource());
-
         verifyResource(resource);
         verifyProviders(storage);
     }
@@ -152,15 +153,13 @@ public class FilesystemRepositoryStorageTestCase extends AbstractRepositoryTest 
 
     @Test
     public void testFileStorageRestart() throws Exception {
-
-        // Add a resource from XML
         RepositoryReader reader = getRepositoryReader("xml/repository-testA.xml");
         Resource resource = storage.addResource(reader.nextResource());
 
         verifyResource(resource);
         verifyProviders(storage);
 
-        RepositoryStorage other = new DefaultFilesystemRepositoryStorage(repository, storageDir, Mockito.mock(ConfigurationPropertyProvider.class));
+        RepositoryStorage other = new DefaultPersistentRepositoryStorage(repository, propertyProvider);
         verifyProviders(other);
     }
 

@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -53,11 +52,9 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
     private ResourceBuilder resourceBuilder;
 
     public AbstractRepositoryXMLReader(InputStream inputStream) {
-        try {
-            reader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
-        } catch (Exception ex) {
-            throw new IllegalStateException("Cannot initialize repository reader", ex);
-        }
+        if (inputStream == null)
+            throw new IllegalArgumentException("Null inputStream");
+        reader = createXMLStreamReader(inputStream);
         try {
             reader.require(START_DOCUMENT, null, null);
             reader.nextTag();
@@ -69,6 +66,8 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
             throw new IllegalStateException("Cannot read resource element: " + reader.getLocation(), ex);
         }
     }
+
+    protected abstract XMLStreamReader createXMLStreamReader(InputStream inputSteam);
 
     protected abstract ResourceBuilder createResourceBuilder();
 

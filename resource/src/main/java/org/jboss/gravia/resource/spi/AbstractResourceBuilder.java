@@ -42,10 +42,6 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
     private AbstractResource resource;
 
     protected abstract AbstractResource createResource();
-    
-    protected abstract AbstractCapability createCapability(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives);
-
-    protected abstract AbstractRequirement createRequirement(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives);
 
     @Override
     public Capability addIdentityCapability(String symbolicName, Version version) {
@@ -66,7 +62,7 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
         }
         return icap;
     }
-    
+
     @Override
     public Capability addCapability(String namespace, String nsvalue) {
         return addCapability(namespace, Collections.singletonMap(namespace, (Object)nsvalue), null);
@@ -74,8 +70,9 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
 
     @Override
     public Capability addCapability(String namespace, Map<String, Object> atts, Map<String, String> dirs) {
-        AbstractCapability cap = createCapability(getResourceInternal(), namespace, mutableAttributes(atts), mutableDirectives(dirs));
-        getResourceInternal().addCapability(cap);
+        AbstractResource resource = getResourceInternal();
+        AbstractCapability cap = resource.createCapability(namespace, mutableAttributes(atts), mutableDirectives(dirs));
+        resource.addCapability(cap);
         return cap;
     }
 
@@ -100,7 +97,7 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
         }
         return ireq;
     }
-    
+
     @Override
     public Requirement addRequirement(String namespace, String nsvalue) {
         return addRequirement(namespace, Collections.singletonMap(namespace, (Object)nsvalue), null);
@@ -108,8 +105,9 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
 
     @Override
     public Requirement addRequirement(String namespace, Map<String, Object> atts, Map<String, String> dirs) {
-        AbstractRequirement req = createRequirement(getResourceInternal(), namespace, mutableAttributes(atts), mutableDirectives(dirs));
-        getResourceInternal().addRequirement(req);
+        AbstractResource resource = getResourceInternal();
+        AbstractRequirement req = resource.createRequirement(namespace, mutableAttributes(atts), mutableDirectives(dirs));
+        resource.addRequirement(req);
         return req;
     }
 

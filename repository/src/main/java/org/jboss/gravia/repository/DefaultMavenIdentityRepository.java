@@ -1,4 +1,3 @@
-package org.jboss.gravia.repository;
 /*
  * #%L
  * JBossOSGi Repository
@@ -18,34 +17,19 @@ package org.jboss.gravia.repository;
  * limitations under the License.
  * #L%
  */
+package org.jboss.gravia.repository;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.jboss.gravia.resource.ResourceBuilder;
-import org.jboss.gravia.resource.ResourceStore;
+import org.jboss.gravia.repository.spi.AbstractMavenIdentityRepository;
 
 /**
- * Repository resource storage
+ * A simple {@link Repository} that delegates to a maven repositories.
  *
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public interface RepositoryStorage extends ResourceStore {
+public class DefaultMavenIdentityRepository extends AbstractMavenIdentityRepository {
 
-    /**
-     * Get the associated reposistory;
-     */
-    Repository getRepository();
-
-    /**
-     * Get the repository reader for this storage
-     */
-    RepositoryReader getRepositoryReader();
-
-    RepositoryReader createRepositoryReader(InputStream inputStream);
-
-    RepositoryWriter createRepositoryWriter(OutputStream outputStream);
-
-    ResourceBuilder createResourceBuilder();
+    public DefaultMavenIdentityRepository(ConfigurationPropertyProvider propertyProvider) {
+        super(propertyProvider);
+    }
 }

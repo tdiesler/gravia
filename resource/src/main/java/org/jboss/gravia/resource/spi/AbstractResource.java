@@ -3,6 +3,7 @@ package org.jboss.gravia.resource.spi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.gravia.resource.Attachable;
@@ -21,15 +22,19 @@ import org.jboss.gravia.resource.Wiring;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public class AbstractResource implements Resource {
+public abstract class AbstractResource implements Resource {
 
     private final List<AbstractCapability> capabilities = new ArrayList<AbstractCapability>();
     private final List<AbstractRequirement> requirements = new ArrayList<AbstractRequirement>();
     private final AtomicBoolean mutable = new AtomicBoolean(true);
     private Capability identityCapability;
     private ResourceIdentity identity;
-    private Attachable attachments; 
+    private Attachable attachments;
     private Wiring wiring;
+
+    protected abstract AbstractCapability createCapability(String namespace, Map<String, Object> attributes, Map<String, String> directives);
+
+    protected abstract AbstractRequirement createRequirement(String namespace, Map<String, Object> attributes, Map<String, String> directives);
 
     void addCapability(AbstractCapability cap) {
         synchronized (capabilities) {
@@ -37,14 +42,14 @@ public class AbstractResource implements Resource {
             capabilities.add(cap);
         }
     }
-    
+
     void addRequirement(AbstractRequirement req) {
         synchronized (requirements) {
             assertMutable();
             requirements.add(req);
         }
     }
-    
+
     @Override
     @SuppressWarnings("unchecked")
     public <T> T adapt(Class<T> type) {
@@ -54,7 +59,7 @@ public class AbstractResource implements Resource {
         }
         return result;
     }
-    
+
     @Override
     public Capability getIdentityCapability() {
         if (identityCapability == null) {
@@ -97,7 +102,7 @@ public class AbstractResource implements Resource {
         if (!isMutable())
             throw new IllegalStateException("Invalid access to immutable resource");
     }
-    
+
     void assertImmutable() {
         if (isMutable())
             throw new IllegalStateException("Invalid access to mutable resource");
@@ -159,7 +164,7 @@ public class AbstractResource implements Resource {
         }
         return attachments;
     }
-    
+
     void validate() {
 
         // Make sure we have an identity
@@ -179,7 +184,7 @@ public class AbstractResource implements Resource {
     protected String getSimpleTypeName() {
         return getClass().getSimpleName();
     }
-    
+
     @Override
     public String toString() {
         ResourceIdentity id = identity;

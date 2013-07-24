@@ -56,7 +56,8 @@ public class AbstractResourcesReaderTestCase extends AbstractRepositoryTest {
         Assert.assertEquals("One resource", 1, resources.size());
         Resource resource = resources.get(0);
         Assert.assertNotNull("Resource not null", resource);
-        Assert.assertFalse("No RepositoryContent", resource instanceof RepositoryContent);
+        Assert.assertTrue(resource instanceof RepositoryContent);
+        Assert.assertNull(((RepositoryContent)resource).getContent());
 
         ResourceIdentity icap = resource.getIdentity();
         Assert.assertEquals("acme-pool-feature", icap.getSymbolicName());

@@ -46,24 +46,15 @@ import org.jboss.gravia.resource.spi.AttributeValueHandler.AttributeValue;
  */
 public abstract class AbstractRepositoryXMLWriter implements RepositoryWriter {
 
-    private XMLStreamWriter writer;
+    private final XMLStreamWriter writer;
 
-    public AbstractRepositoryXMLWriter(OutputStream outputSteam) {
-        try {
-            writer = getXMLStreamWriter(outputSteam);
-        } catch (Exception ex) {
-            throw new IllegalStateException("Cannot initialize repository writer", ex);
-        }
+    public AbstractRepositoryXMLWriter(OutputStream outputStream) {
+        if (outputStream == null)
+            throw new IllegalArgumentException("Null outputStream");
+        writer = createXMLStreamWriter(outputStream);
     }
 
-    protected abstract XMLStreamWriter createXMLStreamWriter(OutputStream outputSteam);
-
-    private XMLStreamWriter getXMLStreamWriter(OutputStream outputSteam) {
-        if (writer == null) {
-            writer = createXMLStreamWriter(outputSteam);
-        }
-        return writer;
-    }
+    protected abstract XMLStreamWriter createXMLStreamWriter(OutputStream outputStream);
 
     @Override
     public void writeRepositoryElement(Map<String, String> attributes) {
