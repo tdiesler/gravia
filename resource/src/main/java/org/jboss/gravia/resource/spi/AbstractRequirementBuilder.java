@@ -35,27 +35,20 @@ import org.jboss.gravia.resource.ResourceBuilder;
  */
 public abstract class AbstractRequirementBuilder implements RequirementBuilder {
 
-    private Requirement requirement;
-    private ResourceBuilder resbuilder;
+    private final ResourceBuilder resbuilder;
+    private final Requirement requirement;
 
     public AbstractRequirementBuilder(String namespace) {
         this(namespace, null);
     }
 
     public AbstractRequirementBuilder(String namespace, String nsvalue) {
-        ResourceBuilder resbuilder = getResourceBuilderInternal();
+        resbuilder = createResourceBuilder();
         resbuilder.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, "anonymous");
         requirement = resbuilder.addRequirement(namespace, nsvalue);
     }
 
     protected abstract ResourceBuilder createResourceBuilder();
-
-    private ResourceBuilder getResourceBuilderInternal() {
-        if (resbuilder == null) {
-            resbuilder = createResourceBuilder();
-        }
-        return resbuilder;
-    }
 
     @Override
     public Map<String, Object> getAttributes() {

@@ -55,7 +55,6 @@ import org.jboss.gravia.resource.ResourceIdentity;
 public abstract class AbstractPersistentRepositoryStorage extends MemoryRepositoryStorage {
 
     private final AtomicLong increment = new AtomicLong();
-    private ResourceBuilder resourceBuilder;
 
     public AbstractPersistentRepositoryStorage(Repository repository, ConfigurationPropertyProvider propertyProvider) {
         super(repository);
@@ -86,13 +85,6 @@ public abstract class AbstractPersistentRepositoryStorage extends MemoryReposito
 
     protected abstract URL getBaseURL();
 
-    private ResourceBuilder getResourceBuilder() {
-        if (resourceBuilder == null) {
-            resourceBuilder = createResourceBuilder();
-        }
-        return resourceBuilder;
-    }
-
     @Override
     public Resource addResource(Resource res) throws RepositoryStorageException {
         return addResourceInternal(res, true);
@@ -120,7 +112,7 @@ public abstract class AbstractPersistentRepositoryStorage extends MemoryReposito
 
         // Copy the resource to this storage, if the content URL does not match
         if (urlspec.startsWith(getBaseURL().toExternalForm()) == false) {
-            ResourceBuilder builder = getResourceBuilder();
+            ResourceBuilder builder = createResourceBuilder();
             for (Capability cap : res.getCapabilities(null)) {
                 if (!ContentNamespace.CONTENT_NAMESPACE.equals(cap.getNamespace())) {
                     builder.addCapability(cap.getNamespace(), cap.getAttributes(), cap.getDirectives());

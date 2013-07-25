@@ -49,7 +49,6 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
 
     private final Map<String, String> attributes = new HashMap<String, String>();
     private final XMLStreamReader reader;
-    private ResourceBuilder resourceBuilder;
 
     public AbstractRepositoryXMLReader(InputStream inputStream) {
         if (inputStream == null)
@@ -70,13 +69,6 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
     protected abstract XMLStreamReader createXMLStreamReader(InputStream inputSteam);
 
     protected abstract ResourceBuilder createResourceBuilder();
-
-    private ResourceBuilder getResourceBuilder() {
-        if (resourceBuilder == null) {
-            resourceBuilder = createResourceBuilder();
-        }
-        return resourceBuilder;
-    }
 
     @Override
     public Map<String, String> getRepositoryAttributes() {
@@ -111,7 +103,7 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
     }
 
     private Resource readResourceElement(XMLStreamReader reader) throws XMLStreamException {
-        ResourceBuilder builder = getResourceBuilder();
+        ResourceBuilder builder = createResourceBuilder();
         while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
             Element element = Element.forName(reader.getLocalName());
             switch (element) {
