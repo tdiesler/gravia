@@ -20,14 +20,9 @@
 package org.jboss.gravia.repository.spi;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,36 +54,17 @@ import org.jboss.gravia.resource.ResourceIdentity;
  */
 public abstract class AbstractPersistentRepositoryStorage extends MemoryRepositoryStorage {
 
-    public static final String REPOSITORY_XML_NAME = "repository.xml";
-
-    private final File storageDir;
-    private final File repoFile;
     private final AtomicLong increment = new AtomicLong();
-    private RepositoryReader repositoryReader;
-    private RepositoryWriter repositoryWriter;
     private ResourceBuilder resourceBuilder;
 
-    public AbstractPersistentRepositoryStorage(Repository repository, ConfigurationPropertyProvider propProvider) {
+    public AbstractPersistentRepositoryStorage(Repository repository, ConfigurationPropertyProvider propertyProvider) {
         super(repository);
-        if (propProvider == null)
-            throw new IllegalArgumentException("Null propProvider");
+    }
 
-        String filename = propProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_FILE, REPOSITORY_XML_NAME);
-        String dirname = propProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null);
-        if (dirname == null)
-            throw new IllegalArgumentException("Cannot obtain property: " + Repository.PROPERTY_REPOSITORY_STORAGE_DIR);
+    public void initRepositoryStorage() throws RepositoryStorageException {
 
-        storageDir = new File(dirname).getAbsoluteFile();
-        repoFile = new File(dirname + File.separator + filename).getAbsoluteFile();
-
-        // Initialize repository content
-        if (repoFile.exists()) {
-            RepositoryReader reader;
-            try {
-                reader = getRepositoryReader(new FileInputStream(repoFile));
-            } catch (IOException ex) {
-                throw new IllegalStateException("Cannot initialize repository reader", ex);
-            }
+        RepositoryReader reader = getPersistentRepositoryReader();
+        if (reader != null) {
             String incatt = reader.getRepositoryAttributes().get(Attribute.INCREMENT.getLocalName());
             increment.set(incatt != null ? new Long(incatt) : increment.get());
             Resource res = reader.nextResource();
@@ -100,19 +76,15 @@ public abstract class AbstractPersistentRepositoryStorage extends MemoryReposito
         }
     }
 
-    private RepositoryReader getRepositoryReader(InputStream inputStream) {
-        if (repositoryReader == null) {
-            repositoryReader = createRepositoryReader(inputStream);
-        }
-        return repositoryReader;
-    }
+    protected abstract ResourceBuilder createResourceBuilder();
 
-    private RepositoryWriter getRepositoryWriter(OutputStream outputStream) {
-        if (repositoryWriter == null) {
-            repositoryWriter = createRepositoryWriter(outputStream);
-        }
-        return repositoryWriter;
-    }
+    protected abstract RepositoryReader getPersistentRepositoryReader() throws RepositoryStorageException;
+
+    protected abstract RepositoryWriter getPersistentRepositoryWriter() throws RepositoryStorageException;
+
+    protected abstract void addResourceContent(InputStream input, Map<String, Object> atts) throws RepositoryStorageException;
+
+    protected abstract URL getBaseURL();
 
     private ResourceBuilder getResourceBuilder() {
         if (resourceBuilder == null) {
@@ -163,7 +135,7 @@ public abstract class AbstractPersistentRepositoryStorage extends MemoryReposito
                     try {
                         addResourceContent(input, contentAtts);
                         builder.addCapability(ContentNamespace.CONTENT_NAMESPACE, contentAtts, cap.getDirectives());
-                    } catch (IOException ex) {
+                    } catch (RepositoryStorageException ex) {
                         throw new RepositoryStorageException("Cannot add resource to storeage: " + mimeType, ex);
                     }
                 }
@@ -233,61 +205,11 @@ public abstract class AbstractPersistentRepositoryStorage extends MemoryReposito
         return input;
     }
 
-    private void addResourceContent(InputStream input, Map<String, Object> atts) throws IOException {
-        synchronized (storageDir) {
-            // Copy the input stream to temporary storage
-            File tempFile = new File(storageDir.getAbsolutePath() + File.separator + "temp-content");
-            Long size = copyResourceContent(input, tempFile);
-            atts.put(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE, size);
-            // Calculate the SHA-256
-            String sha256;
-            String algorithm = RepositoryContentHelper.DEFAULT_DIGEST_ALGORITHM;
-            try {
-                sha256 = RepositoryContentHelper.getDigest(new FileInputStream(tempFile), algorithm);
-                atts.put(ContentNamespace.CONTENT_NAMESPACE, sha256);
-            } catch (NoSuchAlgorithmException ex) {
-                throw new RepositoryStorageException("No such digest algorithm: " + algorithm, ex);
-            }
-            // Move the content to storage location
-            String contentPath = sha256.substring(0, 2) + File.separator + sha256.substring(2) + File.separator + "content";
-            File targetFile = new File(storageDir.getAbsolutePath() + File.separator + contentPath);
-            targetFile.getParentFile().mkdirs();
-            tempFile.renameTo(targetFile);
-            URL url = targetFile.toURI().toURL();
-            atts.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, url.toExternalForm());
-        }
-    }
-
-    private long copyResourceContent(InputStream input, File targetFile) throws IOException {
-        int len = 0;
-        long total = 0;
-        byte[] buf = new byte[4096];
-        targetFile.getParentFile().mkdirs();
-        OutputStream out = new FileOutputStream(targetFile);
-        while ((len = input.read(buf)) >= 0) {
-            out.write(buf, 0, len);
-            total += len;
-        }
-        input.close();
-        out.close();
-        return total;
-    }
-
-    private URL getBaseURL() {
-        try {
-            return storageDir.toURI().toURL();
-        } catch (MalformedURLException e) {
-            // ignore
-            return null;
-        }
-    }
-
     private void writeRepositoryXML() {
         RepositoryWriter writer;
         try {
-            repoFile.getParentFile().mkdirs();
-            writer = getRepositoryWriter(new FileOutputStream(repoFile));
-        } catch (IOException ex) {
+            writer = getPersistentRepositoryWriter();
+        } catch (RepositoryStorageException ex) {
             throw new IllegalStateException("Cannot initialize repository writer", ex);
         }
         Map<String, String> attributes = new HashMap<String, String>();

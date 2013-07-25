@@ -19,8 +19,6 @@
  */
 package org.jboss.gravia.repository.spi;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,10 +28,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
-import org.jboss.gravia.repository.RepositoryWriter;
 import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.logging.Logger;
 
@@ -55,21 +51,6 @@ public class MemoryRepositoryStorage extends DefaultResourceStore implements Rep
         if (repository == null)
             throw new IllegalArgumentException("Null repository");
         this.repository = repository;
-    }
-
-    @Override
-    public RepositoryReader createRepositoryReader(InputStream inputStream) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public RepositoryWriter createRepositoryWriter(OutputStream outputStream) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ResourceBuilder createResourceBuilder() {
-        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -19,10 +19,6 @@ package org.jboss.gravia.repository;
  * #L%
  */
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceStore;
 
 /**
@@ -43,9 +39,4 @@ public interface RepositoryStorage extends ResourceStore {
      */
     RepositoryReader getRepositoryReader();
 
-    RepositoryReader createRepositoryReader(InputStream inputStream);
-
-    RepositoryWriter createRepositoryWriter(OutputStream outputStream);
-
-    ResourceBuilder createResourceBuilder();
 }
