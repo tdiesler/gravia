@@ -17,10 +17,15 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.resource;
+package org.jboss.gravia.repository;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.Version;
 
 /**
  * The {@link Resource} builder that understands {@link MavenCoordinates}.
@@ -28,7 +33,7 @@ import java.util.regex.Pattern;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public class MavenResourceBuilder extends DefaultResourceBuilder {
+public class MavenResourceBuilder extends DefaultRepositoryResourceBuilder {
 
     public Capability addIdentityCapability(MavenCoordinates mavenid) {
         Capability icap = addIdentityCapability(getSymbolicName(mavenid), getVersion(mavenid), null, null);

@@ -43,6 +43,10 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
 
     protected abstract AbstractResource createResource();
 
+    protected abstract AbstractCapability createCapability(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives);
+
+    protected abstract AbstractRequirement createRequirement(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives);
+
     @Override
     public Capability addIdentityCapability(String symbolicName, Version version) {
         return addIdentityCapability(symbolicName, version, null, null);
@@ -71,7 +75,7 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
     @Override
     public Capability addCapability(String namespace, Map<String, Object> atts, Map<String, String> dirs) {
         AbstractResource resource = getResourceInternal();
-        AbstractCapability cap = resource.createCapability(namespace, mutableAttributes(atts), mutableDirectives(dirs));
+        AbstractCapability cap = createCapability(resource, namespace, mutableAttributes(atts), mutableDirectives(dirs));
         resource.addCapability(cap);
         return cap;
     }
@@ -106,7 +110,7 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
     @Override
     public Requirement addRequirement(String namespace, Map<String, Object> atts, Map<String, String> dirs) {
         AbstractResource resource = getResourceInternal();
-        AbstractRequirement req = resource.createRequirement(namespace, mutableAttributes(atts), mutableDirectives(dirs));
+        AbstractRequirement req = createRequirement(resource, namespace, mutableAttributes(atts), mutableDirectives(dirs));
         resource.addRequirement(req);
         return req;
     }

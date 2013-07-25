@@ -20,8 +20,15 @@ package org.jboss.gravia.repository;
  * #L%
  */
 
+import java.util.Map;
+
 import org.jboss.gravia.repository.spi.AbstractRepositoryResource;
-import org.jboss.gravia.repository.spi.AbstractRepositoryResourceBuilder;
+import org.jboss.gravia.resource.DefaultCapability;
+import org.jboss.gravia.resource.DefaultRequirement;
+import org.jboss.gravia.resource.spi.AbstractCapability;
+import org.jboss.gravia.resource.spi.AbstractRequirement;
+import org.jboss.gravia.resource.spi.AbstractResource;
+import org.jboss.gravia.resource.spi.AbstractResourceBuilder;
 
 /**
  * Create an URL based resource
@@ -29,10 +36,23 @@ import org.jboss.gravia.repository.spi.AbstractRepositoryResourceBuilder;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public class DefaultRepositoryResourceBuilder extends AbstractRepositoryResourceBuilder {
+public class DefaultRepositoryResourceBuilder extends AbstractResourceBuilder {
 
     @Override
     protected AbstractRepositoryResource createResource() {
         return new DefaultRepositoryResource();
+    }
+
+    @Override
+    protected AbstractCapability createCapability(AbstractResource resource, String namespace, Map<String, Object> atts, Map<String, String> dirs) {
+        if (ContentNamespace.CONTENT_NAMESPACE.equals(namespace))
+            return new DefaultContentCapability(resource, namespace, atts, dirs);
+        else
+            return new DefaultCapability(resource, namespace, atts, dirs);
+    }
+
+    @Override
+    protected AbstractRequirement createRequirement(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives) {
+        return new DefaultRequirement(resource, namespace, attributes, directives);
     }
 }

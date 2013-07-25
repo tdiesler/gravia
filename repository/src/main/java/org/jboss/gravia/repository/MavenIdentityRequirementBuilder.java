@@ -1,8 +1,6 @@
-
-package org.jboss.gravia.repository.spi;
 /*
  * #%L
- * JBossOSGi Repository
+ * JBossOSGi Resolver API
  * %%
  * Copyright (C) 2010 - 2012 JBoss by Red Hat
  * %%
@@ -19,18 +17,22 @@ package org.jboss.gravia.repository.spi;
  * limitations under the License.
  * #L%
  */
+package org.jboss.gravia.repository;
 
-import org.jboss.gravia.resource.DefaultResourceBuilder;
+import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.IdentityRequirementBuilder;
+import org.jboss.gravia.resource.Requirement;
 
 /**
- * Create an URL based resource
+ * An identity {@link Requirement} builder.
  *
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public abstract class AbstractRepositoryResourceBuilder extends DefaultResourceBuilder {
+public class MavenIdentityRequirementBuilder extends IdentityRequirementBuilder {
 
-    @Override
-    protected abstract AbstractRepositoryResource createResource();
-
+    public MavenIdentityRequirementBuilder(MavenCoordinates mavenid) {
+        super(MavenResourceBuilder.getSymbolicName(mavenid), MavenResourceBuilder.getVersion(mavenid).toString());
+        getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
+    }
 }

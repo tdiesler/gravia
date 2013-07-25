@@ -3,7 +3,6 @@ package org.jboss.gravia.resource.spi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.gravia.resource.Attachable;
@@ -31,10 +30,6 @@ public abstract class AbstractResource implements Resource {
     private ResourceIdentity identity;
     private Attachable attachments;
     private Wiring wiring;
-
-    protected abstract AbstractCapability createCapability(String namespace, Map<String, Object> attributes, Map<String, String> directives);
-
-    protected abstract AbstractRequirement createRequirement(String namespace, Map<String, Object> attributes, Map<String, String> directives);
 
     void addCapability(AbstractCapability cap) {
         synchronized (capabilities) {

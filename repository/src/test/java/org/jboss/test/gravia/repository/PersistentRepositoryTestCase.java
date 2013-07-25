@@ -36,6 +36,8 @@ import org.jboss.gravia.repository.ContentCapability;
 import org.jboss.gravia.repository.ContentNamespace;
 import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
 import org.jboss.gravia.repository.DefaultPersistentRepository;
+import org.jboss.gravia.repository.MavenCoordinates;
+import org.jboss.gravia.repository.MavenIdentityRequirementBuilder;
 import org.jboss.gravia.repository.PersistentRepository;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
@@ -43,7 +45,6 @@ import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityRequirementBuilder;
-import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
@@ -75,7 +76,7 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
     public void testFindProvidersByMavenId() throws Exception {
 
         MavenCoordinates mavenid = MavenCoordinates.parse("org.jboss.logging:jboss-logging:3.1.3.GA");
-        Requirement req = new IdentityRequirementBuilder(mavenid).getRequirement();
+        Requirement req = new MavenIdentityRequirementBuilder(mavenid).getRequirement();
         Collection<Capability> providers = repository.findProviders(req);
         Assert.assertEquals("One provider", 1, providers.size());
 
