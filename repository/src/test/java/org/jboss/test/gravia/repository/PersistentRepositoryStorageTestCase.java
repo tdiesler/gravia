@@ -61,7 +61,7 @@ import org.mockito.Mockito;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public class DefaultPersistentRepositoryStorageTestCase extends AbstractRepositoryTest {
+public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest {
 
     private File storageDir;
     private Repository repository;

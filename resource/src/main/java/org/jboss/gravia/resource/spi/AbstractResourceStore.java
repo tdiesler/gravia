@@ -45,7 +45,20 @@ public abstract class AbstractResourceStore implements ResourceStore {
         this.logCapsReqs = logCapsReqs;
     }
 
+
+    @Override
+    public String getName() {
+        return storeName;
+    }
+
     protected abstract MatchPolicy createMatchPolicy();
+
+    private MatchPolicy getMatchPolicyInternal() {
+        if (matchPolicy == null) {
+            matchPolicy = createMatchPolicy();
+        }
+        return matchPolicy;
+    }
 
     @Override
     public Iterator<Resource> getResources() {
@@ -145,13 +158,6 @@ public abstract class AbstractResourceStore implements ResourceStore {
             }
         }
         return Collections.unmodifiableSet(result);
-    }
-
-    private MatchPolicy getMatchPolicyInternal() {
-        if (matchPolicy == null) {
-            matchPolicy = createMatchPolicy();
-        }
-        return matchPolicy;
     }
 
     private synchronized Set<Capability> getCachedCapabilities(CacheKey key) {

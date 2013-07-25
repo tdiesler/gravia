@@ -82,6 +82,7 @@
 
     <!-- Modules -->
     <modules>
+    	<module>provision</module>
     	<module>resource</module>
     	<module>resolver</module>
     	<module>repository</module>

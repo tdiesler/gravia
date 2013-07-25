@@ -29,6 +29,7 @@ public abstract class AbstractResource implements Resource {
     private Capability identityCapability;
     private ResourceIdentity identity;
     private Attachable attachments;
+    private String resourceType;
     private Wiring wiring;
 
     void addCapability(AbstractCapability cap) {
@@ -127,6 +128,15 @@ public abstract class AbstractResource implements Resource {
             }
         }
         return Collections.unmodifiableList(result);
+    }
+
+    @Override
+    public boolean isAbstract() {
+        if (resourceType == null) {
+            Object attval = getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE);
+            resourceType = attval != null ? (String) attval : IdentityNamespace.TYPE_UNKNOWN;
+        }
+        return IdentityNamespace.TYPE_ABSTRACT.equals(resourceType);
     }
 
     @Override

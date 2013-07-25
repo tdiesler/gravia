@@ -39,29 +39,31 @@ import org.jboss.gravia.resource.spi.AbstractCapability;
  * @since 02-Apr-2012
  */
 public class DefaultPreferencePolicy implements PreferencePolicy {
-    
+
     private final Comparator<Capability> comparator;
-    
+
     public DefaultPreferencePolicy(final Map<Resource, Wiring> wirings) {
         comparator = new Comparator<Capability>() {
             @Override
             public int compare(Capability cap1, Capability cap2) {
-                
+
                 // Prefer already wired
-                Wiring w1 = wirings.get(cap1.getResource());
-                Wiring w2 = wirings.get(cap2.getResource());
-                if (w1 != null && w2 == null)
-                    return -1;
-                if (w1 == null && w2 != null)
-                    return +1;
-                
+                if (wirings != null) {
+                    Wiring w1 = wirings.get(cap1.getResource());
+                    Wiring w2 = wirings.get(cap2.getResource());
+                    if (w1 != null && w2 == null)
+                        return -1;
+                    if (w1 == null && w2 != null)
+                        return +1;
+                }
+
                 // Prefer higher version
                 Version v1 = AbstractCapability.getVersion(cap1, IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
                 Version v2 = AbstractCapability.getVersion(cap2, IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
                 return v2.compareTo(v1);
             }
         };    }
-    
+
     @Override
     public void sort(List<Capability> providers) {
         Collections.sort(providers, comparator);

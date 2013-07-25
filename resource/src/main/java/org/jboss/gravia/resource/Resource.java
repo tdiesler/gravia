@@ -13,10 +13,12 @@ public interface Resource extends Adaptable, Attachable {
     ResourceIdentity getIdentity();
 
     Capability getIdentityCapability();
-    
-	List<Capability> getCapabilities(String namespace);
 
-	List<Requirement> getRequirements(String namespace);
-	
-	Wiring getWiring();
+    List<Capability> getCapabilities(String namespace);
+
+    List<Requirement> getRequirements(String namespace);
+
+    boolean isAbstract();
+
+    Wiring getWiring();
 }

@@ -11,14 +11,16 @@ import java.util.Set;
  */
 public interface ResourceStore  {
 
+    String getName();
+
     Iterator<Resource> getResources();
-    
+
     Resource addResource(Resource resource);
-    
+
     Resource removeResource(ResourceIdentity identity);
-    
+
     Resource getResource(ResourceIdentity identity);
-    
+
     Set<Capability> findProviders(Requirement requirement);
-    
+
 }

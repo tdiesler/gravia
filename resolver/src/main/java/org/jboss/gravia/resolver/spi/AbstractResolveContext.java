@@ -88,6 +88,13 @@ public abstract class AbstractResolveContext implements ResolveContext {
 
     protected abstract PreferencePolicy createPreferencePolicy();
 
+    private PreferencePolicy getPreferencePolicyInternal() {
+        if (preferencePolicy == null) {
+            preferencePolicy = createPreferencePolicy();
+        }
+        return preferencePolicy;
+    }
+
     @Override
     public Collection<Resource> getMandatoryResources() {
         return Collections.unmodifiableList(mandatory);
@@ -111,19 +118,12 @@ public abstract class AbstractResolveContext implements ResolveContext {
         }
         return Collections.unmodifiableMap(wirings);
     }
-    
+
     @Override
     public List<Capability> findProviders(Requirement req) {
         List<Capability> result = new ArrayList<Capability>();
         result.addAll(resourceStore.findProviders(req));
         getPreferencePolicyInternal().sort(result);
         return result;
-    }
-
-    private PreferencePolicy getPreferencePolicyInternal() {
-        if (preferencePolicy == null) {
-            preferencePolicy = createPreferencePolicy();
-        }
-        return preferencePolicy;
     }
 }

@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<repository xmlns="http://www.osgi.org/xmlns/repository/v1.0.0" name="PersistentRepository">
+  <resource>
+    <capability namespace="gravia.identity">
+      <attribute name="gravia.identity" value="felix.eventadmin.feature" />
+      <attribute name="type" value="abstract" />
+    </capability>
+    <requirement namespace="gravia.identity">
+      <attribute name="gravia.identity" value="org.apache.felix.eventadmin" />
+    </requirement>
+  </resource>
+  <resource>
+    <capability namespace="gravia.identity">
+      <attribute name="gravia.identity" value="org.apache.felix.eventadmin" />
+      <attribute name="maven.identity" value="org.apache.felix:org.apache.felix.eventadmin:jar:1.3.0" />
+    </capability>
+  </resource>
+</repository>
