@@ -54,6 +54,6 @@ public class IdentityRequirementBuilder extends DefaultRequirementBuilder {
 
     public IdentityRequirementBuilder(MavenCoordinates mavenid) {
         this(MavenResourceBuilder.getSymbolicName(mavenid), MavenResourceBuilder.getVersion(mavenid).toString());
-        getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid);
+        getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
     }
 }

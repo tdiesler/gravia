@@ -32,7 +32,7 @@ public class MavenResourceBuilder extends DefaultResourceBuilder {
 
     public Capability addIdentityCapability(MavenCoordinates mavenid) {
         Capability icap = addIdentityCapability(getSymbolicName(mavenid), getVersion(mavenid), null, null);
-        icap.getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid);
+        icap.getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
         return icap;
     }
 

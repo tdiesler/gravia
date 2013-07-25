@@ -37,7 +37,6 @@ import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
 import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
-import org.jboss.gravia.repository.spi.AbstractPersistentRepositoryStorage;
 import org.jboss.gravia.repository.spi.RepositoryContentHelper;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultRequirementBuilder;
@@ -57,12 +56,12 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 /**
- * Test the {@link AbstractPersistentRepositoryStorage}
+ * Test the {@link DefaultPersistentRepositoryStorage}
  *
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public class FilesystemRepositoryStorageTestCase extends AbstractRepositoryTest {
+public class DefaultPersistentRepositoryStorageTestCase extends AbstractRepositoryTest {
 
     private File storageDir;
     private Repository repository;

@@ -29,7 +29,6 @@ import org.jboss.gravia.repository.ContentNamespace;
 import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
-import org.jboss.gravia.repository.spi.AbstractMavenIdentityRepository;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityRequirementBuilder;
 import org.jboss.gravia.resource.MavenCoordinates;
@@ -42,7 +41,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 /**
- * Test the {@link AbstractMavenIdentityRepository}
+ * Test the {@link DefaultMavenIdentityRepository}
  *
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012

@@ -110,16 +110,11 @@ public abstract class AbstractMavenIdentityRepository extends AbstractRepository
     @Override
     public Collection<Capability> findProviders(Requirement req) {
 
-        Object mavenObj = req.getAttribute(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
-        if (mavenObj == null)
+        String attval = (String) req.getAttribute(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
+        if (attval == null)
             return Collections.emptyList();
 
-        MavenCoordinates mavenid;
-        if (mavenObj instanceof MavenCoordinates)
-            mavenid = (MavenCoordinates) mavenObj;
-        else
-            mavenid = MavenCoordinates.parse((String) mavenObj);
-
+        MavenCoordinates mavenid = MavenCoordinates.parse(attval);
         LOGGER.infof("Find maven providers for: %s", mavenid);
 
         URL contentURL = null;

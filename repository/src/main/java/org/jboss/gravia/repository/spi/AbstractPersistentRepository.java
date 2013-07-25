@@ -36,7 +36,7 @@ import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.logging.Logger;
 
 /**
- * An abstract  {@link Repository} that does nothing.
+ * An abstract {@link PersistentRepository}.
  *
  * @author thomas.diesler@jboss.com
  * @since 11-May-2012
