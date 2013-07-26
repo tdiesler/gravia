@@ -58,7 +58,7 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
         this.delegate = delegate;
     }
 
-    protected abstract RepositoryStorage createRepositoryStorage(Repository repository, ConfigurationPropertyProvider propertyProvider);
+    protected abstract RepositoryStorage createRepositoryStorage(PersistentRepository repository, ConfigurationPropertyProvider propertyProvider);
 
     protected ConfigurationPropertyProvider getConfigurationPropertyProvider() {
         return propertyProvider;
@@ -92,7 +92,7 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
     }
 
     @Override
-    public Repository getRepositoryDelegate() {
+    public Repository getDelegate() {
         return delegate;
     }
 
@@ -119,9 +119,9 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
         Collection<Capability> providers = getRepositoryStorage().findProviders(req);
 
         // Try to find the providers in the delegate
-        if (providers.isEmpty() && getRepositoryDelegate() != null) {
+        if (providers.isEmpty() && getDelegate() != null) {
             providers = new HashSet<Capability>();
-            for (Capability cap : getRepositoryDelegate().findProviders(req)) {
+            for (Capability cap : getDelegate().findProviders(req)) {
                 Resource res = cap.getResource();
                 ResourceIdentity resid = res.getIdentity();
                 Resource storageResource = getRepositoryStorage().getResource(resid);

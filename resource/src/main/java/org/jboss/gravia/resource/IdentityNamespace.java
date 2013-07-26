@@ -47,7 +47,7 @@ public interface IdentityNamespace extends Namespace {
      *
      * @see #CAPABILITY_TYPE_ATTRIBUTE
      */
-    String TYPE_BUNDLE = "type.bundle";
+    String TYPE_BUNDLE = "osgi.bundle";
 
     /**
      * The attribute value identifying the resource
@@ -55,7 +55,7 @@ public interface IdentityNamespace extends Namespace {
      *
      * @see #CAPABILITY_TYPE_ATTRIBUTE
      */
-    String TYPE_MODULE = "type.module";
+    String TYPE_MODULE = "jboss.module";
 
     /**
      * The attribute value identifying the resource
@@ -71,5 +71,5 @@ public interface IdentityNamespace extends Namespace {
      *
      * @see #CAPABILITY_TYPE_ATTRIBUTE
      */
-    String TYPE_UNKNOWN = "type.unknown";
+    String TYPE_UNKNOWN = "unknown";
 }

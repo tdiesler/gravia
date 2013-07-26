@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,7 +27,7 @@ import org.jboss.gravia.resource.VersionRange;
 
 /**
  * A handler for attribute values.
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 06-Jul-2012
  */
@@ -40,7 +40,7 @@ public final class AttributeValueHandler {
         Long,
         Double
     }
-    
+
     /**
      * Read attribute values according to
      * 132.5.6 Attribute Element
@@ -205,7 +205,7 @@ public final class AttributeValueHandler {
                     result.append(escape(val));
                 }
             } else {
-                result.append(escape(value));
+                result.append(value);
             }
             return result.toString();
         }
@@ -214,11 +214,11 @@ public final class AttributeValueHandler {
             String valstr = val.toString();
             if (type != Type.String)
                 return valstr;
-            
+
             StringBuffer result = new StringBuffer();
             for (int i = 0; i < valstr.length(); i++) {
                 char ch = valstr.charAt(i);
-                if (ch == '\\' || ch == ',') {
+                if (ch == '\\' || ch == ',' || ch == '"') {
                     result.append("\\" + ch);
                 } else {
                     result.append(ch);

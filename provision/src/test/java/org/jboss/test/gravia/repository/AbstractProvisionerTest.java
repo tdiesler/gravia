@@ -28,11 +28,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.xml.stream.XMLStreamException;
 
 import org.jboss.gravia.provision.DefaultEnvironment;
-import org.jboss.gravia.provision.DefaultResourceProvisioner;
+import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.Environment;
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ProvisionResult;
-import org.jboss.gravia.provision.ResourceProvisioner;
+import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
 import org.jboss.gravia.repository.DefaultPersistentRepository;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
@@ -58,7 +58,7 @@ public abstract class AbstractProvisionerTest {
 
     AtomicLong installIndex = new AtomicLong();
     PersistentRepository repository;
-    ResourceProvisioner provisionService;
+    Provisioner provisionService;
     Environment environment;
 
     @Before
@@ -69,10 +69,10 @@ public abstract class AbstractProvisionerTest {
         ConfigurationPropertyProvider propertyProvider = Mockito.mock(ConfigurationPropertyProvider.class);
         Mockito.when(propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
         repository = new DefaultPersistentRepository(propertyProvider, new DefaultMavenIdentityRepository(propertyProvider));
-        provisionService = new DefaultResourceProvisioner(resolver, repository);
+        provisionService = new DefaultProvisioner(resolver, repository);
     }
 
-    ResourceProvisioner getProvisioner() {
+    Provisioner getProvisioner() {
         return provisionService;
     }
 

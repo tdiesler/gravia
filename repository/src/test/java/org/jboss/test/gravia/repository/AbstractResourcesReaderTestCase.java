@@ -8,9 +8,9 @@ package org.jboss.test.gravia.repository;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,9 +27,13 @@ import junit.framework.Assert;
 import org.jboss.gravia.repository.Namespace100;
 import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryReader;
+import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
+import org.jboss.gravia.resource.VersionRange;
 import org.junit.Test;
 
 /**
@@ -53,14 +57,38 @@ public class AbstractResourcesReaderTestCase extends AbstractRepositoryTest {
         Assert.assertEquals("Gravia Repository", attributes.get(Namespace100.Attribute.NAME.getLocalName()));
         Assert.assertEquals("1", attributes.get(Namespace100.Attribute.INCREMENT.getLocalName()));
 
-        Assert.assertEquals("One resource", 1, resources.size());
-        Resource resource = resources.get(0);
-        Assert.assertNotNull("Resource not null", resource);
-        Assert.assertTrue(resource instanceof RepositoryContent);
-        Assert.assertNull(((RepositoryContent)resource).getContent());
+        Assert.assertEquals(2, resources.size());
 
-        ResourceIdentity icap = resource.getIdentity();
-        Assert.assertEquals("acme-pool-feature", icap.getSymbolicName());
-        Assert.assertEquals(Version.emptyVersion, icap.getVersion());
+        Resource res = resources.get(0);
+        Assert.assertTrue(res instanceof RepositoryContent);
+        Assert.assertNull(((RepositoryContent)res).getContent());
+
+        ResourceIdentity resid = res.getIdentity();
+        Assert.assertEquals("org.acme.foo.feature", resid.getSymbolicName());
+        Assert.assertEquals(Version.emptyVersion, resid.getVersion());
+
+        Capability icap = res.getIdentityCapability();
+        Assert.assertEquals("org.acme.foo.feature", icap.getAttribute(IdentityNamespace.IDENTITY_NAMESPACE));
+        Assert.assertEquals(Version.emptyVersion, icap.getAttribute(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE));
+
+        List<Requirement> reqs = res.getRequirements(null);
+        Assert.assertEquals(1, reqs.size());
+
+        Requirement req = reqs.get(0);
+        Assert.assertEquals("org.acme.foo", req.getAttribute(IdentityNamespace.IDENTITY_NAMESPACE));
+        Assert.assertEquals(new VersionRange("[1.0,2.0)"), req.getAttribute(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE));
+
+        res = resources.get(1);
+        Assert.assertTrue(res instanceof RepositoryContent);
+        Assert.assertNull(((RepositoryContent)res).getContent());
+
+        resid = res.getIdentity();
+        Assert.assertEquals("org.acme.foo", resid.getSymbolicName());
+        Assert.assertEquals(Version.parseVersion("1.0.0"), resid.getVersion());
+
+        icap = res.getIdentityCapability();
+        Assert.assertEquals("org.acme.foo", icap.getAttribute(IdentityNamespace.IDENTITY_NAMESPACE));
+        Assert.assertEquals(Version.parseVersion("1.0.0"), icap.getAttribute(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE));
+        Assert.assertEquals("with,comma", icap.getAttribute("someatt"));
     }
 }

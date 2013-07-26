@@ -19,39 +19,38 @@
  */
 package org.jboss.gravia.provision;
 
-import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-import org.jboss.gravia.provision.spi.AbstractResourceProvisioner;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.resolver.DefaultPreferencePolicy;
-import org.jboss.gravia.resolver.PreferencePolicy;
 import org.jboss.gravia.resolver.Resolver;
+import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 
 /**
- * The default {@link ResourceProvisioner}
+ * The {@link Provisioner}
  *
  * @author thomas.diesler@jboss.com
  * @since 06-May-2013
  */
-public class DefaultResourceProvisioner extends AbstractResourceProvisioner {
+public interface Provisioner {
 
-    public DefaultResourceProvisioner(Resolver resolver, Repository repository) {
-        super(resolver, repository);
-    }
+    Resolver getResolver();
 
-    @Override
-    protected PreferencePolicy createPreferencePolicy() {
-        return new DefaultPreferencePolicy(null);
-    }
+    Repository getRepository();
 
-    @Override
-    protected Environment cloneEnvironment(Environment env) {
-        Environment clone = new DefaultEnvironment("Cloned " + env.getName());
-        Iterator<Resource> itres = env.getResources();
-        while (itres.hasNext()) {
-            clone.addResource(itres.next());
-        }
-        return clone;
+    ProvisionResult findResources(Set<Requirement> reqs);
+
+    ProvisionResult findResources(Environment env, Set<Requirement> reqs);
+
+    ResourceHandle installResource(Resource resource, Map<Requirement, Resource> mapping) throws ProvisionException;
+
+    interface ResourceHandle {
+
+        Resource getResource();
+
+        <T> T adapt(Class<T> type);
+
+        void uninstall() throws ProvisionException;
     }
 }

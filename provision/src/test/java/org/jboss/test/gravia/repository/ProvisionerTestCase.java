@@ -26,7 +26,7 @@ import junit.framework.Assert;
 
 import org.jboss.gravia.provision.Environment;
 import org.jboss.gravia.provision.ProvisionResult;
-import org.jboss.gravia.provision.ResourceProvisioner;
+import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.MavenIdentityRequirementBuilder;
 import org.jboss.gravia.repository.Repository;
@@ -42,7 +42,7 @@ import org.junit.Test;
 
 
 /**
- * Test the {@link ResourceProvisioner}.
+ * Test the {@link Provisioner}.
  *
  * @author thomas.diesler@jboss.com
  * @since 06-May-2013
@@ -58,7 +58,7 @@ public class ProvisionerTestCase extends AbstractProvisionerTest {
 
     @Test
     public void testEmptyRepository() {
-        ResourceProvisioner provision = getProvisioner();
+        Provisioner provision = getProvisioner();
         Repository repository = provision.getRepository();
         RepositoryStorage storage = repository.adapt(RepositoryStorage.class);
         Resource resource = storage.getRepositoryReader().nextResource();
@@ -76,7 +76,7 @@ public class ProvisionerTestCase extends AbstractProvisionerTest {
         Requirement req = rbuilder.getRequirement();
 
         ProvisionResult result = findResources(Collections.singleton(req));
-        Assert.assertEquals(res, result.getRequirementMapping().get(req));
+        Assert.assertEquals(res, result.getMapping().get(req));
         Assert.assertTrue("Empty resources", result.getResources().isEmpty());
         Assert.assertTrue("Nothing unsatisfied", result.getUnsatisfiedRequirements().isEmpty());
     }
@@ -94,7 +94,7 @@ public class ProvisionerTestCase extends AbstractProvisionerTest {
         Requirement req = rbuilder.getRequirement();
 
         ProvisionResult result = findResources(Collections.singleton(req));
-        Assert.assertEquals(res, result.getRequirementMapping().get(req));
+        Assert.assertEquals(res, result.getMapping().get(req));
         Assert.assertEquals("One resource", 1, result.getResources().size());
         Assert.assertEquals(res, result.getResources().iterator().next());
         Assert.assertTrue("Nothing unsatisfied", result.getUnsatisfiedRequirements().isEmpty());
@@ -123,7 +123,7 @@ public class ProvisionerTestCase extends AbstractProvisionerTest {
         ProvisionResult result = findResources(Collections.singleton(req));
         Assert.assertEquals("Two resources", 2, result.getResources().size());
         Assert.assertTrue("Nothing unsatisfied", result.getUnsatisfiedRequirements().isEmpty());
-        Assert.assertEquals(res1, result.getRequirementMapping().get(req));
+        Assert.assertEquals(res1, result.getMapping().get(req));
     }
 
     @Test
@@ -145,7 +145,7 @@ public class ProvisionerTestCase extends AbstractProvisionerTest {
         Requirement req = rbuilder.getRequirement();
 
         ProvisionResult result = findResources(Collections.singleton(req));
-        Assert.assertEquals(res2, result.getRequirementMapping().get(req));
+        Assert.assertEquals(res2, result.getMapping().get(req));
         Assert.assertEquals("One resources", 1, result.getResources().size());
         Assert.assertEquals(res2, result.getResources().iterator().next());
         Assert.assertTrue("Nothing unsatisfied", result.getUnsatisfiedRequirements().isEmpty());
@@ -157,7 +157,7 @@ public class ProvisionerTestCase extends AbstractProvisionerTest {
         MavenCoordinates mavenid = MavenCoordinates.parse("org.jboss.spec.javax.transaction:jboss-transaction-api_1.1_spec:1.0.1.Final");
         Requirement req = new MavenIdentityRequirementBuilder(mavenid).getRequirement();
 
-        ResourceProvisioner provisionService = getProvisioner();
+        Provisioner provisionService = getProvisioner();
         ProvisionResult result = provisionService.findResources(getEnvironment(), Collections.singleton(req));
         Assert.assertEquals("One resource", 1, result.getResources().size());
         Assert.assertTrue("Nothing unsatisfied", result.getUnsatisfiedRequirements().isEmpty());

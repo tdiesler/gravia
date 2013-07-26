@@ -32,8 +32,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jboss.gravia.provision.Environment;
+import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ProvisionResult;
-import org.jboss.gravia.provision.ResourceProvisioner;
+import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.DefaultResolveContext;
 import org.jboss.gravia.resolver.PreferencePolicy;
@@ -41,28 +42,39 @@ import org.jboss.gravia.resolver.ResolutionException;
 import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.Wire;
 import org.jboss.logging.Logger;
 
 /**
- * An abstract {@link ResourceProvisioner}
+ * An abstract {@link Provisioner}
  *
  * @author thomas.diesler@jboss.com
  * @since 06-May-2013
  */
-public abstract class AbstractResourceProvisioner implements ResourceProvisioner {
+public abstract class AbstractProvisioner implements Provisioner {
 
-    static final Logger LOGGER = Logger.getLogger(ResourceProvisioner.class.getPackage().getName());
+    static final Logger LOGGER = Logger.getLogger(Provisioner.class.getPackage().getName());
 
     private final Resolver resolver;
     private final Repository repository;
     private PreferencePolicy preferencePolicy;
+    private Environment environment;
 
-    public AbstractResourceProvisioner(Resolver resolver, Repository repository) {
+    public AbstractProvisioner(Resolver resolver, Repository repository) {
         this.resolver = resolver;
         this.repository = repository;
+    }
+
+    protected abstract Environment createEnvironment();
+
+    private Environment getEnvironment() {
+        if (environment == null) {
+            environment = createEnvironment();
+        }
+        return environment;
     }
 
     protected abstract Environment cloneEnvironment(Environment env);
@@ -84,6 +96,11 @@ public abstract class AbstractResourceProvisioner implements ResourceProvisioner
             preferencePolicy = createPreferencePolicy();
         }
         return preferencePolicy;
+    }
+
+    @Override
+    public ProvisionResult findResources(Set<Requirement> reqs) {
+        return findResources(getEnvironment(), reqs);
     }
 
     @Override
@@ -116,19 +133,25 @@ public abstract class AbstractResourceProvisioner implements ResourceProvisioner
         Iterator<Resource> itres = resources.iterator();
         while (itres.hasNext()) {
             Resource res = itres.next();
-            if (res.isAbstract()) {
+            if (isAbstract(res)) {
                 itres.remove();
             }
         }
 
-        AbstractProvisionResult result = new AbstractProvisionResult(mapping, unstatisfied, resources);
+        // Sort the provisioner result
+        List<Resource> sorted = new ArrayList<Resource>();
+        for (Resource res : resources) {
+            sortResultResources(res, mapping, sorted);
+        }
+
+        AbstractProvisionResult result = new AbstractProvisionResult(mapping, unstatisfied, sorted);
         LOGGER.debugf("END findResources");
         LOGGER.debugf("  resources: %s", result.getResources());
         LOGGER.debugf("  unsatisfied: %s", result.getUnsatisfiedRequirements());
 
         // Sanity check that we can resolve all result resources
         Set<Resource> mandatory = new LinkedHashSet<Resource>();
-        mandatory.addAll(resources);
+        mandatory.addAll(result.getResources());
         try {
             ResolveContext context = new DefaultResolveContext(envclone, mandatory, null);
             resolver.resolve(context).entrySet();
@@ -139,8 +162,31 @@ public abstract class AbstractResourceProvisioner implements ResourceProvisioner
         return result;
     }
 
-    private void findResources(Environment env, List<Resource> unresolved, Map<Requirement, Resource> mapping, Set<Requirement> unstatisfied,
-            List<Resource> resources) {
+    // Sort mapping targets higher in the list. This should result in resource installations
+    // without dependencies on resources from the same provioner result set.
+    private void sortResultResources(Resource res, Map<Requirement, Resource> mapping, List<Resource> result) {
+        if (!result.contains(res)) {
+            for (Requirement req : res.getRequirements(null)) {
+                Resource target = mapping.get(req);
+                if (target != null) {
+                    sortResultResources(target, mapping, result);
+                }
+            }
+            result.add(res);
+        }
+    }
+
+    @Override
+    public ResourceHandle installResource(Resource resource, Map<Requirement, Resource> mapping) throws ProvisionException {
+        throw new UnsupportedOperationException();
+    }
+
+    private boolean isAbstract(Resource res) {
+        Object attval = res.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE);
+        return IdentityNamespace.TYPE_ABSTRACT.equals(attval);
+    }
+
+    private void findResources(Environment env, List<Resource> unresolved, Map<Requirement, Resource> mapping, Set<Requirement> unstatisfied, List<Resource> resources) {
 
         // Resolve the unsatisfied reqs in the environment
         resolveInEnvironment(env, unresolved, mapping, unstatisfied, resources);
@@ -173,14 +219,7 @@ public abstract class AbstractResourceProvisioner implements ResourceProvisioner
         // Install the resources that match the unsatisfied reqs
         for (Resource res : installable) {
             if (!resources.contains(res)) {
-                Collection<Requirement> reqs = getRequirements(res, null);
-                Iterator<Requirement> itreqs = reqs.iterator();
-                while (itreqs.hasNext()) {
-                    Requirement req = itreqs.next();
-                    if (req.isOptional() || env.findProviders(req).size() > 0) {
-                        itreqs.remove();
-                    }
-                }
+                Collection<Requirement> reqs = res.getRequirements(null);
                 LOGGER.debugf("Adding %d unsatisfied reqs", reqs.size());
                 unstatisfied.addAll(reqs);
                 env.addResource(res);
@@ -195,22 +234,6 @@ public abstract class AbstractResourceProvisioner implements ResourceProvisioner
         }
     }
 
-    private Collection<Requirement> getRequirements(Resource res, String[] namespaces) {
-        Set<Requirement> reqs = new HashSet<Requirement>();
-        if (namespaces != null) {
-            for (String ns : namespaces) {
-                for (Requirement req : res.getRequirements(ns)) {
-                    reqs.add(req);
-                }
-            }
-        } else {
-            for (Requirement req : res.getRequirements(null)) {
-                reqs.add(req);
-            }
-        }
-        return reqs;
-    }
-
     private Capability findProviderInRepository(Requirement req) {
 
         // Find the providers in the repository
@@ -223,7 +246,7 @@ public abstract class AbstractResourceProvisioner implements ResourceProvisioner
             Iterator<Capability> itcap = providers.iterator();
             while (itcap.hasNext()) {
                 Capability cap = itcap.next();
-                if (cap.getResource().isAbstract()) {
+                if (isAbstract(cap.getResource())) {
                     itcap.remove();
                 }
             }
@@ -252,15 +275,10 @@ public abstract class AbstractResourceProvisioner implements ResourceProvisioner
             ResolveContext context = new DefaultResolveContext(env, mandatory, null);
             Set<Entry<Resource, List<Wire>>> wiremap = resolver.resolve(context).entrySet();
             for (Entry<Resource, List<Wire>> entry : wiremap) {
-                Iterator<Requirement> itunsat = unstatisfied.iterator();
-                while (itunsat.hasNext()) {
-                    Requirement req = itunsat.next();
-                    for (Wire wire : entry.getValue()) {
-                        if (wire.getRequirement() == req) {
-                            Resource provider = wire.getProvider();
-                            mapping.put(req, provider);
-                        }
-                    }
+                for (Wire wire : entry.getValue()) {
+                    Requirement req = wire.getRequirement();
+                    Resource provider = wire.getProvider();
+                    mapping.put(req, provider);
                 }
             }
             unstatisfied.clear();
@@ -284,7 +302,7 @@ public abstract class AbstractResourceProvisioner implements ResourceProvisioner
         }
 
         @Override
-        public Map<Requirement, Resource> getRequirementMapping() {
+        public Map<Requirement, Resource> getMapping() {
             return Collections.unmodifiableMap(mapping);
         }
 

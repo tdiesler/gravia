@@ -19,23 +19,35 @@
  */
 package org.jboss.gravia.provision;
 
-import java.util.Set;
-
-import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.resolver.Resolver;
-import org.jboss.gravia.resource.Requirement;
+import org.jboss.gravia.provision.Provisioner.ResourceHandle;
+import org.jboss.gravia.resource.Resource;
 
 /**
- * The Provision Service
+ * An default {@link ResourceHandle}
  *
  * @author thomas.diesler@jboss.com
  * @since 06-May-2013
  */
-public interface ResourceProvisioner {
+public class DefaultResourceHandle implements ResourceHandle {
 
-    Resolver getResolver();
+    private final Resource resource;
 
-    Repository getRepository();
+    public DefaultResourceHandle(Resource resource) {
+        this.resource = resource;
+    }
 
-    ProvisionResult findResources(Environment env, Set<Requirement> reqs);
+    @Override
+    public Resource getResource() {
+        return resource;
+    }
+
+    @Override
+    public <T> T adapt(Class<T> type) {
+        return null;
+    }
+
+    @Override
+    public void uninstall() throws ProvisionException {
+        // do nothing
+    }
 }

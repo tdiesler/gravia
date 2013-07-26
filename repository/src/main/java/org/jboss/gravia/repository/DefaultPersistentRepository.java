@@ -39,7 +39,7 @@ public class DefaultPersistentRepository extends AbstractPersistentRepository {
     }
 
     @Override
-    protected RepositoryStorage createRepositoryStorage(Repository repository, ConfigurationPropertyProvider propertyProvider) {
+    protected RepositoryStorage createRepositoryStorage(PersistentRepository repository, ConfigurationPropertyProvider propertyProvider) {
         return new DefaultPersistentRepositoryStorage(repository, propertyProvider);
     }
 }

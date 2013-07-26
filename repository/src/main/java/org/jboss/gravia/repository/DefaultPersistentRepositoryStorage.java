@@ -49,7 +49,7 @@ public class DefaultPersistentRepositoryStorage extends AbstractPersistentReposi
     private final File storageDir;
     private final File repoFile;
 
-    public DefaultPersistentRepositoryStorage(Repository repository, ConfigurationPropertyProvider propertyProvider) {
+    public DefaultPersistentRepositoryStorage(PersistentRepository repository, ConfigurationPropertyProvider propertyProvider) {
         super(repository, propertyProvider);
         if (propertyProvider == null)
             throw new IllegalArgumentException("Null propertyProvider");

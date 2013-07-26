@@ -26,5 +26,5 @@ public interface PersistentRepository extends Repository {
 
     RepositoryStorage getRepositoryStorage();
 
-    Repository getRepositoryDelegate();
+    Repository getDelegate();
 }

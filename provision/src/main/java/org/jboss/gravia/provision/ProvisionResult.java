@@ -34,7 +34,7 @@ import org.jboss.gravia.resource.Resource;
  */
 public interface ProvisionResult {
 
-    Map<Requirement, Resource> getRequirementMapping();
+    Map<Requirement, Resource> getMapping();
 
     List<Resource> getResources();
 

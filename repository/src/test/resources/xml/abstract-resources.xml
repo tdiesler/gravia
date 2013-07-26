@@ -20,8 +20,19 @@
 <repository name='Gravia Repository' increment='1' xmlns='http://www.osgi.org/xmlns/repository/v1.0.0'>
 	<resource>
 		<capability namespace='gravia.identity'>
-			<attribute name='gravia.identity' value='acme-pool-feature' />
+			<attribute name='gravia.identity' value='org.acme.foo.feature' />
 			<attribute name='type' value='abstract' />
 		</capability>
+        <requirement namespace='gravia.identity'>
+            <attribute name='gravia.identity' value='org.acme.foo' />
+            <attribute name='version' value='[1.0,2.0)' />
+        </requirement>
 	</resource>
+    <resource>
+        <capability namespace='gravia.identity'>
+            <attribute name='gravia.identity' value='org.acme.foo' />
+            <attribute name='version' value='1.0.0' />
+            <attribute name='someatt' value='with,comma' />
+        </capability>
+    </resource>
 </repository>

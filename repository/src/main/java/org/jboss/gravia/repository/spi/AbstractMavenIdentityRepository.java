@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.jboss.gravia.repository.ContentNamespace;
 import org.jboss.gravia.repository.MavenCoordinates;
+import org.jboss.gravia.repository.MavenIdentityRepository;
 import org.jboss.gravia.repository.MavenResourceBuilder;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resource.Capability;
@@ -43,7 +44,7 @@ import org.jboss.gravia.resource.Resource;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public abstract class AbstractMavenIdentityRepository extends AbstractRepository {
+public abstract class AbstractMavenIdentityRepository extends AbstractRepository implements MavenIdentityRepository {
 
     private final List<URL> baserepos;
 
@@ -113,6 +114,15 @@ public abstract class AbstractMavenIdentityRepository extends AbstractRepository
             return Collections.emptyList();
 
         MavenCoordinates mavenid = MavenCoordinates.parse(attval);
+        Resource resource = findMavenResource(mavenid);
+        if (resource == null)
+            return Collections.emptyList();
+
+        return Collections.singleton(resource.getIdentityCapability());
+    }
+
+    @Override
+    public Resource findMavenResource(MavenCoordinates mavenid) {
         LOGGER.infof("Find maven providers for: %s", mavenid);
 
         URL contentURL = null;
@@ -127,17 +137,16 @@ public abstract class AbstractMavenIdentityRepository extends AbstractRepository
             }
         }
 
-        if (contentURL == null)
-            return Collections.emptyList();
+        Resource result = null;
+        if (contentURL != null) {
+            MavenResourceBuilder builder = new MavenResourceBuilder();
+            builder.addIdentityCapability(mavenid);
+            Capability ccap = builder.addCapability(ContentNamespace.CONTENT_NAMESPACE, null, null);
+            ccap.getAttributes().put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, contentURL.toExternalForm());
+            LOGGER.debugf("Found maven resource: %s", result = builder.getResource());
+        }
 
-        MavenResourceBuilder builder = new MavenResourceBuilder();
-        Capability icap = builder.addIdentityCapability(mavenid);
-        Capability ccap = builder.addCapability(ContentNamespace.CONTENT_NAMESPACE, null, null);
-        ccap.getAttributes().put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, contentURL.toExternalForm());
-        Resource resource = builder.getResource();
-        LOGGER.debugf("Found maven resource: %s", resource);
-
-        return Collections.singleton(icap);
+        return result;
     }
 
     private static URL getBaseURL(String urlspec) {

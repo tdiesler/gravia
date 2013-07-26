@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.List;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -44,6 +43,8 @@ import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
 import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.DefaultResourceBuilder;
+import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.IdentityRequirementBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
@@ -88,17 +89,44 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
         Assert.assertEquals("One provider", 1, providers.size());
 
         // Verify the content capability
-        Resource resource = providers.iterator().next().getResource();
-        List<Capability> caps = resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
-        assertEquals("One capability", 1, caps.size());
+        Resource res = providers.iterator().next().getResource();
+        assertEquals(ResourceIdentity.fromString("org.jboss.logging.jboss-logging:3.1.3.GA"), res.getIdentity());
 
-        verifyCapability(caps.get(0));
+        verifyResourceContent(res);
+
+        storage.removeResource(res.getIdentity());
     }
 
-    private void verifyCapability(Capability cap) throws Exception {
+    @Test
+    public void testAddResourceWithMavenId() throws Exception {
 
-        Resource res = cap.getResource();
-        assertEquals(ResourceIdentity.fromString("org.jboss.logging.jboss-logging:3.1.3.GA"), res.getIdentity());
+        DefaultResourceBuilder builder = new DefaultResourceBuilder();
+        Capability icap = builder.addIdentityCapability("org.jboss.logging", "3.1.3.GA");
+        MavenCoordinates mavenid = MavenCoordinates.parse("org.jboss.logging:jboss-logging:3.1.3.GA");
+        icap.getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
+        Resource res = builder.getResource();
+
+        RepositoryStorage storage = repository.adapt(RepositoryStorage.class);
+        res = storage.addResource(res);
+
+        Requirement req = new IdentityRequirementBuilder("org.jboss.logging", "[3.1,4.0)").getRequirement();
+        Collection<Capability> providers = repository.findProviders(req);
+        Assert.assertEquals("One provider", 1, providers.size());
+
+        // Verify that the resource is in storage
+        providers = storage.findProviders(req);
+        Assert.assertEquals("One provider", 1, providers.size());
+
+        // Verify the content capability
+        res = providers.iterator().next().getResource();
+        assertEquals(ResourceIdentity.fromString("org.jboss.logging:3.1.3.GA"), res.getIdentity());
+
+        verifyResourceContent(res);
+
+        storage.removeResource(res.getIdentity());
+    }
+
+    private void verifyResourceContent(Resource res) throws Exception {
 
         Collection<Capability> caps = res.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
         assertEquals("One capability", 1, caps.size());

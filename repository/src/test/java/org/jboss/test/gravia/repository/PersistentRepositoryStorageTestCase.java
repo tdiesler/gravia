@@ -32,6 +32,7 @@ import java.util.List;
 import org.jboss.gravia.repository.ContentCapability;
 import org.jboss.gravia.repository.ContentNamespace;
 import org.jboss.gravia.repository.DefaultPersistentRepositoryStorage;
+import org.jboss.gravia.repository.PersistentRepository;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
 import org.jboss.gravia.repository.RepositoryContent;
@@ -64,8 +65,8 @@ import org.mockito.Mockito;
 public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest {
 
     private File storageDir;
-    private Repository repository;
     private RepositoryStorage storage;
+    private PersistentRepository repository;
     private ConfigurationPropertyProvider propertyProvider;
     private File resAjar;
     private File resAtxt;
@@ -73,7 +74,7 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
     @Before
     public void setUp() throws Exception {
         storageDir = new File("./target/repository/" + System.currentTimeMillis()).getCanonicalFile();
-        repository = Mockito.mock(Repository.class);
+        repository = Mockito.mock(PersistentRepository.class);
         Mockito.when(repository.getName()).thenReturn("MockedRepo");
         propertyProvider = Mockito.mock(ConfigurationPropertyProvider.class);
         Mockito.when(propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());

@@ -36,6 +36,14 @@ public interface ResourceBuilder {
      * @param symbolicName The symbolic name
      * @param version The version
      */
+    Capability addIdentityCapability(String symbolicName, String version);
+
+    /**
+     * Add the identity {@link Capability}.
+     *
+     * @param symbolicName The symbolic name
+     * @param version The version
+     */
     Capability addIdentityCapability(String symbolicName, Version version);
 
     /**
@@ -47,7 +55,7 @@ public interface ResourceBuilder {
      * @param dirs The directives
      */
     Capability addIdentityCapability(String symbolicName, Version version, Map<String, Object> atts, Map<String, String> dirs);
-    
+
     /**
      * Add a {@link Capability}
      *
@@ -71,8 +79,16 @@ public interface ResourceBuilder {
      * @param symbolicName The symbolic name
      * @param version The version range
      */
+    Requirement addIdentityRequirement(String symbolicName, String version);
+
+    /**
+     * Add an identity {@link Requirement}
+     *
+     * @param symbolicName The symbolic name
+     * @param version The version range
+     */
     Requirement addIdentityRequirement(String symbolicName, VersionRange version);
-    
+
     /**
      * Add an identity {@link Requirement}
      *
@@ -82,7 +98,7 @@ public interface ResourceBuilder {
      * @param dirs The directives
      */
     Requirement addIdentityRequirement(String symbolicName, VersionRange version, Map<String, Object> atts, Map<String, String> dirs);
-    
+
     /**
      * Add a {@link Requirement}
      *

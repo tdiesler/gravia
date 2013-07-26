@@ -111,18 +111,22 @@ public class AbstractRequirement implements Requirement {
     public Object getAttribute(String key) {
         return attributes != null ? attributes.get(key) : null;
     }
-    
+
     public static VersionRange getVersionRange(Requirement req, String attr) {
         Object value = req.getAttribute(attr);
         return (value instanceof String) ? new VersionRange((String) value) : (VersionRange) value;
     }
 
     protected void validate() {
+        Object attval = getAttribute(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+        if (attval != null && !(attval instanceof VersionRange)) {
+            getAttributes().put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, new VersionRange(attval.toString()));
+        }
         String resdir = getDirective(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
         optional = Namespace.RESOLUTION_OPTIONAL.equals(resdir);
         canonicalName = toString();
     }
-    
+
     @Override
     public String toString() {
         String result = canonicalName;

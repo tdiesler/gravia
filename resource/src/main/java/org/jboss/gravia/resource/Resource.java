@@ -18,7 +18,5 @@ public interface Resource extends Adaptable, Attachable {
 
     List<Requirement> getRequirements(String namespace);
 
-    boolean isAbstract();
-
     Wiring getWiring();
 }

@@ -30,20 +30,24 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.jboss.gravia.repository.ContentCapability;
 import org.jboss.gravia.repository.ContentNamespace;
+import org.jboss.gravia.repository.MavenCoordinates;
+import org.jboss.gravia.repository.MavenIdentityRepository;
 import org.jboss.gravia.repository.Namespace100.Attribute;
+import org.jboss.gravia.repository.PersistentRepository;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
+import org.jboss.gravia.repository.RepositoryAggregator;
 import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.repository.RepositoryStorageException;
 import org.jboss.gravia.repository.RepositoryWriter;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
-
 
 /**
  * A simple {@link RepositoryStorage} that uses
@@ -56,7 +60,7 @@ public abstract class AbstractPersistentRepositoryStorage extends MemoryReposito
 
     private final AtomicLong increment = new AtomicLong();
 
-    public AbstractPersistentRepositoryStorage(Repository repository, ConfigurationPropertyProvider propertyProvider) {
+    public AbstractPersistentRepositoryStorage(PersistentRepository repository, ConfigurationPropertyProvider propertyProvider) {
         super(repository);
     }
 
@@ -67,12 +71,17 @@ public abstract class AbstractPersistentRepositoryStorage extends MemoryReposito
             String incatt = reader.getRepositoryAttributes().get(Attribute.INCREMENT.getLocalName());
             increment.set(incatt != null ? new Long(incatt) : increment.get());
             Resource res = reader.nextResource();
-            while(res != null) {
+            while (res != null) {
                 addResourceInternal(res, false);
                 res = reader.nextResource();
             }
             reader.close();
         }
+    }
+
+    @Override
+    public PersistentRepository getRepository() {
+        return (PersistentRepository) super.getRepository();
     }
 
     protected abstract ResourceBuilder createResourceBuilder();
@@ -90,16 +99,42 @@ public abstract class AbstractPersistentRepositoryStorage extends MemoryReposito
         return addResourceInternal(res, true);
     }
 
-    private synchronized Resource addResourceInternal(Resource res, boolean writeXML) throws RepositoryStorageException {
-        if (res == null)
-            throw new IllegalArgumentException("Null res");
+    private synchronized Resource addResourceInternal(Resource resource, boolean writeXML) throws RepositoryStorageException {
+        if (resource == null)
+            throw new IllegalArgumentException("Null resource");
 
-        List<Capability> ccaps = res.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
-        if (ccaps.size() > 0) {
-            return addContentResource(res, ccaps, writeXML);
-        } else {
-            return addAbstractResource(res, writeXML);
+        // Convert to a maven resource if needed
+        Capability icap = resource.getIdentityCapability();
+        List<Capability> ccaps = resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
+        String mvnatt = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
+        if (ccaps.isEmpty() && mvnatt != null) {
+            MavenCoordinates mvnid = MavenCoordinates.parse(mvnatt);
+            Resource mvnres = getMavenResource(mvnid);
+            ccaps = mvnres.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
         }
+
+        if (ccaps.size() > 0) {
+            return addContentResource(resource, ccaps, writeXML);
+        } else {
+            return addAbstractResource(resource, writeXML);
+        }
+    }
+
+    private Resource getMavenResource(MavenCoordinates mavenid) {
+        MavenIdentityRepository mvnrepo = null;
+        Repository delegate = getRepository().getDelegate();
+        if (delegate instanceof MavenIdentityRepository) {
+            mvnrepo = (MavenIdentityRepository) delegate;
+        } else if (delegate instanceof RepositoryAggregator) {
+            RepositoryAggregator aggregator = (RepositoryAggregator) delegate;
+            for (Repository repo : aggregator.getDelegates()) {
+                if (repo instanceof MavenIdentityRepository) {
+                    mvnrepo = (MavenIdentityRepository) repo;
+                    break;
+                }
+            }
+        }
+        return mvnrepo != null ? mvnrepo.findMavenResource(mavenid) : null;
     }
 
     private Resource addContentResource(Resource res, List<Capability> ccaps, boolean writeXML) throws RepositoryStorageException {
@@ -116,20 +151,21 @@ public abstract class AbstractPersistentRepositoryStorage extends MemoryReposito
             for (Capability cap : res.getCapabilities(null)) {
                 if (!ContentNamespace.CONTENT_NAMESPACE.equals(cap.getNamespace())) {
                     builder.addCapability(cap.getNamespace(), cap.getAttributes(), cap.getDirectives());
-                } else {
-                    ContentCapability ccap = cap.adapt(ContentCapability.class);
-                    Map<String, Object> contentAtts = new HashMap<String, Object>();
-                    String mimeType = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);
-                    if (mimeType != null) {
-                        contentAtts.put(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE, mimeType);
-                    }
-                    InputStream input = getResourceContent(ccap);
-                    try {
-                        addResourceContent(input, contentAtts);
-                        builder.addCapability(ContentNamespace.CONTENT_NAMESPACE, contentAtts, cap.getDirectives());
-                    } catch (RepositoryStorageException ex) {
-                        throw new RepositoryStorageException("Cannot add resource to storeage: " + mimeType, ex);
-                    }
+                }
+            }
+            for (Capability cap : ccaps) {
+                ContentCapability ccap = cap.adapt(ContentCapability.class);
+                Map<String, Object> contentAtts = new HashMap<String, Object>();
+                String mimeType = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);
+                if (mimeType != null) {
+                    contentAtts.put(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE, mimeType);
+                }
+                InputStream input = getResourceContent(ccap);
+                try {
+                    addResourceContent(input, contentAtts);
+                    builder.addCapability(ContentNamespace.CONTENT_NAMESPACE, contentAtts, cap.getDirectives());
+                } catch (RepositoryStorageException ex) {
+                    throw new RepositoryStorageException("Cannot add resource to storeage: " + mimeType, ex);
                 }
             }
             for (Requirement req : res.getRequirements(null)) {
@@ -210,7 +246,7 @@ public abstract class AbstractPersistentRepositoryStorage extends MemoryReposito
         writer.writeRepositoryElement(attributes);
         RepositoryReader reader = getRepositoryReader();
         Resource resource = reader.nextResource();
-        while(resource != null) {
+        while (resource != null) {
             writer.writeResource(resource);
             resource = reader.nextResource();
         }
