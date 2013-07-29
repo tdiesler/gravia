@@ -89,11 +89,8 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+                    <canUpdateCopyright>true</canUpdateCopyright>
                     <licenseName>lgpl_v2_1</licenseName>
-                    <inceptionYear>2013</inceptionYear>
-                    <excludes>
-                        <exclude>target/**</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
         </plugins>

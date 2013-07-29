@@ -40,6 +40,13 @@
     
 	<build>
 		<plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <inceptionYear>2010</inceptionYear>
+                </configuration>
+            </plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>

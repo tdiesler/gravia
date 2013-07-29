@@ -3,7 +3,7 @@ package org.jboss.test.gravia.repository;
  * #%L
  * JBossOSGi Repository
  * %%
- * Copyright (C) 2010 - 2012 JBoss by Red Hat
+ * Copyright (C) 2012 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as 
