@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.test.gravia.repository;
+package org.jboss.test.gravia.provision;
 
 import java.util.Collections;
 import java.util.Iterator;

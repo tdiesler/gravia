@@ -48,16 +48,16 @@ public class ManifestResourceBuilderTestCase {
 
     @Test
     public void testGenericCapabilities() throws Exception {
-        ManifestBuilder builder = new ManifestBuilder();
-        builder.addIdentityCapability("some.name", "1.0.0");
-        builder.addGenericCapabilities("test; effective:=\"resolve\"; test =\"aName\"; version : Version=\"1.0\"; long :Long=\"100\"; double: Double=\"1.001\"; string:String =\"aString\"; version.list:List < Version > = \"1.0, 1.1, 1.2\"; long.list : List  <Long  >=\"1, 2, 3, 4\"; double.list: List<  Double>= \"1.001, 1.002, 1.003\"; string.list :List<String  >= \"aString,bString,cString\"; string.list2:List=\"a\\\"quote,a\\,comma, aSpace ,\\start,\\,start,end\\\",end\\,\"; string.list3 :List<String>= \" aString , bString , cString \"");
-        builder.addGenericCapabilities("test.multiple; attr=\"value1\"", "test.multiple; attr=\"value2\"", "test.no.attrs");
-        Manifest manifest = builder.getManifest();
+        ManifestBuilder manifestbuilder = new ManifestBuilder();
+        manifestbuilder.addIdentityCapability("some.name", "1.0.0");
+        manifestbuilder.addGenericCapabilities("test; effective:=\"resolve\"; test =\"aName\"; version : Version=\"1.0\"; long :Long=\"100\"; double: Double=\"1.001\"; string:String =\"aString\"; version.list:List < Version > = \"1.0, 1.1, 1.2\"; long.list : List  <Long  >=\"1, 2, 3, 4\"; double.list: List<  Double>= \"1.001, 1.002, 1.003\"; string.list :List<String  >= \"aString,bString,cString\"; string.list2:List=\"a\\\"quote,a\\,comma, aSpace ,\\start,\\,start,end\\\",end\\,\"; string.list3 :List<String>= \" aString , bString , cString \"");
+        manifestbuilder.addGenericCapabilities("test.multiple; attr=\"value1\"", "test.multiple; attr=\"value2\"", "test.no.attrs");
+        Manifest manifest = manifestbuilder.getManifest();
 
         //manifest.write(System.out);
 
-        ManifestResourceBuilder resbuilder = new ManifestResourceBuilder();
-        Resource resource = resbuilder.load(manifest).getResource();
+        ManifestResourceBuilder builder = new ManifestResourceBuilder();
+        Resource resource = builder.load(manifest).getResource();
         Assert.assertEquals(ResourceIdentity.fromString("some.name:1.0.0"), resource.getIdentity());
         List<Capability> caps = resource.getCapabilities("test");
         Assert.assertEquals(1, caps.size());
