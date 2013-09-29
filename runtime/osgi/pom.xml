@@ -29,31 +29,19 @@
     
     <parent>
         <groupId>org.jboss.gravia</groupId>
-        <artifactId>gravia</artifactId>
+        <artifactId>gravia-runtime</artifactId>
         <version>1.0.0.Beta2-SNAPSHOT</version>
     </parent>
 
-    <name>Gravia :: Runtime</name>
+    <name>Gravia :: Runtime :: OSGi</name>
     
-    <artifactId>gravia-runtime</artifactId>
-	<packaging>pom</packaging>
-	
-	<modules>
-		<module>api</module>
-		<module>embedded</module>
-		<module>osgi</module>
-		<module>itests</module>
-	</modules>
-	
+    <artifactId>gravia-runtime-osgi</artifactId>
+
+    <dependencies>
+    </dependencies>
+
 	<build>
 		<plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <configuration>
-                    <inceptionYear>2013</inceptionYear>
-                </configuration>
-            </plugin>
 		</plugins>
 	</build>
 </project>
