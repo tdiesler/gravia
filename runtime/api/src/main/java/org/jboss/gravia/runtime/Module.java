@@ -22,6 +22,7 @@
 package org.jboss.gravia.runtime;
 
 import java.util.Dictionary;
+import java.util.Map;
 
 /**
  * [TODO]
@@ -40,17 +41,6 @@ public interface Module {
         UNINSTALLED
     }
 
-    enum Type {
-        /** OSGi Bundle */
-        BUNDLE,
-        /** JBoss Module */
-        MODULE,
-        /** Other */
-        OTHER
-    }
-
-    Runtime getRuntime();
-
     long getModuleId();
 
     State getState();
@@ -58,6 +48,8 @@ public interface Module {
     <A> A adapt(Class<A> type);
 
     ModuleContext getModuleContext();
+
+    Map<String, Object> getProperties();
 
     void start() throws ModuleException;
 

@@ -49,7 +49,7 @@ public class ServiceEvent extends EventObject {
      * This event is synchronously delivered <strong>after</strong> the service
      * has been registered with the Framework.
      * 
-     * @see BundleContext#registerService(String[],Object,Dictionary)
+     * @see ModuleContext#registerService(String[],Object,Dictionary)
      */
     public final static int             REGISTERED          = 0x00000001;
 
@@ -70,14 +70,14 @@ public class ServiceEvent extends EventObject {
      * has completed unregistering.
      * 
      * <p>
-     * If a bundle is using a service that is {@code UNREGISTERING}, the bundle
+     * If a module is using a service that is {@code UNREGISTERING}, the module
      * should release its use of the service when it receives this event. If the
-     * bundle does not release its use of the service when it receives this
-     * event, the Framework will automatically release the bundle's use of the
+     * module does not release its use of the service when it receives this
+     * event, the Framework will automatically release the module's use of the
      * service while completing the service unregistration operation.
      * 
      * @see ServiceRegistration#unregister()
-     * @see BundleContext#ungetService(ServiceReference)
+     * @see ModuleContext#ungetService(ServiceReference)
      */
     public final static int             UNREGISTERING       = 0x00000004;
 

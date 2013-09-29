@@ -5,8 +5,8 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
  * 
  * This program is distributed in the hope that it will be useful,
@@ -14,12 +14,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
  * 
- * You should have received a copy of the GNU General Lesser Public 
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.internal.osgi;
+package org.jboss.gravia.runtime.embedded.osgi;
 
 import java.io.File;
 import java.io.InputStream;
@@ -49,11 +49,11 @@ import org.osgi.framework.ServiceRegistration;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public final class ModuleAsBundleContext implements BundleContext {
+public final class BundleContextAdaptor implements BundleContext {
 
     private final ModuleContext moduleContext;
 
-    public ModuleAsBundleContext(ModuleContext moduleContext) {
+    public BundleContextAdaptor(ModuleContext moduleContext) {
         this.moduleContext = moduleContext;
     }
 
@@ -61,7 +61,8 @@ public final class ModuleAsBundleContext implements BundleContext {
 
     @Override
     public Bundle getBundle() {
-        return moduleContext.getModule().adapt(Bundle.class);
+        Module module = moduleContext.getModule();
+        return new BundleAdaptor(module);
     }
 
     // Unsupported BundleContext API
@@ -228,7 +229,8 @@ public final class ModuleAsBundleContext implements BundleContext {
 
         @Override
         public Bundle getBundle() {
-            return delegate.getModule().adapt(Bundle.class);
+            Module module = delegate.getModule();
+            return new BundleAdaptor(module);
         }
 
         @Override

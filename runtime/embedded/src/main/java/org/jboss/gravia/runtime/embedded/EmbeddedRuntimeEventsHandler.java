@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.internal;
+package org.jboss.gravia.runtime.embedded;
 
 import java.security.AccessControlContext;
 import java.security.AccessController;
@@ -37,8 +37,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import org.jboss.gravia.runtime.AllServiceListener;
-import org.jboss.gravia.runtime.BundleEvent;
-import org.jboss.gravia.runtime.BundleListener;
+import org.jboss.gravia.runtime.ModuleEvent;
+import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Filter;
 import org.jboss.gravia.runtime.Module;
@@ -46,8 +46,8 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.RuntimeUtils;
 import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceListener;
-import org.jboss.gravia.runtime.SynchronousBundleListener;
-import org.jboss.gravia.runtime.internal.osgi.ConstantsHelper;
+import org.jboss.gravia.runtime.SynchronousModuleListener;
+import org.jboss.gravia.runtime.embedded.osgi.ConstantsHelper;
 import org.jboss.logging.Logger;
 
 /**
@@ -74,19 +74,19 @@ final class EmbeddedRuntimeEventsHandler {
 
     EmbeddedRuntimeEventsHandler(ExecutorService executorService) {
         this.executorService = executorService;
-        asyncBundleEvents.add(new Integer(BundleEvent.INSTALLED));
-        asyncBundleEvents.add(new Integer(BundleEvent.RESOLVED));
-        asyncBundleEvents.add(new Integer(BundleEvent.STARTED));
-        asyncBundleEvents.add(new Integer(BundleEvent.STOPPED));
-        asyncBundleEvents.add(new Integer(BundleEvent.UNRESOLVED));
-        asyncBundleEvents.add(new Integer(BundleEvent.UNINSTALLED));
-        infoEvents.add(ConstantsHelper.bundleEvent(BundleEvent.INSTALLED));
-        infoEvents.add(ConstantsHelper.bundleEvent(BundleEvent.STARTED));
-        infoEvents.add(ConstantsHelper.bundleEvent(BundleEvent.STOPPED));
-        infoEvents.add(ConstantsHelper.bundleEvent(BundleEvent.UNINSTALLED));
+        asyncBundleEvents.add(new Integer(ModuleEvent.INSTALLED));
+        asyncBundleEvents.add(new Integer(ModuleEvent.RESOLVED));
+        asyncBundleEvents.add(new Integer(ModuleEvent.STARTED));
+        asyncBundleEvents.add(new Integer(ModuleEvent.STOPPED));
+        asyncBundleEvents.add(new Integer(ModuleEvent.UNRESOLVED));
+        asyncBundleEvents.add(new Integer(ModuleEvent.UNINSTALLED));
+        infoEvents.add(ConstantsHelper.bundleEvent(ModuleEvent.INSTALLED));
+        infoEvents.add(ConstantsHelper.bundleEvent(ModuleEvent.STARTED));
+        infoEvents.add(ConstantsHelper.bundleEvent(ModuleEvent.STOPPED));
+        infoEvents.add(ConstantsHelper.bundleEvent(ModuleEvent.UNINSTALLED));
     }
 
-    public void addBundleListener(final Module bundle, final BundleListener listener) {
+    public void addBundleListener(final Module bundle, final ModuleListener listener) {
         assert listener != null : "Null listener";
         synchronized (bundleListeners) {
             List<BundleListenerRegistration> registrations = bundleListeners.get(bundle);
@@ -102,7 +102,7 @@ final class EmbeddedRuntimeEventsHandler {
     }
 
 
-    public void removeBundleListener(final Module bundle, final BundleListener listener) {
+    public void removeBundleListener(final Module bundle, final ModuleListener listener) {
         assert listener != null : "Null listener";
         synchronized (bundleListeners) {
             List<BundleListenerRegistration> registrations = bundleListeners.get(bundle);
@@ -227,7 +227,7 @@ final class EmbeddedRuntimeEventsHandler {
         }
 
         // Expose the bundleState wrapper not the state itself
-        final BundleEvent event = new BundleEventImpl(type, bundle, context != null ? context.getModule() : bundle);
+        final ModuleEvent event = new BundleEventImpl(type, bundle, context != null ? context.getModule() : bundle);
         final String typeName = ConstantsHelper.bundleEvent(event.getType());
 
         // Nobody is interested
@@ -239,11 +239,11 @@ final class EmbeddedRuntimeEventsHandler {
         iterator = registrations.iterator();
         while (iterator.hasNext()) {
             BundleListenerRegistration blreg = iterator.next();
-            BundleListener listener = blreg.listener;
+            ModuleListener listener = blreg.listener;
             try {
-                if (listener instanceof SynchronousBundleListener) {
+                if (listener instanceof SynchronousModuleListener) {
                     iterator.remove();
-                    listener.bundleChanged(event);
+                    listener.moduleChanged(event);
                 }
             } catch (Throwable th) {
                 LOGGER.warnf(th, "Error while firing bundle event %s for: %s", typeName, bundle);
@@ -259,10 +259,10 @@ final class EmbeddedRuntimeEventsHandler {
                     // installed, resolved, started, stopped, updated, unresolved, or uninstalled
                     if (asyncBundleEvents.contains(type)) {
                         for (BundleListenerRegistration blreg : registrations) {
-                            BundleListener listener = blreg.listener;
+                            ModuleListener listener = blreg.listener;
                             try {
-                                if (!(listener instanceof SynchronousBundleListener)) {
-                                    listener.bundleChanged(event);
+                                if (!(listener instanceof SynchronousModuleListener)) {
+                                    listener.moduleChanged(event);
                                 }
                             } catch (Throwable th) {
                                 LOGGER.warnf(th, "Error while firing bundle event %s for: %s", typeName, bundle);
@@ -389,7 +389,7 @@ final class EmbeddedRuntimeEventsHandler {
         }
 
         Module getModule() {
-            return module.adapt(Module.class);
+            return module;
         }
 
         ModuleContext getModuleContext() {
@@ -434,17 +434,17 @@ final class EmbeddedRuntimeEventsHandler {
     }
 
     static class BundleListenerRegistration {
-        private final BundleListener listener;
+        private final ModuleListener listener;
         private final ModuleContext bundleContext;
         private final Module bundle;
 
-        BundleListenerRegistration(Module bundle, BundleListener listener) {
+        BundleListenerRegistration(Module bundle, ModuleListener listener) {
             this.listener = listener;
             this.bundle = bundle;
             this.bundleContext = bundle.getModuleContext();
         }
 
-        BundleListener getListener() {
+        ModuleListener getListener() {
             return listener;
         }
 
@@ -535,7 +535,7 @@ final class EmbeddedRuntimeEventsHandler {
         }
     }
 
-    static class BundleEventImpl extends BundleEvent {
+    static class BundleEventImpl extends ModuleEvent {
 
         private static final long serialVersionUID = -2705304702665185935L;
 

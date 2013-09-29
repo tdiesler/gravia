@@ -63,7 +63,7 @@ public class RuntimeUtils {
      * <p>
      * This method returns a Filter implementation which may not perform as well
      * as the framework implementation-specific Filter implementation returned
-     * by {@link BundleContext#createFilter(String)}.
+     * by {@link ModuleContext#createFilter(String)}.
      * 
      * @param filter The filter string.
      * @return A {@code Filter} object encapsulating the filter string.

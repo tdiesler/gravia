@@ -1,6 +1,6 @@
 /*
  * #%L
- * Gravia :: Runtime :: API
+ * JBossOSGi SPI
  * %%
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
@@ -19,17 +19,25 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime;
+package org.jboss.test.gravia.runtime.embedded;
+
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.embedded.EmbeddedRuntime;
 
 /**
- * [TODO]
+ * [TODO].
  *
- * @author thomas.diesler@jboss.com
+ * @author thomas.diesler@jbos.com
  * @since 27-Sep-2013
  */
-public interface ServiceFactory<S> {
+abstract class AbstractRuntimeTest {
 
-    S getService(Module module, ServiceRegistration<S> registration);
+    private Runtime runtime;
 
-    void ungetService(Module module, ServiceRegistration<S> registration, S service);
+    Runtime getRuntime() {
+        if (runtime == null) {
+            runtime = new EmbeddedRuntime(null);
+        }
+        return runtime;
+    }
 }

@@ -1,6 +1,6 @@
 /*
  * #%L
- * Gravia :: Runtime :: API
+ * JBossOSGi Framework
  * %%
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
@@ -19,21 +19,25 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime;
+package org.jboss.test.gravia.runtime.embedded.suba;
 
-import java.util.EventListener;
+import org.jboss.gravia.runtime.ModuleActivator;
+import org.jboss.gravia.runtime.ModuleContext;
 
 /**
- * [TODO]
+ * A Service Activator
  *
  * @author thomas.diesler@jboss.com
- * @since 27-Sep-2013
+ * @since 24-Apr-2009
  */
-public interface BundleListener extends EventListener {
-    /**
-     * Receives notification that a bundle has had a lifecycle change.
-     * 
-     * @param event The {@code ModuleEvent}.
-     */
-    public void bundleChanged(BundleEvent event);
+public class SimpleActivator implements ModuleActivator {
+
+    @Override
+    public void start(ModuleContext context) {
+        context.registerService(String.class, new String("Hello"), null);
+    }
+
+    @Override
+    public void stop(ModuleContext context) {
+    }
 }

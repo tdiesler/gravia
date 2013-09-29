@@ -29,7 +29,7 @@ import java.util.EventObject;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public class BundleEvent extends EventObject {
+public class ModuleEvent extends EventObject {
 
     static final long       serialVersionUID    = 4080640865971756012L;
 
@@ -140,7 +140,7 @@ public class BundleEvent extends EventObject {
      *        to install the module. Otherwise it is the module itself.
      * @since 1.6
      */
-    public BundleEvent(int type, Module module, Module origin) {
+    public ModuleEvent(int type, Module module, Module origin) {
         super(module);
         if (origin == null) {
             throw new IllegalArgumentException("null origin");
@@ -157,7 +157,7 @@ public class BundleEvent extends EventObject {
      * @param module The module which had a lifecycle change. This module is
      *        used as the origin of the event.
      */
-    public BundleEvent(int type, Module module) {
+    public ModuleEvent(int type, Module module) {
         super(module);
         this.module = module;
         this.type = type;

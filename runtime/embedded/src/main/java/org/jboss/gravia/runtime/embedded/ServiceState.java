@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.internal;
+package org.jboss.gravia.runtime.embedded;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,9 +154,9 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
 
-    public void ungetScopedValue(Module bundle) {
+    public void ungetScopedValue(Module module) {
         if (valueProvider.isFactoryValue()) {
-            ServiceFactoryHolder factoryHolder = getFactoryHolder(bundle);
+            ServiceFactoryHolder factoryHolder = getFactoryHolder(module);
             if (factoryHolder != null) {
                 try {
                     factoryHolder.ungetService();
@@ -262,20 +262,20 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
 
-    public void addUsingModule(Module bundleState) {
+    public void addUsingModule(Module moduleState) {
         synchronized (this) {
             if (usingModules == null)
                 usingModules = new HashSet<Module>();
 
-            usingModules.add(bundleState);
+            usingModules.add(moduleState);
         }
     }
 
 
-    public void removeUsingModule(Module bundle) {
+    public void removeUsingModule(Module module) {
         synchronized (this) {
             if (usingModules != null)
-                usingModules.remove(bundle);
+                usingModules.remove(module);
         }
     }
 
@@ -291,52 +291,52 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
     @Override
-    public boolean isAssignableTo(Module bundle, String className) {
-        if (bundle == null)
-            throw new IllegalArgumentException("Null bundle");
+    public boolean isAssignableTo(Module module, String className) {
+        if (module == null)
+            throw new IllegalArgumentException("Null module");
         if (className == null)
             throw new IllegalArgumentException("Null className");
 
-        if (bundle == ownerModule || className.startsWith("java."))
+        if (module == ownerModule || className.startsWith("java."))
             return true;
 
-        if (bundle.getState() == Module.State.UNINSTALLED)
+        if (module.getState() == Module.State.UNINSTALLED)
             return false;
 
-        ClassLoader bundleClassLoader = bundle.adapt(ClassLoader.class);
-        if (bundleClassLoader == null) {
-            LOGGER.infof("No ClassLoader for: %s", bundle);
+        ClassLoader moduleClassLoader = module.adapt(ClassLoader.class);
+        if (moduleClassLoader == null) {
+            LOGGER.infof("No ClassLoader for: %s", module);
             return false;
         }
 
         Class<?> targetClass;
         try {
-            targetClass = bundleClassLoader.loadClass(className);
+            targetClass = moduleClassLoader.loadClass(className);
         } catch (ClassNotFoundException ex) {
-            // If the requesting bundle does not have a wire to the
+            // If the requesting module does not have a wire to the
             // service package it cannot be constraint on that package.
-            LOGGER.tracef("Requesting bundle [%s] cannot load class: %s", bundle, className);
+            LOGGER.tracef("Requesting module [%s] cannot load class: %s", module, className);
             return true;
         }
 
         ClassLoader ownerClassLoader = ownerModule.adapt(ClassLoader.class);
         if (ownerClassLoader == null) {
-            LOGGER.tracef("Registrant bundle [%s] has no class loader for: %s", ownerModule, className);
+            LOGGER.tracef("Registrant module [%s] has no class loader for: %s", ownerModule, className);
             return true;
         }
 
-        // For the bundle that registered the service referenced by this ServiceReference (registrant bundle);
-        // find the source for the package. If no source is found then return true if the registrant bundle
-        // is equal to the specified bundle; otherwise return false
+        // For the module that registered the service referenced by this ServiceReference (registrant module);
+        // find the source for the package. If no source is found then return true if the registrant module
+        // is equal to the specified module; otherwise return false
         Class<?> serviceClass;
         try {
             serviceClass = ownerClassLoader.loadClass(className);
         } catch (ClassNotFoundException e) {
-            LOGGER.tracef("Registrant bundle [%s] cannot load class: %s", ownerModule, className);
+            LOGGER.tracef("Registrant module [%s] cannot load class: %s", ownerModule, className);
             return true;
         }
 
-        // If the package source of the registrant bundle is equal to the package source of the specified bundle
+        // If the package source of the registrant module is equal to the package source of the specified module
         // then return true; otherwise return false.
         if (targetClass != serviceClass) {
             LOGGER.tracef("Not assignable: %s", className);
@@ -435,14 +435,14 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         T getService() {
             // Multiple calls to getService() return the same value
             if (useCount.get() == 0) {
-                // The Framework must not allow this method to be concurrently called for the same bundle
+                // The Framework must not allow this method to be concurrently called for the same module
                 synchronized (module) {
                     T retValue = (T) factory.getService(module, getRegistration());
                     if (retValue == null)
                         return null;
 
                     // The Framework will check if the returned service object is an instance of all the
-                    // classes named when the service was registered. If not, then null is returned to the bundle.
+                    // classes named when the service was registered. If not, then null is returned to the module.
                     if (checkValidClassNames(ownerModule, (String[]) getProperty(Constants.OBJECTCLASS), retValue) == false)
                         return null;
 

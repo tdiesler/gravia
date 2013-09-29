@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.test.gravia.runtime;
+package org.jboss.test.gravia.runtime.embedded;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,7 @@ import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.osgi.metadata.OSGiMetaData;
 import org.jboss.osgi.metadata.OSGiMetaDataBuilder;
-import org.jboss.test.gravia.runtime.suba.SimpleActivator;
+import org.jboss.test.gravia.runtime.embedded.suba.SimpleActivator;
 import org.junit.Test;
 
 /**
@@ -50,7 +50,6 @@ public class BasicComponentTestCase extends AbstractRuntimeTest {
 
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(Constants.MODULE_ACTIVATOR, bundleActivator);
-        props.put(Constants.MODULE_TYPE, Module.Type.BUNDLE);
         Module scrModule = getRuntime().installModule(SimpleActivator.class.getClassLoader(), props);
         Assert.assertEquals(Module.State.RESOLVED, scrModule.getState());
 

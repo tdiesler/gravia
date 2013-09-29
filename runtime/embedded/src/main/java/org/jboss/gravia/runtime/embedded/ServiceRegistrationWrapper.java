@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.internal;
+package org.jboss.gravia.runtime.embedded;
 
 import java.util.Dictionary;
 

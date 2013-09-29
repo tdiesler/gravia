@@ -62,7 +62,7 @@ public class ServiceException extends RuntimeException {
     public static final int REMOTE              = 5;
     /**
      * The service factory resulted in a recursive call to itself for the
-     * requesting bundle.
+     * requesting module.
      * 
      * @since 1.6
      */

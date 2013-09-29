@@ -21,12 +21,19 @@
  */
 package org.jboss.gravia.runtime;
 
+import java.util.EventListener;
+
 /**
  * [TODO]
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public interface SynchronousBundleListener extends BundleListener {
-    // This is a marker interface
+public interface ModuleListener extends EventListener {
+    /**
+     * Receives notification that a module has had a lifecycle change.
+     * 
+     * @param event The {@code ModuleEvent}.
+     */
+    public void moduleChanged(ModuleEvent event);
 }

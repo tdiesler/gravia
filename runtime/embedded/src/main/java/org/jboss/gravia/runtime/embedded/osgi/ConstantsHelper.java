@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.internal.osgi;
+package org.jboss.gravia.runtime.embedded.osgi;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;

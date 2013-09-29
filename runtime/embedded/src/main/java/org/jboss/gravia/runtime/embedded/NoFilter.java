@@ -1,4 +1,4 @@
-package org.jboss.gravia.runtime.internal;
+package org.jboss.gravia.runtime.embedded;
 /*
  * #%L
  * JBossOSGi Framework

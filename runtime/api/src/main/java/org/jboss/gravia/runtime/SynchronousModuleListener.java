@@ -27,9 +27,6 @@ package org.jboss.gravia.runtime;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public interface ServiceFactory<S> {
-
-    S getService(Module module, ServiceRegistration<S> registration);
-
-    void ungetService(Module module, ServiceRegistration<S> registration, S service);
+public interface SynchronousModuleListener extends ModuleListener {
+    // This is a marker interface
 }

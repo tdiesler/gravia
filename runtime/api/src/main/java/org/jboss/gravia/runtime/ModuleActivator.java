@@ -1,6 +1,6 @@
 /*
  * #%L
- * JBossOSGi SPI
+ * Gravia :: Runtime :: API
  * %%
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
@@ -19,25 +19,18 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.test.gravia.runtime;
+package org.jboss.gravia.runtime;
 
-import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.internal.EmbeddedRuntime;
 
 /**
- * [TODO].
+ * [TODO]
  *
- * @author thomas.diesler@jbos.com
+ * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-abstract class AbstractRuntimeTest {
+public interface ModuleActivator {
 
-    private Runtime runtime;
+    void start(ModuleContext context) throws Exception;
 
-    Runtime getRuntime() {
-        if (runtime == null) {
-            runtime = new EmbeddedRuntime(null);
-        }
-        return runtime;
-    }
+    void stop(ModuleContext context) throws Exception;
 }

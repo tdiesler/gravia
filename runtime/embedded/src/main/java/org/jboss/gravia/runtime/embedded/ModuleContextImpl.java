@@ -19,13 +19,14 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.internal;
+package org.jboss.gravia.runtime.embedded;
 
 import java.util.Dictionary;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
@@ -97,11 +98,13 @@ final class ModuleContextImpl implements ModuleContext {
     }
 
     private EmbeddedRuntimeServicesHandler getServiceManager() {
-        return module.getRuntime().adapt(EmbeddedRuntimeServicesHandler.class);
+        Runtime runtime = module.adapt(Runtime.class);
+        return runtime.adapt(EmbeddedRuntimeServicesHandler.class);
     }
 
     private EmbeddedRuntimeEventsHandler getRuntimeEvents() {
-        return module.getRuntime().adapt(EmbeddedRuntimeEventsHandler.class);
+        Runtime runtime = module.adapt(Runtime.class);
+        return runtime.adapt(EmbeddedRuntimeEventsHandler.class);
     }
 
     void assertNotDestroyed() {

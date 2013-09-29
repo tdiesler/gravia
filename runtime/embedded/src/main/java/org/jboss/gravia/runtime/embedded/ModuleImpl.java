@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.internal;
+package org.jboss.gravia.runtime.embedded;
 
 import java.util.Collections;
 import java.util.Dictionary;
@@ -33,15 +33,12 @@ import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceRegistration;
-import org.jboss.gravia.runtime.internal.osgi.ModuleAsBundle;
-import org.jboss.gravia.runtime.internal.osgi.ModuleAsBundleContext;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import org.jboss.gravia.runtime.embedded.osgi.BundleLifecycleHandler;
 
 /**
  * [TODO]
@@ -49,13 +46,12 @@ import org.osgi.framework.BundleContext;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-final class ModuleImpl implements Module {
+final class ModuleImpl implements Module, Attachable {
 
-    private static AttachmentKey<BundleActivator> BUNDLE_ACTIVATOR_KEY = AttachmentKey.create(BundleActivator.class);
+    private static AttachmentKey<ModuleActivator> MODULE_ACTIVATOR_KEY = AttachmentKey.create(ModuleActivator.class);
     private static final AtomicLong moduleIdGenerator = new AtomicLong();
 
     private final EmbeddedRuntime runtime;
-    private final Type moduleType;
     private final ClassLoader classLoader;
     private final Map<String, Object> properties;
     private final AtomicReference<State> stateRef = new AtomicReference<State>();
@@ -71,7 +67,6 @@ final class ModuleImpl implements Module {
             auxprops.putAll(props);
         }
         this.properties = Collections.unmodifiableMap(auxprops);
-        this.moduleType = (Type) getProperty(Constants.MODULE_TYPE, Type.OTHER);
         this.moduleId = moduleIdGenerator.incrementAndGet();
         this.stateRef.set(State.UNINSTALLED);
     }
@@ -79,25 +74,40 @@ final class ModuleImpl implements Module {
     // Module API
 
     @Override
-    public Runtime getRuntime() {
-        return runtime;
+    public long getModuleId() {
+        return moduleId;
     }
 
     @Override
-    public long getModuleId() {
-        return moduleId;
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <A> A adapt(Class<A> type) {
         A result = null;
-        if (type.isAssignableFrom(Bundle.class)) {
-            result = (A) getBundle();
-        } else if (type.isAssignableFrom(BundleContext.class)) {
-            result = (A) getBundleContext();
+        if (type.isAssignableFrom(Runtime.class)) {
+            result = (A) runtime;
+        } else if (type.isAssignableFrom(ClassLoader.class)) {
+            result = (A) classLoader;
         }
         return result;
+    }
+
+    @Override
+    public <T> T putAttachment(AttachmentKey<T> key, T value) {
+        return attachments.putAttachment(key, value);
+    }
+
+    @Override
+    public <T> T getAttachment(AttachmentKey<T> key) {
+        return attachments.getAttachment(key);
+    }
+
+    @Override
+    public <T> T removeAttachment(AttachmentKey<T> key) {
+        return attachments.removeAttachment(key);
     }
 
     @Override
@@ -135,43 +145,37 @@ final class ModuleImpl implements Module {
         // Create the {@link ModuleContext}
         createModuleContext();
 
-        // #8 The BundleActivator.start(BundleContext) method of this bundle is called
-        String className = (String) properties.get(Constants.MODULE_ACTIVATOR);
-        if (className != null) {
-            try {
-                BundleActivator bundleActivator;
-                synchronized (BUNDLE_ACTIVATOR_KEY) {
-                    bundleActivator = attachments.getAttachment(BUNDLE_ACTIVATOR_KEY);
-                    if (bundleActivator == null) {
-                        Object result = loadClass(className).newInstance();
-                        if (moduleType == Type.BUNDLE) {
-                            bundleActivator = (BundleActivator) result;
-                            attachments.putAttachment(BUNDLE_ACTIVATOR_KEY, bundleActivator);
+        try {
+            if (BundleLifecycleHandler.isInternalBundle(this)) {
+                BundleLifecycleHandler.start(this);
+            } else {
+                String className = (String) properties.get(Constants.MODULE_ACTIVATOR);
+                if (className != null) {
+                    ModuleActivator moduleActivator;
+                    synchronized (MODULE_ACTIVATOR_KEY) {
+                        moduleActivator = attachments.getAttachment(MODULE_ACTIVATOR_KEY);
+                        if (moduleActivator == null) {
+                            Object result = loadClass(className).newInstance();
+                            moduleActivator = (ModuleActivator) result;
+                            attachments.putAttachment(MODULE_ACTIVATOR_KEY, moduleActivator);
                         }
                     }
-                }
-                if (bundleActivator != null) {
-                    bundleActivator.start(getBundle().getBundleContext());
-                }
-            }
+                    if (moduleActivator != null) {
+                        moduleActivator.start(getModuleContext());
+                    }
 
-            // If the BundleActivator is invalid or throws an exception then
-            catch (Throwable th) {
-                setState(State.RESOLVED);
-                destroyModuleContext();
-                throw new ModuleException("Cannot start module: " + this, th);
+                }
             }
         }
+
+        // If the ModuleActivator is invalid or throws an exception then
+        catch (Throwable th) {
+            setState(State.RESOLVED);
+            destroyModuleContext();
+            throw new ModuleException("Cannot start module: " + this, th);
+        }
+
         setState(State.ACTIVE);
-    }
-
-    private Bundle getBundle() {
-        return new ModuleAsBundle(this);
-    }
-
-    private BundleContext getBundleContext() {
-        ModuleContextImpl context = (ModuleContextImpl) getModuleContext();
-        return context != null ? new ModuleAsBundleContext(context) : null;
     }
 
     @Override
@@ -196,11 +200,6 @@ final class ModuleImpl implements Module {
     public ServiceRegistration<?> registerService(String clazz, Object service, Dictionary<String, ?> properties) {
         EmbeddedRuntimeServicesHandler serviceManager = runtime.adapt(EmbeddedRuntimeServicesHandler.class);
         return serviceManager.registerService(this, new String[]{ clazz }, service, properties);
-    }
-
-    private Object getProperty(String key, Object defval) {
-        Object value = properties.get(key);
-        return value != null ? value : defval;
     }
 
     private void assertNotUninstalled() {
