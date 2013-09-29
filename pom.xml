@@ -36,6 +36,8 @@
 
     <!-- Properties -->
     <properties>
+        <version.apache.felix.configadmin>1.6.0</version.apache.felix.configadmin>
+        <version.apache.felix.metatype>1.0.8</version.apache.felix.metatype>
         <version.apache.felix.scr>1.6.2</version.apache.felix.scr>
         <version.apache.felix.scr.ds.annotations>1.2.4</version.apache.felix.scr.ds.annotations>
         <version.apache.felix.scr.generator>1.9.0</version.apache.felix.scr.generator>

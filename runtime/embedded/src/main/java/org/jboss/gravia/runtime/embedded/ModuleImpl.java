@@ -22,8 +22,8 @@
 package org.jboss.gravia.runtime.embedded;
 
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,7 +37,6 @@ import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.embedded.osgi.BundleLifecycleHandler;
 
 /**
@@ -79,8 +78,13 @@ final class ModuleImpl implements Module, Attachable {
     }
 
     @Override
-    public Map<String, Object> getProperties() {
-        return properties;
+    public Object getProperty(String key) {
+        return properties.get(key);
+    }
+
+    @Override
+    public Set<String> getPropertyKeys() {
+        return properties.keySet();
     }
 
     @Override
@@ -194,12 +198,6 @@ final class ModuleImpl implements Module, Attachable {
         assertNotUninstalled();
         setState(State.UNINSTALLED);
         runtime.uninstallModule(this);
-    }
-
-    @Override
-    public ServiceRegistration<?> registerService(String clazz, Object service, Dictionary<String, ?> properties) {
-        EmbeddedRuntimeServicesHandler serviceManager = runtime.adapt(EmbeddedRuntimeServicesHandler.class);
-        return serviceManager.registerService(this, new String[]{ clazz }, service, properties);
     }
 
     private void assertNotUninstalled() {

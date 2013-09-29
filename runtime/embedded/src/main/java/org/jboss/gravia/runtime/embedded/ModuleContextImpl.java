@@ -21,11 +21,16 @@
  */
 package org.jboss.gravia.runtime.embedded;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
@@ -58,6 +63,18 @@ final class ModuleContextImpl implements ModuleContext {
     }
 
     @Override
+    public void addModuleListener(ModuleListener listener) {
+        assertNotDestroyed();
+        getRuntimeEvents().addModuleListener(module, listener);
+    }
+
+    @Override
+    public void removeModuleListener(ModuleListener listener) {
+        assertNotDestroyed();
+        getRuntimeEvents().removeModuleListener(module, listener);
+    }
+
+    @Override
     public void addServiceListener(ServiceListener listener, String filterstr) {
         assertNotDestroyed();
         getRuntimeEvents().addServiceListener(module, listener, filterstr);
@@ -67,6 +84,12 @@ final class ModuleContextImpl implements ModuleContext {
     public void addServiceListener(ServiceListener listener) {
         assertNotDestroyed();
         getRuntimeEvents().addServiceListener(module, listener, null);
+    }
+
+    @Override
+    public void removeServiceListener(ServiceListener listener) {
+        assertNotDestroyed();
+        getRuntimeEvents().removeServiceListener(module, listener);
     }
 
     @Override
@@ -83,10 +106,72 @@ final class ModuleContextImpl implements ModuleContext {
     }
 
     @Override
+    public ServiceRegistration<?> registerService(String[] classNames, Object service, Dictionary<String, ?> properties) {
+        assertNotDestroyed();
+        return getServiceManager().registerService(module, classNames, service, properties);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
         assertNotDestroyed();
         return (ServiceReference<S>) getServiceManager().getServiceReference(module, clazz.getName());
+    }
+
+
+    @Override
+    public ServiceReference<?> getServiceReference(String clazzName) {
+        assertNotDestroyed();
+        return getServiceManager().getServiceReference(module, clazzName);
+    }
+
+    @Override
+    public ServiceReference<?>[] getServiceReferences(String className, String filter) {
+        assertNotDestroyed();
+        List<ServiceState<?>> srefs = getServiceManager().getServiceReferences(module, className, filter, true);
+        if (srefs.isEmpty())
+            return null;
+
+        List<ServiceReference<?>> result = new ArrayList<ServiceReference<?>>();
+        for (ServiceState<?> serviceState : srefs)
+            result.add(serviceState.getReference());
+
+        return result.toArray(new ServiceReference[result.size()]);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter) {
+        assertNotDestroyed();
+        String className = clazz != null ? clazz.getName() : null;
+        List<ServiceState<?>> srefs = getServiceManager().getServiceReferences(module, className, filter, true);
+
+        List<ServiceReference<S>> result = new ArrayList<ServiceReference<S>>();
+        for (ServiceState<?> serviceState : srefs)
+            result.add((ServiceReference<S>) serviceState.getReference());
+
+        return Collections.unmodifiableList(result);
+    }
+
+    @Override
+    public ServiceReference<?>[] getAllServiceReferences(String className, String filter) {
+        assertNotDestroyed();
+        List<ServiceState<?>> srefs = getServiceManager().getServiceReferences(module, className, filter, false);
+        if (srefs.isEmpty())
+            return null;
+
+        List<ServiceReference<?>> result = new ArrayList<ServiceReference<?>>();
+        for (ServiceState<?> serviceState : srefs)
+            result.add(serviceState.getReference());
+
+        return result.toArray(new ServiceReference[result.size()]);
+    }
+
+    @Override
+    public boolean ungetService(ServiceReference<?> reference) {
+        assertNotDestroyed();
+        ServiceState<?> serviceState = ServiceState.assertServiceState(reference);
+        return getServiceManager().ungetService(module, serviceState);
     }
 
     @Override

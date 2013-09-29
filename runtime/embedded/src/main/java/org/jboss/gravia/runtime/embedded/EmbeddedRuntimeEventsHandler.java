@@ -86,7 +86,7 @@ final class EmbeddedRuntimeEventsHandler {
         infoEvents.add(ConstantsHelper.bundleEvent(ModuleEvent.UNINSTALLED));
     }
 
-    public void addBundleListener(final Module bundle, final ModuleListener listener) {
+    public void addModuleListener(final Module bundle, final ModuleListener listener) {
         assert listener != null : "Null listener";
         synchronized (bundleListeners) {
             List<BundleListenerRegistration> registrations = bundleListeners.get(bundle);
@@ -102,7 +102,7 @@ final class EmbeddedRuntimeEventsHandler {
     }
 
 
-    public void removeBundleListener(final Module bundle, final ModuleListener listener) {
+    public void removeModuleListener(final Module bundle, final ModuleListener listener) {
         assert listener != null : "Null listener";
         synchronized (bundleListeners) {
             List<BundleListenerRegistration> registrations = bundleListeners.get(bundle);

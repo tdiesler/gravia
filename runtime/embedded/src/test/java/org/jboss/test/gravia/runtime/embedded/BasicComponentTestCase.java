@@ -24,6 +24,7 @@ package org.jboss.test.gravia.runtime.embedded;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import junit.framework.Assert;
 
@@ -45,14 +46,18 @@ public class BasicComponentTestCase extends AbstractRuntimeTest {
     @Test
     public void testBasicModule() throws Exception {
         JarFile jarFile = new JarFile("target/test-libs/bundles/org.apache.felix.scr.jar");
-        OSGiMetaData metaData = OSGiMetaDataBuilder.load(jarFile.getManifest());
+        Manifest manifest = jarFile.getManifest();
+        OSGiMetaData metaData = OSGiMetaDataBuilder.load(manifest);
         String bundleActivator = metaData.getBundleActivator();
 
         Map<String, Object> props = new HashMap<String, Object>();
-        props.put(Constants.MODULE_ACTIVATOR, bundleActivator);
+        props.put(Constants.MODULE_MANIFEST, manifest);
+        props.put("Bundle-Activator", bundleActivator);
         Module scrModule = getRuntime().installModule(SimpleActivator.class.getClassLoader(), props);
         Assert.assertEquals(Module.State.RESOLVED, scrModule.getState());
 
-        //scrModule.start();
+        scrModule.start();
+
+        scrModule.stop();
     }
 }

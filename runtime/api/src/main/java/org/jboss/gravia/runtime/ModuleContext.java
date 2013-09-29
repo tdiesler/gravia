@@ -21,6 +21,7 @@
  */
 package org.jboss.gravia.runtime;
 
+import java.util.Collection;
 import java.util.Dictionary;
 
 /**
@@ -33,15 +34,33 @@ public interface ModuleContext {
 
     Module getModule();
 
+    void addModuleListener(ModuleListener listener);
+
+    void removeModuleListener(ModuleListener listener);
+
     void addServiceListener(ServiceListener listener, String filter);
 
     void addServiceListener(ServiceListener listener);
+
+    void removeServiceListener(ServiceListener listener);
 
     <S> ServiceRegistration<S> registerService(Class<S> clazz, S service, Dictionary<String, ?> properties);
 
     ServiceRegistration<?> registerService(String className, Object service, Dictionary<String, ?> properties);
 
+    ServiceRegistration<?> registerService(String[] classNames, Object service, Dictionary<String, ?> properties);
+
     <S> ServiceReference<S> getServiceReference(Class<S> clazz);
 
+    ServiceReference<?> getServiceReference(String className);
+
+    ServiceReference<?>[] getServiceReferences(String className, String filter);
+
+    <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter);
+
+    ServiceReference<?>[] getAllServiceReferences(String className, String filter);
+
     <S> S getService(ServiceReference<S> reference);
+
+    boolean ungetService(ServiceReference<?> reference);
 }

@@ -21,7 +21,10 @@
  */
 package org.jboss.gravia.runtime.embedded;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,11 +45,22 @@ public final class EmbeddedRuntime implements Runtime {
     private final EmbeddedRuntimeEventsHandler runtimeEvents;
     private final EmbeddedRuntimeServicesHandler serviceManager;
 
-    private Map<Long, Module> modules = new ConcurrentHashMap<Long, Module>();
+    private final Map<Long, Module> modules = new ConcurrentHashMap<Long, Module>();
+    private final Map<String, Object> properties;
 
-    public EmbeddedRuntime(Map<String, Object> properties) {
+    public EmbeddedRuntime(Map<String, Object> props) {
         runtimeEvents = new EmbeddedRuntimeEventsHandler(createExecutorService("RuntimeEvents"));
         serviceManager = new EmbeddedRuntimeServicesHandler(runtimeEvents);
+        Map<String, Object> auxprops = new ConcurrentHashMap<String, Object>();
+        if (props != null) {
+            auxprops.putAll(props);
+        }
+        this.properties = Collections.unmodifiableMap(auxprops);
+    }
+
+    @Override
+    public Object getProperty(String key) {
+        return properties.get(key);
     }
 
     @Override
@@ -64,6 +78,12 @@ public final class EmbeddedRuntime implements Runtime {
     @Override
     public Module getModule(long id) {
         return modules.get(id);
+    }
+
+    @Override
+    public Set<Module> getModules() {
+        HashSet<Module> snapshot = new HashSet<Module>(modules.values());
+        return Collections.unmodifiableSet(snapshot);
     }
 
     @Override

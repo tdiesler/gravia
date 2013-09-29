@@ -22,10 +22,10 @@
 package org.jboss.gravia.runtime.embedded.osgi;
 
 import org.jboss.gravia.resource.Attachable;
-import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.osgi.framework.BundleActivator;
+import org.osgi.framework.Constants;
 
 /**
  * A handler for internal Bundle lifecycle.
@@ -35,26 +35,22 @@ import org.osgi.framework.BundleActivator;
  */
 public final class BundleLifecycleHandler {
 
-    private static final String INTERNAL_BUNDLE_ACTIVATOR = "Internal-ModuleActivator";
-
-    private static AttachmentKey<BundleActivator> BUNDLE_ACTIVATOR_KEY = AttachmentKey.create(BundleActivator.class);
-
     public static boolean isInternalBundle(Module module) {
-        String className = (String) module.getProperties().get(INTERNAL_BUNDLE_ACTIVATOR);
+        String className = (String) module.getProperty(Constants.BUNDLE_ACTIVATOR);
         return className != null;
     }
 
     public static void start(Module module) throws Exception {
-        String className = (String) module.getProperties().get(INTERNAL_BUNDLE_ACTIVATOR);
+        String className = (String) module.getProperty(Constants.BUNDLE_ACTIVATOR);
         if (className != null) {
             BundleActivator bundleActivator;
-            synchronized (BUNDLE_ACTIVATOR_KEY) {
+            synchronized (BundleAdaptor.BUNDLE_ACTIVATOR_KEY) {
                 Attachable attachable = (Attachable) module;
-                bundleActivator = attachable.getAttachment(BUNDLE_ACTIVATOR_KEY);
+                bundleActivator = attachable.getAttachment(BundleAdaptor.BUNDLE_ACTIVATOR_KEY);
                 if (bundleActivator == null) {
                     Object result = module.loadClass(className).newInstance();
                     bundleActivator = (BundleActivator) result;
-                    attachable.putAttachment(BUNDLE_ACTIVATOR_KEY, bundleActivator);
+                    attachable.putAttachment(BundleAdaptor.BUNDLE_ACTIVATOR_KEY, bundleActivator);
                 }
             }
             if (bundleActivator != null) {
@@ -66,7 +62,7 @@ public final class BundleLifecycleHandler {
 
     public static void stop(Module module) throws Exception {
         Attachable attachable = (Attachable) module;
-        BundleActivator bundleActivator = attachable.getAttachment(BUNDLE_ACTIVATOR_KEY);
+        BundleActivator bundleActivator = attachable.getAttachment(BundleAdaptor.BUNDLE_ACTIVATOR_KEY);
         ModuleContext context = module.getModuleContext();
         bundleActivator.stop(new BundleContextAdaptor(context));
     }

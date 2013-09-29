@@ -28,14 +28,26 @@ import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.jar.Manifest;
 
+import org.jboss.gravia.resource.Attachable;
+import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.osgi.metadata.CaseInsensitiveDictionary;
+import org.jboss.osgi.metadata.OSGiMetaData;
+import org.jboss.osgi.metadata.OSGiMetaDataBuilder;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 
@@ -47,6 +59,9 @@ import org.osgi.framework.Version;
  * @since 27-Sep-2013
  */
 public final class BundleAdaptor implements Bundle {
+
+    static AttachmentKey<OSGiMetaData> OSGI_METADATA_KEY = AttachmentKey.create(OSGiMetaData.class);
+    static AttachmentKey<BundleActivator> BUNDLE_ACTIVATOR_KEY = AttachmentKey.create(BundleActivator.class);
 
     private final Module module;
 
@@ -73,11 +88,16 @@ public final class BundleAdaptor implements Bundle {
                 return Bundle.INSTALLED;
             case RESOLVED:
                 return Bundle.RESOLVED;
+            case STARTING:
+                return Bundle.STARTING;
             case ACTIVE:
                 return Bundle.ACTIVE;
-            default:
+            case STOPPING:
+                return Bundle.STOPPING;
+            case UNINSTALLED:
                 return Bundle.UNINSTALLED;
         }
+        return Bundle.UNINSTALLED;
     }
 
     @Override
@@ -86,7 +106,20 @@ public final class BundleAdaptor implements Bundle {
         return context != null ? new BundleContextAdaptor(context) : null;
     }
 
-    // Unsupported Bundle API
+    @Override
+    public String getSymbolicName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Version getVersion() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Class<?> loadClass(String className) throws ClassNotFoundException {
+        return module.loadClass(className);
+    }
 
     @Override
     public int compareTo(Bundle bundle) {
@@ -130,12 +163,14 @@ public final class BundleAdaptor implements Bundle {
 
     @Override
     public Dictionary<String, String> getHeaders() {
-        throw new UnsupportedOperationException();
+        // If the specified locale is null then the locale returned
+        // by java.util.Locale.getDefault is used.
+        return getHeaders(null);
     }
 
     @Override
     public long getBundleId() {
-        throw new UnsupportedOperationException();
+        return module.getModuleId();
     }
 
     @Override
@@ -164,18 +199,86 @@ public final class BundleAdaptor implements Bundle {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Dictionary<String, String> getHeaders(String locale) {
-        throw new UnsupportedOperationException();
+
+        // Get the raw (unlocalized) manifest headers
+        Dictionary<String, String> rawHeaders = getOSGiMetaData().getHeaders();
+
+        // If the specified locale is the empty string, this method will return the
+        // raw (unlocalized) manifest headers including any leading "%"
+        if ("".equals(locale))
+            return rawHeaders;
+
+        // If the specified locale is null then the locale
+        // returned by java.util.Locale.getDefault is used
+        if (locale == null)
+            locale = Locale.getDefault().toString();
+
+        // Get the localization base name
+        String baseName = rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
+        if (baseName == null)
+            baseName = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+
+        // Get the resource bundle URL for the given base and locale
+        URL entryURL = null; //getLocalizationEntry(baseName, locale);
+
+        // If the specified locale entry could not be found fall back to the default locale entry
+        if (entryURL == null) {
+            // String defaultLocale = Locale.getDefault().toString();
+            // entryURL = getLocalizationEntry(baseName, defaultLocale);
+        }
+
+        // Read the resource bundle
+        ResourceBundle resBundle = null;
+        /*
+        if (entryURL != null) {
+            try {
+                resBundle = new PropertyResourceBundle(entryURL.openStream());
+            } catch (IOException ex) {
+                throw new IllegalStateException("Cannot read resource bundle: " + entryURL, ex);
+            }
+        }
+         */
+
+        Dictionary<String, String> locHeaders = new Hashtable<String, String>();
+        Enumeration<String> e = rawHeaders.keys();
+        while (e.hasMoreElements()) {
+            String key = e.nextElement();
+            String value = rawHeaders.get(key);
+            if (value.startsWith("%"))
+                value = value.substring(1);
+
+            if (resBundle != null) {
+                try {
+                    value = resBundle.getString(value);
+                } catch (MissingResourceException ex) {
+                    // ignore
+                }
+            }
+
+            locHeaders.put(key, value);
+        }
+
+        return new CaseInsensitiveDictionary(locHeaders);
     }
 
-    @Override
-    public String getSymbolicName() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Class<?> loadClass(String name) throws ClassNotFoundException {
-        throw new UnsupportedOperationException();
+    private OSGiMetaData getOSGiMetaData() {
+        Attachable attachable = (Attachable) module;
+        OSGiMetaData metadata  = attachable.getAttachment(OSGI_METADATA_KEY);
+        if (metadata == null) {
+            Manifest manifest = (Manifest) module.getProperty(org.jboss.gravia.runtime.Constants.MODULE_MANIFEST);
+            if (manifest != null) {
+                metadata = OSGiMetaDataBuilder.load(manifest);
+            } else {
+                String bsname = getSymbolicName();
+                Version version = getVersion();
+                OSGiMetaDataBuilder builder = OSGiMetaDataBuilder.createBuilder(bsname, version);
+                metadata = builder.getOSGiMetaData();
+            }
+            attachable.putAttachment(OSGI_METADATA_KEY, metadata);
+        }
+        return metadata;
     }
 
     @Override
@@ -205,11 +308,6 @@ public final class BundleAdaptor implements Bundle {
 
     @Override
     public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Version getVersion() {
         throw new UnsupportedOperationException();
     }
 

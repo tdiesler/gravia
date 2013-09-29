@@ -31,6 +31,8 @@ public interface Constants {
 
     String MODULE_ACTIVATOR = "Module-Activator";
 
+    String MODULE_MANIFEST = "Module-Manifest";
+
     String OBJECTCLASS = "objectClass";
 
     String SERVICE_ID = "service.id";

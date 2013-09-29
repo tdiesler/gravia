@@ -33,7 +33,7 @@
         <version>1.0.0.Beta2-SNAPSHOT</version>
     </parent>
 
-    <name>Gravia Resource</name>
+    <name>Gravia :: Resource</name>
     
     <artifactId>gravia-resource</artifactId>
 

@@ -21,8 +21,7 @@
  */
 package org.jboss.gravia.runtime;
 
-import java.util.Dictionary;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * [TODO]
@@ -49,15 +48,15 @@ public interface Module {
 
     ModuleContext getModuleContext();
 
-    Map<String, Object> getProperties();
+    Object getProperty(String key);
+
+    Set<String> getPropertyKeys();
 
     void start() throws ModuleException;
 
     void stop() throws ModuleException;
 
     void uninstall() throws ModuleException;
-
-    ServiceRegistration<?> registerService(String clazz, Object service, Dictionary<String, ?> properties);
 
     Class<?> loadClass(String className) throws ClassNotFoundException;
 }

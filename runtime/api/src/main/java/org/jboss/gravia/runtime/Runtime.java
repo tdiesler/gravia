@@ -22,6 +22,7 @@
 package org.jboss.gravia.runtime;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * [TODO]
@@ -33,9 +34,11 @@ public interface Runtime {
 
     <A> A adapt(Class<A> type);
 
+    Object getProperty(String key);
+
     Module getModule(long id);
 
+    Set<Module> getModules();
+
     Module installModule(ClassLoader classloader, Map<String, Object> properties);
-
-
 }
