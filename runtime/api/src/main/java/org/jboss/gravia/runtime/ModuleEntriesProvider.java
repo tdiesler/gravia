@@ -21,33 +21,21 @@
  */
 package org.jboss.gravia.runtime;
 
+import java.net.URL;
+import java.util.Enumeration;
+
 /**
  * [TODO]
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public class ModuleException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+public interface ModuleEntriesProvider {
 
-    public ModuleException(String message) {
-        super(message);
-    }
+    Enumeration<String> getEntryPaths(String path);
 
-    public ModuleException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    URL getEntry(String path);
 
-    public ModuleException(Throwable cause) {
-        super(cause);
-    }
-
-    public static ModuleException launderThrowable(Throwable cause) {
-        if (cause instanceof RuntimeException)
-            throw (RuntimeException)cause;
-        if (cause instanceof Error)
-            throw (Error)cause;
-        return new ModuleException(cause);
-    }
+    Enumeration<URL> findEntries(String path, String filePattern, boolean recurse);
 }

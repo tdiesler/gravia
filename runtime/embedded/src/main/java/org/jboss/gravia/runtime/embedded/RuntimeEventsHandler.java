@@ -21,6 +21,8 @@
  */
 package org.jboss.gravia.runtime.embedded;
 
+import static org.jboss.gravia.runtime.embedded.EmbeddedRuntime.LOGGER;
+
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.util.ArrayList;
@@ -48,7 +50,6 @@ import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.SynchronousModuleListener;
 import org.jboss.gravia.runtime.embedded.osgi.ConstantsHelper;
-import org.jboss.logging.Logger;
 
 /**
  * [TODO]
@@ -56,23 +57,21 @@ import org.jboss.logging.Logger;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-final class EmbeddedRuntimeEventsHandler {
-
-    private static Logger LOGGER = Logger.getLogger(EmbeddedRuntimeEventsHandler.class);
+final class RuntimeEventsHandler {
 
     private final ExecutorService executorService;
 
-    /** The bundleState listeners */
-    private final Map<Module, List<BundleListenerRegistration>> bundleListeners = new ConcurrentHashMap<Module, List<BundleListenerRegistration>>();
+    /** The moduleState listeners */
+    private final Map<Module, List<BundleListenerRegistration>> moduleListeners = new ConcurrentHashMap<Module, List<BundleListenerRegistration>>();
     /** The service listeners */
     private final Map<Module, List<ServiceListenerRegistration>> serviceListeners = new ConcurrentHashMap<Module, List<ServiceListenerRegistration>>();
 
-    /** The set of bundleState events that are delivered to an (asynchronous) BundleListener */
+    /** The set of moduleState events that are delivered to an (asynchronous) BundleListener */
     private Set<Integer> asyncBundleEvents = new HashSet<Integer>();
     /** The set of events that are logged at INFO level */
     private Set<String> infoEvents = new HashSet<String>();
 
-    EmbeddedRuntimeEventsHandler(ExecutorService executorService) {
+    RuntimeEventsHandler(ExecutorService executorService) {
         this.executorService = executorService;
         asyncBundleEvents.add(new Integer(ModuleEvent.INSTALLED));
         asyncBundleEvents.add(new Integer(ModuleEvent.RESOLVED));
@@ -86,15 +85,15 @@ final class EmbeddedRuntimeEventsHandler {
         infoEvents.add(ConstantsHelper.bundleEvent(ModuleEvent.UNINSTALLED));
     }
 
-    public void addModuleListener(final Module bundle, final ModuleListener listener) {
+    void addModuleListener(final Module module, final ModuleListener listener) {
         assert listener != null : "Null listener";
-        synchronized (bundleListeners) {
-            List<BundleListenerRegistration> registrations = bundleListeners.get(bundle);
+        synchronized (moduleListeners) {
+            List<BundleListenerRegistration> registrations = moduleListeners.get(module);
             if (registrations == null) {
                 registrations = new ArrayList<BundleListenerRegistration>();
-                bundleListeners.put(bundle, registrations);
+                moduleListeners.put(module, registrations);
             }
-            BundleListenerRegistration registration = new BundleListenerRegistration(bundle, listener);
+            BundleListenerRegistration registration = new BundleListenerRegistration(module, listener);
             if (registrations.contains(registration) == false) {
                 registrations.add(registration);
             }
@@ -102,10 +101,10 @@ final class EmbeddedRuntimeEventsHandler {
     }
 
 
-    public void removeModuleListener(final Module bundle, final ModuleListener listener) {
+    void removeModuleListener(final Module module, final ModuleListener listener) {
         assert listener != null : "Null listener";
-        synchronized (bundleListeners) {
-            List<BundleListenerRegistration> registrations = bundleListeners.get(bundle);
+        synchronized (moduleListeners) {
+            List<BundleListenerRegistration> registrations = moduleListeners.get(module);
             if (registrations != null) {
                 if (registrations.size() > 1) {
                     Iterator<BundleListenerRegistration> iterator = registrations.iterator();
@@ -117,27 +116,27 @@ final class EmbeddedRuntimeEventsHandler {
                         }
                     }
                 } else {
-                    removeBundleListeners(bundle);
+                    removeBundleListeners(module);
                 }
             }
         }
     }
 
 
-    public void removeBundleListeners(final Module bundleState) {
-        synchronized (bundleListeners) {
-            bundleListeners.remove(bundleState);
+    void removeBundleListeners(final Module moduleState) {
+        synchronized (moduleListeners) {
+            moduleListeners.remove(moduleState);
         }
     }
 
 
-    public void removeAllBundleListeners() {
-        synchronized (bundleListeners) {
-            bundleListeners.clear();
+    void removeAllBundleListeners() {
+        synchronized (moduleListeners) {
+            moduleListeners.clear();
         }
     }
 
-    public void addServiceListener(final Module module, final ServiceListener listener, final String filterstr) {
+    void addServiceListener(final Module module, final ServiceListener listener, final String filterstr) {
         assert listener != null : "Null listener";
         synchronized (serviceListeners) {
             List<ServiceListenerRegistration> listeners = serviceListeners.get(module);
@@ -146,7 +145,7 @@ final class EmbeddedRuntimeEventsHandler {
                 serviceListeners.put(module, listeners);
             }
 
-            // If the context bundleState's list of listeners already contains a listener l such that (l==listener),
+            // If the context moduleState's list of listeners already contains a listener l such that (l==listener),
             // then this method replaces that listener's filter (which may be null) with the specified one (which may be null).
             removeServiceListener(module, listener);
 
@@ -160,10 +159,10 @@ final class EmbeddedRuntimeEventsHandler {
     }
 
 
-    public Collection<ListenerInfo> getServiceListenerInfos(final Module bundleState) {
+    Collection<ListenerInfo> getServiceListenerInfos(final Module moduleState) {
         Collection<ListenerInfo> listeners = new ArrayList<ListenerInfo>();
         for (Entry<Module, List<ServiceListenerRegistration>> entry : serviceListeners.entrySet()) {
-            if (bundleState == null || bundleState.equals(entry.getKey())) {
+            if (moduleState == null || moduleState.equals(entry.getKey())) {
                 for (ServiceListenerRegistration aux : entry.getValue()) {
                     ListenerInfo info = aux.getListenerInfo();
                     listeners.add(info);
@@ -174,12 +173,12 @@ final class EmbeddedRuntimeEventsHandler {
     }
 
 
-    public void removeServiceListener(final Module bundleState, final ServiceListener listener) {
+    void removeServiceListener(final Module moduleState, final ServiceListener listener) {
         assert listener != null : "Null listener";
         synchronized (serviceListeners) {
-            List<ServiceListenerRegistration> listeners = serviceListeners.get(bundleState);
+            List<ServiceListenerRegistration> listeners = serviceListeners.get(moduleState);
             if (listeners != null) {
-                ServiceListenerRegistration slreg = new ServiceListenerRegistration(bundleState, listener, NoFilter.INSTANCE);
+                ServiceListenerRegistration slreg = new ServiceListenerRegistration(moduleState, listener, NoFilter.INSTANCE);
                 int index = listeners.indexOf(slreg);
                 if (index >= 0) {
                     slreg = listeners.remove(index);
@@ -189,45 +188,45 @@ final class EmbeddedRuntimeEventsHandler {
     }
 
 
-    public void removeServiceListeners(final Module bundleState) {
+    void removeServiceListeners(final Module moduleState) {
         synchronized (serviceListeners) {
-            serviceListeners.remove(bundleState);
+            serviceListeners.remove(moduleState);
         }
     }
 
 
-    public void removeAllServiceListeners() {
+    void removeAllServiceListeners() {
         synchronized (serviceListeners) {
             serviceListeners.clear();
         }
     }
 
 
-    public void fireBundleEvent(final Module bundle, final int type) {
-        fireBundleEvent(null, bundle, type);
+    void fireModuleEvent(final Module module, final int type) {
+        fireModuleEvent(null, module, type);
     }
 
 
-    public void fireBundleEvent(final ModuleContext context, final Module bundle, final int type) {
-        if (bundle == null)
-            throw new IllegalArgumentException("bundle");
+    void fireModuleEvent(final ModuleContext context, final Module module, final int type) {
+        if (module == null)
+            throw new IllegalArgumentException("module");
 
         // Do nothing it the framework is not active
-        // if (bundleManager.isFrameworkCreated() == false)
+        // if (moduleManager.isFrameworkCreated() == false)
         //    return;
 
         // Get a snapshot of the current listeners
         final List<BundleListenerRegistration> registrations = new ArrayList<BundleListenerRegistration>();
-        synchronized (bundleListeners) {
-            for (Entry<Module, List<BundleListenerRegistration>> entry : bundleListeners.entrySet()) {
+        synchronized (moduleListeners) {
+            for (Entry<Module, List<BundleListenerRegistration>> entry : moduleListeners.entrySet()) {
                 for (BundleListenerRegistration blreg : entry.getValue()) {
                     registrations.add(blreg);
                 }
             }
         }
 
-        // Expose the bundleState wrapper not the state itself
-        final ModuleEvent event = new BundleEventImpl(type, bundle, context != null ? context.getModule() : bundle);
+        // Expose the moduleState wrapper not the state itself
+        final ModuleEvent event = new ModuleEventImpl(type, module, context != null ? context.getModule() : module);
         final String typeName = ConstantsHelper.bundleEvent(event.getType());
 
         // Nobody is interested
@@ -246,7 +245,7 @@ final class EmbeddedRuntimeEventsHandler {
                     listener.moduleChanged(event);
                 }
             } catch (Throwable th) {
-                LOGGER.warnf(th, "Error while firing bundle event %s for: %s", typeName, bundle);
+                LOGGER.warnf(th, "Error while firing module event %s for: %s", typeName, module);
             }
         }
 
@@ -255,7 +254,7 @@ final class EmbeddedRuntimeEventsHandler {
 
                 @Override
                 public void run() {
-                    // BundleListeners are called with a BundleEvent object when a bundleState has been
+                    // BundleListeners are called with a BundleEvent object when a moduleState has been
                     // installed, resolved, started, stopped, updated, unresolved, or uninstalled
                     if (asyncBundleEvents.contains(type)) {
                         for (BundleListenerRegistration blreg : registrations) {
@@ -265,7 +264,7 @@ final class EmbeddedRuntimeEventsHandler {
                                     listener.moduleChanged(event);
                                 }
                             } catch (Throwable th) {
-                                LOGGER.warnf(th, "Error while firing bundle event %s for: %s", typeName, bundle);
+                                LOGGER.warnf(th, "Error while firing module event %s for: %s", typeName, module);
                             }
                         }
                     }
@@ -277,10 +276,10 @@ final class EmbeddedRuntimeEventsHandler {
         }
     }
 
-    public void fireServiceEvent(final Module bundle, int type, final ServiceState<?> serviceState) {
+    void fireServiceEvent(final Module module, int type, final ServiceState<?> serviceState) {
 
         // Do nothing it the framework is not active
-        // if (bundleManager.isFrameworkCreated() == false)
+        // if (moduleManager.isFrameworkCreated() == false)
         //    return;
 
         // Get a snapshot of the current listeners
@@ -367,7 +366,7 @@ final class EmbeddedRuntimeEventsHandler {
     static class ServiceListenerRegistration {
 
         private final Module module;
-        private final ModuleContext bundleContext;
+        private final ModuleContext moduleContext;
         private final ServiceListener listener;
         private final Filter filter;
         private final ListenerInfo info;
@@ -376,14 +375,14 @@ final class EmbeddedRuntimeEventsHandler {
         AccessControlContext accessControlContext;
 
         ServiceListenerRegistration(final Module module, final ServiceListener listener, final Filter filter) {
-            assert module != null : "Null bundle";
+            assert module != null : "Null module";
             assert listener != null : "Null listener";
             assert filter != null : "Null filter";
             this.module = module;
             this.listener = listener;
             this.filter = filter;
-            this.bundleContext = module.getModuleContext();
-            this.info = new ListenerInfo(bundleContext, this);
+            this.moduleContext = module.getModuleContext();
+            this.info = new ListenerInfo(moduleContext, this);
             if (System.getSecurityManager() != null)
                 accessControlContext = AccessController.getContext();
         }
@@ -435,13 +434,13 @@ final class EmbeddedRuntimeEventsHandler {
 
     static class BundleListenerRegistration {
         private final ModuleListener listener;
-        private final ModuleContext bundleContext;
-        private final Module bundle;
+        private final ModuleContext moduleContext;
+        private final Module module;
 
-        BundleListenerRegistration(Module bundle, ModuleListener listener) {
+        BundleListenerRegistration(Module module, ModuleListener listener) {
             this.listener = listener;
-            this.bundle = bundle;
-            this.bundleContext = bundle.getModuleContext();
+            this.module = module;
+            this.moduleContext = module.getModuleContext();
         }
 
         ModuleListener getListener() {
@@ -449,11 +448,11 @@ final class EmbeddedRuntimeEventsHandler {
         }
 
         Module getModule() {
-            return bundle;
+            return module;
         }
 
         ModuleContext getModuleContext() {
-            return bundleContext;
+            return moduleContext;
         }
 
 
@@ -477,7 +476,7 @@ final class EmbeddedRuntimeEventsHandler {
         @Override
         public String toString() {
             String className = listener.getClass().getName();
-            return "BundleListener[" + bundle + "," + className + "]";
+            return "BundleListener[" + module + "," + className + "]";
         }
     }
 
@@ -487,8 +486,8 @@ final class EmbeddedRuntimeEventsHandler {
         private final ModuleContext moduleContext;
         private boolean removed;
 
-        ListenerInfo(ModuleContext bundleContext, ServiceListenerRegistration registration) {
-            this.moduleContext = bundleContext;
+        ListenerInfo(ModuleContext moduleContext, ServiceListenerRegistration registration) {
+            this.moduleContext = moduleContext;
             this.registration = registration;
         }
 
@@ -535,12 +534,12 @@ final class EmbeddedRuntimeEventsHandler {
         }
     }
 
-    static class BundleEventImpl extends ModuleEvent {
+    static class ModuleEventImpl extends ModuleEvent {
 
         private static final long serialVersionUID = -2705304702665185935L;
 
-        BundleEventImpl(int type, Module bundle, Module origin) {
-            super(type, bundle, origin);
+        ModuleEventImpl(int type, Module module, Module origin) {
+            super(type, module, origin);
         }
 
 

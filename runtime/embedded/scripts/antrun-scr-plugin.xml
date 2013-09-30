@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ====================================================================== -->
+<!--                                                                        -->
+<!--  JBoss, the OpenSource J2EE webOS                                      -->
+<!--                                                                        -->
+<!--  Distributable under LGPL license.                                     -->
+<!--  See terms of license at http://www.gnu.org.                           -->
+<!--                                                                        -->
+<!-- ====================================================================== -->
+
+<project>
+
+  <!-- ================================================================== -->
+  <!-- Setup                                                              -->
+  <!-- ================================================================== -->
+  
+  <property name="output.dir" value="${basedir}/target/test-classes" />
+  <property name="source.dir" value="${basedir}/src/test/java" />
+
+  <!-- ================================================================== -->
+  <!-- Initialization                                                     -->
+  <!-- ================================================================== -->
+  <target name="init">
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Generate Resources                                                 -->
+  <!-- ================================================================== -->
+  <target name="generate" depends="init">
+
+    <property name="m2Repo" value="${user.home}/.m2/repository" />
+    <path id="classpath">
+      <fileset dir="${m2Repo}">
+        <include name="org/apache/felix/org.apache.felix.scr/1.6.2/org.apache.felix.scr-1.6.2.jar" />
+        <include name="org/apache/felix/org.apache.felix.scr.ant/1.8.0/org.apache.felix.scr.ant-1.8.0.jar" />
+        <include name="org/apache/felix/org.apache.felix.scr.annotations/1.2.4/org.apache.felix.scr.ds-annotations-1.2.4.jar" />
+        <include name="org/jboss/gravia/gravia-runtime-api/${project.version}/gravia-runtime-api-${project.version}.jar" />
+        <include name="org/osgi/org.osgi.enterprise/5.0.0/org.osgi.enterprise-5.0.0.jar" />
+        <include name="org/osgi/org.osgi.core/5.0.0/org.osgi.core-5.0.0.jar" />
+      </fileset>
+      <pathelement location="${basedir}/target/classes"/>
+    </path>
+  	<property name="classpath" refid="classpath"/>
+  	
+    <taskdef resource="scrtask.properties" classpathref="classpath"/>
+  	
+  	<mkdir dir="${output.dir}"/>
+  	<scr srcdir="${source.dir}" destdir="${output.dir}" classpathref="classpath" strictMode="true" specVersion="1.2"/>
+
+  </target>
+</project>
+

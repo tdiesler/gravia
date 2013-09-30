@@ -17,6 +17,8 @@
             <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
             <includes>
+                <include>*:org.apache.felix.configadmin:jar</include>
+                <include>*:org.apache.felix.metatype:jar</include>
                 <include>*:org.apache.felix.scr:jar</include>
             </includes>
             <useStrictFiltering>true</useStrictFiltering>

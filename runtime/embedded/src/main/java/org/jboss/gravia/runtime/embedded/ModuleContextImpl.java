@@ -182,14 +182,14 @@ final class ModuleContextImpl implements ModuleContext {
         return getServiceManager().getService(module, serviceState);
     }
 
-    private EmbeddedRuntimeServicesHandler getServiceManager() {
+    private RuntimeServicesHandler getServiceManager() {
         Runtime runtime = module.adapt(Runtime.class);
-        return runtime.adapt(EmbeddedRuntimeServicesHandler.class);
+        return runtime.adapt(RuntimeServicesHandler.class);
     }
 
-    private EmbeddedRuntimeEventsHandler getRuntimeEvents() {
+    private RuntimeEventsHandler getRuntimeEvents() {
         Runtime runtime = module.adapt(Runtime.class);
-        return runtime.adapt(EmbeddedRuntimeEventsHandler.class);
+        return runtime.adapt(RuntimeEventsHandler.class);
     }
 
     void assertNotDestroyed() {

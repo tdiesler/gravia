@@ -1,6 +1,6 @@
 /*
  * #%L
- * JBossOSGi Framework
+ * JBossOSGi Runtime
  * %%
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
@@ -21,7 +21,11 @@
  */
 package org.jboss.gravia.runtime;
 
-import java.util.Set;
+import java.util.jar.Manifest;
+
+import org.jboss.gravia.resource.Attachable;
+import org.jboss.gravia.resource.AttachmentKey;
+import org.jboss.gravia.resource.ResourceIdentity;
 
 /**
  * [TODO]
@@ -29,7 +33,10 @@ import java.util.Set;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public interface Module {
+public interface Module extends Attachable {
+
+    AttachmentKey<Manifest> MANIFEST_KEY = AttachmentKey.create(Manifest.class);
+    AttachmentKey<ModuleEntriesProvider> ENTRIES_PROVIDER_KEY = AttachmentKey.create(ModuleEntriesProvider.class);
 
     enum State {
         INSTALLED,
@@ -40,6 +47,8 @@ public interface Module {
         UNINSTALLED
     }
 
+    ResourceIdentity getIdentity();
+
     long getModuleId();
 
     State getState();
@@ -48,15 +57,128 @@ public interface Module {
 
     ModuleContext getModuleContext();
 
-    Object getProperty(String key);
-
-    Set<String> getPropertyKeys();
-
+    /**
+     * Starts this module.
+     * <p>
+     * If this module's state is {@code UNINSTALLED} then an {@code IllegalStateException} is thrown.
+     * <p>
+     * The following steps are required to start this module:
+     * <ol>
+     * 
+     * <li>If this module is in the process of being activated or deactivated
+     * then this method must wait for activation or deactivation to complete
+     * before continuing. If this does not occur in a reasonable time, a
+     * {@code ModuleException} is thrown to indicate this module was unable to
+     * be started.
+     * 
+     * <li>If this module's state is {@code ACTIVE} then this method returns immediately.
+     * 
+     * <li>This module's state is set to {@code STARTING}.
+     * 
+     * <li>A module event of type {@link ModuleEvent#STARTING} is fired.
+     * 
+     * <li>The {@link ModuleActivator#start(ModuleContext)} method if one is specified, is called.
+     * If the {@code ModuleActivator} is invalid or throws an exception then:
+     * <ul>
+     * <li>This module's state is set to {@code STOPPING}.
+     * <li>A module event of type {@link ModuleEvent#STOPPING} is fired.
+     * <li>Any services registered by this module must be unregistered.
+     * <li>Any services used by this module must be released.
+     * <li>Any listeners registered by this module must be removed.
+     * <li>This module's state is set to {@code RESOLVED}.
+     * <li>A module event of type {@link ModuleEvent#STOPPED} is fired.
+     * <li>A {@code ModuleException} is then thrown.
+     * </ul>
+     * 
+     * <li>This module's state is set to {@code ACTIVE}.
+     * 
+     * <li>A module event of type {@link ModuleEvent#STARTED} is fired.
+     * </ol>
+     * 
+     * @throws ModuleException If the module cannot be started
+     */
     void start() throws ModuleException;
 
+    /**
+     * Stops this module.
+     * <p>
+     * If this module's state is {@code UNINSTALLED} then an {@code IllegalStateException} is thrown.
+     * <p>
+     * The following steps are required to stop this module:
+     * <ol>
+     * 
+     * <li>If this module is in the process of being activated or deactivated
+     * then this method must wait for activation or deactivation to complete
+     * before continuing. If this does not occur in a reasonable time, a
+     * {@code ModuleException} is thrown to indicate this module was unable to
+     * be stopped.
+     * 
+     * <li>If this module's state is not {@code ACTIVE} then this method returns immediately.
+     * 
+     * <li>This module's state is set to {@code STOPPING}.
+     * 
+     * <li>A module event of type {@link ModuleEvent#STOPPING} is fired.
+     * 
+     * <li>The {@link ModuleActivator#stop(ModuleContext)} method of this module's {@code ModuleActivator},
+     * if one is specified, is called. If that method throws an exception, this method must continue to
+     * stop this module and a {@code ModuleException} must be thrown after
+     * completion of the remaining steps.
+     * 
+     * <li>Any services registered by this module must be unregistered.
+     * <li>Any services used by this module must be released.
+     * <li>Any listeners registered by this module must be removed.
+     * 
+     * <li>This module's state is set to {@code RESOLVED}.
+     * 
+     * <li>A module event of type {@link ModuleEvent#STOPPED} is fired.
+     * </ol>
+     * 
+     * <b>Preconditions </b>
+     * <ul>
+     * <li>{@code getState()} in &#x007B; {@code ACTIVE} &#x007D;.
+     * </ul>
+     * <b>Postconditions, no exceptions thrown </b>
+     * <ul>
+     * <li>Module autostart setting is modified unless the
+     * {@link #STOP_TRANSIENT} option was set.
+     * <li>{@code getState()} not in &#x007B; {@code ACTIVE}, {@code STOPPING}
+     * &#x007D;.
+     * <li>{@code ModuleActivator.stop} has been called and did not throw an
+     * exception.
+     * </ul>
+     * <b>Postconditions, when an exception is thrown </b>
+     * <ul>
+     * <li>Module autostart setting is modified unless the
+     * {@link #STOP_TRANSIENT} option was set.
+     * </ul>
+     * @throws ModuleException If the module cannot be started
+     */
     void stop() throws ModuleException;
 
-    void uninstall() throws ModuleException;
+    /**
+     * Uninstalls this module.
+     * 
+     * <p>
+     * This method causes the Runtime to notify other modules that this module
+     * is being uninstalled, and then puts this module into the
+     * {@code UNINSTALLED} state. The Runtime must remove any resources
+     * related to this module that it is able to remove.
+     * 
+     * <p>
+     * If this module's state is {@code UNINSTALLED} then an {@code IllegalStateException} is thrown.
+     * 
+     * <p>
+     * The following steps are required to uninstall a module:
+     * <ol>
+     * 
+     * <li>This module is stopped as described in the {@code Module.stop} method.
+     * 
+     * <li>This module's state is set to {@code UNINSTALLED}.
+     * 
+     * <li>A module event of type {@link ModuleEvent#UNINSTALLED} is fired.
+     * </ol>
+     */
+    void uninstall();
 
     Class<?> loadClass(String className) throws ClassNotFoundException;
 }

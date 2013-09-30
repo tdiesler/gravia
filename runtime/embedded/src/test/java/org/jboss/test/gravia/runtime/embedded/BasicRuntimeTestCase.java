@@ -21,17 +21,16 @@
  */
 package org.jboss.test.gravia.runtime.embedded;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.jar.Manifest;
 
 import junit.framework.Assert;
 
-import org.jboss.gravia.runtime.Constants;
+import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
-import org.jboss.test.gravia.runtime.embedded.suba.SimpleActivator;
+import org.jboss.test.gravia.runtime.embedded.sub.a.SimpleActivator;
 import org.junit.Test;
 
 /**
@@ -45,7 +44,9 @@ public class BasicRuntimeTestCase extends AbstractRuntimeTest {
     @Test
     public void testBasicModule() throws Exception {
 
-        Module moduleA = getRuntime().installModule(SimpleActivator.class.getClassLoader(), null);
+        Manifest manifest = new ManifestBuilder().addIdentityCapability("moduleA", "1.0.0").getManifest();
+
+        Module moduleA = getRuntime().installModule(SimpleActivator.class.getClassLoader(), manifest);
         Assert.assertEquals(Module.State.RESOLVED, moduleA.getState());
 
         moduleA.start();
@@ -75,9 +76,11 @@ public class BasicRuntimeTestCase extends AbstractRuntimeTest {
     @Test
     public void testBundleWithClassLoader() throws Exception {
 
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(Constants.MODULE_ACTIVATOR, SimpleActivator.class.getName());
-        Module moduleA = getRuntime().installModule(SimpleActivator.class.getClassLoader(), props);
+        ManifestBuilder builder = new ManifestBuilder().addIdentityCapability("moduleA", "1.0.0");
+        builder.addModuleActivator(SimpleActivator.class);
+        Manifest manifest = builder.getManifest();
+
+        Module moduleA = getRuntime().installModule(SimpleActivator.class.getClassLoader(), manifest);
         Assert.assertEquals(Module.State.RESOLVED, moduleA.getState());
 
         ModuleContext context = moduleA.getModuleContext();

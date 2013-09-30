@@ -34,13 +34,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Vector;
+import java.util.jar.Attributes;
+import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.ModuleEntriesProvider;
 import org.jboss.osgi.metadata.CaseInsensitiveDictionary;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.osgi.metadata.OSGiMetaData;
 import org.jboss.osgi.metadata.OSGiMetaDataBuilder;
 import org.osgi.framework.Bundle;
@@ -70,16 +75,26 @@ public final class BundleAdaptor implements Bundle {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <A> A adapt(Class<A> type) {
-        A result = null;
-        if (type.isAssignableFrom(Module.class)) {
-            result = (A) module;
-        }
-        return result;
+    public long getBundleId() {
+        return module.getModuleId();
     }
 
-    // Bundle API
+
+    @Override
+    public String getSymbolicName() {
+        return module.getIdentity().getSymbolicName();
+    }
+
+    @Override
+    public Version getVersion() {
+        String version = module.getIdentity().getVersion().toString();
+        return  Version.parseVersion(version);
+    }
+
+    @Override
+    public String getLocation() {
+        return module.getIdentity().toString();
+    }
 
     @Override
     public int getState() {
@@ -107,13 +122,8 @@ public final class BundleAdaptor implements Bundle {
     }
 
     @Override
-    public String getSymbolicName() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Version getVersion() {
-        throw new UnsupportedOperationException();
+    public <A> A adapt(Class<A> type) {
+        return module.adapt(type);
     }
 
     @Override
@@ -122,80 +132,19 @@ public final class BundleAdaptor implements Bundle {
     }
 
     @Override
-    public int compareTo(Bundle bundle) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void start(int options) throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void start() throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void stop(int options) throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void stop() throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void update(InputStream input) throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void update() throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void uninstall() throws BundleException {
-        throw new UnsupportedOperationException();
+    public URL getResource(String name) {
+        ClassLoader classLoader = module.adapt(ClassLoader.class);
+        return classLoader.getResource(name);
     }
 
     @Override
     public Dictionary<String, String> getHeaders() {
-        // If the specified locale is null then the locale returned
-        // by java.util.Locale.getDefault is used.
         return getHeaders(null);
     }
 
     @Override
-    public long getBundleId() {
-        return module.getModuleId();
-    }
-
-    @Override
-    public String getLocation() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ServiceReference<?>[] getRegisteredServices() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ServiceReference<?>[] getServicesInUse() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean hasPermission(Object permission) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public URL getResource(String name) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Bundle.hasPermission(Object)");
     }
 
     @Override
@@ -203,7 +152,7 @@ public final class BundleAdaptor implements Bundle {
     public Dictionary<String, String> getHeaders(String locale) {
 
         // Get the raw (unlocalized) manifest headers
-        Dictionary<String, String> rawHeaders = getOSGiMetaData().getHeaders();
+        Dictionary<String, String> rawHeaders = getRawHeaders(module);
 
         // If the specified locale is the empty string, this method will return the
         // raw (unlocalized) manifest headers including any leading "%"
@@ -263,57 +212,160 @@ public final class BundleAdaptor implements Bundle {
         return new CaseInsensitiveDictionary(locHeaders);
     }
 
-    private OSGiMetaData getOSGiMetaData() {
-        Attachable attachable = (Attachable) module;
+    @Override
+    public Enumeration<URL> getResources(String name) throws IOException {
+        ClassLoader classLoader = module.adapt(ClassLoader.class);
+        return classLoader.getResources(name);
+    }
+
+    @Override
+    public URL getEntry(String path) {
+        ModuleEntriesProvider entriesProvider = getModuleEntriesProvider();
+        return entriesProvider.getEntry(path);
+    }
+
+    @Override
+    public Enumeration<String> getEntryPaths(String path) {
+        ModuleEntriesProvider entriesProvider = getModuleEntriesProvider();
+        return entriesProvider.getEntryPaths(path);
+    }
+
+    @Override
+    public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
+        ModuleEntriesProvider entriesProvider = getModuleEntriesProvider();
+        return entriesProvider.findEntries(path, filePattern, recurse);
+    }
+
+    @Override
+    public int compareTo(Bundle bundle) {
+        throw new UnsupportedOperationException("Bundle.compareTo(Bundle)");
+    }
+
+    @Override
+    public void start(int options) throws BundleException {
+        throw new UnsupportedOperationException("Bundle.start(int)");
+    }
+
+    @Override
+    public void start() throws BundleException {
+        throw new UnsupportedOperationException("Bundle.start()");
+    }
+
+    @Override
+    public void stop(int options) throws BundleException {
+        throw new UnsupportedOperationException("Bundle.stop(int)");
+    }
+
+    @Override
+    public void stop() throws BundleException {
+        throw new UnsupportedOperationException("Bundle.stop()");
+    }
+
+    @Override
+    public void update(InputStream input) throws BundleException {
+        throw new UnsupportedOperationException("Bundle.update(InputStream)");
+    }
+
+    @Override
+    public void update() throws BundleException {
+        throw new UnsupportedOperationException("Bundle.update()");
+    }
+
+    @Override
+    public void uninstall() throws BundleException {
+        throw new UnsupportedOperationException("Bundle.uninstall()");
+    }
+
+    @Override
+    public ServiceReference<?>[] getRegisteredServices() {
+        throw new UnsupportedOperationException("Bundle.getRegisteredServices()");
+    }
+
+    @Override
+    public ServiceReference<?>[] getServicesInUse() {
+        throw new UnsupportedOperationException("Bundle.getServicesInUse()");
+    }
+
+    @Override
+    public long getLastModified() {
+        throw new UnsupportedOperationException("Bundle.getLastModified()");
+    }
+
+    @Override
+    public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
+        throw new UnsupportedOperationException("Bundle.getSignerCertificates(int)");
+    }
+
+    @Override
+    public File getDataFile(String filename) {
+        throw new UnsupportedOperationException("Bundle.getDataFile(String)");
+    }
+
+    private Dictionary<String, String> getRawHeaders(Module module) {
+        Dictionary<String, String> result = new Hashtable<String, String>();
+        Manifest manifest = getManifest(module);
+        if (manifest != null) {
+            Attributes atts = manifest.getMainAttributes();
+            for (Object key : atts.keySet()) {
+                String keystr = ((Name) key).toString();
+                String value = atts.getValue(keystr);
+                result.put(keystr, value);
+            }
+        }
+        return result;
+    }
+
+    static OSGiMetaData getOSGiMetaData(Module module) {
+        Attachable attachable = module;
         OSGiMetaData metadata  = attachable.getAttachment(OSGI_METADATA_KEY);
         if (metadata == null) {
-            Manifest manifest = (Manifest) module.getProperty(org.jboss.gravia.runtime.Constants.MODULE_MANIFEST);
-            if (manifest != null) {
+            Manifest manifest = getManifest(module);
+            if (OSGiManifestBuilder.isValidBundleManifest(manifest)) {
                 metadata = OSGiMetaDataBuilder.load(manifest);
-            } else {
-                String bsname = getSymbolicName();
-                Version version = getVersion();
-                OSGiMetaDataBuilder builder = OSGiMetaDataBuilder.createBuilder(bsname, version);
-                metadata = builder.getOSGiMetaData();
             }
             attachable.putAttachment(OSGI_METADATA_KEY, metadata);
         }
         return metadata;
     }
 
-    @Override
-    public Enumeration<URL> getResources(String name) throws IOException {
-        throw new UnsupportedOperationException();
+    static Manifest getManifest(Module module) {
+        return module.adapt(Manifest.class);
+    }
+
+    private ModuleEntriesProvider getModuleEntriesProvider() {
+        ModuleEntriesProvider provider = module.getAttachment(Module.ENTRIES_PROVIDER_KEY);
+        return provider != null ? provider : new CLassLoaderEntriesProvider();
     }
 
     @Override
-    public Enumeration<String> getEntryPaths(String path) {
-        throw new UnsupportedOperationException();
+    public String toString() {
+        return "Bundle[" + module.getIdentity() + "]";
     }
 
-    @Override
-    public URL getEntry(String path) {
-        throw new UnsupportedOperationException();
-    }
+    private class CLassLoaderEntriesProvider implements ModuleEntriesProvider {
 
-    @Override
-    public long getLastModified() {
-        throw new UnsupportedOperationException();
-    }
+        @Override
+        public URL getEntry(String path) {
+            return getResource(path);
+        }
 
-    @Override
-    public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
-        throw new UnsupportedOperationException();
-    }
+        @Override
+        public Enumeration<String> getEntryPaths(String path) {
+            throw new UnsupportedOperationException("Bundle.getEntryPaths(String)");
+        }
 
-    @Override
-    public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
-        throw new UnsupportedOperationException();
-    }
+        @Override
+        public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
+            if (filePattern.contains("*") || recurse == true)
+                throw new UnsupportedOperationException("Bundle.getEntryPaths(String,String,boolean)");
 
-    @Override
-    public File getDataFile(String filename) {
-        throw new UnsupportedOperationException();
-    }
+            URL result = getResource(path + "/" + filePattern);
+            if (result == null)
+                return null;
 
+            Vector<URL> vector = new Vector<URL>();
+            vector.add(result);
+            return vector.elements();
+        }
+    }
 }

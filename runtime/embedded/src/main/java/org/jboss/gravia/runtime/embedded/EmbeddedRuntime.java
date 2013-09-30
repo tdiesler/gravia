@@ -29,10 +29,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.jar.Manifest;
 
+import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.Module.State;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.logging.Logger;
 
 /**
  * [TODO]
@@ -42,15 +46,17 @@ import org.jboss.gravia.runtime.Runtime;
  */
 public final class EmbeddedRuntime implements Runtime {
 
-    private final EmbeddedRuntimeEventsHandler runtimeEvents;
-    private final EmbeddedRuntimeServicesHandler serviceManager;
+    static Logger LOGGER = Logger.getLogger(Runtime.class.getPackage().getName());
+
+    private final RuntimeEventsHandler runtimeEvents;
+    private final RuntimeServicesHandler serviceManager;
 
     private final Map<Long, Module> modules = new ConcurrentHashMap<Long, Module>();
     private final Map<String, Object> properties;
 
     public EmbeddedRuntime(Map<String, Object> props) {
-        runtimeEvents = new EmbeddedRuntimeEventsHandler(createExecutorService("RuntimeEvents"));
-        serviceManager = new EmbeddedRuntimeServicesHandler(runtimeEvents);
+        runtimeEvents = new RuntimeEventsHandler(createExecutorService("RuntimeEvents"));
+        serviceManager = new RuntimeServicesHandler(runtimeEvents);
         Map<String, Object> auxprops = new ConcurrentHashMap<String, Object>();
         if (props != null) {
             auxprops.putAll(props);
@@ -67,9 +73,9 @@ public final class EmbeddedRuntime implements Runtime {
     @SuppressWarnings("unchecked")
     public <A> A adapt(Class<A> type) {
         A result = null;
-        if (type.isAssignableFrom(EmbeddedRuntimeEventsHandler.class)) {
+        if (type.isAssignableFrom(RuntimeEventsHandler.class)) {
             result = (A) runtimeEvents;
-        } else if (type.isAssignableFrom(EmbeddedRuntimeServicesHandler.class)) {
+        } else if (type.isAssignableFrom(RuntimeServicesHandler.class)) {
             result = (A) serviceManager;
         }
         return result;
@@ -87,14 +93,38 @@ public final class EmbeddedRuntime implements Runtime {
     }
 
     @Override
-    public Module installModule(ClassLoader classLoader, Map<String, Object> properties) {
-        ModuleImpl module = new ModuleImpl(this, classLoader, properties);
+    public Module installModule(ClassLoader classLoader, Manifest manifest) {
+        ModuleImpl module = new ModuleImpl(this, classLoader, manifest);
+        return installModuleInternal(module);
+    }
+
+    @Override
+    public Module installModule(ClassLoader classLoader, Resource resource) {
+        ModuleImpl module = new ModuleImpl(this, classLoader, resource);
+        return installModuleInternal(module);
+    }
+
+    private Module installModuleInternal(ModuleImpl module) {
+
+        // #1 The module's state is set to {@code INSTALLED}.
+        module.setState(State.INSTALLED);
+
+        // #2 A module event of type {@link ModuleEvent#INSTALLED} is fired.
+        runtimeEvents.fireModuleEvent(module, ModuleEvent.INSTALLED);
+
+        // #3 The module's state is set to {@code RESOLVED}.
         module.setState(State.RESOLVED);
+
+        // #4 A module event of type {@link ModuleEvent#RESOLVED} is fired.
+        runtimeEvents.fireModuleEvent(module, ModuleEvent.RESOLVED);
+
+        LOGGER.infof("Installed: %s", module);
         return module;
     }
 
     void uninstallModule(Module module) {
         modules.remove(module.getModuleId());
+        LOGGER.infof("Uninstalled: %s", module);
     }
 
     private ExecutorService createExecutorService(final String threadName) {

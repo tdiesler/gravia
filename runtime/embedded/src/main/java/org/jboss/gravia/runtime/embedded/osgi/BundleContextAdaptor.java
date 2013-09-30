@@ -28,11 +28,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
+
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.SynchronousModuleListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -47,6 +49,7 @@ import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.SynchronousBundleListener;
 
 /**
  * Bundle implementation that delegates all functionality to
@@ -78,23 +81,24 @@ public final class BundleContextAdaptor implements BundleContext {
     }
 
     @Override
+    public Bundle getBundle(long id) {
+        Module module = getRuntime().getModule(id);
+        return module != null ? new BundleAdaptor(module) : null;
+    }
+
+    @Override
     public Bundle installBundle(String location, InputStream input) throws BundleException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("BundleContext.installBundle(String,InputStream)");
     }
 
     @Override
     public Bundle installBundle(String location) throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Bundle getBundle(long id) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("BundleContext.installBundle(String)");
     }
 
     @Override
     public Bundle getBundle(String location) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("BundleContext.getBundle(String)");
     }
 
     @Override
@@ -123,7 +127,7 @@ public final class BundleContextAdaptor implements BundleContext {
 
     @Override
     public void addBundleListener(BundleListener listener) {
-        moduleContext.addModuleListener(new BundleListenerAdaptor(listener));
+        moduleContext.addModuleListener(adaptBundleListener(listener));
     }
 
     @Override
@@ -133,12 +137,12 @@ public final class BundleContextAdaptor implements BundleContext {
 
     @Override
     public void addFrameworkListener(FrameworkListener listener) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("BundleContext.addFrameworkListener(FrameworkListener)");
     }
 
     @Override
     public void removeFrameworkListener(FrameworkListener listener) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("BundleContext.removeFrameworkListener(FrameworkListener)");
     }
 
     @Override
@@ -224,7 +228,7 @@ public final class BundleContextAdaptor implements BundleContext {
 
     @Override
     public File getDataFile(String filename) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("BundleContext.getDataFile(String)");
     }
 
     @Override
@@ -245,6 +249,26 @@ public final class BundleContextAdaptor implements BundleContext {
         return service;
     }
 
+    private ModuleListener adaptBundleListener(BundleListener listener) {
+        if (listener instanceof SynchronousBundleListener) {
+            return new SynchronousBundleListenerAdaptor(listener);
+        } else {
+            return new BundleListenerAdaptor(listener);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "BundleContext[" + moduleContext.getModule().getIdentity() + "]";
+    }
+
+    private class SynchronousBundleListenerAdaptor extends BundleListenerAdaptor implements SynchronousModuleListener {
+
+        SynchronousBundleListenerAdaptor(BundleListener delegate) {
+            super(delegate);
+        }
+    }
+
     private class BundleListenerAdaptor implements ModuleListener {
 
         private final BundleListener delegate;
@@ -255,7 +279,7 @@ public final class BundleContextAdaptor implements BundleContext {
 
         @Override
         public void moduleChanged(ModuleEvent event) {
-            delegate.bundleChanged(new BundleEvent(event.getType(), getBundle()));
+            delegate.bundleChanged(new BundleEvent(event.getType(), new BundleAdaptor(event.getOrigin())));
         }
 
         @Override
@@ -327,7 +351,7 @@ public final class BundleContextAdaptor implements BundleContext {
 
         @Override
         public Bundle[] getUsingBundles() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("BundleContext.getUsingBundles()");
         }
 
         @Override

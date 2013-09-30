@@ -5,8 +5,8 @@
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
  * 
  * This program is distributed in the hope that it will be useful,
@@ -14,7 +14,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
  * 
- * You should have received a copy of the GNU General Lesser Public 
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -51,7 +51,8 @@ public final class ManifestBuilder {
     public static final String GRAVIA_IDENTITY_REQUIREMENT = "Gravia-IdentityRequirement";
     public static final String GRAVIA_CAPABILITY = "Gravia-Capability";
     public static final String GRAVIA_REQUIREMENT = "Gravia-Requirement";
-    
+    public static final String GRAVIA_ACTIVATOR = "Gravia-Activator";
+
     public enum Type {
         String,
         Version,
@@ -59,9 +60,9 @@ public final class ManifestBuilder {
         Long,
         Double
     }
-    
+
     static final Logger LOGGER = Logger.getLogger(ManifestBuilder.class.getPackage().getName());
-    
+
     private final Map<String, String> identityRequirements = new LinkedHashMap<String, String>();
     private final List<String> genericCapabilities = new ArrayList<String>();
     private final List<String> genericRequirements = new ArrayList<String>();
@@ -81,11 +82,11 @@ public final class ManifestBuilder {
     public ManifestBuilder addIdentityCapability(String symbolicName, String version) {
         return addIdentityCapability(symbolicName, Version.parseVersion(version), null, null);
     }
-    
+
     public ManifestBuilder addIdentityCapability(String symbolicName, Version version) {
         return addIdentityCapability(symbolicName, version, null, null);
     }
-    
+
     public ManifestBuilder addIdentityCapability(String symbolicName, Version version, Map<String, String> atts, Map<String, String> dirs) {
         StringBuffer buffer = new StringBuffer(symbolicName);
         if (version != null) {
@@ -104,15 +105,15 @@ public final class ManifestBuilder {
         addManifestHeader(GRAVIA_IDENTITY_CAPABILITY, buffer.toString());
         return this;
     }
-    
+
     public ManifestBuilder addIdentityRequirement(String symbolicName, String version) {
         return addIdentityRequirement(symbolicName, new VersionRange(version), null, null);
     }
-    
+
     public ManifestBuilder addIdentityRequirement(String symbolicName, VersionRange version) {
         return addIdentityRequirement(symbolicName, version, null, null);
     }
-    
+
     public ManifestBuilder addIdentityRequirement(String symbolicName, VersionRange version, Map<String, String> atts, Map<String, String> dirs) {
         StringBuffer buffer = new StringBuffer(symbolicName);
         if (version != null) {
@@ -131,9 +132,19 @@ public final class ManifestBuilder {
         addEntry(identityRequirements, buffer.toString());
         return this;
     }
-    
+
     public ManifestBuilder addManifestHeader(String key, String value) {
         append(key + ": " + value);
+        return this;
+    }
+
+    public ManifestBuilder addModuleActivator(String className) {
+        addManifestHeader(GRAVIA_ACTIVATOR, className);
+        return this;
+    }
+
+    public ManifestBuilder addModuleActivator(Class<?> clazz) {
+        addManifestHeader(GRAVIA_ACTIVATOR, clazz.getName());
         return this;
     }
 
@@ -189,7 +200,7 @@ public final class ManifestBuilder {
             LOGGER.warnf("Ignore duplicate entery: %s", entry);
         }
     }
-    
+
     /**
      * Validate a given manifest.
      *
@@ -222,13 +233,13 @@ public final class ManifestBuilder {
         if (identitySpec == null)
             throw new IllegalArgumentException("Cannot obtain required header: " + GRAVIA_IDENTITY_CAPABILITY);
     }
-    
+
     private static String getManifestHeaderInternal(Manifest manifest, String key) {
         Attributes attribs = manifest.getMainAttributes();
         String value = attribs.getValue(key);
         return value != null ? value.trim() : null;
     }
-    
+
     public Manifest getManifest() {
         if (manifest == null) {
             addManifestHeader(GRAVIA_IDENTITY_REQUIREMENT, identityRequirements);
@@ -271,7 +282,7 @@ public final class ManifestBuilder {
             addManifestHeader(header, buffer.toString());
         }
     }
-    
+
     private void addManifestHeader(String header, List<String> source) {
         if (source.size() > 0) {
             int i = 0;
@@ -283,7 +294,7 @@ public final class ManifestBuilder {
             addManifestHeader(header, buffer.toString());
         }
     }
-    
+
     public InputStream openStream() {
         Manifest manifest = getManifest();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

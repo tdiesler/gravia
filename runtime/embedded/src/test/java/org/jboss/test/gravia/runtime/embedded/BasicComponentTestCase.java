@@ -21,18 +21,15 @@
  */
 package org.jboss.test.gravia.runtime.embedded;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-import junit.framework.Assert;
-
-import org.jboss.gravia.runtime.Constants;
+import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
-import org.jboss.osgi.metadata.OSGiMetaData;
-import org.jboss.osgi.metadata.OSGiMetaDataBuilder;
-import org.jboss.test.gravia.runtime.embedded.suba.SimpleActivator;
+import org.jboss.gravia.runtime.Module.State;
+import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.ServiceReference;
+import org.jboss.test.gravia.runtime.embedded.sub.a.ServiceA;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -43,21 +40,41 @@ import org.junit.Test;
  */
 public class BasicComponentTestCase extends AbstractRuntimeTest {
 
+    static final String MODULE_A = "moduleA";
+    static final String MODULE_A1 = "moduleA1";
+
     @Test
     public void testBasicModule() throws Exception {
-        JarFile jarFile = new JarFile("target/test-libs/bundles/org.apache.felix.scr.jar");
-        Manifest manifest = jarFile.getManifest();
-        OSGiMetaData metaData = OSGiMetaDataBuilder.load(manifest);
-        String bundleActivator = metaData.getBundleActivator();
+        installInternalBundles("org.apache.felix.scr");
 
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(Constants.MODULE_MANIFEST, manifest);
-        props.put("Bundle-Activator", bundleActivator);
-        Module scrModule = getRuntime().installModule(SimpleActivator.class.getClassLoader(), props);
-        Assert.assertEquals(Module.State.RESOLVED, scrModule.getState());
+        Module moduleA = getRuntime().installModule(getClass().getClassLoader(), getManifestA());
+        Module moduleA1 = getRuntime().installModule(getClass().getClassLoader(), getManifestA1());
 
-        scrModule.start();
+        moduleA.start();
+        Assert.assertEquals(State.ACTIVE, moduleA.getState());
 
-        scrModule.stop();
+        moduleA1.start();
+        Assert.assertEquals(State.ACTIVE, moduleA1.getState());
+
+        ModuleContext contextA = moduleA.getModuleContext();
+        ServiceReference<ServiceA> srefA = contextA.getServiceReference(ServiceA.class);
+        Assert.assertNotNull("ServiceReference not null", srefA);
+
+        ServiceA serviceA = contextA.getService(srefA);
+        Assert.assertEquals("ServiceA#1:ServiceA1#1:Hello", serviceA.doStuff("Hello"));
+    }
+
+    private Manifest getManifestA() {
+        ManifestBuilder builder = new ManifestBuilder();
+        builder.addIdentityCapability(MODULE_A, "1.0.0");
+        builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.embedded.sub.a.ServiceA.xml");
+        return builder.getManifest();
+    }
+
+    private Manifest getManifestA1() {
+        ManifestBuilder builder = new ManifestBuilder();
+        builder.addIdentityCapability(MODULE_A1, "1.0.0");
+        builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.embedded.sub.a1.ServiceA1.xml");
+        return builder.getManifest();
     }
 }

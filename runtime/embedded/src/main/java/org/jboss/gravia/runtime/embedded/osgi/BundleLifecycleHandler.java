@@ -21,11 +21,13 @@
  */
 package org.jboss.gravia.runtime.embedded.osgi;
 
+import java.util.jar.Manifest;
+
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.Constants;
 
 /**
  * A handler for internal Bundle lifecycle.
@@ -35,13 +37,13 @@ import org.osgi.framework.Constants;
  */
 public final class BundleLifecycleHandler {
 
-    public static boolean isInternalBundle(Module module) {
-        String className = (String) module.getProperty(Constants.BUNDLE_ACTIVATOR);
-        return className != null;
+    public static boolean isBundle(Module module) {
+        Manifest manifest = BundleAdaptor.getManifest(module);
+        return OSGiManifestBuilder.isValidBundleManifest(manifest);
     }
 
     public static void start(Module module) throws Exception {
-        String className = (String) module.getProperty(Constants.BUNDLE_ACTIVATOR);
+        String className = BundleAdaptor.getOSGiMetaData(module).getBundleActivator();
         if (className != null) {
             BundleActivator bundleActivator;
             synchronized (BundleAdaptor.BUNDLE_ACTIVATOR_KEY) {

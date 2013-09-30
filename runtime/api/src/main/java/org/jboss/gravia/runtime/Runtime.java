@@ -1,6 +1,6 @@
 /*
  * #%L
- * JBossOSGi Framework
+ * JBossOSGi Runtime
  * %%
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
@@ -21,8 +21,11 @@
  */
 package org.jboss.gravia.runtime;
 
-import java.util.Map;
 import java.util.Set;
+import java.util.jar.Manifest;
+
+import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
 
 /**
  * [TODO]
@@ -40,5 +43,33 @@ public interface Runtime {
 
     Set<Module> getModules();
 
-    Module installModule(ClassLoader classloader, Map<String, Object> properties);
+    /**
+     * Installs a module with the specified {@code ClassLoader} and {@code Manifest} object.
+     * <p>
+     * The module's {@link ResourceIdentity} and possible other capabilities/requirements are generated from the manifest.
+     * <p>
+     * The following steps are required to install a module:
+     * <ol>
+     * <li>The module's state is set to {@code INSTALLED}.
+     * <li>A module event of type {@link ModuleEvent#INSTALLED} is fired.
+     * <li>The module's state is set to {@code RESOLVED}.
+     * <li>A module event of type {@link ModuleEvent#RESOLVED} is fired.
+     * <li>The {@code Module} object for the newly or previously installed module is returned.
+     * </ol>
+     */
+    Module installModule(ClassLoader classloader, Manifest manifest);
+
+    /**
+     * Installs a module with the specified {@code ClassLoader} and {@code Resource} object.
+     * <p>
+     * The following steps are required to install a module:
+     * <ol>
+     * <li>The module's state is set to {@code INSTALLED}.
+     * <li>A module event of type {@link ModuleEvent#INSTALLED} is fired.
+     * <li>The module's state is set to {@code RESOLVED}.
+     * <li>A module event of type {@link ModuleEvent#RESOLVED} is fired.
+     * <li>The {@code Module} object for the newly or previously installed module is returned.
+     * </ol>
+     */
+    Module installModule(ClassLoader classloader, Resource resource);
 }

@@ -21,8 +21,14 @@
  */
 package org.jboss.test.gravia.runtime.embedded;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.jar.JarFile;
+
+import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.embedded.EmbeddedRuntime;
+import org.junit.Before;
 
 /**
  * [TODO].
@@ -30,14 +36,31 @@ import org.jboss.gravia.runtime.embedded.EmbeddedRuntime;
  * @author thomas.diesler@jbos.com
  * @since 27-Sep-2013
  */
-abstract class AbstractRuntimeTest {
+public abstract class AbstractRuntimeTest {
 
     private Runtime runtime;
 
+    @Before
+    public void setUp() throws Exception {
+        runtime = new EmbeddedRuntime(null);
+    }
+
     Runtime getRuntime() {
-        if (runtime == null) {
-            runtime = new EmbeddedRuntime(null);
-        }
         return runtime;
+    }
+
+    void installInternalBundles(String... names) throws Exception {
+        List<Module> modules = new ArrayList<Module>();
+        for (String name : names) {
+            modules.add(installInternalBundle(name));
+        }
+        for (Module module : modules) {
+            module.start();
+        }
+    }
+
+    Module installInternalBundle(String symbolicName) throws Exception {
+        JarFile jarFile = new JarFile("target/test-libs/bundles/" + symbolicName + ".jar");
+        return runtime.installModule(getClass().getClassLoader(), jarFile.getManifest());
     }
 }

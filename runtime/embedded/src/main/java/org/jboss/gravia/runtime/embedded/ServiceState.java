@@ -56,7 +56,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
     private static Logger LOGGER = Logger.getLogger(ServiceState.class);
 
-    private final EmbeddedRuntimeServicesHandler serviceManager;
+    private final RuntimeServicesHandler serviceManager;
     private final Module ownerModule;
     private final String[] classNames;
     private final long serviceId;
@@ -76,7 +76,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
     @SuppressWarnings("unchecked")
-    ServiceState(EmbeddedRuntimeServicesHandler serviceManager, Module owner, long serviceId, String[] classNames, ValueProvider<S> valueProvider, Dictionary properties) {
+    ServiceState(RuntimeServicesHandler serviceManager, Module owner, long serviceId, String[] classNames, ValueProvider<S> valueProvider, Dictionary properties) {
         assert serviceManager != null : "Null serviceManager";
         assert owner != null : "Null owner";
         assert classNames != null && classNames.length > 0 : "Null clazzes";

@@ -21,6 +21,8 @@
  */
 package org.jboss.gravia.runtime.embedded;
 
+import static org.jboss.gravia.runtime.embedded.EmbeddedRuntime.LOGGER;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -38,7 +40,6 @@ import org.jboss.gravia.runtime.RuntimeUtils;
 import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.logging.Logger;
 
 /**
  * [TODO]
@@ -46,16 +47,14 @@ import org.jboss.logging.Logger;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-final class EmbeddedRuntimeServicesHandler {
+final class RuntimeServicesHandler {
 
-    private static Logger LOGGER = Logger.getLogger(EmbeddedRuntimeServicesHandler.class);
-
-    private final EmbeddedRuntimeEventsHandler frameworkEvents;
+    private final RuntimeEventsHandler frameworkEvents;
     private final Map<String, List<ServiceState<?>>> serviceContainer = new HashMap<String, List<ServiceState<?>>>();
     private final ThreadLocal<Module> getServiceRecursion = new ThreadLocal<Module>();
     private final AtomicLong identityGenerator = new AtomicLong();
 
-    EmbeddedRuntimeServicesHandler(EmbeddedRuntimeEventsHandler frameworkEvents) {
+    RuntimeServicesHandler(RuntimeEventsHandler frameworkEvents) {
         this.frameworkEvents = frameworkEvents;
     }
 
@@ -243,7 +242,7 @@ final class EmbeddedRuntimeServicesHandler {
      * Unregister the given service.
      */
 
-    public void unregisterService(ServiceState<?> serviceState) {
+    void unregisterService(ServiceState<?> serviceState) {
         synchronized (serviceState) {
 
             if (serviceState.isUnregistered())
@@ -285,7 +284,7 @@ final class EmbeddedRuntimeServicesHandler {
      *         unregistered; <code>true</code> otherwise.
      */
 
-    public boolean ungetService(Module module, ServiceState<?> serviceState) {
+    boolean ungetService(Module module, ServiceState<?> serviceState) {
         serviceState.ungetScopedValue(module);
         return true;
     }
