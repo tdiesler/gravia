@@ -36,11 +36,16 @@
     <name>Gravia :: Runtime :: API</name>
     
     <artifactId>gravia-runtime-api</artifactId>
+    <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-resource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.osgi.metadata</groupId>
+            <artifactId>jbosgi-metadata</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jboss.logging</groupId>
@@ -57,6 +62,21 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Version>${project.version}</Bundle-Version>
+						<Export-Package>
+							org.jboss.gravia.runtime;version="${project.version}",
+						</Export-Package>
+						<Import-Package>
+						</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>

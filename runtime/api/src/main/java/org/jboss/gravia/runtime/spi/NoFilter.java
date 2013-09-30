@@ -1,4 +1,4 @@
-package org.jboss.gravia.runtime.embedded;
+package org.jboss.gravia.runtime.spi;
 /*
  * #%L
  * JBossOSGi Framework
@@ -33,7 +33,7 @@ import org.jboss.gravia.runtime.ServiceReference;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-final class NoFilter implements Filter {
+public final class NoFilter implements Filter {
 
     /** Singleton instance */
     public static final Filter INSTANCE = new NoFilter();

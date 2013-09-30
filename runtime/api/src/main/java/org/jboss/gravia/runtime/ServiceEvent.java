@@ -33,10 +33,6 @@ import java.util.EventObject;
 public class ServiceEvent extends EventObject {
 
     static final long                   serialVersionUID    = 8792901483909409299L;
-    /**
-     * Reference to the service that had a change occur in its lifecycle.
-     */
-    private final ServiceReference<?>   reference;
 
     /**
      * Type of service lifecycle change.
@@ -105,7 +101,6 @@ public class ServiceEvent extends EventObject {
      */
     public ServiceEvent(int type, ServiceReference<?> reference) {
         super(reference);
-        this.reference = reference;
         this.type = type;
     }
 
@@ -118,7 +113,7 @@ public class ServiceEvent extends EventObject {
      * @return Reference to the service that had a lifecycle change.
      */
     public ServiceReference<?> getServiceReference() {
-        return reference;
+        return (ServiceReference<?>) getSource();
     }
 
     /**

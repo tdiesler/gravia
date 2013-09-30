@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.embedded;
+package org.jboss.gravia.runtime.spi;
 
 import java.util.Collection;
 import java.util.Map;

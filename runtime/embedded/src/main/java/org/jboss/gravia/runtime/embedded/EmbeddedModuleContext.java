@@ -36,6 +36,8 @@ import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
+import org.jboss.gravia.runtime.spi.RuntimeStorageHandler;
 
 /**
  * [TODO]
@@ -43,12 +45,12 @@ import org.jboss.gravia.runtime.ServiceRegistration;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-final class ModuleContextImpl implements ModuleContext {
+final class EmbeddedModuleContext implements ModuleContext {
 
     private final AtomicBoolean destroyed = new AtomicBoolean();
     private final Module module;
 
-    ModuleContextImpl(Module module) {
+    EmbeddedModuleContext(Module module) {
         this.module = module;
     }
 

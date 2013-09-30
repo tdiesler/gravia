@@ -19,12 +19,10 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.embedded;
+package org.jboss.gravia.runtime.spi;
 
-import static org.jboss.gravia.runtime.embedded.EmbeddedRuntime.LOGGER;
+import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,8 +46,8 @@ import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.RuntimeUtils;
 import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceListener;
+import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.SynchronousModuleListener;
-import org.jboss.gravia.runtime.embedded.osgi.ConstantsHelper;
 
 /**
  * [TODO]
@@ -57,7 +55,7 @@ import org.jboss.gravia.runtime.embedded.osgi.ConstantsHelper;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-final class RuntimeEventsHandler {
+public final class RuntimeEventsHandler {
 
     private final ExecutorService executorService;
 
@@ -85,7 +83,7 @@ final class RuntimeEventsHandler {
         infoEvents.add(ConstantsHelper.bundleEvent(ModuleEvent.UNINSTALLED));
     }
 
-    void addModuleListener(final Module module, final ModuleListener listener) {
+    public void addModuleListener(final Module module, final ModuleListener listener) {
         assert listener != null : "Null listener";
         synchronized (moduleListeners) {
             List<BundleListenerRegistration> registrations = moduleListeners.get(module);
@@ -101,7 +99,7 @@ final class RuntimeEventsHandler {
     }
 
 
-    void removeModuleListener(final Module module, final ModuleListener listener) {
+    public void removeModuleListener(final Module module, final ModuleListener listener) {
         assert listener != null : "Null listener";
         synchronized (moduleListeners) {
             List<BundleListenerRegistration> registrations = moduleListeners.get(module);
@@ -123,20 +121,20 @@ final class RuntimeEventsHandler {
     }
 
 
-    void removeBundleListeners(final Module moduleState) {
+    public void removeBundleListeners(final Module moduleState) {
         synchronized (moduleListeners) {
             moduleListeners.remove(moduleState);
         }
     }
 
 
-    void removeAllBundleListeners() {
+    public void removeAllBundleListeners() {
         synchronized (moduleListeners) {
             moduleListeners.clear();
         }
     }
 
-    void addServiceListener(final Module module, final ServiceListener listener, final String filterstr) {
+    public void addServiceListener(final Module module, final ServiceListener listener, final String filterstr) {
         assert listener != null : "Null listener";
         synchronized (serviceListeners) {
             List<ServiceListenerRegistration> listeners = serviceListeners.get(module);
@@ -173,7 +171,7 @@ final class RuntimeEventsHandler {
     }
 
 
-    void removeServiceListener(final Module moduleState, final ServiceListener listener) {
+    public void removeServiceListener(final Module moduleState, final ServiceListener listener) {
         assert listener != null : "Null listener";
         synchronized (serviceListeners) {
             List<ServiceListenerRegistration> listeners = serviceListeners.get(moduleState);
@@ -188,26 +186,26 @@ final class RuntimeEventsHandler {
     }
 
 
-    void removeServiceListeners(final Module moduleState) {
+    public void removeServiceListeners(final Module moduleState) {
         synchronized (serviceListeners) {
             serviceListeners.remove(moduleState);
         }
     }
 
 
-    void removeAllServiceListeners() {
+    public void removeAllServiceListeners() {
         synchronized (serviceListeners) {
             serviceListeners.clear();
         }
     }
 
 
-    void fireModuleEvent(final Module module, final int type) {
+    public void fireModuleEvent(final Module module, final int type) {
         fireModuleEvent(null, module, type);
     }
 
 
-    void fireModuleEvent(final ModuleContext context, final Module module, final int type) {
+    public void fireModuleEvent(final ModuleContext context, final Module module, final int type) {
         if (module == null)
             throw new IllegalArgumentException("module");
 
@@ -276,7 +274,7 @@ final class RuntimeEventsHandler {
         }
     }
 
-    void fireServiceEvent(final Module module, int type, final ServiceState<?> serviceState) {
+    public void fireServiceEvent(final Module module, int type, final ServiceReference<?> reference) {
 
         // Do nothing it the framework is not active
         // if (moduleManager.isFrameworkCreated() == false)
@@ -306,9 +304,9 @@ final class RuntimeEventsHandler {
         }
 
         // Construct the ServiceEvent
-        ServiceEvent event = new ServiceEventImpl(type, serviceState);
+        ServiceEvent event = new ServiceEventImpl(type, reference);
         String typeName = ConstantsHelper.serviceEvent(event.getType());
-        LOGGER.tracef("Service %s: %s", typeName, serviceState);
+        LOGGER.tracef("Service %s: %s", typeName, reference);
 
         // Nobody is interested
         if (listeners.isEmpty())
@@ -325,9 +323,9 @@ final class RuntimeEventsHandler {
                 // Service events must only be delivered to event listeners which can validly cast the event
                 if (!listenerReg.isAllServiceListener()) {
                     boolean assignableToOwner = true;
-                    String[] clazzes = (String[]) serviceState.getProperty(Constants.OBJECTCLASS);
+                    String[] clazzes = (String[]) reference.getProperty(Constants.OBJECTCLASS);
                     for (String clazz : clazzes) {
-                        if (serviceState.isAssignableTo(owner, clazz) == false) {
+                        if (reference.isAssignableTo(owner, clazz) == false) {
                             assignableToOwner = false;
                             break;
                         }
@@ -339,7 +337,7 @@ final class RuntimeEventsHandler {
                 try {
                     String filterstr = info.getFilter();
                     ServiceListener listener = listenerReg.getListener();
-                    if (listenerReg.isAllServiceListener() || listenerReg.filter.match(serviceState)) {
+                    if (listenerReg.isAllServiceListener() || listenerReg.filter.match(reference)) {
                         listener.serviceChanged(event);
                     }
 
@@ -348,13 +346,14 @@ final class RuntimeEventsHandler {
                     // the filter matched the service properties prior to the modification but the filter does
                     // not match the modified service properties.
                     else if (filterstr != null && ServiceEvent.MODIFIED == event.getType()) {
-                        if (listenerReg.filter.match(serviceState.getPreviousProperties())) {
-                            event = new ServiceEventImpl(ServiceEvent.MODIFIED_ENDMATCH, serviceState);
+                        Filter filter = listenerReg.filter;
+                        if (/* filter.match(reference.getPreviousProperties()) && */ !filter.match(reference)) {
+                            event = new ServiceEventImpl(ServiceEvent.MODIFIED_ENDMATCH, reference);
                             listener.serviceChanged(event);
                         }
                     }
                 } catch (Throwable th) {
-                    LOGGER.warnf(th, "Error while firing service event %s for: %s", typeName, serviceState);
+                    LOGGER.warnf(th, "Error while firing service event %s for: %s", typeName, reference);
                 }
             }
         }
@@ -363,16 +362,13 @@ final class RuntimeEventsHandler {
     /**
      * Filter and AccessControl for service events
      */
-    static class ServiceListenerRegistration {
+    private static class ServiceListenerRegistration {
 
         private final Module module;
         private final ModuleContext moduleContext;
         private final ServiceListener listener;
         private final Filter filter;
         private final ListenerInfo info;
-
-        // Any access control context
-        AccessControlContext accessControlContext;
 
         ServiceListenerRegistration(final Module module, final ServiceListener listener, final Filter filter) {
             assert module != null : "Null module";
@@ -383,8 +379,6 @@ final class RuntimeEventsHandler {
             this.filter = filter;
             this.moduleContext = module.getModuleContext();
             this.info = new ListenerInfo(moduleContext, this);
-            if (System.getSecurityManager() != null)
-                accessControlContext = AccessController.getContext();
         }
 
         Module getModule() {
@@ -432,29 +426,18 @@ final class RuntimeEventsHandler {
         }
     }
 
-    static class BundleListenerRegistration {
+    private static class BundleListenerRegistration {
         private final ModuleListener listener;
-        private final ModuleContext moduleContext;
         private final Module module;
 
         BundleListenerRegistration(Module module, ModuleListener listener) {
             this.listener = listener;
             this.module = module;
-            this.moduleContext = module.getModuleContext();
         }
 
         ModuleListener getListener() {
             return listener;
         }
-
-        Module getModule() {
-            return module;
-        }
-
-        ModuleContext getModuleContext() {
-            return moduleContext;
-        }
-
 
         @Override
         public int hashCode() {
@@ -480,7 +463,7 @@ final class RuntimeEventsHandler {
         }
     }
 
-    static class ListenerInfo {
+    private static class ListenerInfo {
 
         private final ServiceListenerRegistration registration;
         private final ModuleContext moduleContext;
@@ -491,27 +474,18 @@ final class RuntimeEventsHandler {
             this.registration = registration;
         }
 
-        public ModuleContext getModuleContext() {
+        ModuleContext getModuleContext() {
             return moduleContext;
         }
 
-        public String getFilter() {
+        String getFilter() {
             Filter filter = registration.filter;
             return filter != NoFilter.INSTANCE ? filter.toString() : null;
-        }
-
-        public boolean isRemoved() {
-            return removed;
         }
 
         ServiceListenerRegistration getRegistration() {
             return registration;
         }
-
-        void setRemoved(boolean removed) {
-            this.removed = removed;
-        }
-
 
         @Override
         public int hashCode() {
@@ -534,7 +508,7 @@ final class RuntimeEventsHandler {
         }
     }
 
-    static class ModuleEventImpl extends ModuleEvent {
+    private static class ModuleEventImpl extends ModuleEvent {
 
         private static final long serialVersionUID = -2705304702665185935L;
 
@@ -549,12 +523,12 @@ final class RuntimeEventsHandler {
         }
     }
 
-    static class ServiceEventImpl extends ServiceEvent {
+    private static class ServiceEventImpl extends ServiceEvent {
 
         private static final long serialVersionUID = 62018288275708239L;
 
-        public ServiceEventImpl(int type, ServiceState<?> serviceState) {
-            super(type, serviceState.getReference());
+        ServiceEventImpl(int type, ServiceReference<?> reference) {
+            super(type, reference);
         }
 
 

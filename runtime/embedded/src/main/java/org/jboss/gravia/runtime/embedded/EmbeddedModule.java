@@ -21,7 +21,7 @@
  */
 package org.jboss.gravia.runtime.embedded;
 
-import static org.jboss.gravia.runtime.embedded.EmbeddedRuntime.LOGGER;
+import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -29,24 +29,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
 
-import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.AttachmentKey;
-import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
-import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.resource.spi.AttachableSupport;
-import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleException;
-import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.embedded.osgi.BundleLifecycleHandler;
-import org.jboss.osgi.metadata.OSGiManifestBuilder;
-import org.jboss.osgi.metadata.OSGiMetaData;
-import org.jboss.osgi.metadata.OSGiMetaDataBuilder;
+import org.jboss.gravia.runtime.spi.AbstractModule;
+import org.jboss.gravia.runtime.spi.AbstractRuntime;
+import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
 
 /**
  * [TODO]
@@ -54,45 +47,19 @@ import org.jboss.osgi.metadata.OSGiMetaDataBuilder;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-final class ModuleImpl implements Module {
+final class EmbeddedModule extends AbstractModule {
 
     private static AttachmentKey<ModuleActivator> MODULE_ACTIVATOR_KEY = AttachmentKey.create(ModuleActivator.class);
     private static final AtomicLong moduleIdGenerator = new AtomicLong();
     private static final Long START_STOP_TIMEOUT = new Long(10000);
 
-    private final EmbeddedRuntime runtime;
-    private final ClassLoader classLoader;
-    private final Resource resource;
-    private final AtomicReference<State> stateRef = new AtomicReference<State>();
     private final AtomicReference<ModuleContext> contextRef = new AtomicReference<ModuleContext>();
     private final ReentrantLock startStopLock = new ReentrantLock();
-    private final Attachable attachments = new AttachableSupport();
     private final long moduleId;
 
-    ModuleImpl(EmbeddedRuntime runtime, ClassLoader classLoader, Manifest manifest) {
-        this(runtime, classLoader, buildResource(manifest));
-        putAttachment(MANIFEST_KEY, manifest);
-    }
-
-    ModuleImpl(EmbeddedRuntime runtime, ClassLoader classLoader, Resource resource) {
-        this.runtime = runtime;
-        this.classLoader = classLoader;
-        this.resource = resource;
+    EmbeddedModule(AbstractRuntime runtime, ClassLoader classLoader, Resource resource) {
+        super(runtime, classLoader, resource);
         this.moduleId = moduleIdGenerator.incrementAndGet();
-        this.stateRef.set(State.UNINSTALLED);
-    }
-
-    private static Resource buildResource(Manifest manifest) {
-        Resource resource;
-        if (OSGiManifestBuilder.isValidBundleManifest(manifest)) {
-            OSGiMetaData metaData = OSGiMetaDataBuilder.load(manifest);
-            DefaultResourceBuilder builder = new DefaultResourceBuilder();
-            builder.addIdentityCapability(metaData.getBundleSymbolicName(), metaData.getBundleVersion().toString());
-            resource = builder.getResource();
-        } else {
-            resource = new ManifestResourceBuilder().load(manifest).getResource();
-        }
-        return resource;
     }
 
     // Module API
@@ -103,63 +70,16 @@ final class ModuleImpl implements Module {
     }
 
     @Override
-    public ResourceIdentity getIdentity() {
-        return resource.getIdentity();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <A> A adapt(Class<A> type) {
-        A result = null;
-        if (type.isAssignableFrom(Runtime.class)) {
-            result = (A) runtime;
-        } else if (type.isAssignableFrom(ClassLoader.class)) {
-            result = (A) classLoader;
-        } else if (type.isAssignableFrom(Resource.class)) {
-            result = (A) resource;
-        } else if (type.isAssignableFrom(Manifest.class)) {
-            result = (A) getAttachment(MANIFEST_KEY);
-        } else if (type.isAssignableFrom(Module.class)) {
-            result = (A) this;
-        }
-        return result;
-    }
-
-    @Override
-    public <T> T putAttachment(AttachmentKey<T> key, T value) {
-        return attachments.putAttachment(key, value);
-    }
-
-    @Override
-    public <T> T getAttachment(AttachmentKey<T> key) {
-        return attachments.getAttachment(key);
-    }
-
-    @Override
-    public <T> T removeAttachment(AttachmentKey<T> key) {
-        return attachments.removeAttachment(key);
-    }
-
-    @Override
-    public State getState() {
-        return stateRef.get();
-    }
-
-    void setState(State newState) {
-        stateRef.set(newState);
-    }
-
-    @Override
     public ModuleContext getModuleContext() {
         return contextRef.get();
     }
 
     private void createModuleContext() {
-        contextRef.set(new ModuleContextImpl(this));
+        contextRef.set(new EmbeddedModuleContext(this));
     }
 
     private void destroyModuleContext() {
-        ModuleContextImpl context = (ModuleContextImpl) contextRef.get();
+        EmbeddedModuleContext context = (EmbeddedModuleContext) contextRef.get();
         if (context != null) {
             context.destroy();
         }
@@ -185,7 +105,7 @@ final class ModuleImpl implements Module {
             setState(State.STARTING);
 
             // #4 A module event of type {@link ModuleEvent#STARTING} is fired.
-            RuntimeEventsHandler eventHandler = runtime.adapt(RuntimeEventsHandler.class);
+            RuntimeEventsHandler eventHandler = getRuntime().adapt(RuntimeEventsHandler.class);
             eventHandler.fireModuleEvent(this, ModuleEvent.STARTING);
 
             // Create the {@link ModuleContext}
@@ -200,11 +120,11 @@ final class ModuleImpl implements Module {
                     if (className != null) {
                         ModuleActivator moduleActivator;
                         synchronized (MODULE_ACTIVATOR_KEY) {
-                            moduleActivator = attachments.getAttachment(MODULE_ACTIVATOR_KEY);
+                            moduleActivator = getAttachment(MODULE_ACTIVATOR_KEY);
                             if (moduleActivator == null) {
                                 Object result = loadClass(className).newInstance();
                                 moduleActivator = (ModuleActivator) result;
-                                attachments.putAttachment(MODULE_ACTIVATOR_KEY, moduleActivator);
+                                putAttachment(MODULE_ACTIVATOR_KEY, moduleActivator);
                             }
                         }
                         if (moduleActivator != null) {
@@ -277,7 +197,7 @@ final class ModuleImpl implements Module {
             setState(State.STOPPING);
 
             // #4 A module event of type {@link ModuleEvent#STOPPING} is fired.
-            RuntimeEventsHandler eventHandler = runtime.adapt(RuntimeEventsHandler.class);
+            RuntimeEventsHandler eventHandler = getRuntime().adapt(RuntimeEventsHandler.class);
             eventHandler.fireModuleEvent(this, ModuleEvent.STOPPING);
 
             // #5 The {@link ModuleActivator#stop(ModuleContext)} is called
@@ -286,7 +206,7 @@ final class ModuleImpl implements Module {
                 if (BundleLifecycleHandler.isBundle(this)) {
                     BundleLifecycleHandler.stop(this);
                 } else {
-                    ModuleActivator moduleActivator = attachments.getAttachment(MODULE_ACTIVATOR_KEY);
+                    ModuleActivator moduleActivator = getAttachment(MODULE_ACTIVATOR_KEY);
                     if (moduleActivator != null) {
                         moduleActivator.stop(getModuleContext());
                     }
@@ -335,26 +255,16 @@ final class ModuleImpl implements Module {
         setState(State.UNINSTALLED);
 
         // #3 A module event of type {@link ModuleEvent#UNINSTALLED} is fired.
-        RuntimeEventsHandler eventHandler = runtime.adapt(RuntimeEventsHandler.class);
+        RuntimeEventsHandler eventHandler = getRuntime().adapt(RuntimeEventsHandler.class);
         eventHandler.fireModuleEvent(this, ModuleEvent.UNINSTALLED);
 
-        runtime.uninstallModule(this);
+        getRuntime().uninstallModule(this);
 
         LOGGER.infof("Uninstalled: %s", this);
     }
 
-    @Override
-    public Class<?> loadClass(String className) throws ClassNotFoundException {
-        return classLoader.loadClass(className);
-    }
-
     private void assertNotUninstalled() {
-        if (stateRef.get() == State.UNINSTALLED)
+        if (getState() == State.UNINSTALLED)
             throw new IllegalStateException("Module already uninstalled: " + this);
-    }
-
-    @Override
-    public String toString() {
-        return "Module[" + getIdentity() + "]";
     }
 }

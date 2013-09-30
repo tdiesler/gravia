@@ -21,7 +21,7 @@
  */
 package org.jboss.gravia.runtime.embedded;
 
-import static org.jboss.gravia.runtime.embedded.EmbeddedRuntime.LOGGER;
+import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +40,9 @@ import org.jboss.gravia.runtime.RuntimeUtils;
 import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceReference;
+import org.jboss.gravia.runtime.spi.NoFilter;
+import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
+import org.osgi.framework.Bundle;
 
 /**
  * [TODO]
