@@ -39,12 +39,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import org.jboss.gravia.runtime.AllServiceListener;
-import org.jboss.gravia.runtime.ModuleEvent;
-import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Filter;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.ModuleEvent;
+import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.RuntimeUtils;
 import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceListener;

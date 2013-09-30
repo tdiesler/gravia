@@ -25,7 +25,6 @@ import java.util.jar.Manifest;
 
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.Module.State;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.test.gravia.runtime.embedded.sub.a.ServiceA;
@@ -45,23 +44,21 @@ public class BasicComponentTestCase extends AbstractRuntimeTest {
 
     @Test
     public void testBasicModule() throws Exception {
+
         installInternalBundles("org.apache.felix.scr");
 
-        Module moduleA = getRuntime().installModule(getClass().getClassLoader(), getManifestA());
-        Module moduleA1 = getRuntime().installModule(getClass().getClassLoader(), getManifestA1());
+        Module modA = getRuntime().installModule(getClass().getClassLoader(), getManifestA());
+        modA.start();
 
-        moduleA.start();
-        Assert.assertEquals(State.ACTIVE, moduleA.getState());
+        Module modA1 = getRuntime().installModule(getClass().getClassLoader(), getManifestA1());
+        modA1.start();
 
-        moduleA1.start();
-        Assert.assertEquals(State.ACTIVE, moduleA1.getState());
-
-        ModuleContext contextA = moduleA.getModuleContext();
-        ServiceReference<ServiceA> srefA = contextA.getServiceReference(ServiceA.class);
+        ModuleContext ctxA = modA.getModuleContext();
+        ServiceReference<ServiceA> srefA = ctxA.getServiceReference(ServiceA.class);
         Assert.assertNotNull("ServiceReference not null", srefA);
 
-        ServiceA serviceA = contextA.getService(srefA);
-        Assert.assertEquals("ServiceA#1:ServiceA1#1:Hello", serviceA.doStuff("Hello"));
+        ServiceA srvA = ctxA.getService(srefA);
+        Assert.assertEquals("ServiceA#1:ServiceA1#1:Hello", srvA.doStuff("Hello"));
     }
 
     private Manifest getManifestA() {

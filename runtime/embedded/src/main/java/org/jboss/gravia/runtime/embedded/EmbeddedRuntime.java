@@ -50,18 +50,20 @@ public final class EmbeddedRuntime implements Runtime {
 
     private final RuntimeEventsHandler runtimeEvents;
     private final RuntimeServicesHandler serviceManager;
+    private final RuntimeStorageHandler storageHandler;
 
     private final Map<Long, Module> modules = new ConcurrentHashMap<Long, Module>();
     private final Map<String, Object> properties;
 
     public EmbeddedRuntime(Map<String, Object> props) {
-        runtimeEvents = new RuntimeEventsHandler(createExecutorService("RuntimeEvents"));
-        serviceManager = new RuntimeServicesHandler(runtimeEvents);
         Map<String, Object> auxprops = new ConcurrentHashMap<String, Object>();
         if (props != null) {
             auxprops.putAll(props);
         }
-        this.properties = Collections.unmodifiableMap(auxprops);
+        properties = Collections.unmodifiableMap(auxprops);
+        runtimeEvents = new RuntimeEventsHandler(createExecutorService("RuntimeEvents"));
+        serviceManager = new RuntimeServicesHandler(runtimeEvents);
+        storageHandler = new RuntimeStorageHandler(properties, true);
     }
 
     @Override
@@ -77,6 +79,8 @@ public final class EmbeddedRuntime implements Runtime {
             result = (A) runtimeEvents;
         } else if (type.isAssignableFrom(RuntimeServicesHandler.class)) {
             result = (A) serviceManager;
+        } else if (type.isAssignableFrom(RuntimeStorageHandler.class)) {
+            result = (A) storageHandler;
         }
         return result;
     }

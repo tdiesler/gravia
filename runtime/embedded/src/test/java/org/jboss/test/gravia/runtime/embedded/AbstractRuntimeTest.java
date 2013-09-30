@@ -21,14 +21,20 @@
  */
 package org.jboss.test.gravia.runtime.embedded;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarFile;
 
+import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.embedded.EmbeddedRuntime;
 import org.junit.Before;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * [TODO].
@@ -42,11 +48,19 @@ public abstract class AbstractRuntimeTest {
 
     @Before
     public void setUp() throws Exception {
-        runtime = new EmbeddedRuntime(null);
+        Map<String, Object> props = new HashMap<String, Object>();
+        props.put(Constants.RUNTIME_STORAGE, new File("target/runtime").getAbsolutePath());
+        props.put(Constants.RUNTIME_STORAGE_CLEAN, Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT);
+        runtime = new EmbeddedRuntime(props);
     }
 
     Runtime getRuntime() {
         return runtime;
+    }
+
+    ConfigurationAdmin getConfigurationAdmin(Module module) {
+        ModuleContext context = module.getModuleContext();
+        return context.getService(context.getServiceReference(ConfigurationAdmin.class));
     }
 
     void installInternalBundles(String... names) throws Exception {

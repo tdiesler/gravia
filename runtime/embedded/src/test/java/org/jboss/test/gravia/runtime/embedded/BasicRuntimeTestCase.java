@@ -46,27 +46,27 @@ public class BasicRuntimeTestCase extends AbstractRuntimeTest {
 
         Manifest manifest = new ManifestBuilder().addIdentityCapability("moduleA", "1.0.0").getManifest();
 
-        Module moduleA = getRuntime().installModule(SimpleActivator.class.getClassLoader(), manifest);
-        Assert.assertEquals(Module.State.RESOLVED, moduleA.getState());
+        Module modA = getRuntime().installModule(SimpleActivator.class.getClassLoader(), manifest);
+        Assert.assertEquals(Module.State.RESOLVED, modA.getState());
 
-        moduleA.start();
-        Assert.assertEquals(Module.State.ACTIVE, moduleA.getState());
+        modA.start();
+        Assert.assertEquals(Module.State.ACTIVE, modA.getState());
 
-        ModuleContext context = moduleA.getModuleContext();
+        ModuleContext context = modA.getModuleContext();
         ServiceRegistration<String> sreg = context.registerService(String.class, new String("Hello"), null);
         Assert.assertNotNull("Null sreg", sreg);
 
         String service = context.getService(sreg.getReference());
         Assert.assertEquals("Hello", service);
 
-        moduleA.stop();
-        Assert.assertEquals(Module.State.RESOLVED, moduleA.getState());
+        modA.stop();
+        Assert.assertEquals(Module.State.RESOLVED, modA.getState());
 
-        moduleA.uninstall();
-        Assert.assertEquals(Module.State.UNINSTALLED, moduleA.getState());
+        modA.uninstall();
+        Assert.assertEquals(Module.State.UNINSTALLED, modA.getState());
 
         try {
-            moduleA.start();
+            modA.start();
             Assert.fail("IllegalStateException expected");
         } catch (IllegalStateException ex) {
             // expected
@@ -80,30 +80,30 @@ public class BasicRuntimeTestCase extends AbstractRuntimeTest {
         builder.addModuleActivator(SimpleActivator.class);
         Manifest manifest = builder.getManifest();
 
-        Module moduleA = getRuntime().installModule(SimpleActivator.class.getClassLoader(), manifest);
-        Assert.assertEquals(Module.State.RESOLVED, moduleA.getState());
+        Module modA = getRuntime().installModule(SimpleActivator.class.getClassLoader(), manifest);
+        Assert.assertEquals(Module.State.RESOLVED, modA.getState());
 
-        ModuleContext context = moduleA.getModuleContext();
-        Assert.assertNull("Null moduleContext", context);
+        ModuleContext ctxA = modA.getModuleContext();
+        Assert.assertNull("Null moduleContext", ctxA);
 
-        moduleA.start();
-        Assert.assertEquals(Module.State.ACTIVE, moduleA.getState());
+        modA.start();
+        Assert.assertEquals(Module.State.ACTIVE, modA.getState());
 
-        context = moduleA.getModuleContext();
-        ServiceReference<String> sref = context.getServiceReference(String.class);
-        Assert.assertNotNull("Null sref", sref);
+        ctxA = modA.getModuleContext();
+        ServiceReference<String> srefA = ctxA.getServiceReference(String.class);
+        Assert.assertNotNull("Null sref", srefA);
 
-        String service = context.getService(sref);
-        Assert.assertEquals("Hello", service);
+        String srvA = ctxA.getService(srefA);
+        Assert.assertEquals("Hello", srvA);
 
-        moduleA.stop();
-        Assert.assertEquals(Module.State.RESOLVED, moduleA.getState());
+        modA.stop();
+        Assert.assertEquals(Module.State.RESOLVED, modA.getState());
 
-        moduleA.uninstall();
-        Assert.assertEquals(Module.State.UNINSTALLED, moduleA.getState());
+        modA.uninstall();
+        Assert.assertEquals(Module.State.UNINSTALLED, modA.getState());
 
         try {
-            moduleA.start();
+            modA.start();
             Assert.fail("IllegalStateException expected");
         } catch (IllegalStateException ex) {
             // expected

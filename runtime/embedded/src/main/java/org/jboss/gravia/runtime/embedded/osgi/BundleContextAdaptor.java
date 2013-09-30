@@ -228,7 +228,7 @@ public final class BundleContextAdaptor implements BundleContext {
 
     @Override
     public File getDataFile(String filename) {
-        throw new UnsupportedOperationException("BundleContext.getDataFile(String)");
+        return moduleContext.getDataFile(filename);
     }
 
     @Override
@@ -401,12 +401,12 @@ public final class BundleContextAdaptor implements BundleContext {
 
         @Override
         public S getService(Module module, org.jboss.gravia.runtime.ServiceRegistration<S> registration) {
-            return delegate.getService(getBundle(), new ServiceRegistrationAdaptor<S>(registration));
+            return delegate.getService(new BundleAdaptor(module), new ServiceRegistrationAdaptor<S>(registration));
         }
 
         @Override
         public void ungetService(Module module, org.jboss.gravia.runtime.ServiceRegistration<S> registration, S service) {
-            delegate.ungetService(getBundle(), new ServiceRegistrationAdaptor<S>(registration), service);
+            delegate.ungetService(new BundleAdaptor(module), new ServiceRegistrationAdaptor<S>(registration), service);
         }
     }
 }

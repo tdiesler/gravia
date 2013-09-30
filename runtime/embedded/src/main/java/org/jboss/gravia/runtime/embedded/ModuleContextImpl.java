@@ -21,6 +21,7 @@
  */
 package org.jboss.gravia.runtime.embedded;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,71 +65,110 @@ final class ModuleContextImpl implements ModuleContext {
 
     @Override
     public void addModuleListener(ModuleListener listener) {
+        if (listener == null)
+            throw new IllegalArgumentException("Null listener");
+
         assertNotDestroyed();
-        getRuntimeEvents().addModuleListener(module, listener);
+        getEventsHandler().addModuleListener(module, listener);
     }
 
     @Override
     public void removeModuleListener(ModuleListener listener) {
+        if (listener == null)
+            throw new IllegalArgumentException("Null listener");
+
         assertNotDestroyed();
-        getRuntimeEvents().removeModuleListener(module, listener);
+        getEventsHandler().removeModuleListener(module, listener);
     }
 
     @Override
     public void addServiceListener(ServiceListener listener, String filterstr) {
+        if (listener == null)
+            throw new IllegalArgumentException("Null listener");
+
         assertNotDestroyed();
-        getRuntimeEvents().addServiceListener(module, listener, filterstr);
+        getEventsHandler().addServiceListener(module, listener, filterstr);
     }
 
     @Override
     public void addServiceListener(ServiceListener listener) {
+        if (listener == null)
+            throw new IllegalArgumentException("Null listener");
+
         assertNotDestroyed();
-        getRuntimeEvents().addServiceListener(module, listener, null);
+        getEventsHandler().addServiceListener(module, listener, null);
     }
 
     @Override
     public void removeServiceListener(ServiceListener listener) {
+        if (listener == null)
+            throw new IllegalArgumentException("Null listener");
+
         assertNotDestroyed();
-        getRuntimeEvents().removeServiceListener(module, listener);
+        getEventsHandler().removeServiceListener(module, listener);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service, Dictionary<String, ?> properties) {
+        if (clazz == null)
+            throw new IllegalArgumentException("Null clazz");
+        if (service == null)
+            throw new IllegalArgumentException("Null service");
+
         assertNotDestroyed();
-        return getServiceManager().registerService(module, new String[]{ clazz.getName() }, service, properties);
+        return getServicesHandler().registerService(module, new String[]{ clazz.getName() }, service, properties);
     }
 
     @Override
     public ServiceRegistration<?> registerService(String className, Object service, Dictionary<String, ?> properties) {
+        if (className == null)
+            throw new IllegalArgumentException("Null className");
+        if (service == null)
+            throw new IllegalArgumentException("Null service");
+
         assertNotDestroyed();
-        return getServiceManager().registerService(module, new String[]{ className }, service, properties);
+        return getServicesHandler().registerService(module, new String[]{ className }, service, properties);
     }
 
     @Override
     public ServiceRegistration<?> registerService(String[] classNames, Object service, Dictionary<String, ?> properties) {
+        if (classNames == null)
+            throw new IllegalArgumentException("Null classNames");
+        if (service == null)
+            throw new IllegalArgumentException("Null service");
+
         assertNotDestroyed();
-        return getServiceManager().registerService(module, classNames, service, properties);
+        return getServicesHandler().registerService(module, classNames, service, properties);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
+        if (clazz == null)
+            throw new IllegalArgumentException("Null clazz");
+
         assertNotDestroyed();
-        return (ServiceReference<S>) getServiceManager().getServiceReference(module, clazz.getName());
+        return (ServiceReference<S>) getServicesHandler().getServiceReference(module, clazz.getName());
     }
 
 
     @Override
-    public ServiceReference<?> getServiceReference(String clazzName) {
+    public ServiceReference<?> getServiceReference(String className) {
+        if (className == null)
+            throw new IllegalArgumentException("Null className");
+
         assertNotDestroyed();
-        return getServiceManager().getServiceReference(module, clazzName);
+        return getServicesHandler().getServiceReference(module, className);
     }
 
     @Override
     public ServiceReference<?>[] getServiceReferences(String className, String filter) {
+        if (className == null)
+            throw new IllegalArgumentException("Null className");
+
         assertNotDestroyed();
-        List<ServiceState<?>> srefs = getServiceManager().getServiceReferences(module, className, filter, true);
+        List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(module, className, filter, true);
         if (srefs.isEmpty())
             return null;
 
@@ -142,9 +182,12 @@ final class ModuleContextImpl implements ModuleContext {
     @Override
     @SuppressWarnings("unchecked")
     public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter) {
+        if (clazz == null)
+            throw new IllegalArgumentException("Null clazz");
+
         assertNotDestroyed();
         String className = clazz != null ? clazz.getName() : null;
-        List<ServiceState<?>> srefs = getServiceManager().getServiceReferences(module, className, filter, true);
+        List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(module, className, filter, true);
 
         List<ServiceReference<S>> result = new ArrayList<ServiceReference<S>>();
         for (ServiceState<?> serviceState : srefs)
@@ -155,8 +198,11 @@ final class ModuleContextImpl implements ModuleContext {
 
     @Override
     public ServiceReference<?>[] getAllServiceReferences(String className, String filter) {
+        if (className == null)
+            throw new IllegalArgumentException("Null className");
+
         assertNotDestroyed();
-        List<ServiceState<?>> srefs = getServiceManager().getServiceReferences(module, className, filter, false);
+        List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(module, className, filter, false);
         if (srefs.isEmpty())
             return null;
 
@@ -169,27 +215,44 @@ final class ModuleContextImpl implements ModuleContext {
 
     @Override
     public boolean ungetService(ServiceReference<?> reference) {
+        if (reference == null)
+            throw new IllegalArgumentException("Null reference");
+
         assertNotDestroyed();
         ServiceState<?> serviceState = ServiceState.assertServiceState(reference);
-        return getServiceManager().ungetService(module, serviceState);
+        return getServicesHandler().ungetService(module, serviceState);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <S> S getService(ServiceReference<S> reference) {
+        if (reference == null)
+            throw new IllegalArgumentException("Null reference");
+
         assertNotDestroyed();
         ServiceState<S> serviceState = ServiceState.assertServiceState(reference);
-        return getServiceManager().getService(module, serviceState);
+        return getServicesHandler().getService(module, serviceState);
     }
 
-    private RuntimeServicesHandler getServiceManager() {
+    @Override
+    public File getDataFile(String filename) {
+        RuntimeStorageHandler storageHandler = getStorageHandler();
+        return storageHandler.getDataFile(module, filename);
+    }
+
+    private RuntimeServicesHandler getServicesHandler() {
         Runtime runtime = module.adapt(Runtime.class);
         return runtime.adapt(RuntimeServicesHandler.class);
     }
 
-    private RuntimeEventsHandler getRuntimeEvents() {
+    private RuntimeEventsHandler getEventsHandler() {
         Runtime runtime = module.adapt(Runtime.class);
         return runtime.adapt(RuntimeEventsHandler.class);
+    }
+
+    private RuntimeStorageHandler getStorageHandler() {
+        Runtime runtime = module.adapt(Runtime.class);
+        return runtime.adapt(RuntimeStorageHandler.class);
     }
 
     void assertNotDestroyed() {

@@ -21,6 +21,7 @@
  */
 package org.jboss.gravia.runtime;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Dictionary;
 
@@ -63,4 +64,6 @@ public interface ModuleContext {
     <S> S getService(ServiceReference<S> reference);
 
     boolean ungetService(ServiceReference<?> reference);
+
+    File getDataFile(String filename);
 }
