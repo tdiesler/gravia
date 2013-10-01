@@ -34,11 +34,6 @@ public class ModuleEvent extends EventObject {
     static final long       serialVersionUID    = 4080640865971756012L;
 
     /**
-     * Module that had a change occur in its lifecycle.
-     */
-    private final Module    module;
-
-    /**
      * Type of module lifecycle change.
      */
     private final int       type;
@@ -145,7 +140,6 @@ public class ModuleEvent extends EventObject {
         if (origin == null) {
             throw new IllegalArgumentException("null origin");
         }
-        this.module = module;
         this.type = type;
         this.origin = origin;
     }
@@ -159,7 +153,6 @@ public class ModuleEvent extends EventObject {
      */
     public ModuleEvent(int type, Module module) {
         super(module);
-        this.module = module;
         this.type = type;
         this.origin = module;
     }
@@ -171,7 +164,7 @@ public class ModuleEvent extends EventObject {
      * @return The module that had a change occur in its lifecycle.
      */
     public Module getModule() {
-        return module;
+        return (Module) getSource();
     }
 
     /**

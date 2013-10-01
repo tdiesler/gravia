@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime;
+package org.jboss.gravia.runtime.spi;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
@@ -37,17 +37,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.gravia.runtime.Filter;
+import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.ServiceReference;
+
 /**
  * [TODO]
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public class RuntimeUtils {
+final class FilterFactory {
     /**
      * FrameworkUtil objects may not be constructed.
      */
-    private RuntimeUtils() {
+    private FilterFactory() {
         // private empty constructor to prevent construction
     }
 
@@ -73,7 +77,7 @@ public class RuntimeUtils {
      * 
      * @see Filter
      */
-    public static Filter createFilter(String filter) {
+    static Filter createFilter(String filter) {
         return FilterImpl.newInstance(filter);
     }
 
@@ -1474,7 +1478,7 @@ public class RuntimeUtils {
                     String key = (String) k;
                     for (String i : keyList) {
                         if (key.equalsIgnoreCase(i)) {
-                            throw new IllegalArgumentException();
+                            throw new IllegalArgumentException("Duplicate dictionary keys: " + dictionary.keys());
                         }
                     }
                     keyList.add(key);

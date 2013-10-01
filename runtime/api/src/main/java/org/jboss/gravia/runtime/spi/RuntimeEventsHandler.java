@@ -43,7 +43,6 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleListener;
-import org.jboss.gravia.runtime.RuntimeUtils;
 import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
@@ -77,10 +76,10 @@ public final class RuntimeEventsHandler {
         asyncBundleEvents.add(new Integer(ModuleEvent.STOPPED));
         asyncBundleEvents.add(new Integer(ModuleEvent.UNRESOLVED));
         asyncBundleEvents.add(new Integer(ModuleEvent.UNINSTALLED));
-        infoEvents.add(ConstantsHelper.bundleEvent(ModuleEvent.INSTALLED));
-        infoEvents.add(ConstantsHelper.bundleEvent(ModuleEvent.STARTED));
-        infoEvents.add(ConstantsHelper.bundleEvent(ModuleEvent.STOPPED));
-        infoEvents.add(ConstantsHelper.bundleEvent(ModuleEvent.UNINSTALLED));
+        infoEvents.add(ConstantsHelper.moduleEvent(ModuleEvent.INSTALLED));
+        infoEvents.add(ConstantsHelper.moduleEvent(ModuleEvent.STARTED));
+        infoEvents.add(ConstantsHelper.moduleEvent(ModuleEvent.STOPPED));
+        infoEvents.add(ConstantsHelper.moduleEvent(ModuleEvent.UNINSTALLED));
     }
 
     public void addModuleListener(final Module module, final ModuleListener listener) {
@@ -148,7 +147,7 @@ public final class RuntimeEventsHandler {
             removeServiceListener(module, listener);
 
             // Create the new listener registration
-            Filter filter = (filterstr != null ? RuntimeUtils.createFilter(filterstr) : NoFilter.INSTANCE);
+            Filter filter = (filterstr != null ? FilterFactory.createFilter(filterstr) : NoFilter.INSTANCE);
             ServiceListenerRegistration slreg = new ServiceListenerRegistration(module, listener, filter);
 
             // Add the listener to the list
@@ -225,7 +224,7 @@ public final class RuntimeEventsHandler {
 
         // Expose the moduleState wrapper not the state itself
         final ModuleEvent event = new ModuleEventImpl(type, module, context != null ? context.getModule() : module);
-        final String typeName = ConstantsHelper.bundleEvent(event.getType());
+        final String typeName = ConstantsHelper.moduleEvent(event.getType());
 
         // Nobody is interested
         Iterator<BundleListenerRegistration> iterator = registrations.iterator();
@@ -519,7 +518,7 @@ public final class RuntimeEventsHandler {
 
         @Override
         public String toString() {
-            return "BundleEvent[type=" + ConstantsHelper.bundleEvent(getType()) + ",source=" + getSource() + "]";
+            return "BundleEvent[type=" + ConstantsHelper.moduleEvent(getType()) + ",source=" + getSource() + "]";
         }
     }
 

@@ -33,7 +33,24 @@ import java.util.Dictionary;
  */
 public interface ModuleContext {
 
+    /**
+     * Get the module associated with this context
+     */
     Module getModule();
+
+    /**
+     * Creates a {@code Filter} object. This {@code Filter} object may be used
+     * to match a {@code ServiceReference} object or a {@code Dictionary}
+     * object.
+     * 
+     * <p>
+     * If the filter cannot be parsed, an {@link IllegalArgumentException} will be
+     * thrown with a human readable message where the filter became unparsable.
+     * 
+     * @param filter The filter string.
+     * @return A {@code Filter} object encapsulating the filter string.
+     */
+    Filter createFilter(String filter);
 
     void addModuleListener(ModuleListener listener);
 
@@ -55,9 +72,9 @@ public interface ModuleContext {
 
     ServiceReference<?> getServiceReference(String className);
 
-    ServiceReference<?>[] getServiceReferences(String className, String filter);
-
     <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter);
+
+    ServiceReference<?>[] getServiceReferences(String className, String filter);
 
     ServiceReference<?>[] getAllServiceReferences(String className, String filter);
 

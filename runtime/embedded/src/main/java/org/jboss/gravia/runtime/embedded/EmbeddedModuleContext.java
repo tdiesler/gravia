@@ -27,17 +27,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.gravia.runtime.spi.AbstractModuleContext;
 import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
-import org.jboss.gravia.runtime.spi.RuntimeStorageHandler;
 
 /**
  * [TODO]
@@ -45,24 +43,15 @@ import org.jboss.gravia.runtime.spi.RuntimeStorageHandler;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-final class EmbeddedModuleContext implements ModuleContext {
-
-    private final AtomicBoolean destroyed = new AtomicBoolean();
-    private final Module module;
+final class EmbeddedModuleContext extends AbstractModuleContext {
 
     EmbeddedModuleContext(Module module) {
-        this.module = module;
+        super(module);
     }
-
-    void destroy() {
-        destroyed.set(true);
-    }
-
-    // ModuleContext API
 
     @Override
-    public Module getModule() {
-        return module;
+    protected void destroy() {
+        super.destroy();
     }
 
     @Override
@@ -71,7 +60,7 @@ final class EmbeddedModuleContext implements ModuleContext {
             throw new IllegalArgumentException("Null listener");
 
         assertNotDestroyed();
-        getEventsHandler().addModuleListener(module, listener);
+        getEventsHandler().addModuleListener(getModule(), listener);
     }
 
     @Override
@@ -80,7 +69,7 @@ final class EmbeddedModuleContext implements ModuleContext {
             throw new IllegalArgumentException("Null listener");
 
         assertNotDestroyed();
-        getEventsHandler().removeModuleListener(module, listener);
+        getEventsHandler().removeModuleListener(getModule(), listener);
     }
 
     @Override
@@ -89,7 +78,7 @@ final class EmbeddedModuleContext implements ModuleContext {
             throw new IllegalArgumentException("Null listener");
 
         assertNotDestroyed();
-        getEventsHandler().addServiceListener(module, listener, filterstr);
+        getEventsHandler().addServiceListener(getModule(), listener, filterstr);
     }
 
     @Override
@@ -98,7 +87,7 @@ final class EmbeddedModuleContext implements ModuleContext {
             throw new IllegalArgumentException("Null listener");
 
         assertNotDestroyed();
-        getEventsHandler().addServiceListener(module, listener, null);
+        getEventsHandler().addServiceListener(getModule(), listener, null);
     }
 
     @Override
@@ -107,7 +96,7 @@ final class EmbeddedModuleContext implements ModuleContext {
             throw new IllegalArgumentException("Null listener");
 
         assertNotDestroyed();
-        getEventsHandler().removeServiceListener(module, listener);
+        getEventsHandler().removeServiceListener(getModule(), listener);
     }
 
     @Override
@@ -119,7 +108,7 @@ final class EmbeddedModuleContext implements ModuleContext {
             throw new IllegalArgumentException("Null service");
 
         assertNotDestroyed();
-        return getServicesHandler().registerService(module, new String[]{ clazz.getName() }, service, properties);
+        return getServicesHandler().registerService(this, new String[]{ clazz.getName() }, service, properties);
     }
 
     @Override
@@ -130,7 +119,7 @@ final class EmbeddedModuleContext implements ModuleContext {
             throw new IllegalArgumentException("Null service");
 
         assertNotDestroyed();
-        return getServicesHandler().registerService(module, new String[]{ className }, service, properties);
+        return getServicesHandler().registerService(this, new String[]{ className }, service, properties);
     }
 
     @Override
@@ -141,7 +130,7 @@ final class EmbeddedModuleContext implements ModuleContext {
             throw new IllegalArgumentException("Null service");
 
         assertNotDestroyed();
-        return getServicesHandler().registerService(module, classNames, service, properties);
+        return getServicesHandler().registerService(this, classNames, service, properties);
     }
 
     @Override
@@ -151,7 +140,7 @@ final class EmbeddedModuleContext implements ModuleContext {
             throw new IllegalArgumentException("Null clazz");
 
         assertNotDestroyed();
-        return (ServiceReference<S>) getServicesHandler().getServiceReference(module, clazz.getName());
+        return (ServiceReference<S>) getServicesHandler().getServiceReference(this, clazz.getName());
     }
 
 
@@ -161,7 +150,7 @@ final class EmbeddedModuleContext implements ModuleContext {
             throw new IllegalArgumentException("Null className");
 
         assertNotDestroyed();
-        return getServicesHandler().getServiceReference(module, className);
+        return getServicesHandler().getServiceReference(this, className);
     }
 
     @Override
@@ -170,7 +159,7 @@ final class EmbeddedModuleContext implements ModuleContext {
             throw new IllegalArgumentException("Null className");
 
         assertNotDestroyed();
-        List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(module, className, filter, true);
+        List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, true);
         if (srefs.isEmpty())
             return null;
 
@@ -189,7 +178,7 @@ final class EmbeddedModuleContext implements ModuleContext {
 
         assertNotDestroyed();
         String className = clazz != null ? clazz.getName() : null;
-        List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(module, className, filter, true);
+        List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, true);
 
         List<ServiceReference<S>> result = new ArrayList<ServiceReference<S>>();
         for (ServiceState<?> serviceState : srefs)
@@ -204,7 +193,7 @@ final class EmbeddedModuleContext implements ModuleContext {
             throw new IllegalArgumentException("Null className");
 
         assertNotDestroyed();
-        List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(module, className, filter, false);
+        List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, false);
         if (srefs.isEmpty())
             return null;
 
@@ -222,7 +211,7 @@ final class EmbeddedModuleContext implements ModuleContext {
 
         assertNotDestroyed();
         ServiceState<?> serviceState = ServiceState.assertServiceState(reference);
-        return getServicesHandler().ungetService(module, serviceState);
+        return getServicesHandler().ungetService(getModule(), serviceState);
     }
 
     @Override
@@ -233,32 +222,27 @@ final class EmbeddedModuleContext implements ModuleContext {
 
         assertNotDestroyed();
         ServiceState<S> serviceState = ServiceState.assertServiceState(reference);
-        return getServicesHandler().getService(module, serviceState);
+        return getServicesHandler().getService(this, serviceState);
     }
 
     @Override
     public File getDataFile(String filename) {
         RuntimeStorageHandler storageHandler = getStorageHandler();
-        return storageHandler.getDataFile(module, filename);
+        return storageHandler.getDataFile(getModule(), filename);
     }
 
     private RuntimeServicesHandler getServicesHandler() {
-        Runtime runtime = module.adapt(Runtime.class);
+        Runtime runtime = getModule().adapt(Runtime.class);
         return runtime.adapt(RuntimeServicesHandler.class);
     }
 
     private RuntimeEventsHandler getEventsHandler() {
-        Runtime runtime = module.adapt(Runtime.class);
+        Runtime runtime = getModule().adapt(Runtime.class);
         return runtime.adapt(RuntimeEventsHandler.class);
     }
 
     private RuntimeStorageHandler getStorageHandler() {
-        Runtime runtime = module.adapt(Runtime.class);
+        Runtime runtime = getModule().adapt(Runtime.class);
         return runtime.adapt(RuntimeStorageHandler.class);
-    }
-
-    void assertNotDestroyed() {
-        if (destroyed.get())
-            throw new IllegalStateException("Invalid ModuleContext for: " + module);
     }
 }

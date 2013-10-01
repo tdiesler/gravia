@@ -107,7 +107,6 @@ public interface Filter {
      *        in the match.
      * @return {@code true} if the {@code Dictionary}'s values match this
      *         filter; {@code false} otherwise.
-     * @since 1.3
      */
     boolean matchCase(Dictionary<String, ?> dictionary);
 
@@ -121,7 +120,6 @@ public interface Filter {
      *        {@code null} value is considered not present to the filter.
      * @return {@code true} if the {@code Map}'s values match this filter;
      *         {@code false} otherwise.
-     * @since 1.6
      */
     boolean matches(Map<String, ?> map);
 }

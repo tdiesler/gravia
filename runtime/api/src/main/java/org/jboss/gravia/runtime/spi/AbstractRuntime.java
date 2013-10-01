@@ -37,6 +37,7 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
 import org.jboss.gravia.runtime.ModuleEvent;
+import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
@@ -53,28 +54,39 @@ public abstract class AbstractRuntime implements Runtime {
 
     public static Logger LOGGER = Logger.getLogger(Runtime.class.getPackage().getName());
 
+    private final Map<Long, Module> modules = new ConcurrentHashMap<Long, Module>();
     private final RuntimeEventsHandler runtimeEvents;
 
-    private final Map<Long, Module> modules = new ConcurrentHashMap<Long, Module>();
-
-    public AbstractRuntime() {
+    protected AbstractRuntime() {
         runtimeEvents = new RuntimeEventsHandler(createExecutorService("RuntimeEvents"));
     }
 
     protected abstract AbstractModule createModule(ClassLoader classLoader, Resource resource);
 
     @Override
+    public void init() throws ModuleException {
+    }
+
+    @Override
+    public void start() throws ModuleException {
+    }
+
+    @Override
+    public void stop() throws ModuleException {
+    }
+
+    @Override
+    public void destroy() throws ModuleException {
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <A> A adapt(Class<A> type) {
         A result = null;
         if (type.isAssignableFrom(RuntimeEventsHandler.class)) {
-            result = (A) getRuntimeEventsHandler();
+            result = (A) runtimeEvents;
         }
         return result;
-    }
-
-    public RuntimeEventsHandler getRuntimeEventsHandler() {
-        return runtimeEvents;
     }
 
     @Override
@@ -109,7 +121,7 @@ public abstract class AbstractRuntime implements Runtime {
         return installModuleInternal(classLoader, resource);
     }
 
-    public void uninstallModule(Module module) {
+    protected void uninstallModule(Module module) {
         modules.remove(module.getModuleId());
         LOGGER.infof("Uninstalled: %s", module);
     }

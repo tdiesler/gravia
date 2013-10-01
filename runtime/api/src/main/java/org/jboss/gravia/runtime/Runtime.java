@@ -35,6 +35,14 @@ import org.jboss.gravia.resource.ResourceIdentity;
  */
 public interface Runtime {
 
+    void init() throws ModuleException;
+
+    void start() throws ModuleException;
+
+    void stop() throws ModuleException;
+
+    void destroy() throws ModuleException;
+
     <A> A adapt(Class<A> type);
 
     Object getProperty(String key);

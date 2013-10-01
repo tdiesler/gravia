@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.jboss.gravia.runtime.Filter;
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.RuntimeUtils;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceReference;
@@ -54,7 +54,7 @@ final class RuntimeServicesHandler {
 
     private final RuntimeEventsHandler frameworkEvents;
     private final Map<String, List<ServiceState<?>>> serviceContainer = new HashMap<String, List<ServiceState<?>>>();
-    private final ThreadLocal<Module> getServiceRecursion = new ThreadLocal<Module>();
+    private final ThreadLocal<ModuleContext> getServiceRecursion = new ThreadLocal<ModuleContext>();
     private final AtomicLong identityGenerator = new AtomicLong();
 
     RuntimeServicesHandler(RuntimeEventsHandler frameworkEvents) {
@@ -81,7 +81,7 @@ final class RuntimeServicesHandler {
      * @return A <code>ServiceRegistration</code> object for use by the module registering the service
      */
     @SuppressWarnings({ "rawtypes" })
-    ServiceState registerService(Module module, String[] classNames, final Object serviceValue, Dictionary properties) {
+    ServiceState registerService(ModuleContext context, String[] classNames, final Object serviceValue, Dictionary properties) {
         assert classNames != null && classNames.length > 0 : "Null service classes";
 
         ServiceState.ValueProvider<Object> valueProvider = new ServiceState.ValueProvider<Object>() {
@@ -98,7 +98,7 @@ final class RuntimeServicesHandler {
         };
 
         long serviceId = getNextServiceId();
-        ServiceState<?> serviceState = new ServiceState<Object>(this, module, serviceId, classNames, valueProvider, properties);
+        ServiceState<?> serviceState = new ServiceState<Object>(this, context.getModule(), serviceId, classNames, valueProvider, properties);
         LOGGER.debugf("Register service: %s", serviceState);
 
         synchronized (serviceContainer) {
@@ -116,7 +116,7 @@ final class RuntimeServicesHandler {
         //module.addRegisteredService(serviceState);
 
         // This event is synchronously delivered after the service has been registered with the Framework.
-        frameworkEvents.fireServiceEvent(module, ServiceEvent.REGISTERED, serviceState);
+        frameworkEvents.fireServiceEvent(context.getModule(), ServiceEvent.REGISTERED, serviceState);
 
         return serviceState;
     }
@@ -128,11 +128,11 @@ final class RuntimeServicesHandler {
      * @param clazz The class name with which the service was registered.
      * @return A <code>ServiceReference</code> object, or <code>null</code>
      */
-    ServiceState<?> getServiceReference(Module module, String clazz) {
+    ServiceState<?> getServiceReference(ModuleContext context, String clazz) {
         assert clazz != null : "Null clazz";
 
-        boolean checkAssignable = (module.getModuleId() != 0);
-        List<ServiceState<?>> result = getServiceReferencesInternal(module, clazz, NoFilter.INSTANCE, checkAssignable);
+        boolean checkAssignable = (context.getModule().getModuleId() != 0);
+        List<ServiceState<?>> result = getServiceReferencesInternal(context, clazz, NoFilter.INSTANCE, checkAssignable);
         if (result.isEmpty())
             return null;
 
@@ -152,16 +152,16 @@ final class RuntimeServicesHandler {
      * @param filterStr The filter expression or <code>null</code> for all services.
      * @return A potentially empty list of <code>ServiceReference</code> objects.
      */
-    List<ServiceState<?>> getServiceReferences(Module module, String clazz, String filterStr, boolean checkAssignable) {
+    List<ServiceState<?>> getServiceReferences(ModuleContext context, String clazz, String filterStr, boolean checkAssignable) {
         Filter filter = NoFilter.INSTANCE;
         if (filterStr != null)
-            filter = RuntimeUtils.createFilter(filterStr);
+            filter = context.createFilter(filterStr);
 
-        List<ServiceState<?>> result = getServiceReferencesInternal(module, clazz, filter, checkAssignable);
+        List<ServiceState<?>> result = getServiceReferencesInternal(context, clazz, filter, checkAssignable);
         return result;
     }
 
-    private List<ServiceState<?>> getServiceReferencesInternal(final Module module, String className, Filter filter, boolean checkAssignable) {
+    private List<ServiceState<?>> getServiceReferencesInternal(final ModuleContext module, String className, Filter filter, boolean checkAssignable) {
         assert module != null : "Null module";
         assert filter != null : "Null filter";
 
@@ -197,13 +197,13 @@ final class RuntimeServicesHandler {
         return Collections.unmodifiableList(resultList);
     }
 
-    private boolean isMatchingService(Module module, ServiceState<?> serviceState, String clazzName, Filter filter, boolean checkAssignable) {
+    private boolean isMatchingService(ModuleContext context, ServiceState<?> serviceState, String clazzName, Filter filter, boolean checkAssignable) {
         if (serviceState.isUnregistered() || filter.match(serviceState) == false)
             return false;
         if (checkAssignable == false || clazzName == null)
             return true;
 
-        return serviceState.isAssignableTo(module, clazzName);
+        return serviceState.isAssignableTo(context.getModule(), clazzName);
     }
 
     /**
@@ -211,29 +211,29 @@ final class RuntimeServicesHandler {
      *
      * @return A service object for the service associated with <code>reference</code> or <code>null</code>
      */
-    <S> S getService(Module module, ServiceState<S> serviceState) {
+    <S> S getService(ModuleContext context, ServiceState<S> serviceState) {
         // If the service has been unregistered, null is returned.
         if (serviceState.isUnregistered())
             return null;
 
         // If this method is called recursively for the same module
         // then it must return null to break the recursion.
-        if (getServiceRecursion.get() == module)
+        if (getServiceRecursion.get() == context)
             return null;
 
         S value;
         try {
-            getServiceRecursion.set(module);
+            getServiceRecursion.set(context);
 
             // Add the given service ref to the list of used services
-            serviceState.addUsingModule(module);
+            serviceState.addUsingModule(context.getModule());
 
-            value = serviceState.getScopedValue(module);
+            value = serviceState.getScopedValue(context.getModule());
 
             // If the factory returned an invalid value
             // restore the service usage counts
             if (value == null) {
-                serviceState.removeUsingModule(module);
+                serviceState.removeUsingModule(context.getModule());
             }
         } finally {
             getServiceRecursion.remove();

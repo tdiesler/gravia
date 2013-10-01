@@ -21,10 +21,23 @@
  */
 package org.jboss.gravia.runtime.osgi;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleException;
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.util.tracker.BundleTracker;
 
 /**
  * [TODO]
@@ -35,9 +48,45 @@ import org.osgi.framework.BundleContext;
 public final class OSGiRuntime extends AbstractRuntime {
 
     private final BundleContext syscontext;
+    private BundleTracker<Bundle> tracker;
 
     public OSGiRuntime(BundleContext syscontext) {
         this.syscontext = syscontext;
+        RuntimeLocator.setRuntime(this);
+    }
+
+    @Override
+    public void init() throws ModuleException {
+        // Track installed bundles
+        int states = Bundle.INSTALLED | Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE | Bundle.STOPPING;
+        tracker = new BundleTracker<Bundle>(syscontext, states, null) {
+            @Override
+            public Bundle addingBundle(Bundle bundle, BundleEvent event) {
+                Bundle result = super.addingBundle(bundle, event);
+                BundleWiring wiring = bundle.adapt(BundleWiring.class);
+                ClassLoader classLoader = wiring != null ? wiring.getClassLoader() : null;
+                if (bundle.getBundleId() > 0 && classLoader != null) {
+                    URL url = bundle.getEntry(JarFile.MANIFEST_NAME);
+                    try {
+                        Manifest manifest = new Manifest(url.openStream());
+                        installModule(classLoader, manifest);
+                    } catch (IOException ex) {
+                        LOGGER.errorf("Cannot add installed bundle");
+                    }
+                }
+                return result;
+            }
+        };
+    }
+
+    @Override
+    public void start() throws ModuleException {
+        tracker.open();
+    }
+
+    @Override
+    public void stop() throws ModuleException {
+        tracker.close();
     }
 
     @Override
@@ -47,7 +96,16 @@ public final class OSGiRuntime extends AbstractRuntime {
 
     @Override
     protected AbstractModule createModule(ClassLoader classLoader, Resource resource) {
-        return new OSGiModule(this, classLoader, resource);
+        return new ModuleAdaptor(this, classLoader, resource);
     }
 
+    @Override
+    protected void uninstallModule(Module module) {
+        super.uninstallModule(module);
+    }
+
+    public static Module mappedModule(Bundle bundle) {
+        Runtime runtime = RuntimeLocator.getRuntime();
+        return bundle != null ? runtime.getModule(bundle.getBundleId()) : null;
+    }
 }

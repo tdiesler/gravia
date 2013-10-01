@@ -40,7 +40,7 @@ public final class ConstantsHelper {
     /**
      * Return the string representation of a {@link ModuleEvent} type
      */
-    public static String bundleEvent(int eventType) {
+    public static String moduleEvent(int eventType) {
         String retType = "[" + eventType + "]";
         if (ModuleEvent.INSTALLED == eventType)
             retType = "INSTALLED";

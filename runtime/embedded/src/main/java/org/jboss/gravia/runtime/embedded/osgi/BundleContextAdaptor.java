@@ -34,6 +34,7 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.SynchronousModuleListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -279,7 +280,16 @@ public final class BundleContextAdaptor implements BundleContext {
 
         @Override
         public void moduleChanged(ModuleEvent event) {
-            delegate.bundleChanged(new BundleEvent(event.getType(), new BundleAdaptor(event.getOrigin())));
+            int type = event.getType();
+            Module module = event.getModule();
+            Module origin = event.getOrigin();
+            BundleEvent bundleEvent;
+            if (origin != null) {
+                bundleEvent = new BundleEvent(type, new BundleAdaptor(module), new BundleAdaptor(origin));
+            } else {
+                bundleEvent = new BundleEvent(type, new BundleAdaptor(module));
+            }
+            delegate.bundleChanged(bundleEvent);
         }
 
         @Override
@@ -356,14 +366,22 @@ public final class BundleContextAdaptor implements BundleContext {
 
         @Override
         public boolean isAssignableTo(Bundle bundle, String className) {
-            Runtime runtime = getRuntime();
-            Module module = runtime.getModule(bundle.getBundleId());
+            Module module = mappedModule(bundle);
             return delegate.isAssignableTo(module, className);
         }
 
         @Override
         public int compareTo(Object reference) {
             return new ServiceReferenceAdaptor<S>(delegate).compareTo(reference);
+        }
+
+        private Module mappedModule(Bundle bundle) {
+            Module result = null;
+            if (bundle != null) {
+                Runtime runtime = RuntimeLocator.getRuntime();
+                result = runtime.getModule(bundle.getBundleId());
+            }
+            return result;
         }
     }
 

@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.spi;
+package org.jboss.gravia.runtime.embedded;
 
 import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
 
@@ -38,11 +38,11 @@ import org.jboss.gravia.runtime.Module;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public final class RuntimeStorageHandler {
+final class RuntimeStorageHandler {
 
     private final File storageArea;
 
-    public RuntimeStorageHandler(Map<String, Object> props, boolean firstInit) {
+    RuntimeStorageHandler(Map<String, Object> props, boolean firstInit) {
 
         // Create the storage area
         String dirName = (String) props.get(Constants.RUNTIME_STORAGE);
@@ -64,7 +64,7 @@ public final class RuntimeStorageHandler {
         }
     }
 
-    public synchronized File getDataFile(Module module, String filename) {
+    File getDataFile(Module module, String filename) {
         File moduleDir = getStorageDir(module);
         File dataFile = new File(moduleDir.getAbsolutePath() + File.separator + filename);
         dataFile.getParentFile().mkdirs();

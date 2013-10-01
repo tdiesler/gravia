@@ -21,8 +21,6 @@
  */
 package org.jboss.gravia.runtime.embedded;
 
-import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -38,7 +36,6 @@ import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.embedded.osgi.BundleLifecycleHandler;
 import org.jboss.gravia.runtime.spi.AbstractModule;
-import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
 
 /**
@@ -53,13 +50,15 @@ final class EmbeddedModule extends AbstractModule {
     private static final AtomicLong moduleIdGenerator = new AtomicLong();
     private static final Long START_STOP_TIMEOUT = new Long(10000);
 
+    private final AtomicReference<State> stateRef = new AtomicReference<State>();
     private final AtomicReference<ModuleContext> contextRef = new AtomicReference<ModuleContext>();
     private final ReentrantLock startStopLock = new ReentrantLock();
     private final long moduleId;
 
-    EmbeddedModule(AbstractRuntime runtime, ClassLoader classLoader, Resource resource) {
+    EmbeddedModule(EmbeddedRuntime runtime, ClassLoader classLoader, Resource resource) {
         super(runtime, classLoader, resource);
         this.moduleId = moduleIdGenerator.incrementAndGet();
+        this.stateRef.set(State.UNINSTALLED);
     }
 
     // Module API
@@ -84,6 +83,16 @@ final class EmbeddedModule extends AbstractModule {
             context.destroy();
         }
         contextRef.set(null);
+    }
+
+    @Override
+    public State getState() {
+        return stateRef.get();
+    }
+
+    @Override
+    public void setState(State newState) {
+        stateRef.set(newState);
     }
 
     @Override
@@ -266,5 +275,10 @@ final class EmbeddedModule extends AbstractModule {
     private void assertNotUninstalled() {
         if (getState() == State.UNINSTALLED)
             throw new IllegalStateException("Module already uninstalled: " + this);
+    }
+
+    @Override
+    protected EmbeddedRuntime getRuntime() {
+        return (EmbeddedRuntime) super.getRuntime();
     }
 }

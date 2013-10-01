@@ -26,9 +26,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
-import org.jboss.gravia.runtime.spi.RuntimeStorageHandler;
+import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
 
 /**
  * [TODO]
@@ -49,8 +51,9 @@ public final class EmbeddedRuntime extends AbstractRuntime {
             auxprops.putAll(props);
         }
         properties = Collections.unmodifiableMap(auxprops);
-        serviceManager = new RuntimeServicesHandler(getRuntimeEventsHandler());
+        serviceManager = new RuntimeServicesHandler(adapt(RuntimeEventsHandler.class));
         storageHandler = new RuntimeStorageHandler(properties, true);
+        RuntimeLocator.setRuntime(this);
     }
 
     @Override
@@ -75,5 +78,10 @@ public final class EmbeddedRuntime extends AbstractRuntime {
     @Override
     public Object getProperty(String key) {
         return properties.get(key);
+    }
+
+    @Override
+    protected void uninstallModule(Module module) {
+        super.uninstallModule(module);
     }
 }
