@@ -58,7 +58,7 @@ public final class OSGiRuntime extends AbstractRuntime {
     @Override
     public void init() throws ModuleException {
         // Track installed bundles
-        int states = Bundle.INSTALLED | Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE | Bundle.STOPPING;
+        int states = Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE | Bundle.STOPPING;
         tracker = new BundleTracker<Bundle>(syscontext, states, null) {
             @Override
             public Bundle addingBundle(Bundle bundle, BundleEvent event) {

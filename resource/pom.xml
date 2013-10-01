@@ -36,6 +36,7 @@
     <name>Gravia :: Resource</name>
     
     <artifactId>gravia-resource</artifactId>
+    <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
@@ -56,6 +57,22 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Version>${project.version}</Bundle-Version>
+						<Export-Package>
+							org.jboss.gravia.resource;version="${project.version}",
+							org.jboss.gravia.resource.spi;version="${project.version}",
+						</Export-Package>
+						<Import-Package>
+						</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>

@@ -75,8 +75,8 @@
                 <artifactId>arquillian-osgi-bundle</artifactId>
                 <version>${version.jboss.arquillian.osgi}</version>
             </dependency>
-            
-            <!-- JBoss -->
+
+			<!-- Gravia -->
 	        <dependency>
 		        <groupId>org.jboss.gravia</groupId>
 		        <artifactId>gravia-resource</artifactId>
@@ -87,6 +87,18 @@
 		        <artifactId>gravia-runtime-api</artifactId>
 		        <version>${project.version}</version>
 	        </dependency>
+	        <dependency>
+		        <groupId>org.jboss.gravia</groupId>
+		        <artifactId>gravia-runtime-embedded</artifactId>
+		        <version>${project.version}</version>
+	        </dependency>
+	        <dependency>
+		        <groupId>org.jboss.gravia</groupId>
+		        <artifactId>gravia-runtime-osgi</artifactId>
+		        <version>${project.version}</version>
+	        </dependency>
+			            
+            <!-- JBoss -->
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging</artifactId>

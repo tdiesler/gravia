@@ -46,12 +46,13 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 /**
- * Test simple OSGi bundle deployment
+ * Test simple module lifecycle
  * 
  * @author thomas.diesler@jboss.com
+ * @since 01-Oct-2013
  */
 @RunWith(Arquillian.class)
-public class BundleLifecycleTestCase {
+public class ModuleLifecycleTestCase {
 
     @ArquillianResource
     BundleContext syscontext;
@@ -93,7 +94,7 @@ public class BundleLifecycleTestCase {
     public void testBundle(@ArquillianResource Bundle bundle) throws Exception {
 
         Module module = OSGiRuntime.mappedModule(bundle);
-        Assert.assertNotNull("Module not null", module);
+        Assert.assertEquals(bundle.getBundleId(), module.getModuleId());
 
         Assert.assertEquals("example-bundle:0.0.0", module.getIdentity().toString());
 
@@ -102,6 +103,7 @@ public class BundleLifecycleTestCase {
 
         module.stop();
         Assert.assertEquals(State.RESOLVED, module.getState());
+        Assert.assertNull("ModuleContext null", module.getModuleContext());
 
         module.start();
         Assert.assertEquals(State.ACTIVE, module.getState());
