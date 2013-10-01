@@ -17,9 +17,18 @@
             <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
             <includes>
+                <include>*:org.apache.felix.configadmin:jar</include>
+                <include>*:org.apache.felix.log:jar</include>
+                <include>*:org.apache.felix.metatype:jar</include>
+                <include>*:org.apache.felix.scr:jar</include>
+                <include>*:org.apache.servicemix.bundles.asm:jar</include>
                 <include>*:gravia-resource:jar</include>
                 <include>*:gravia-runtime-api:jar</include>
                 <include>*:gravia-runtime-osgi:jar</include>
+                <include>*:pax-web-jetty-bundle:jar</include>
+                <include>*:pax-web-extender-war:jar</include>
+                <include>*:xbean-bundleutils:jar</include>
+                <include>*:xbean-finder:jar</include>
             </includes>
             <useStrictFiltering>true</useStrictFiltering>
             <scope>provided</scope>

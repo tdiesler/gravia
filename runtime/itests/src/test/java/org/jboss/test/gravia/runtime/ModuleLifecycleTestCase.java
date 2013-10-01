@@ -38,7 +38,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 
 /**
  * Test simple module lifecycle
@@ -48,9 +47,6 @@ import org.osgi.framework.BundleContext;
  */
 @RunWith(Arquillian.class)
 public class ModuleLifecycleTestCase {
-
-    @ArquillianResource
-    BundleContext syscontext;
 
     @Deployment
     public static JavaArchive createdeployment() {

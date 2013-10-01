@@ -40,7 +40,6 @@
 
     <!-- Properties -->
     <properties>
-        <surefire.system.args>-ea -Xmx512m</surefire.system.args>
     </properties>
     
     <dependencies>

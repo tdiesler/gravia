@@ -48,7 +48,8 @@ public final class RuntimeActivator implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         Runtime runtime = RuntimeLocator.getRuntime();
-        runtime.stop();
+        if (runtime != null)
+            runtime.stop();
     }
 
 }
