@@ -29,12 +29,13 @@ import java.util.Map;
 import java.util.jar.JarFile;
 
 import org.jboss.gravia.runtime.Constants;
+import org.jboss.gravia.runtime.DefaultPropertiesProvider;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.PropertiesProvider;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.embedded.EmbeddedRuntime;
+import org.junit.After;
 import org.junit.Before;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -53,21 +54,13 @@ public abstract class AbstractRuntimeTest {
         final Map<String, Object> props = new HashMap<String, Object>();
         props.put(Constants.RUNTIME_STORAGE, new File("target/runtime").getAbsolutePath());
         props.put(Constants.RUNTIME_STORAGE_CLEAN, Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT);
-        PropertiesProvider propertiesProvider = new PropertiesProvider() {
+        PropertiesProvider propertiesProvider = new DefaultPropertiesProvider(props);
+        runtime = RuntimeLocator.locateRuntime(propertiesProvider);
+    }
 
-            @Override
-            public Object getProperty(String key, Object defaultValue) {
-                Object value = props.get(key);
-                return value != null ? value : defaultValue;
-            }
-
-            @Override
-            public Object getProperty(String key) {
-                return getProperty(key, null);
-            }
-        };
-        runtime = new EmbeddedRuntime(propertiesProvider);
-        RuntimeLocator.setRuntime(runtime);
+    @After
+    public void tearDown() throws Exception {
+        RuntimeLocator.setRuntime(null);
     }
 
     Runtime getRuntime() {

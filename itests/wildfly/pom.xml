@@ -1,0 +1,174 @@
+<!--
+  #%L
+  Gravia Resource
+  %%
+  Copyright (C) 2013 JBoss by Red Hat
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as 
+  published by the Free Software Foundation, either version 2.1 of the 
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Lesser Public License for more details.
+  
+  You should have received a copy of the GNU General Lesser Public 
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/lgpl-2.1.html>.
+  #L%
+  -->
+<!--
+    Set these VM properties in your IDE debugger 
+
+    -Djava.util.logging.manager=org.jboss.logmanager.LogManager 
+    -Dtest.archive.directory=${workspace_loc:gravia-itests-wildfly/target}/test-libs 
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>org.jboss.gravia</groupId>
+        <artifactId>gravia-itests</artifactId>
+        <version>1.0.0.Beta2-SNAPSHOT</version>
+    </parent>
+
+    <name>Gravia :: Integration Tests :: WildFly</name>
+    
+    <artifactId>gravia-itests-wildfly</artifactId>
+
+    <properties>
+        <project.root.dir>${basedir}</project.root.dir>
+        <jboss.home>${project.build.directory}/wildfly-${version.jboss.wildfly}</jboss.home>
+    </properties>
+    
+    <dependencies>
+        
+        <!-- Provided Dependencies -->
+        <dependency>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-runtime-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-itests-common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-container-wildfly</artifactId>
+	        <classifier>patch</classifier>
+            <scope>provided</scope>
+	        <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.servlet</groupId>
+            <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.jboss.arquillian.junit</groupId>
+            <artifactId>arquillian-junit-container</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wildfly</groupId>
+            <artifactId>wildfly-arquillian-container-managed</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>jboss-logmanager</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.shrinkwrap</groupId>
+            <artifactId>shrinkwrap-impl-base</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+	<build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+		<plugins>
+	        <plugin>
+	            <artifactId>maven-dependency-plugin</artifactId>
+	            <executions>
+	                <execution>
+	                    <id>unpack-wildfly</id>
+	                    <phase>process-test-resources</phase>
+	                    <goals>
+	                        <goal>unpack</goal>
+	                    </goals>
+	                    <configuration>
+	                        <artifactItems>
+	                            <artifactItem>
+	                                <groupId>org.wildfly</groupId>
+	                                <artifactId>wildfly-dist</artifactId>
+	                                <version>${version.jboss.wildfly}</version>
+	                                <type>zip</type>
+	                                <overWrite>false</overWrite>
+	                                <outputDirectory>${project.build.directory}</outputDirectory>
+	                            </artifactItem>
+	                        </artifactItems>
+	                    </configuration>
+	                </execution>
+	                <execution>
+	                    <id>unpack-wildfly-patch</id>
+	                    <phase>process-test-resources</phase>
+	                    <goals>
+	                        <goal>unpack</goal>
+	                    </goals>
+	                    <configuration>
+	                        <artifactItems>
+	                            <artifactItem>
+	                                <groupId>org.jboss.gravia</groupId>
+	                                <artifactId>gravia-container-wildfly</artifactId>
+	                                <version>${project.version}</version>
+	                                <classifier>patch</classifier>
+	                                <type>zip</type>
+	                                <overWrite>false</overWrite>
+	                                <outputDirectory>${jboss.home}</outputDirectory>
+	                            </artifactItem>
+	                        </artifactItems>
+	                    </configuration>
+	                </execution>
+	            </executions>
+	        </plugin>
+			<plugin>
+			    <artifactId>maven-surefire-plugin</artifactId>
+			    <configuration>
+			        <argLine>${surefire.system.args}</argLine>
+			        <redirectTestOutputToFile>false</redirectTestOutputToFile>
+			        <systemPropertyVariables>
+			            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+			            <test.archive.directory>${project.build.directory}/test-libs</test.archive.directory>
+			        </systemPropertyVariables>
+			        <includes>
+			        	<include>**/wildfly/*TestCase.java</include>
+			        </includes>
+			    </configuration>
+			</plugin>
+	    </plugins>
+	</build>
+	
+</project>

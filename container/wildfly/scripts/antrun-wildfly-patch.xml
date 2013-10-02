@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ====================================================================== -->
+<!--                                                                        -->
+<!--  JBoss, the OpenSource J2EE webOS                                      -->
+<!--                                                                        -->
+<!--  Distributable under LGPL license.                                     -->
+<!--  See terms of license at http://www.gnu.org.                           -->
+<!--                                                                        -->
+<!-- ====================================================================== -->
+
+<project default="build">
+
+  <!-- ================================================================== -->
+  <!-- Setup                                                              -->
+  <!-- ================================================================== -->
+  
+  <property name="output.dir" value="${basedir}/target" />
+  <property name="resources.dir" value="${basedir}/src/main/resources" />
+  <property name="wildfly.patch.dir" value="${output.dir}/wildfly-patch" />
+  <property name="deploy.artifacts.dir" value="${output.dir}/deploy-artifacts" />
+  <property name="deploy.artifacts.lib" value="${deploy.artifacts.dir}/lib" />
+  <property name="deploy.artifacts.resources" value="${deploy.artifacts.dir}/resources" />
+
+  <!-- ================================================================== -->
+  <!-- Initialization                                                     -->
+  <!-- ================================================================== -->
+  <target name="init">
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Distribution                                                       -->
+  <!-- ================================================================== -->
+  <target name="build" depends="init">
+
+  	<!-- Filter the modules resources -->
+    <copy todir="${wildfly.patch.dir}" overwrite="true">
+        <fileset dir="${resources.dir}" />
+		<filterset>
+	        <filter token="project.version" value="${project.version}" />
+      	</filterset>
+    </copy>
+  	
+  	<!-- Copy module resources-->
+    <copy todir="${wildfly.patch.dir}/modules/system/layers/base/org/jboss/gravia/main" overwrite="true">
+        <fileset file="${deploy.artifacts.lib}/gravia-provision-*.jar" />
+        <fileset file="${deploy.artifacts.lib}/gravia-repository-*.jar" />
+        <fileset file="${deploy.artifacts.lib}/gravia-resolver-*.jar" />
+        <fileset file="${deploy.artifacts.lib}/gravia-resource-*.jar" />
+        <fileset file="${deploy.artifacts.lib}/gravia-runtime-api-*.jar" />
+        <fileset file="${deploy.artifacts.lib}/gravia-runtime-embedded*.jar" />
+        <fileset file="${deploy.artifacts.lib}/org.apache.felix.configadmin-*.jar" />
+        <fileset file="${deploy.artifacts.lib}/org.apache.felix.scr-*.jar" />
+    </copy>
+	
+  	<!-- Zip the wildfly patch -->
+  	<zip destfile="${output.dir}/${project.artifactId}-${project.version}-patch.zip" basedir="${wildfly.patch.dir}"/>
+  </target>
+</project>

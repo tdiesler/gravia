@@ -21,8 +21,6 @@
  */
 package org.jboss.gravia.runtime.spi;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import org.jboss.gravia.resource.DefaultResourceBuilder;
@@ -100,32 +97,8 @@ public abstract class AbstractRuntime implements Runtime {
     }
 
     @Override
-    public final Module installModule(ClassLoader classLoader) {
-        return installModule(classLoader, null);
-    }
-
-    @Override
     public final Module installModule(ClassLoader classLoader, Manifest manifest) {
-        if (classLoader == null)
-            throw new IllegalArgumentException("Null classLoader");
-
-        if (manifest == null) {
-            URL manifestLocation = findResource(classLoader, JarFile.MANIFEST_NAME);
-            if (manifestLocation == null)
-                throw new IllegalArgumentException("Cannot obtain manifest from: " + classLoader);
-
-            try {
-                manifest = new Manifest(manifestLocation.openStream());
-            } catch (IOException e) {
-                throw new IllegalStateException("Cannot load manifest from: " + manifestLocation);
-            }
-        }
-
         return installModule(classLoader, null, manifest);
-    }
-
-    protected URL findResource(ClassLoader classLoader, String name) {
-        return classLoader.getResource(name);
     }
 
     @Override

@@ -23,36 +23,52 @@
     Set these VM properties in your IDE debugger 
 
     -Djava.util.logging.manager=org.jboss.logmanager.LogManager 
+    -Dtest.archive.directory=${workspace_loc:gravia-runtime-itests/target}/test-libs 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     
     <parent>
         <groupId>org.jboss.gravia</groupId>
-        <artifactId>gravia</artifactId>
+        <artifactId>gravia-itests</artifactId>
         <version>1.0.0.Beta2-SNAPSHOT</version>
     </parent>
 
-    <name>Gravia :: Runtime</name>
+    <name>Gravia :: Integration Tests :: Common</name>
     
-    <artifactId>gravia-runtime</artifactId>
-	<packaging>pom</packaging>
-	
-	<modules>
-		<module>api</module>
-		<module>embedded</module>
-		<module>osgi</module>
-	</modules>
-	
+    <artifactId>gravia-itests-common</artifactId>
+
+    <dependencies>
+        
+        <!-- Provided Dependencies -->
+        <dependency>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-runtime-api</artifactId>
+        </dependency>
+        <dependency>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-runtime-osgi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <scope>provided</scope>
+        </dependency>
+		<dependency>
+		    <groupId>org.jboss.spec.javax.servlet</groupId>
+		    <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+		    <scope>provided</scope>
+		</dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
 	<build>
 		<plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <configuration>
-                    <inceptionYear>2013</inceptionYear>
-                </configuration>
-            </plugin>
 		</plugins>
 	</build>
+	
 </project>

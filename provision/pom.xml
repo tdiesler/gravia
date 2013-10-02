@@ -24,12 +24,10 @@
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-resolver</artifactId>
-	        <version>${project.version}</version>
         </dependency>
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-repository</artifactId>
-	        <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.logging</groupId>

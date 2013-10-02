@@ -46,7 +46,7 @@ public final class RuntimeLocator {
     public static Runtime locateRuntime(PropertiesProvider props) {
         Runtime runtime = getRuntime();
         if (runtime == null) {
-            ServiceLoader<RuntimeFactory> loader = ServiceLoader.load(RuntimeFactory.class);
+            ServiceLoader<RuntimeFactory> loader = ServiceLoader.load(RuntimeFactory.class, RuntimeLocator.class.getClassLoader());
             Iterator<RuntimeFactory> iterator = loader.iterator();
             if (iterator.hasNext()) {
                 RuntimeFactory factory = iterator.next();

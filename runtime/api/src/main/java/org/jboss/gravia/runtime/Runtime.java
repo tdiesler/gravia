@@ -42,16 +42,6 @@ public interface Runtime extends PropertiesProvider {
     Set<Module> getModules();
 
     /**
-     * Installs a module with the given ClassLoader.
-     * <p>
-     * The module's {@link ResourceIdentity} and possible other
-     * capabilities/requirements are generated from the manifest.
-     * <p>
-     * @see Runtime#installModule(ClassLoader, Resource, Manifest)
-     */
-    Module installModule(ClassLoader classloader);
-
-    /**
      * Installs a module with the given ClassLoader and Manifest.
      * <p>
      * The module's {@link ResourceIdentity} and possible other
