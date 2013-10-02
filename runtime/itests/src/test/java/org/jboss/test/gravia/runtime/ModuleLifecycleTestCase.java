@@ -20,12 +20,15 @@ import java.io.InputStream;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.osgi.OSGiRuntime;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
@@ -41,7 +44,7 @@ import org.osgi.framework.BundleActivator;
 
 /**
  * Test simple module lifecycle
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 01-Oct-2013
  */
@@ -49,6 +52,7 @@ import org.osgi.framework.BundleActivator;
 public class ModuleLifecycleTestCase {
 
     @Deployment
+    @StartLevelAware(autostart = true)
     public static JavaArchive createdeployment() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example-bundle");
         archive.addClasses(SimpleActivator.class);
@@ -69,7 +73,8 @@ public class ModuleLifecycleTestCase {
     @Test
     public void testBundle(@ArquillianResource Bundle bundle) throws Exception {
 
-        Module module = OSGiRuntime.mappedModule(bundle);
+        Runtime runtime = RuntimeLocator.getRuntime();
+        Module module = runtime.getModule(bundle.getBundleId());
         Assert.assertEquals(bundle.getBundleId(), module.getModuleId());
 
         Assert.assertEquals("example-bundle:0.0.0", module.getIdentity().toString());

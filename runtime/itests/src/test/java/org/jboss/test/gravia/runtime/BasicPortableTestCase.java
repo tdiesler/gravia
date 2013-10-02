@@ -24,7 +24,7 @@ package org.jboss.test.gravia.runtime;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
+import javax.servlet.Servlet;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 
@@ -38,6 +38,7 @@ import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.test.gravia.runtime.sub.ApplicationActivator;
 import org.jboss.test.gravia.runtime.sub.SimpleServlet;
 import org.jboss.test.support.HttpRequest;
 import org.junit.Assert;
@@ -69,16 +70,15 @@ public class BasicPortableTestCase {
     @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, "simple.war");
-        archive.addClasses(HttpRequest.class, SimpleServlet.class);
+        archive.addClasses(HttpRequest.class, ApplicationActivator.class, SimpleServlet.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
-                builder.addExportPackages(BasicPortableTestCase.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, Resource.class);
-                builder.addImportPackages(HttpServlet.class, WebServlet.class, PostConstruct.class);
+                builder.addImportPackages(Servlet.class, HttpServlet.class, WebServlet.class);
                 builder.addManifestHeader("Web-ContextPath", "/simple");
                 builder.addBundleClasspath("WEB-INF/classes");
                 return builder.openStream();
@@ -90,7 +90,7 @@ public class BasicPortableTestCase {
     @Test
     public void testWarDeployment() throws Exception {
         String result = performCall("/simple/servlet?input=Hello");
-        Assert.assertEquals("Hello", result);
+        Assert.assertEquals("Hello from Module[simple.war:0.0.0]", result);
     }
 
     private String performCall(String path) throws Exception {

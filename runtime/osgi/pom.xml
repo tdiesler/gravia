@@ -101,7 +101,7 @@
 					<instructions>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 						<Bundle-Version>${project.version}</Bundle-Version>
-						<Bundle-Activator>org.jboss.gravia.runtime.osgi.RuntimeActivator</Bundle-Activator>
+						<Bundle-Activator>org.jboss.gravia.runtime.osgi.internal.RuntimeActivator</Bundle-Activator>
 						<Export-Package>
 							org.jboss.gravia.runtime.osgi;version="${project.version}",
 						</Export-Package>

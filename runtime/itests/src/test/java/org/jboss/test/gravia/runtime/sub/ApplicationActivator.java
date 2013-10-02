@@ -21,29 +21,27 @@
  */
 package org.jboss.test.gravia.runtime.sub;
 
-import java.io.IOException;
-import java.io.Writer;
-
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 
-@SuppressWarnings("serial")
-@WebServlet(name = "SimpleServlet", urlPatterns = { "/servlet" })
-public class SimpleServlet extends HttpServlet {
+@WebListener
+public class ApplicationActivator implements ServletContextListener {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String msg = req.getParameter("input");
-        Writer writer = resp.getWriter();
-        writer.write((msg != null ? msg : "No input") + " from " + getWebappModule());
+    public void contextInitialized(ServletContextEvent event) {
+        Runtime runtime = RuntimeLocator.locateRuntime(null);
+        Module module = runtime.installModule(getClass().getClassLoader());
+        ServletContext servletContext = event.getServletContext();
+        servletContext.setAttribute(Module.class.getName(), module);
     }
 
-    private Module getWebappModule() {
-        // Initilaized in {@link ApplicationActivator}
-        return (Module) getServletContext().getAttribute(Module.class.getName());
+    @Override
+    public void contextDestroyed(ServletContextEvent event) {
     }
 }

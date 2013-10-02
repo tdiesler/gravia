@@ -20,14 +20,13 @@ import java.io.InputStream;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
-import org.jboss.gravia.runtime.ModuleException;
-import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.osgi.OSGiRuntime;
@@ -36,9 +35,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.test.gravia.runtime.osgi.sub.SimpleActivator;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
@@ -47,7 +44,7 @@ import org.osgi.framework.BundleContext;
 
 /**
  * Test simple module lifecycle
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 01-Oct-2013
  */
@@ -57,22 +54,8 @@ public class ModuleLifecycleTestCase {
     @ArquillianResource
     BundleContext syscontext;
 
-    @Before
-    public void setUp() throws ModuleException {
-        OSGiRuntime runtime = new OSGiRuntime(syscontext);
-        RuntimeLocator.setRuntime(runtime);
-        runtime.init();
-        runtime.start();
-    }
-
-    @After
-    public void tearDown() throws ModuleException {
-        Runtime runtime = RuntimeLocator.getRuntime();
-        runtime.stop();
-        runtime.destroy();
-    }
-
     @Deployment
+    @StartLevelAware(autostart = true)
     public static JavaArchive createdeployment() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example-bundle");
         archive.addClasses(SimpleActivator.class);
@@ -93,7 +76,7 @@ public class ModuleLifecycleTestCase {
     @Test
     public void testBundle(@ArquillianResource Bundle bundle) throws Exception {
 
-        Module module = OSGiRuntime.mappedModule(bundle);
+        Module module = RuntimeLocator.getRuntime().getModule(bundle.getBundleId());
         Assert.assertEquals(bundle.getBundleId(), module.getModuleId());
 
         Assert.assertEquals("example-bundle:0.0.0", module.getIdentity().toString());

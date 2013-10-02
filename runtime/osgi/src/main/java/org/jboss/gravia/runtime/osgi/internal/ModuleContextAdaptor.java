@@ -8,18 +8,18 @@
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.osgi;
+package org.jboss.gravia.runtime.osgi.internal;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,6 +36,7 @@ import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.spi.AbstractModuleContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -188,7 +189,8 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
     }
 
     private Module mappedModule(Bundle bundle) {
-        return OSGiRuntime.mappedModule(bundle);
+        Runtime runtime = getModule().adapt(Runtime.class);
+        return runtime.getModule(bundle.getBundleId());
     }
 
     @SuppressWarnings("unchecked")

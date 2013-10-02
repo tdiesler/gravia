@@ -8,12 +8,12 @@
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
@@ -21,6 +21,8 @@
  */
 package org.jboss.gravia.runtime;
 
+import java.util.Iterator;
+import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -39,5 +41,20 @@ public final class RuntimeLocator {
 
     public static void setRuntime(Runtime runtime) {
         runtimeReference.set(runtime);
+    }
+
+    public static Runtime locateRuntime(PropertiesProvider props) {
+        Runtime runtime = getRuntime();
+        if (runtime == null) {
+            ServiceLoader<RuntimeFactory> loader = ServiceLoader.load(RuntimeFactory.class);
+            Iterator<RuntimeFactory> iterator = loader.iterator();
+            if (iterator.hasNext()) {
+                RuntimeFactory factory = iterator.next();
+                DefaultPropertiesProvider propertiesProvider = new DefaultPropertiesProvider();
+                runtime = factory.createRuntime(props != null ? props : propertiesProvider);
+                setRuntime(runtime);
+            }
+        }
+        return runtime;
     }
 }

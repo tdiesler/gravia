@@ -54,7 +54,7 @@
         <version.jboss.wildfly>8.0.0.Alpha4</version.jboss.wildfly>
         <version.junit>4.10</version.junit>
         <version.mockito>1.8.4</version.mockito>
-        <version.ops4j.pax.web>3.0.2</version.ops4j.pax.web>
+        <version.ops4j.pax.web>3.0.3-SNAPSHOT</version.ops4j.pax.web>
         <version.osgi>5.0.0</version.osgi>
         <version.slf4j>1.5.11</version.slf4j>
         

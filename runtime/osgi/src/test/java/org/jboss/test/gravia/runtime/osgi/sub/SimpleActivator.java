@@ -25,12 +25,14 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.osgi.OSGiRuntime;
+import org.jboss.gravia.runtime.osgi.OSGiRuntimeLocator;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 /**
  * A Service Activator
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 24-Apr-2009
  */
@@ -38,7 +40,11 @@ public class SimpleActivator implements BundleActivator, ModuleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        Module module = OSGiRuntime.mappedModule(context.getBundle());
+        Bundle bundle = context.getBundle();
+
+        OSGiRuntime runtime = OSGiRuntimeLocator.locateRuntime(context);
+        Module module = runtime.installModule(bundle);
+
         start(module.getModuleContext());
     }
 

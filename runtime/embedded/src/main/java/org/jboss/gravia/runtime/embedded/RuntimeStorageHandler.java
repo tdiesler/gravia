@@ -8,12 +8,12 @@
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
@@ -25,14 +25,13 @@ import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-
 import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.PropertiesProvider;
 
 /**
  * [TODO]
- * 
+ *
  * @ThreadSafe
  *
  * @author thomas.diesler@jboss.com
@@ -42,10 +41,10 @@ final class RuntimeStorageHandler {
 
     private final File storageArea;
 
-    RuntimeStorageHandler(Map<String, Object> props, boolean firstInit) {
+    RuntimeStorageHandler(PropertiesProvider props, boolean firstInit) {
 
         // Create the storage area
-        String dirName = (String) props.get(Constants.RUNTIME_STORAGE);
+        String dirName = (String) props.getProperty(Constants.RUNTIME_STORAGE);
         if (dirName == null) {
             try {
                 File storageDir = new File("./gravia-store");
@@ -57,7 +56,7 @@ final class RuntimeStorageHandler {
         storageArea = new File(dirName).getAbsoluteFile();
 
         // Cleanup the storage area
-        String storageClean = (String) props.get(Constants.RUNTIME_STORAGE_CLEAN);
+        String storageClean = (String) props.getProperty(Constants.RUNTIME_STORAGE_CLEAN);
         if (firstInit == true && Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT.equals(storageClean)) {
             LOGGER.debugf("Deleting storage: %s", storageArea.getAbsolutePath());
             deleteRecursive(storageArea);

@@ -8,12 +8,12 @@
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
@@ -21,13 +21,9 @@
  */
 package org.jboss.gravia.runtime.embedded;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
@@ -43,17 +39,10 @@ public final class EmbeddedRuntime extends AbstractRuntime {
     private final RuntimeServicesHandler serviceManager;
     private final RuntimeStorageHandler storageHandler;
 
-    private final Map<String, Object> properties;
-
-    public EmbeddedRuntime(Map<String, Object> props) {
-        Map<String, Object> auxprops = new ConcurrentHashMap<String, Object>();
-        if (props != null) {
-            auxprops.putAll(props);
-        }
-        properties = Collections.unmodifiableMap(auxprops);
+    public EmbeddedRuntime(PropertiesProvider propertiesProvider) {
+        super(propertiesProvider);
         serviceManager = new RuntimeServicesHandler(adapt(RuntimeEventsHandler.class));
-        storageHandler = new RuntimeStorageHandler(properties, true);
-        RuntimeLocator.setRuntime(this);
+        storageHandler = new RuntimeStorageHandler(propertiesProvider, true);
     }
 
     @Override
@@ -73,11 +62,6 @@ public final class EmbeddedRuntime extends AbstractRuntime {
             }
         }
         return result;
-    }
-
-    @Override
-    public Object getProperty(String key) {
-        return properties.get(key);
     }
 
     @Override

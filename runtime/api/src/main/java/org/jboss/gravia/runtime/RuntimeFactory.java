@@ -1,8 +1,8 @@
 /*
  * #%L
- * Gravia Resource
+ * JBossOSGi Runtime
  * %%
- * Copyright (C) 2010 - 2013 JBoss by Red Hat
+ * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -19,25 +19,16 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.resource;
+package org.jboss.gravia.runtime;
 
-import java.util.List;
 
 /**
- * A resource is associated with Capabilities/Requirements.
+ * [TODO]
  *
  * @author thomas.diesler@jboss.com
- * @since 02-Jul-2010
+ * @since 27-Sep-2013
  */
-public interface Resource extends Adaptable, Attachable {
+public interface RuntimeFactory {
 
-    ResourceIdentity getIdentity();
-
-    Capability getIdentityCapability();
-
-    List<Capability> getCapabilities(String namespace);
-
-    List<Requirement> getRequirements(String namespace);
-
-    Wiring getWiring();
+    Runtime createRuntime(PropertiesProvider propertiesProvider);
 }
