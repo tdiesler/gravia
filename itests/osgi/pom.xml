@@ -189,9 +189,6 @@
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <test.archive.directory>${project.build.directory}/test-libs</test.archive.directory>
                     </systemPropertyVariables>
-                    <includes>
-                    	<include>**/osgi/*TestCase.java</include>
-                    </includes>
                 </configuration>
             </plugin>
 		</plugins>

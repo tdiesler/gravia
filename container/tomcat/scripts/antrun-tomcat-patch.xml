@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ====================================================================== -->
+<!--                                                                        -->
+<!--  JBoss, the OpenSource J2EE webOS                                      -->
+<!--                                                                        -->
+<!--  Distributable under LGPL license.                                     -->
+<!--  See terms of license at http://www.gnu.org.                           -->
+<!--                                                                        -->
+<!-- ====================================================================== -->
+
+<project default="build">
+
+  <!-- ================================================================== -->
+  <!-- Setup                                                              -->
+  <!-- ================================================================== -->
+  
+  <property name="output.dir" value="${basedir}/target" />
+  <property name="resources.dir" value="${basedir}/src/main/resources" />
+  <property name="tomcat.patch.dir" value="${output.dir}/tomcat-patch" />
+  <property name="deploy.artifacts.dir" value="${output.dir}/deploy-artifacts" />
+  <property name="deploy.artifacts.lib" value="${deploy.artifacts.dir}/lib" />
+  <property name="deploy.artifacts.resources" value="${deploy.artifacts.dir}/resources" />
+
+  <!-- ================================================================== -->
+  <!-- Initialization                                                     -->
+  <!-- ================================================================== -->
+  <target name="init">
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Distribution                                                       -->
+  <!-- ================================================================== -->
+  <target name="build" depends="init">
+
+  	<!-- Filter the modules resources -->
+    <copy todir="${tomcat.patch.dir}" overwrite="true">
+        <fileset dir="${resources.dir}" />
+		<filterset>
+	        <filter token="project.version" value="${project.version}" />
+      	</filterset>
+    </copy>
+  	
+  	<!-- Copy module resources-->
+    <copy todir="${tomcat.patch.dir}/lib" overwrite="true">
+        <fileset file="${deploy.artifacts.lib}/*.jar" />
+    </copy>
+	
+  	<!-- Zip the tomcat patch -->
+  	<zip destfile="${output.dir}/${project.artifactId}-${project.version}-patch.zip" basedir="${tomcat.patch.dir}"/>
+  </target>
+</project>

@@ -42,6 +42,7 @@
 		<module>common</module>
 		<module>osgi</module>
 		<module>wildfly</module>
+		<module>tomcat</module>
 	</modules>
 	
 </project>
