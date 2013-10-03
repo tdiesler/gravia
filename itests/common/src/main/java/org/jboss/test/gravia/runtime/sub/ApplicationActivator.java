@@ -29,13 +29,11 @@ import java.util.jar.Manifest;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
-
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 
-@WebListener
+// @WebListener
 public class ApplicationActivator implements ServletContextListener {
 
     @Override
