@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.gravia.runtime.tomcat;
+package org.jboss.test.gravia.itests.wildfly;
 
 import java.io.InputStream;
 
@@ -28,7 +28,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.test.gravia.runtime.ModuleLifecycleTest;
+import org.jboss.test.gravia.itests.ModuleLifecycleTest;
 import org.junit.runner.RunWith;
 
 /**
@@ -38,7 +38,7 @@ import org.junit.runner.RunWith;
  * @since 01-Oct-2013
  */
 @RunWith(Arquillian.class)
-public class TomcatModuleLifecycleTestCase extends ModuleLifecycleTest {
+public class WildFlyModuleLifecycleTestCase extends ModuleLifecycleTest {
 
     @Deployment
     public static WebArchive deployment() {
@@ -48,9 +48,11 @@ public class TomcatModuleLifecycleTestCase extends ModuleLifecycleTest {
             public InputStream openStream() {
                 ManifestBuilder builder = new ManifestBuilder();
                 builder.addIdentityCapability(archive.getName(), "1.0.0");
+                builder.addManifestHeader("Dependencies", "org.jboss.gravia");
                 return builder.openStream();
             }
         });
         return archive;
     }
+
 }

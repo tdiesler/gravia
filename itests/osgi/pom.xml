@@ -185,6 +185,11 @@
                 <configuration>
                     <argLine>${surefire.system.args}</argLine>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <!--
+                      NPE in ClassPathUtil due to uninstalled bundle access
+                      https://ops4j1.jira.com/browse/PAXWEB-626 
+                    -->
+                    <forkMode>always</forkMode>
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <test.archive.directory>${project.build.directory}/test-libs</test.archive.directory>

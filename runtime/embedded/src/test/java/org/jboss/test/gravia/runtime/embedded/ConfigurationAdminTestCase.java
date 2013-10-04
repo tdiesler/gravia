@@ -24,13 +24,14 @@ package org.jboss.test.gravia.runtime.embedded;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
+
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.test.gravia.runtime.embedded.sub.a.ServiceD;
-import org.jboss.test.gravia.runtime.embedded.sub.a1.ServiceD1;
+import org.jboss.test.gravia.runtime.embedded.sub.d.ServiceD;
+import org.jboss.test.gravia.runtime.embedded.sub.d1.ServiceD1;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.service.cm.Configuration;
@@ -81,7 +82,7 @@ public class ConfigurationAdminTestCase extends AbstractRuntimeTest {
     private Dictionary<String,String> getModuleHeadersD() {
         ManifestBuilder builder = new ManifestBuilder();
         builder.addIdentityCapability(MODULE_D, "1.0.0");
-        builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.embedded.sub.a.ServiceD.xml");
+        builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.embedded.sub.d.ServiceD.xml");
         ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(builder.getManifest());
         return headersProvider.getHeaders();
     }
@@ -89,7 +90,7 @@ public class ConfigurationAdminTestCase extends AbstractRuntimeTest {
     private Dictionary<String,String> getModuleHeadersD1() {
         ManifestBuilder builder = new ManifestBuilder();
         builder.addIdentityCapability(MODULE_D1, "1.0.0");
-        builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.embedded.sub.a1.ServiceD1.xml");
+        builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.embedded.sub.d1.ServiceD1.xml");
         ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(builder.getManifest());
         return headersProvider.getHeaders();
     }

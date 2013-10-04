@@ -19,21 +19,32 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.gravia.runtime;
+package org.jboss.test.gravia.itests;
 
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.Servlet;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+
+import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.test.gravia.runtime.sub.ApplicationActivator;
-import org.jboss.test.gravia.runtime.sub.SimpleServlet;
-import org.jboss.test.support.HttpRequest;
+import org.jboss.test.gravia.itests.sub.ApplicationActivator;
+import org.jboss.test.gravia.itests.sub.SimpleServlet;
+import org.jboss.test.gravia.itests.support.HttpRequest;
 import org.junit.Assert;
 import org.junit.Test;
+import org.osgi.framework.BundleActivator;
 
 /**
  * Test webapp deployemnts
@@ -41,23 +52,43 @@ import org.junit.Test;
  * @author thomas.diesler@jboss.com
  * @since 01-Oct-2013
  */
-public abstract class ModuleLifecycleTest {
+public abstract class CommonDeploymentTest {
 
     public static WebArchive deployment() {
-        WebArchive archive = ShrinkWrap.create(WebArchive.class, "simple.war");
+        final WebArchive archive = ShrinkWrap.create(WebArchive.class, "common.war");
         archive.addClasses(HttpRequest.class, ApplicationActivator.class, SimpleServlet.class);
-        archive.addClasses(ModuleLifecycleTest.class);
+        archive.addClasses(CommonDeploymentTest.class);
+        archive.setManifest(new Asset() {
+            @Override
+            public InputStream openStream() {
+                OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+                builder.addBundleSymbolicName(archive.getName());
+                builder.addBundleVersion("1.0.0");
+                builder.addBundleManifestVersion(2);
+                builder.addImportPackages(BundleActivator.class, ModuleActivator.class, Resource.class);
+                builder.addImportPackages(Servlet.class, HttpServlet.class, WebServlet.class);
+                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, archive.getName() + ";version=1.0.0");
+                builder.addManifestHeader("Web-ContextPath", "/common");
+                builder.addBundleClasspath("WEB-INF/classes");
+                builder.addManifestHeader("Dependencies", "org.jboss.gravia"); // WildFly
+                return builder.openStream();
+            }
+        });
         return archive;
     }
 
     @Test
     public void testServletAccess() throws Exception {
-        String result = performCall("/simple/servlet?input=Hello");
-        Assert.assertEquals("Hello from Module[simple.war:1.0.0]", result);
+        String result = performCall("/common/servlet?input=Hello");
+        Assert.assertEquals("Hello from Module[common.war:1.0.0]", result);
     }
 
     @Test
     public void testModuleLifecycle() throws Exception {
+
+        // With forkMode=always make sure we have an initialized runtime
+        String result = performCall("/common/servlet?input=Hello");
+        Assert.assertEquals("Hello from Module[common.war:1.0.0]", result);
 
         Module modA = RuntimeLocator.getRuntime().getModule(getClass().getClassLoader());
         Assert.assertEquals(Module.State.ACTIVE, modA.getState());
