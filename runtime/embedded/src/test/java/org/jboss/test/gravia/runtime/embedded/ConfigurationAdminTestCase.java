@@ -24,9 +24,8 @@ package org.jboss.test.gravia.runtime.embedded;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
-import java.util.jar.Manifest;
-
 import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.runtime.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceReference;
@@ -43,7 +42,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author thomas.diesler@jboss.com
  * @since 11-Sep-2013
  */
-public class ConfiguredReferenceTestCase extends AbstractRuntimeTest {
+public class ConfigurationAdminTestCase extends AbstractRuntimeTest {
 
     static final String MODULE_D = "moduleD";
     static final String MODULE_D1 = "moduleD1";
@@ -51,12 +50,10 @@ public class ConfiguredReferenceTestCase extends AbstractRuntimeTest {
     @Test
     public void testServiceAccess() throws Exception {
 
-        installInternalBundles("org.apache.felix.scr", "org.apache.felix.configadmin");
-
-        Module modD = getRuntime().installModule(getClass().getClassLoader(), getManifestD());
+        Module modD = getRuntime().installModule(getClass().getClassLoader(), getModuleHeadersD());
         modD.start();
 
-        Module modD1 = getRuntime().installModule(getClass().getClassLoader(), getManifestD1());
+        Module modD1 = getRuntime().installModule(getClass().getClassLoader(), getModuleHeadersD1());
         modD1.start();
 
         ModuleContext contextD = modD.getModuleContext();
@@ -81,17 +78,19 @@ public class ConfiguredReferenceTestCase extends AbstractRuntimeTest {
         Assert.assertEquals("ServiceD#1:ServiceD1#1:bar:Hello", srvD.doStuff("Hello"));
     }
 
-    private Manifest getManifestD() {
+    private Dictionary<String,String> getModuleHeadersD() {
         ManifestBuilder builder = new ManifestBuilder();
         builder.addIdentityCapability(MODULE_D, "1.0.0");
         builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.embedded.sub.a.ServiceD.xml");
-        return builder.getManifest();
+        ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(builder.getManifest());
+        return headersProvider.getHeaders();
     }
 
-    private Manifest getManifestD1() {
+    private Dictionary<String,String> getModuleHeadersD1() {
         ManifestBuilder builder = new ManifestBuilder();
         builder.addIdentityCapability(MODULE_D1, "1.0.0");
         builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.embedded.sub.a1.ServiceD1.xml");
-        return builder.getManifest();
+        ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(builder.getManifest());
+        return headersProvider.getHeaders();
     }
 }

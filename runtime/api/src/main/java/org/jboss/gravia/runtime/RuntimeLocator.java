@@ -52,6 +52,7 @@ public final class RuntimeLocator {
                 RuntimeFactory factory = iterator.next();
                 DefaultPropertiesProvider propertiesProvider = new DefaultPropertiesProvider();
                 runtime = factory.createRuntime(props != null ? props : propertiesProvider);
+                runtime.init();
                 setRuntime(runtime);
             }
         }

@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServlet;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
+import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
@@ -61,6 +62,7 @@ public class BasicPortableTestCase extends BasicPortableTest {
                 builder.addBundleManifestVersion(2);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, Resource.class);
                 builder.addImportPackages(Servlet.class, HttpServlet.class, WebServlet.class);
+                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, archive.getName() + ";version=1.0.0");
                 builder.addManifestHeader("Web-ContextPath", "/simple");
                 builder.addBundleClasspath("WEB-INF/classes");
                 return builder.openStream();

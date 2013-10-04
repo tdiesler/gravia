@@ -42,6 +42,7 @@ import org.jboss.gravia.runtime.ServiceException;
 import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.gravia.runtime.spi.NotNullException;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.metadata.CaseInsensitiveDictionary;
 
@@ -59,7 +60,6 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     private final RuntimeServicesHandler serviceManager;
     private final Module ownerModule;
     private final String[] classNames;
-    private final long serviceId;
     private final ValueProvider<S> valueProvider;
     private final ServiceReference<S> reference;
     private ServiceRegistration<S> registration;
@@ -84,7 +84,6 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
         this.serviceManager = serviceManager;
         this.ownerModule = owner;
-        this.serviceId = serviceId;
         this.valueProvider = valueProvider;
         this.classNames = classNames;
 
@@ -111,13 +110,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         return (ServiceState) sref;
     }
 
-
-    public long getServiceId() {
-        return serviceId;
-    }
-
-
-    public S getScopedValue(Module module) {
+    S getScopedValue(Module module) {
 
         // For non-factory services, return the value
         if (valueProvider.isFactoryValue() == false)
@@ -154,7 +147,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
 
-    public void ungetScopedValue(Module module) {
+    void ungetScopedValue(Module module) {
         if (valueProvider.isFactoryValue()) {
             ServiceFactoryHolder factoryHolder = getFactoryHolder(module);
             if (factoryHolder != null) {
@@ -173,12 +166,12 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
 
-    public ServiceRegistration<S> getRegistration() {
+    ServiceRegistration<S> getRegistration() {
         return registration;
     }
 
 
-    public List<String> getClassNames() {
+    List<String> getClassNames() {
         return Arrays.asList(classNames);
     }
 
@@ -197,7 +190,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
 
-    public void unregisterInternal() {
+    private void unregisterInternal() {
         serviceManager.unregisterService(this);
         usingModules = null;
         registration = null;
@@ -246,12 +239,12 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
 
     @SuppressWarnings("unchecked")
-    public Dictionary<String, ?> getPreviousProperties() {
+    Dictionary<String, ?> getPreviousProperties() {
         return prevProperties;
     }
 
 
-    public Module getServiceOwner() {
+    Module getServiceOwner() {
         return ownerModule;
     }
 
@@ -262,7 +255,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
 
-    public void addUsingModule(Module moduleState) {
+    void addUsingModule(Module moduleState) {
         synchronized (this) {
             if (usingModules == null)
                 usingModules = new HashSet<Module>();
@@ -272,7 +265,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
 
-    public void removeUsingModule(Module module) {
+    void removeUsingModule(Module module) {
         synchronized (this) {
             if (usingModules != null)
                 usingModules.remove(module);
@@ -280,7 +273,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
 
-    public Set<Module> getUsingModulesInternal() {
+    Set<Module> getUsingModulesInternal() {
         synchronized (this) {
             if (usingModules == null)
                 return Collections.emptySet();
@@ -292,10 +285,8 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
     @Override
     public boolean isAssignableTo(Module module, String className) {
-        if (module == null)
-            throw new IllegalArgumentException("Null module");
-        if (className == null)
-            throw new IllegalArgumentException("Null className");
+        NotNullException.assertValue(module, "module");
+        NotNullException.assertValue(className, "className");
 
         if (module == ownerModule || className.startsWith("java."))
             return true;
@@ -356,17 +347,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         return comparator.compare(this, (ServiceReference) sref);
     }
 
-
-    public int getServiceRanking() {
-        Object prop = getProperty(Constants.SERVICE_RANKING);
-        if (prop instanceof Integer == false)
-            return 0;
-
-        return ((Integer) prop).intValue();
-    }
-
-
-    public boolean isUnregistered() {
+    boolean isUnregistered() {
         return registration == null;
     }
 

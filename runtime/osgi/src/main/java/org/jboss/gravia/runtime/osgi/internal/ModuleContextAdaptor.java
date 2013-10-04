@@ -21,7 +21,6 @@
  */
 package org.jboss.gravia.runtime.osgi.internal;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -181,11 +180,6 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
     public boolean ungetService(ServiceReference<?> reference) {
         ServiceReferenceAdaptor<?> adaptor = (ServiceReferenceAdaptor<?>) reference;
         return bundleContext.ungetService(adaptor.delegate);
-    }
-
-    @Override
-    public File getDataFile(String filename) {
-        return bundleContext.getDataFile(filename);
     }
 
     private Module mappedModule(Bundle bundle) {

@@ -8,12 +8,12 @@
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
@@ -21,7 +21,6 @@
  */
 package org.jboss.gravia.runtime;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Dictionary;
 
@@ -42,11 +41,11 @@ public interface ModuleContext {
      * Creates a {@code Filter} object. This {@code Filter} object may be used
      * to match a {@code ServiceReference} object or a {@code Dictionary}
      * object.
-     * 
+     *
      * <p>
      * If the filter cannot be parsed, an {@link IllegalArgumentException} will be
      * thrown with a human readable message where the filter became unparsable.
-     * 
+     *
      * @param filter The filter string.
      * @return A {@code Filter} object encapsulating the filter string.
      */
@@ -81,6 +80,4 @@ public interface ModuleContext {
     <S> S getService(ServiceReference<S> reference);
 
     boolean ungetService(ServiceReference<?> reference);
-
-    File getDataFile(String filename);
 }

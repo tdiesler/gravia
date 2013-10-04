@@ -21,47 +21,45 @@
  */
 package org.jboss.gravia.resource;
 
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.jar.Attributes;
-import java.util.jar.Attributes.Name;
-import java.util.jar.Manifest;
-
 import org.jboss.gravia.resource.spi.ElementParser;
 
 /**
- * The default {@link Resource} builder.
+ * Build a {@link Resource} from a given Dictionary.
  *
  * @author thomas.diesler@jboss.com
- * @since 02-Jul-2010
+ * @since 03-Oct-2013
  */
-public class ManifestResourceBuilder extends DefaultResourceBuilder {
+public final class DictionaryResourceBuilder extends DefaultResourceBuilder {
 
-    public ManifestResourceBuilder load(Manifest manifest) {
-        Attributes mainAttributes = manifest.getMainAttributes();
-        for (Object key : mainAttributes.keySet()) {
-            Attributes.Name name = (Name) key;
-            String value = mainAttributes.getValue(name);
-            if (ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY.equals(name.toString())) {
+    public DictionaryResourceBuilder load(Dictionary<String, String> headers) {
+        Enumeration<String> keys = headers.keys();
+        while (keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            String value = headers.get(key);
+            if (ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY.equals(key)) {
                 Map<String, Object> atts = new LinkedHashMap<String, Object>();
                 Map<String, String> dirs = new LinkedHashMap<String, String>();
                 String symbolicName = parseParameterizedValue(value, atts, dirs);
                 addIdentityCapability(symbolicName, null, atts, dirs);
-            } else if (ManifestBuilder.GRAVIA_IDENTITY_REQUIREMENT.equals(name.toString())) {
+            } else if (ManifestBuilder.GRAVIA_IDENTITY_REQUIREMENT.equals(key)) {
                 for(String part : ElementParser.parseDelimitedString(value, ',')) {
                     Map<String, Object> atts = new LinkedHashMap<String, Object>();
                     Map<String, String> dirs = new LinkedHashMap<String, String>();
                     String symbolicName = parseParameterizedValue(part, atts, dirs);
                     addIdentityRequirement(symbolicName, null, atts, dirs);
                 }
-            } else if (ManifestBuilder.GRAVIA_CAPABILITY.equals(name.toString())) {
+            } else if (ManifestBuilder.GRAVIA_CAPABILITY.equals(key)) {
                 for(String part : ElementParser.parseDelimitedString(value, ',')) {
                     Map<String, Object> atts = new LinkedHashMap<String, Object>();
                     Map<String, String> dirs = new LinkedHashMap<String, String>();
                     String namespace = parseParameterizedValue(part, atts, dirs);
                     addCapability(namespace, atts, dirs);
                 }
-            } else if (ManifestBuilder.GRAVIA_REQUIREMENT.equals(name.toString())) {
+            } else if (ManifestBuilder.GRAVIA_REQUIREMENT.equals(key)) {
                 for(String part : ElementParser.parseDelimitedString(value, ',')) {
                     Map<String, Object> atts = new LinkedHashMap<String, Object>();
                     Map<String, String> dirs = new LinkedHashMap<String, String>();

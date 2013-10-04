@@ -29,19 +29,23 @@ import java.util.jar.Manifest;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+
+import org.jboss.gravia.runtime.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 
-// @WebListener
+// WebAppParser cannot load @WebListener class
+// https://ops4j1.jira.com/browse/PAXWEB-627
+
+//@WebListener
+
 public class ApplicationActivator implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
-        Runtime runtime = RuntimeLocator.locateRuntime(null);
         ServletContext servletContext = event.getServletContext();
-        Manifest manifest = getWebappManifest(servletContext);
-        Module module = runtime.installModule(getClass().getClassLoader(), manifest);
+        Module module = getWebappModule(servletContext);
         servletContext.setAttribute(Module.class.getName(), module);
     }
 
@@ -49,7 +53,20 @@ public class ApplicationActivator implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent event) {
     }
 
-    private Manifest getWebappManifest(ServletContext servletContext) {
+    static Module getWebappModule(ServletContext servletContext) {
+        Module module = (Module) servletContext.getAttribute(Module.class.getName());
+        if (module == null) {
+            Runtime runtime = RuntimeLocator.locateRuntime(null);
+            ClassLoader classLoader = ApplicationActivator.class.getClassLoader();
+            Manifest manifest = getWebappManifest(servletContext);
+            ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(manifest);
+            module = runtime.installModule(classLoader, headersProvider.getHeaders());
+            servletContext.setAttribute(Module.class.getName(), module);
+        }
+        return module;
+    }
+
+    static Manifest getWebappManifest(ServletContext servletContext) {
         Manifest manifest;
         try {
             URL entry = servletContext.getResource("/" + JarFile.MANIFEST_NAME);

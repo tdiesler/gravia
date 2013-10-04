@@ -230,7 +230,7 @@ public final class BundleContextAdaptor implements BundleContext {
 
     @Override
     public File getDataFile(String filename) {
-        return moduleContext.getDataFile(filename);
+        return moduleContext.getModule().getDataFile(filename);
     }
 
     @Override

@@ -8,12 +8,12 @@
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
@@ -30,29 +30,18 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 import java.util.Vector;
-import java.util.jar.Attributes;
-import java.util.jar.Attributes.Name;
-import java.util.jar.Manifest;
-
-import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
-import org.jboss.gravia.runtime.ModuleEntriesProvider;
+import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.osgi.metadata.CaseInsensitiveDictionary;
-import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.osgi.metadata.OSGiMetaData;
-import org.jboss.osgi.metadata.OSGiMetaDataBuilder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 
@@ -143,54 +132,18 @@ public final class BundleAdaptor implements Bundle {
     }
 
     @Override
-    public boolean hasPermission(Object permission) {
-        throw new UnsupportedOperationException("Bundle.hasPermission(Object)");
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     public Dictionary<String, String> getHeaders(String locale) {
 
         // Get the raw (unlocalized) manifest headers
-        Dictionary<String, String> rawHeaders = getRawHeaders(module);
+        Dictionary<String, String> rawHeaders = module.getHeaders();
 
         // If the specified locale is the empty string, this method will return the
         // raw (unlocalized) manifest headers including any leading "%"
         if ("".equals(locale))
             return rawHeaders;
 
-        // If the specified locale is null then the locale
-        // returned by java.util.Locale.getDefault is used
-        if (locale == null)
-            locale = Locale.getDefault().toString();
-
-        // Get the localization base name
-        String baseName = rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
-        if (baseName == null)
-            baseName = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
-
-        // Get the resource bundle URL for the given base and locale
-        URL entryURL = null; //getLocalizationEntry(baseName, locale);
-
-        // If the specified locale entry could not be found fall back to the default locale entry
-        if (entryURL == null) {
-            // String defaultLocale = Locale.getDefault().toString();
-            // entryURL = getLocalizationEntry(baseName, defaultLocale);
-        }
-
-        // Read the resource bundle
-        ResourceBundle resBundle = null;
-        /*
-        if (entryURL != null) {
-            try {
-                resBundle = new PropertyResourceBundle(entryURL.openStream());
-            } catch (IOException ex) {
-                throw new IllegalStateException("Cannot read resource bundle: " + entryURL, ex);
-            }
-        }
-         */
-
-        Dictionary<String, String> locHeaders = new Hashtable<String, String>();
+        Dictionary<String, String> result = new Hashtable<String, String>();
         Enumeration<String> e = rawHeaders.keys();
         while (e.hasMoreElements()) {
             String key = e.nextElement();
@@ -198,18 +151,10 @@ public final class BundleAdaptor implements Bundle {
             if (value.startsWith("%"))
                 value = value.substring(1);
 
-            if (resBundle != null) {
-                try {
-                    value = resBundle.getString(value);
-                } catch (MissingResourceException ex) {
-                    // ignore
-                }
-            }
-
-            locHeaders.put(key, value);
+            result.put(key, value);
         }
 
-        return new CaseInsensitiveDictionary(locHeaders);
+        return new CaseInsensitiveDictionary(result);
     }
 
     @Override
@@ -298,38 +243,12 @@ public final class BundleAdaptor implements Bundle {
 
     @Override
     public File getDataFile(String filename) {
-        throw new UnsupportedOperationException("Bundle.getDataFile(String)");
+        return module.getDataFile(filename);
     }
 
-    private Dictionary<String, String> getRawHeaders(Module module) {
-        Dictionary<String, String> result = new Hashtable<String, String>();
-        Manifest manifest = getManifest(module);
-        if (manifest != null) {
-            Attributes atts = manifest.getMainAttributes();
-            for (Object key : atts.keySet()) {
-                String keystr = ((Name) key).toString();
-                String value = atts.getValue(keystr);
-                result.put(keystr, value);
-            }
-        }
-        return result;
-    }
-
-    static OSGiMetaData getOSGiMetaData(Module module) {
-        Attachable attachable = module;
-        OSGiMetaData metadata  = attachable.getAttachment(OSGI_METADATA_KEY);
-        if (metadata == null) {
-            Manifest manifest = getManifest(module);
-            if (OSGiManifestBuilder.isValidBundleManifest(manifest)) {
-                metadata = OSGiMetaDataBuilder.load(manifest);
-            }
-            attachable.putAttachment(OSGI_METADATA_KEY, metadata);
-        }
-        return metadata;
-    }
-
-    static Manifest getManifest(Module module) {
-        return module.adapt(Manifest.class);
+    @Override
+    public boolean hasPermission(Object permission) {
+        throw new UnsupportedOperationException("Bundle.hasPermission(Object)");
     }
 
     private ModuleEntriesProvider getModuleEntriesProvider() {
@@ -346,6 +265,7 @@ public final class BundleAdaptor implements Bundle {
 
         @Override
         public URL getEntry(String path) {
+            // [TODO] flawed because of parent first access
             return getResource(path);
         }
 
@@ -359,6 +279,7 @@ public final class BundleAdaptor implements Bundle {
             if (filePattern.contains("*") || recurse == true)
                 throw new UnsupportedOperationException("Bundle.getEntryPaths(String,String,boolean)");
 
+            // [TODO] flawed because of parent first access
             URL result = getResource(path + "/" + filePattern);
             if (result == null)
                 return null;

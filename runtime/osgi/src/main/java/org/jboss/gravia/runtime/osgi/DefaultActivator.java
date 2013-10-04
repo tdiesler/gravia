@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.gravia.runtime.osgi.sub;
+package org.jboss.gravia.runtime.osgi;
 
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleActivator;
@@ -36,15 +36,13 @@ import org.osgi.framework.BundleContext;
  * @author thomas.diesler@jboss.com
  * @since 24-Apr-2009
  */
-public class SimpleActivator implements BundleActivator, ModuleActivator {
+public class DefaultActivator implements BundleActivator, ModuleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
         Bundle bundle = context.getBundle();
-
         OSGiRuntime runtime = OSGiRuntimeLocator.locateRuntime(context);
         Module module = runtime.installModule(bundle);
-
         start(module.getModuleContext());
     }
 
@@ -54,7 +52,6 @@ public class SimpleActivator implements BundleActivator, ModuleActivator {
 
     @Override
     public void start(ModuleContext context) throws Exception {
-        context.registerService(String.class, new String("Hello"), null);
     }
 
     @Override

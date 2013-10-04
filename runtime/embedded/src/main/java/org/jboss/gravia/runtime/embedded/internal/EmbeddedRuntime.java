@@ -21,12 +21,20 @@
  */
 package org.jboss.gravia.runtime.embedded.internal;
 
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ServiceLoader;
+
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
+import org.jboss.gravia.runtime.spi.RuntimePlugin;
 
 /**
  * [TODO]
@@ -46,8 +54,36 @@ public final class EmbeddedRuntime extends AbstractRuntime {
     }
 
     @Override
-    protected AbstractModule createModule(ClassLoader classLoader, Resource resource) {
-        return new EmbeddedModule(this, classLoader, resource);
+    public void init() {
+
+        // Install the plugin modules
+        List<Module> pluginModules = new ArrayList<Module>();
+        ClassLoader classLoader = getClass().getClassLoader();
+        ServiceLoader<RuntimePlugin> services = ServiceLoader.load(RuntimePlugin.class);
+        Iterator<RuntimePlugin> iterator = services.iterator();
+        while (iterator.hasNext()) {
+            RuntimePlugin plugin = iterator.next();
+            try {
+                Module module = plugin.installPluginModule(this, classLoader);
+                pluginModules.add(module);
+            } catch (ModuleException ex) {
+                LOGGER.errorf(ex, "Cannot load plugin: %s", plugin.getClass().getName());
+            }
+        }
+
+        // Start the plugin modules
+        for (Module module : pluginModules) {
+            try {
+                module.start();
+            } catch (ModuleException ex) {
+                LOGGER.errorf(ex, "Cannot start plugin: %s", module);
+            }
+        }
+    }
+
+    @Override
+    protected AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
+        return new EmbeddedModule(this, classLoader, resource, headers);
     }
 
     @Override

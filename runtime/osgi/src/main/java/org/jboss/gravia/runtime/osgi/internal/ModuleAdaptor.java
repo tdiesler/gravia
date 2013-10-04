@@ -21,6 +21,9 @@
  */
 package org.jboss.gravia.runtime.osgi.internal;
 
+import java.io.File;
+import java.util.Dictionary;
+
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
@@ -41,8 +44,8 @@ final class ModuleAdaptor extends AbstractModule {
 
     private final Bundle bundle;
 
-    ModuleAdaptor(AbstractRuntime runtime, ClassLoader classLoader, Resource resource) {
-        super(runtime, classLoader, resource);
+    ModuleAdaptor(AbstractRuntime runtime, ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
+        super(runtime, classLoader, resource, headers);
         bundle = ((BundleReference) classLoader).getBundle();
     }
 
@@ -120,6 +123,11 @@ final class ModuleAdaptor extends AbstractModule {
         } catch (BundleException ex) {
             ModuleException.launderThrowable(ex);
         }
+    }
+
+    @Override
+    public File getDataFile(String filename) {
+        return bundle.getDataFile(filename);
     }
 
     @Override

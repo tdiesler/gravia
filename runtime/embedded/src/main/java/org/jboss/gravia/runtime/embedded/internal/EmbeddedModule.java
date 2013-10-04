@@ -8,12 +8,12 @@
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
@@ -21,11 +21,12 @@
  */
 package org.jboss.gravia.runtime.embedded.internal;
 
+import java.io.File;
+import java.util.Dictionary;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.jar.Manifest;
 
 import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.ManifestBuilder;
@@ -34,7 +35,6 @@ import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleException;
-import org.jboss.gravia.runtime.embedded.osgi.BundleLifecycleHandler;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
 
@@ -55,8 +55,8 @@ final class EmbeddedModule extends AbstractModule {
     private final ReentrantLock startStopLock = new ReentrantLock();
     private final long moduleId;
 
-    EmbeddedModule(EmbeddedRuntime runtime, ClassLoader classLoader, Resource resource) {
-        super(runtime, classLoader, resource);
+    EmbeddedModule(EmbeddedRuntime runtime, ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
+        super(runtime, classLoader, resource, headers);
         this.moduleId = moduleIdGenerator.incrementAndGet();
         this.stateRef.set(State.UNINSTALLED);
     }
@@ -122,23 +122,19 @@ final class EmbeddedModule extends AbstractModule {
 
             // #5 The {@link ModuleActivator#start(ModuleContext)} method if one is specified, is called.
             try {
-                if (BundleLifecycleHandler.isBundle(this)) {
-                    BundleLifecycleHandler.start(this);
-                } else {
-                    String className = getModuleActivatorClassName();
-                    if (className != null) {
-                        ModuleActivator moduleActivator;
-                        synchronized (MODULE_ACTIVATOR_KEY) {
-                            moduleActivator = getAttachment(MODULE_ACTIVATOR_KEY);
-                            if (moduleActivator == null) {
-                                Object result = loadClass(className).newInstance();
-                                moduleActivator = (ModuleActivator) result;
-                                putAttachment(MODULE_ACTIVATOR_KEY, moduleActivator);
-                            }
+                String className = getHeaders().get(ManifestBuilder.GRAVIA_ACTIVATOR);
+                if (className != null) {
+                    ModuleActivator moduleActivator;
+                    synchronized (MODULE_ACTIVATOR_KEY) {
+                        moduleActivator = getAttachment(MODULE_ACTIVATOR_KEY);
+                        if (moduleActivator == null) {
+                            Object result = loadClass(className).newInstance();
+                            moduleActivator = (ModuleActivator) result;
+                            putAttachment(MODULE_ACTIVATOR_KEY, moduleActivator);
                         }
-                        if (moduleActivator != null) {
-                            moduleActivator.start(getModuleContext());
-                        }
+                    }
+                    if (moduleActivator != null) {
+                        moduleActivator.start(getModuleContext());
                     }
                 }
             }
@@ -183,11 +179,6 @@ final class EmbeddedModule extends AbstractModule {
         }
     }
 
-    private String getModuleActivatorClassName() {
-        Manifest manifest = getAttachment(MANIFEST_KEY);
-        return manifest != null ? manifest.getMainAttributes().getValue(ManifestBuilder.GRAVIA_ACTIVATOR) : null;
-    }
-
     @Override
     public void stop() throws ModuleException {
         assertNotUninstalled();
@@ -212,13 +203,9 @@ final class EmbeddedModule extends AbstractModule {
             // #5 The {@link ModuleActivator#stop(ModuleContext)} is called
             Throwable stopException = null;
             try {
-                if (BundleLifecycleHandler.isBundle(this)) {
-                    BundleLifecycleHandler.stop(this);
-                } else {
-                    ModuleActivator moduleActivator = getAttachment(MODULE_ACTIVATOR_KEY);
-                    if (moduleActivator != null) {
-                        moduleActivator.stop(getModuleContext());
-                    }
+                ModuleActivator moduleActivator = getAttachment(MODULE_ACTIVATOR_KEY);
+                if (moduleActivator != null) {
+                    moduleActivator.stop(getModuleContext());
                 }
             } catch (Throwable th) {
                 stopException = th;
@@ -272,6 +259,12 @@ final class EmbeddedModule extends AbstractModule {
         LOGGER.infof("Uninstalled: %s", this);
     }
 
+    @Override
+    public File getDataFile(String filename) {
+        RuntimeStorageHandler storageHandler = getStorageHandler();
+        return storageHandler.getDataFile(this, filename);
+    }
+
     private void assertNotUninstalled() {
         if (getState() == State.UNINSTALLED)
             throw new IllegalStateException("Module already uninstalled: " + this);
@@ -280,5 +273,9 @@ final class EmbeddedModule extends AbstractModule {
     @Override
     protected EmbeddedRuntime getRuntime() {
         return (EmbeddedRuntime) super.getRuntime();
+    }
+
+    private RuntimeStorageHandler getStorageHandler() {
+        return getRuntime().adapt(RuntimeStorageHandler.class);
     }
 }

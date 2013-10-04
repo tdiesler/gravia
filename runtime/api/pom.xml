@@ -44,10 +44,6 @@
 	        <artifactId>gravia-resource</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss.osgi.metadata</groupId>
-            <artifactId>jbosgi-metadata</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
         </dependency>

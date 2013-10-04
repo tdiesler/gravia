@@ -8,12 +8,12 @@
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
@@ -21,7 +21,6 @@
  */
 package org.jboss.gravia.runtime.embedded.internal;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +34,7 @@ import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.AbstractModuleContext;
+import org.jboss.gravia.runtime.spi.NotNullException;
 import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
 
 /**
@@ -56,45 +56,35 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
 
     @Override
     public void addModuleListener(ModuleListener listener) {
-        if (listener == null)
-            throw new IllegalArgumentException("Null listener");
-
+        NotNullException.assertValue(listener, "listener");
         assertNotDestroyed();
         getEventsHandler().addModuleListener(getModule(), listener);
     }
 
     @Override
     public void removeModuleListener(ModuleListener listener) {
-        if (listener == null)
-            throw new IllegalArgumentException("Null listener");
-
+        NotNullException.assertValue(listener, "listener");
         assertNotDestroyed();
         getEventsHandler().removeModuleListener(getModule(), listener);
     }
 
     @Override
     public void addServiceListener(ServiceListener listener, String filterstr) {
-        if (listener == null)
-            throw new IllegalArgumentException("Null listener");
-
+        NotNullException.assertValue(listener, "listener");
         assertNotDestroyed();
         getEventsHandler().addServiceListener(getModule(), listener, filterstr);
     }
 
     @Override
     public void addServiceListener(ServiceListener listener) {
-        if (listener == null)
-            throw new IllegalArgumentException("Null listener");
-
+        NotNullException.assertValue(listener, "listener");
         assertNotDestroyed();
         getEventsHandler().addServiceListener(getModule(), listener, null);
     }
 
     @Override
     public void removeServiceListener(ServiceListener listener) {
-        if (listener == null)
-            throw new IllegalArgumentException("Null listener");
-
+        NotNullException.assertValue(listener, "listener");
         assertNotDestroyed();
         getEventsHandler().removeServiceListener(getModule(), listener);
     }
@@ -102,33 +92,24 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     @SuppressWarnings("unchecked")
     public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service, Dictionary<String, ?> properties) {
-        if (clazz == null)
-            throw new IllegalArgumentException("Null clazz");
-        if (service == null)
-            throw new IllegalArgumentException("Null service");
-
+        NotNullException.assertValue(clazz, "clazz");
+        NotNullException.assertValue(service, "service");
         assertNotDestroyed();
         return getServicesHandler().registerService(this, new String[]{ clazz.getName() }, service, properties);
     }
 
     @Override
     public ServiceRegistration<?> registerService(String className, Object service, Dictionary<String, ?> properties) {
-        if (className == null)
-            throw new IllegalArgumentException("Null className");
-        if (service == null)
-            throw new IllegalArgumentException("Null service");
-
+        NotNullException.assertValue(className, "className");
+        NotNullException.assertValue(service, "service");
         assertNotDestroyed();
         return getServicesHandler().registerService(this, new String[]{ className }, service, properties);
     }
 
     @Override
     public ServiceRegistration<?> registerService(String[] classNames, Object service, Dictionary<String, ?> properties) {
-        if (classNames == null)
-            throw new IllegalArgumentException("Null classNames");
-        if (service == null)
-            throw new IllegalArgumentException("Null service");
-
+        NotNullException.assertValue(classNames, "classNames");
+        NotNullException.assertValue(service, "service");
         assertNotDestroyed();
         return getServicesHandler().registerService(this, classNames, service, properties);
     }
@@ -136,8 +117,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     @SuppressWarnings("unchecked")
     public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
-        if (clazz == null)
-            throw new IllegalArgumentException("Null clazz");
+        NotNullException.assertValue(clazz, "clazz");
 
         assertNotDestroyed();
         return (ServiceReference<S>) getServicesHandler().getServiceReference(this, clazz.getName());
@@ -146,8 +126,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
 
     @Override
     public ServiceReference<?> getServiceReference(String className) {
-        if (className == null)
-            throw new IllegalArgumentException("Null className");
+        NotNullException.assertValue(className, "className");
 
         assertNotDestroyed();
         return getServicesHandler().getServiceReference(this, className);
@@ -155,8 +134,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
 
     @Override
     public ServiceReference<?>[] getServiceReferences(String className, String filter) {
-        if (className == null)
-            throw new IllegalArgumentException("Null className");
+        NotNullException.assertValue(className, "className");
 
         assertNotDestroyed();
         List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, true);
@@ -173,8 +151,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     @SuppressWarnings("unchecked")
     public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter) {
-        if (clazz == null)
-            throw new IllegalArgumentException("Null clazz");
+        NotNullException.assertValue(clazz, "clazz");
 
         assertNotDestroyed();
         String className = clazz != null ? clazz.getName() : null;
@@ -189,8 +166,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
 
     @Override
     public ServiceReference<?>[] getAllServiceReferences(String className, String filter) {
-        if (className == null)
-            throw new IllegalArgumentException("Null className");
+        NotNullException.assertValue(className, "className");
 
         assertNotDestroyed();
         List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, false);
@@ -206,8 +182,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
 
     @Override
     public boolean ungetService(ServiceReference<?> reference) {
-        if (reference == null)
-            throw new IllegalArgumentException("Null reference");
+        NotNullException.assertValue(reference, "reference");
 
         assertNotDestroyed();
         ServiceState<?> serviceState = ServiceState.assertServiceState(reference);
@@ -217,18 +192,11 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     @SuppressWarnings("unchecked")
     public <S> S getService(ServiceReference<S> reference) {
-        if (reference == null)
-            throw new IllegalArgumentException("Null reference");
+        NotNullException.assertValue(reference, "reference");
 
         assertNotDestroyed();
         ServiceState<S> serviceState = ServiceState.assertServiceState(reference);
         return getServicesHandler().getService(this, serviceState);
-    }
-
-    @Override
-    public File getDataFile(String filename) {
-        RuntimeStorageHandler storageHandler = getStorageHandler();
-        return storageHandler.getDataFile(getModule(), filename);
     }
 
     private RuntimeServicesHandler getServicesHandler() {
@@ -239,10 +207,5 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     private RuntimeEventsHandler getEventsHandler() {
         Runtime runtime = getModule().adapt(Runtime.class);
         return runtime.adapt(RuntimeEventsHandler.class);
-    }
-
-    private RuntimeStorageHandler getStorageHandler() {
-        Runtime runtime = getModule().adapt(Runtime.class);
-        return runtime.adapt(RuntimeStorageHandler.class);
     }
 }

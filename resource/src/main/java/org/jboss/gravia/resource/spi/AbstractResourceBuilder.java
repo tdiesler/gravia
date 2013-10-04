@@ -5,16 +5,16 @@
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -32,6 +32,7 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
+import org.jboss.gravia.resource.spi.AttributeValueHandler.AttributeValue;
 
 /**
  * An abstract {@link Resource} builder.
@@ -131,6 +132,55 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
         resource.validate();
         resource.setMutable(false);
         return resource;
+    }
+
+    protected String parseParameterizedValue(String line, Map<String, Object> atts, Map<String, String> dirs) {
+        String mainvalue = null;
+        for (String part : ElementParser.parseDelimitedString(line, ';', true)) {
+            if (part.indexOf(":=") > 0) {
+                int index = part.indexOf(":=");
+                String key = part.substring(0, index);
+                String value = unquote(part.substring(index + 2));
+                dirs.put(key.trim(), value);
+            } else if (part.indexOf('=') > 0) {
+                int index = part.indexOf('=');
+                String keystr = part.substring(0, index);
+                Object value = getAttributeValue(keystr, part.substring(index + 1));
+                atts.put(getAttributeKey(keystr), value);
+            } else if (mainvalue == null) {
+                mainvalue = part;
+            } else {
+                throw new IllegalArgumentException("Cannot parse: " + line);
+            }
+        }
+        return mainvalue;
+    }
+
+    private String getAttributeKey(String keystr) {
+        String[] parts = keystr.split(":");
+        return parts[0].trim();
+    }
+
+    private Object getAttributeValue(String key, String valstr) {
+        String[] parts = key.split(":");
+        if (parts.length == 1) {
+            return unquote(valstr);
+        }
+        String typespec = parts[1].trim();
+        if (typespec.startsWith("List")) {
+            parts = typespec.split("[<>]");
+            typespec = "List<" + (parts.length > 1 ? parts[1].trim() : "String") + ">";
+        }
+        AttributeValue attval = AttributeValueHandler.readAttributeValue(typespec, unquote(valstr));
+        return attval.getValue();
+    }
+
+    private String unquote(String value) {
+        value = value.trim();
+        if (value.startsWith("\"") && value.endsWith("\"") || value.startsWith("'") && value.endsWith("'")) {
+            value = value.substring(1, value.length() - 1);
+        }
+        return value;
     }
 
     private Map<String, Object> mutableAttributes(Map<String, Object> atts) {

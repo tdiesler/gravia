@@ -21,9 +21,8 @@
  */
 package org.jboss.gravia.runtime;
 
+import java.util.Dictionary;
 import java.util.Set;
-import java.util.jar.Manifest;
-
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 
@@ -35,6 +34,8 @@ import org.jboss.gravia.resource.ResourceIdentity;
  */
 public interface Runtime extends PropertiesProvider {
 
+    void init();
+
     <A> A adapt(Class<A> type);
 
     Module getModule(long id);
@@ -42,19 +43,19 @@ public interface Runtime extends PropertiesProvider {
     Set<Module> getModules();
 
     /**
-     * Installs a module with the given ClassLoader and Manifest.
+     * Installs a module with the given ClassLoader and headers dictionary.
      * <p>
      * The module's {@link ResourceIdentity} and possible other
-     * capabilities/requirements are generated from the manifest.
+     * capabilities/requirements are generated from the headers.
      * <p>
-     * @see Runtime#installModule(ClassLoader, Resource, Manifest)
+     * @see Runtime#installModule(ClassLoader, Resource, Dictionary)
      */
-    Module installModule(ClassLoader classloader, Manifest manifest);
+    Module installModule(ClassLoader classLoader, Dictionary<String, String> headers);
 
     /**
      * Installs a module with the given ClassLoader.
      *
-     * The Resource as well as the Manifest parameter are optional, but
+     * The Resource as well as the Dictionary parameter are optional, but
      * one of them must be given to determine the modules's identity.
      * <p>
      * An explicit {@link Resource} parameter takes priority.
@@ -68,5 +69,5 @@ public interface Runtime extends PropertiesProvider {
      * <li>The {@code Module} object for the newly or previously installed module is returned.
      * </ol>
      */
-    Module installModule(ClassLoader classloader, Resource resource, Manifest manifest);
+    Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers);
 }

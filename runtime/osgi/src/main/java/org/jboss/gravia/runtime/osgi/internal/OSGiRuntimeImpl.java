@@ -21,11 +21,7 @@
  */
 package org.jboss.gravia.runtime.osgi.internal;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
-
+import java.util.Dictionary;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
@@ -49,8 +45,13 @@ public final class OSGiRuntimeImpl extends AbstractRuntime implements OSGiRuntim
     }
 
     @Override
-    protected AbstractModule createModule(ClassLoader classLoader, Resource resource) {
-        return new ModuleAdaptor(this, classLoader, resource);
+    public void init() {
+        // do nothing
+    }
+
+    @Override
+    protected AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
+        return new ModuleAdaptor(this, classLoader, resource, headers);
     }
 
     @Override
@@ -69,15 +70,7 @@ public final class OSGiRuntimeImpl extends AbstractRuntime implements OSGiRuntim
             if (bundle.getBundleId() == 0)
                 throw new ModuleException("Cannot install system bundle: " + bundle);
 
-            Manifest manifest;
-            try {
-                URL entry = bundle.getEntry(JarFile.MANIFEST_NAME);
-                manifest = new Manifest(entry.openStream());
-            } catch (IOException ex) {
-                throw new ModuleException("Cannot read manifest from: " + bundle, ex);
-            }
-
-            module = installModule(classLoader, manifest);
+            module = installModule(classLoader, bundle.getHeaders());
         }
         return module;
     }

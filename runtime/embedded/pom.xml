@@ -151,13 +151,19 @@
                         <configuration>
                             <target>
                                 <property name="project.version" value="${project.version}" />
+                                <property name="version.scr" value="${version.apache.felix.scr}" />
+                                <property name="version.scr.ant" value="${version.apache.felix.scr.generator}" />
+                                <property name="version.ds.annotations" value="${version.apache.felix.scr.ds.annotations}" />
+                                <property name="version.osgi" value="${version.osgi}" />
                                 <ant antfile="scripts/antrun-scr-plugin.xml" target="generate" />
                             </target>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-            <!--  
+            <!--
+             All processing of test components 
+             https://issues.apache.org/jira/browse/FELIX-4271 
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>

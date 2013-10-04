@@ -22,6 +22,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
@@ -34,13 +35,12 @@ import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.jboss.test.gravia.runtime.osgi.sub.SimpleActivator;
+import org.jboss.test.gravia.runtime.osgi.sub.a.SimpleActivator;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 
 /**
  * Test simple module lifecycle
@@ -50,9 +50,6 @@ import org.osgi.framework.BundleContext;
  */
 @RunWith(Arquillian.class)
 public class ModuleLifecycleTestCase {
-
-    @ArquillianResource
-    BundleContext syscontext;
 
     @Deployment
     @StartLevelAware(autostart = true)
@@ -67,6 +64,7 @@ public class ModuleLifecycleTestCase {
                 builder.addBundleManifestVersion(2);
                 builder.addBundleActivator(SimpleActivator.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntime.class, Resource.class);
+                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, archive.getName() + ";version=0.0.0");
                 return builder.openStream();
             }
         });
@@ -74,7 +72,7 @@ public class ModuleLifecycleTestCase {
     }
 
     @Test
-    public void testBundle(@ArquillianResource Bundle bundle) throws Exception {
+    public void testModuleActivator(@ArquillianResource Bundle bundle) throws Exception {
 
         Module module = RuntimeLocator.getRuntime().getModule(bundle.getBundleId());
         Assert.assertEquals(bundle.getBundleId(), module.getModuleId());

@@ -22,6 +22,7 @@
 package org.jboss.gravia.runtime.spi;
 
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -29,10 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.jar.Manifest;
-
-import org.jboss.gravia.resource.DefaultResourceBuilder;
-import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
@@ -40,9 +37,6 @@ import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.PropertiesProvider;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.logging.Logger;
-import org.jboss.osgi.metadata.OSGiManifestBuilder;
-import org.jboss.osgi.metadata.OSGiMetaData;
-import org.jboss.osgi.metadata.OSGiMetaDataBuilder;
 
 /**
  * [TODO]
@@ -63,7 +57,7 @@ public abstract class AbstractRuntime implements Runtime {
         properties = propertiesProvider;
     }
 
-    protected abstract AbstractModule createModule(ClassLoader classLoader, Resource resource);
+    protected abstract AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers);
 
     @Override
     public final Object getProperty(String key) {
@@ -97,41 +91,14 @@ public abstract class AbstractRuntime implements Runtime {
     }
 
     @Override
-    public final Module installModule(ClassLoader classLoader, Manifest manifest) {
-        return installModule(classLoader, null, manifest);
+    public final Module installModule(ClassLoader classLoader, Dictionary<String, String> headers) {
+        return installModule(classLoader, null, headers);
     }
 
     @Override
-    public final Module installModule(ClassLoader classLoader, Resource resource, Manifest manifest) {
-        assert classLoader != null : "Null classLoader";
+    public final Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
 
-        if (resource == null && manifest == null)
-            throw new IllegalArgumentException("Cannot install module without identity: " + classLoader);
-
-        // Construct the module's identity from the manifest
-        if (resource == null && manifest != null) {
-            if (OSGiManifestBuilder.isValidBundleManifest(manifest)) {
-                OSGiMetaData metaData = OSGiMetaDataBuilder.load(manifest);
-                DefaultResourceBuilder builder = new DefaultResourceBuilder();
-                builder.addIdentityCapability(metaData.getBundleSymbolicName(), metaData.getBundleVersion().toString());
-                resource = builder.getResource();
-            } else {
-                resource = new ManifestResourceBuilder().load(manifest).getResource();
-            }
-        }
-
-        Module module = installModuleInternal(classLoader, resource);
-        if (manifest != null) {
-            module.putAttachment(Module.MANIFEST_KEY, manifest);
-        }
-        return module;
-    }
-
-    private Module installModuleInternal(ClassLoader classLoader, Resource resource) {
-        assert classLoader != null : "Null classLoader";
-        assert resource != null : "Null resource";
-
-        AbstractModule module = createModule(classLoader, resource);
+        AbstractModule module = createModule(classLoader, resource, headers);
         modules.put(module.getModuleId(), module);
 
         // #1 The module's state is set to {@code INSTALLED}.

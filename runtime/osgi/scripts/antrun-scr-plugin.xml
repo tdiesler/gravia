@@ -46,7 +46,7 @@
     <taskdef resource="scrtask.properties" classpathref="classpath"/>
   	
   	<mkdir dir="${output.dir}"/>
-  	<scr srcdir="${source.dir}" destdir="${output.dir}" classpathref="classpath" strictMode="true" specVersion="1.2">
+  	<scr srcdir="${source.dir}/" destdir="${output.dir}" classpathref="classpath" strictMode="true" specVersion="1.2">
   		<include name="**/sub/**"/>
   	</scr>
 
