@@ -24,22 +24,29 @@ package org.jboss.test.gravia.runtime.sub;
 import java.io.IOException;
 import java.io.Writer;
 
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleException;
 
 @SuppressWarnings("serial")
 @WebServlet(name = "SimpleServlet", urlPatterns = { "/servlet" })
 public class SimpleServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         String msg = req.getParameter("input");
         Writer writer = resp.getWriter();
         Module module = ApplicationActivator.getWebappModule(getServletContext());
+        try {
+            module.start();
+        } catch (ModuleException ex) {
+            throw new ServletException(ex);
+        }
         writer.write((msg != null ? msg : "No input") + " from " + module);
     }
 }

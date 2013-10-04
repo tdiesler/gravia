@@ -40,7 +40,11 @@ public interface Runtime extends PropertiesProvider {
 
     Module getModule(long id);
 
+    Module getModule(ClassLoader classLoader);
+
     Set<Module> getModules();
+
+    Set<Module> getModules(ClassLoader classLoader);
 
     /**
      * Installs a module with the given ClassLoader and headers dictionary.

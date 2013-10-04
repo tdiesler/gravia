@@ -48,6 +48,17 @@ public interface Module extends Attachable {
         UNINSTALLED
     }
 
+    /**
+     * Addapt this module to another type.
+     * <p/>
+     * All modules support
+     * <ul>
+     * <li>{@link Runtime}</li>
+     * <li>{@link ClassLoader}</li>
+     * <li>{@link Resource}</li>
+     * </ul>
+     * @return Null if the module cannot be adapted to the requested type
+     */
     <A> A adapt(Class<A> type);
 
     ResourceIdentity getIdentity();

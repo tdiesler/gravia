@@ -23,6 +23,10 @@ package org.jboss.test.gravia.runtime;
 
 import java.util.concurrent.TimeUnit;
 
+import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.test.gravia.runtime.sub.ApplicationActivator;
@@ -37,21 +41,49 @@ import org.junit.Test;
  * @author thomas.diesler@jboss.com
  * @since 01-Oct-2013
  */
-public abstract class BasicPortableTest {
+public abstract class ModuleLifecycleTest {
 
     public static WebArchive deployment() {
         WebArchive archive = ShrinkWrap.create(WebArchive.class, "simple.war");
         archive.addClasses(HttpRequest.class, ApplicationActivator.class, SimpleServlet.class);
+        archive.addClasses(ModuleLifecycleTest.class);
         return archive;
     }
 
     @Test
-    public void testWarDeployment() throws Exception {
+    public void testServletAccess() throws Exception {
         String result = performCall("/simple/servlet?input=Hello");
         Assert.assertEquals("Hello from Module[simple.war:1.0.0]", result);
     }
 
-    private String performCall(String path) throws Exception {
+    @Test
+    public void testModuleLifecycle() throws Exception {
+
+        Module modA = RuntimeLocator.getRuntime().getModule(getClass().getClassLoader());
+        Assert.assertEquals(Module.State.ACTIVE, modA.getState());
+
+        ModuleContext context = modA.getModuleContext();
+        ServiceRegistration<String> sreg = context.registerService(String.class, new String("Hello"), null);
+        Assert.assertNotNull("Null sreg", sreg);
+
+        String service = context.getService(sreg.getReference());
+        Assert.assertEquals("Hello", service);
+
+        modA.stop();
+        Assert.assertEquals(Module.State.RESOLVED, modA.getState());
+
+        modA.uninstall();
+        Assert.assertEquals(Module.State.UNINSTALLED, modA.getState());
+
+        try {
+            modA.start();
+            Assert.fail("IllegalStateException expected");
+        } catch (IllegalStateException ex) {
+            // expected
+        }
+    }
+
+    protected String performCall(String path) throws Exception {
         String urlspec = "http://localhost:8080" + path;
         return HttpRequest.get(urlspec, 10, TimeUnit.SECONDS);
     }

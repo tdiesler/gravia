@@ -19,18 +19,26 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.gravia.runtime.tomcat;
+package org.jboss.test.gravia.runtime.osgi;
 
 import java.io.InputStream;
 
+import javax.servlet.Servlet;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.ModuleActivator;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.test.gravia.runtime.BasicPortableTest;
+import org.jboss.test.gravia.runtime.ModuleLifecycleTest;
 import org.junit.runner.RunWith;
+import org.osgi.framework.BundleActivator;
 
 /**
  * Test webapp deployemnts
@@ -38,18 +46,25 @@ import org.junit.runner.RunWith;
  * @author thomas.diesler@jboss.com
  * @since 01-Oct-2013
  */
-@RunAsClient
 @RunWith(Arquillian.class)
-public class BasicPortableTestCase extends BasicPortableTest {
+public class OSGiModuleLifecycleTestCase extends ModuleLifecycleTest {
 
     @Deployment
+    @StartLevelAware(autostart = true)
     public static WebArchive deployment() {
-        final WebArchive archive = BasicPortableTest.deployment();
+        final WebArchive archive = ModuleLifecycleTest.deployment();
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
-                ManifestBuilder builder = new ManifestBuilder();
-                builder.addIdentityCapability(archive.getName(), "1.0.0");
+                OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+                builder.addBundleSymbolicName(archive.getName());
+                builder.addBundleVersion("1.0.0");
+                builder.addBundleManifestVersion(2);
+                builder.addImportPackages(BundleActivator.class, ModuleActivator.class, Resource.class);
+                builder.addImportPackages(Servlet.class, HttpServlet.class, WebServlet.class);
+                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, archive.getName() + ";version=1.0.0");
+                builder.addManifestHeader("Web-ContextPath", "/simple");
+                builder.addBundleClasspath("WEB-INF/classes");
                 return builder.openStream();
             }
         });

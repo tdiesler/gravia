@@ -21,15 +21,16 @@
  */
 package org.jboss.gravia.runtime.spi;
 
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
@@ -85,9 +86,27 @@ public abstract class AbstractRuntime implements Runtime {
     }
 
     @Override
+    public Module getModule(ClassLoader classLoader) {
+        Set<Module> modules = getModules(classLoader);
+        return modules.size() == 1 ? modules.iterator().next() : null;
+    }
+
+    @Override
     public Set<Module> getModules() {
-        HashSet<Module> snapshot = new HashSet<Module>(modules.values());
-        return Collections.unmodifiableSet(snapshot);
+        return new HashSet<Module>(modules.values());
+    }
+
+    @Override
+    public Set<Module> getModules(ClassLoader classLoader) {
+        Set<Module> result = getModules();
+        Iterator<Module> iterator = result.iterator();
+        while(iterator.hasNext()) {
+            Module module = iterator.next();
+            if (!module.adapt(ClassLoader.class).equals(classLoader)) {
+                iterator.remove();
+            }
+        }
+        return result;
     }
 
     @Override

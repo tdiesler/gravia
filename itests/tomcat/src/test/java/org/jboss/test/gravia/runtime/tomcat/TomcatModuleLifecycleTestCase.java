@@ -19,17 +19,16 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.gravia.runtime.wildfly;
+package org.jboss.test.gravia.runtime.tomcat;
 
 import java.io.InputStream;
 
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.test.gravia.runtime.BasicPortableTest;
+import org.jboss.test.gravia.runtime.ModuleLifecycleTest;
 import org.junit.runner.RunWith;
 
 /**
@@ -38,19 +37,17 @@ import org.junit.runner.RunWith;
  * @author thomas.diesler@jboss.com
  * @since 01-Oct-2013
  */
-@RunAsClient
 @RunWith(Arquillian.class)
-public class BasicPortableTestCase extends BasicPortableTest {
+public class TomcatModuleLifecycleTestCase extends ModuleLifecycleTest {
 
     @Deployment
     public static WebArchive deployment() {
-        final WebArchive archive = BasicPortableTest.deployment();
+        final WebArchive archive = ModuleLifecycleTest.deployment();
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
                 ManifestBuilder builder = new ManifestBuilder();
                 builder.addIdentityCapability(archive.getName(), "1.0.0");
-                builder.addManifestHeader("Dependencies", "org.jboss.gravia");
                 return builder.openStream();
             }
         });
