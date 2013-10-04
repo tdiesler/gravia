@@ -32,6 +32,7 @@ import javax.servlet.ServletContextListener;
 
 import org.jboss.gravia.runtime.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 
@@ -56,12 +57,18 @@ public class ApplicationActivator implements ServletContextListener {
     static Module getWebappModule(ServletContext servletContext) {
         Module module = (Module) servletContext.getAttribute(Module.class.getName());
         if (module == null) {
-            Runtime runtime = RuntimeLocator.locateRuntime(null);
-            ClassLoader classLoader = ApplicationActivator.class.getClassLoader();
-            Manifest manifest = getWebappManifest(servletContext);
-            ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(manifest);
-            module = runtime.installModule(classLoader, headersProvider.getHeaders());
-            servletContext.setAttribute(Module.class.getName(), module);
+            try {
+                Runtime runtime = RuntimeLocator.locateRuntime(null);
+                ClassLoader classLoader = ApplicationActivator.class.getClassLoader();
+                Manifest manifest = getWebappManifest(servletContext);
+                ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(manifest);
+                module = runtime.installModule(classLoader, headersProvider.getHeaders());
+                servletContext.setAttribute(Module.class.getName(), module);
+            } catch (RuntimeException rte) {
+                throw rte;
+            } catch (ModuleException ex) {
+                throw new IllegalStateException(ex);
+            }
         }
         return module;
     }

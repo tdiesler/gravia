@@ -145,7 +145,7 @@ public class ConfigurationAdminTestCase  {
                 builder.addExportPackages(ServiceD.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addImportPackages(ServiceD1.class);
-                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_D1 + ";version=1.0.0");
+                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_D + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.d.ServiceD.xml");
                 return builder.openStream();
             }

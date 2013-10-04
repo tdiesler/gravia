@@ -32,9 +32,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
 import org.jboss.gravia.runtime.ModuleEvent;
+import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.PropertiesProvider;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.logging.Logger;
@@ -81,23 +83,32 @@ public abstract class AbstractRuntime implements Runtime {
     }
 
     @Override
-    public Module getModule(long id) {
+    public final Module getModule(long id) {
         return modules.get(id);
     }
 
     @Override
-    public Module getModule(ClassLoader classLoader) {
+    public final Module getModule(ResourceIdentity identity) {
+        for (Module module : modules.values()) {
+            if (module.getIdentity().equals(identity))
+                return module;
+        }
+        return null;
+    }
+
+    @Override
+    public final Module getModule(ClassLoader classLoader) {
         Set<Module> modules = getModules(classLoader);
         return modules.size() == 1 ? modules.iterator().next() : null;
     }
 
     @Override
-    public Set<Module> getModules() {
+    public final Set<Module> getModules() {
         return new HashSet<Module>(modules.values());
     }
 
     @Override
-    public Set<Module> getModules(ClassLoader classLoader) {
+    public final Set<Module> getModules(ClassLoader classLoader) {
         Set<Module> result = getModules();
         Iterator<Module> iterator = result.iterator();
         while(iterator.hasNext()) {
@@ -110,14 +121,17 @@ public abstract class AbstractRuntime implements Runtime {
     }
 
     @Override
-    public final Module installModule(ClassLoader classLoader, Dictionary<String, String> headers) {
+    public final Module installModule(ClassLoader classLoader, Dictionary<String, String> headers) throws ModuleException {
         return installModule(classLoader, null, headers);
     }
 
     @Override
-    public final Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
+    public final Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) throws ModuleException {
 
         AbstractModule module = createModule(classLoader, resource, headers);
+        if (getModule(module.getIdentity()) != null) {
+            throw new ModuleException("ModuleAlready installed: " + module);
+        }
         modules.put(module.getModuleId(), module);
 
         // #1 The module's state is set to {@code INSTALLED}.

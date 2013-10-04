@@ -40,6 +40,8 @@ public interface Runtime extends PropertiesProvider {
 
     Module getModule(long id);
 
+    Module getModule(ResourceIdentity identity);
+
     Module getModule(ClassLoader classLoader);
 
     Set<Module> getModules();
@@ -54,7 +56,7 @@ public interface Runtime extends PropertiesProvider {
      * <p>
      * @see Runtime#installModule(ClassLoader, Resource, Dictionary)
      */
-    Module installModule(ClassLoader classLoader, Dictionary<String, String> headers);
+    Module installModule(ClassLoader classLoader, Dictionary<String, String> headers) throws ModuleException;
 
     /**
      * Installs a module with the given ClassLoader.
@@ -73,5 +75,5 @@ public interface Runtime extends PropertiesProvider {
      * <li>The {@code Module} object for the newly or previously installed module is returned.
      * </ol>
      */
-    Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers);
+    Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) throws ModuleException;
 }

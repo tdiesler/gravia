@@ -36,15 +36,18 @@
         <resource-root path="gravia-resource-@project.version@.jar"/>
         <resource-root path="gravia-runtime-api-@project.version@.jar"/>
         <resource-root path="gravia-runtime-embedded-@project.version@.jar"/>
+        <resource-root path="org.apache.felix.configadmin-@version.apache.felix.configadmin@.jar"/>
+        <resource-root path="org.apache.felix.log-@version.apache.felix.log@.jar"/>
+        <resource-root path="org.apache.felix.metatype-@version.apache.felix.metatype@.jar"/>
+        <resource-root path="org.apache.felix.scr-@version.apache.felix.scr@.jar"/>
     </resources>
 
     <exports>
-        <exclude path="org/jboss/gravia/provision/spi"/>
-        <exclude path="org/jboss/gravia/resource/spi"/>
-        <exclude path="org/jboss/gravia/resolver/spi"/>
-        <exclude path="org/jboss/gravia/repository/spi"/>
-        <exclude path="org/jboss/gravia/runtime/embedded/osgi"/>
-        <exclude path="org/jboss/gravia/runtime/embedded/internal"/>
+        <include path="org/jboss/gravia/provision"/>
+        <include path="org/jboss/gravia/resource"/>
+        <include path="org/jboss/gravia/resolver"/>
+        <include path="org/jboss/gravia/repository"/>
+        <include path="org/jboss/gravia/runtime"/>
     </exports>
     
     <dependencies>

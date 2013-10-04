@@ -59,7 +59,7 @@ public final class EmbeddedRuntime extends AbstractRuntime {
         // Install the plugin modules
         List<Module> pluginModules = new ArrayList<Module>();
         ClassLoader classLoader = getClass().getClassLoader();
-        ServiceLoader<RuntimePlugin> services = ServiceLoader.load(RuntimePlugin.class);
+        ServiceLoader<RuntimePlugin> services = ServiceLoader.load(RuntimePlugin.class, EmbeddedRuntime.class.getClassLoader());
         Iterator<RuntimePlugin> iterator = services.iterator();
         while (iterator.hasNext()) {
             RuntimePlugin plugin = iterator.next();

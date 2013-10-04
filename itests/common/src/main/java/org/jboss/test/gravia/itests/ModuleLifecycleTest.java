@@ -51,13 +51,10 @@ public abstract class ModuleLifecycleTest {
     }
 
     @Test
-    public void testServletAccess() throws Exception {
+    public void testModuleLifecycle() throws Exception {
+
         String result = performCall("/simple/servlet?input=Hello");
         Assert.assertEquals("Hello from Module[simple.war:1.0.0]", result);
-    }
-
-    @Test
-    public void testModuleLifecycle() throws Exception {
 
         Module modA = RuntimeLocator.getRuntime().getModule(getClass().getClassLoader());
         Assert.assertEquals(Module.State.ACTIVE, modA.getState());

@@ -24,6 +24,7 @@ package org.jboss.test.gravia.itests.sub;
 import java.io.IOException;
 import java.io.Writer;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -34,19 +35,25 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
 
 @SuppressWarnings("serial")
-@WebServlet(name = "SimpleServlet", urlPatterns = { "/servlet" })
+@WebServlet(name = "SimpleServlet", urlPatterns = { "/servlet" }, loadOnStartup = 1)
 public class SimpleServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        String msg = req.getParameter("input");
-        Writer writer = resp.getWriter();
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
         Module module = ApplicationActivator.getWebappModule(getServletContext());
         try {
             module.start();
         } catch (ModuleException ex) {
             throw new ServletException(ex);
         }
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        String msg = req.getParameter("input");
+        Writer writer = resp.getWriter();
+        Module module = ApplicationActivator.getWebappModule(getServletContext());
         writer.write((msg != null ? msg : "No input") + " from " + module);
     }
 }
