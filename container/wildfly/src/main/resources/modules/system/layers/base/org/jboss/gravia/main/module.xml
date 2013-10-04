@@ -48,6 +48,10 @@
         <include path="org/jboss/gravia/resolver"/>
         <include path="org/jboss/gravia/repository"/>
         <include path="org/jboss/gravia/runtime"/>
+        <include path="org/osgi/service/cm"/>
+        <include path="org/osgi/service/component"/>
+        <include path="org/osgi/service/log"/>
+        <include path="org/osgi/service/metatype"/>
     </exports>
     
     <dependencies>

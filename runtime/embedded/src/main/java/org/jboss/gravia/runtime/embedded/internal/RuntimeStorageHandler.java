@@ -47,7 +47,8 @@ final class RuntimeStorageHandler {
         String dirName = (String) props.getProperty(Constants.RUNTIME_STORAGE);
         if (dirName == null) {
             try {
-                File storageDir = new File("./gravia-store");
+                // [TODO] make this configurable for WildFly/Tomcat
+                File storageDir = new File("./target/gravia-store");
                 dirName = storageDir.getCanonicalPath();
             } catch (IOException ex) {
                 throw new IllegalStateException("Cannot create storage area", ex);
