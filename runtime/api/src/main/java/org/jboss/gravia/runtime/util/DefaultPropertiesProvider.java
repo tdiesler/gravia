@@ -21,8 +21,6 @@
  */
 package org.jboss.gravia.runtime.util;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -30,28 +28,35 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
-
 /**
- * [TODO]
+ * A properties provider that delegates to the system properties
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
+ *
+ * @ThreadSafe
  */
 public final class DefaultPropertiesProvider implements PropertiesProvider {
 
-    private final Map<String, Object> properties;
+    private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
 
     public DefaultPropertiesProvider() {
         this(System.getProperties());
     }
 
-    @SuppressWarnings("unchecked")
     public DefaultPropertiesProvider(Map<String, Object> props) {
-        properties = new ConcurrentHashMap<String, Object>(props != null ? props : Collections.EMPTY_MAP);
+        if (props != null)
+            properties.putAll(props);
     }
 
     public DefaultPropertiesProvider(Properties props) {
-        properties = new ConcurrentHashMap<String, Object>(toMap(props));
+        if (props != null) {
+            for (Entry<Object, Object> entry : props.entrySet()) {
+                String key = entry.getKey().toString();
+                Object value = entry.getValue();
+                properties.put(key, value);
+            }
+        }
     }
 
     @Override
@@ -63,17 +68,5 @@ public final class DefaultPropertiesProvider implements PropertiesProvider {
     public Object getProperty(String key, Object defaultValue) {
         Object value = properties.get(key);
         return value != null ? value : defaultValue;
-    }
-
-    private Map<String, Object> toMap(Properties props) {
-        HashMap<String, Object> result = new HashMap<String, Object>();
-        if (props != null) {
-            for (Entry<Object, Object> entry : props.entrySet()) {
-                String key = entry.getKey().toString();
-                Object value = entry.getValue();
-                result.put(key, value);
-            }
-        }
-        return result;
     }
 }

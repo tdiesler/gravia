@@ -8,12 +8,12 @@
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
@@ -22,56 +22,61 @@
 package org.jboss.gravia.runtime;
 
 /**
- * [TODO]
+ * A service exception used to indicate that a service problem occurred.
+ *
+ * <p>
+ * A {@code ServiceException} object is created by the Runtime to denote an
+ * exception condition in the service. A type code is used to identify the
+ * exception type for future extendability.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
 public class ServiceException extends RuntimeException {
-    static final long       serialVersionUID    = 3038963223712959631L;
+    static final long serialVersionUID = 3038963223712959631L;
 
     /**
      * Type of service exception.
      */
-    private final int       type;
+    private final int type;
 
     /**
      * No exception type is unspecified.
      */
-    public static final int UNSPECIFIED         = 0;
+    public static final int UNSPECIFIED = 0;
     /**
      * The service has been unregistered.
      */
-    public static final int UNREGISTERED        = 1;
+    public static final int UNREGISTERED = 1;
     /**
      * The service factory produced an invalid service object.
      */
-    public static final int FACTORY_ERROR       = 2;
+    public static final int FACTORY_ERROR = 2;
     /**
      * The service factory threw an exception.
      */
-    public static final int FACTORY_EXCEPTION   = 3;
+    public static final int FACTORY_EXCEPTION = 3;
     /**
      * The exception is a subclass of ServiceException. The subclass should be
      * examined for the type of the exception.
      */
-    public static final int SUBCLASSED          = 4;
+    public static final int SUBCLASSED = 4;
     /**
      * An error occurred invoking a remote service.
      */
-    public static final int REMOTE              = 5;
+    public static final int REMOTE = 5;
     /**
      * The service factory resulted in a recursive call to itself for the
      * requesting module.
-     * 
+     *
      * @since 1.6
      */
-    public static final int FACTORY_RECURSION   = 6;
+    public static final int FACTORY_RECURSION = 6;
 
     /**
      * Creates a {@code ServiceException} with the specified message and
      * exception cause.
-     * 
+     *
      * @param msg The associated message.
      * @param cause The cause of this exception.
      */
@@ -81,7 +86,7 @@ public class ServiceException extends RuntimeException {
 
     /**
      * Creates a {@code ServiceException} with the specified message.
-     * 
+     *
      * @param msg The message.
      */
     public ServiceException(String msg) {
@@ -91,7 +96,7 @@ public class ServiceException extends RuntimeException {
     /**
      * Creates a {@code ServiceException} with the specified message, type and
      * exception cause.
-     * 
+     *
      * @param msg The associated message.
      * @param type The type for this exception.
      * @param cause The cause of this exception.
@@ -103,7 +108,7 @@ public class ServiceException extends RuntimeException {
 
     /**
      * Creates a {@code ServiceException} with the specified message and type.
-     * 
+     *
      * @param msg The message.
      * @param type The type for this exception.
      */
@@ -115,7 +120,7 @@ public class ServiceException extends RuntimeException {
     /**
      * Returns the type for this exception or {@code UNSPECIFIED} if the type
      * was unspecified or unknown.
-     * 
+     *
      * @return The type of this exception.
      */
     public int getType() {

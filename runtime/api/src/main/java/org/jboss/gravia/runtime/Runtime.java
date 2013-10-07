@@ -28,61 +28,97 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 
 /**
- * [TODO]
+ * The Gravia runtime.
+ *
+ * <p>
+ * It is used to install and maintain the set of installed {@link Module}s.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
 public interface Runtime {
 
+    /**
+     * Initialize this runtime instance. After calling this method, this Runtime
+     * must:
+     * <ul>
+     * <li>Have event handling enabled.</li>
+     * <li>Have reified Module objects for all installed modules.</li>
+     * <li>Have registered any framework services.</li>
+     * </ul>
+     */
     void init();
 
     /**
      * Returns the value of the specified property. If the key is not found in
-     * the Framework properties, the system properties are then searched. The
+     * the Runtime properties, the system properties are then searched. The
      * method returns {@code null} if the property is not found.
-     *
-     * <p>
-     * All bundles must have permission to read properties whose names start
-     * with &quot;org.osgi.&quot;.
      *
      * @param key The name of the requested property.
      * @return The value of the requested property, or {@code null} if the
      *         property is undefined.
-     * @throws SecurityException If the caller does not have the appropriate
-     *         {@code PropertyPermission} to read the property, and the Java
-     *         Runtime Environment supports permissions.
      */
     Object getProperty(String key);
 
     /**
      * Returns the value of the specified property. If the key is not found in
-     * the Framework properties, the system properties are then searched. The
-     * method returns {@code null} if the property is not found.
-     *
-     * <p>
-     * All bundles must have permission to read properties whose names start
-     * with &quot;org.osgi.&quot;.
+     * the Runtime properties, the system properties are then searched. The
+     * method returns provided default value if the property is not found.
      *
      * @param key The name of the requested property.
-     * @return The value of the requested property, or {@code null} if the
+     * @return The value of the requested property, or the provided default value if the
      *         property is undefined.
-     * @throws SecurityException If the caller does not have the appropriate
-     *         {@code PropertyPermission} to read the property, and the Java
-     *         Runtime Environment supports permissions.
      */
     Object getProperty(String key, Object defaultValue);
 
-    <A> A adapt(Class<A> type);
-
+    /**
+     * Returns the module with the specified identifier.
+     *
+     * @param id The identifier of the module to retrieve.
+     * @return A {@code Module} object or {@code null} if the identifier does
+     *         not match any installed module.
+     */
     Module getModule(long id);
 
+    /**
+     * Returns the module with the specified resource identity.
+     *
+     * @param id The identifier of the module to retrieve.
+     * @return A {@code Module} object or {@code null} if the resource identity does
+     *         not match any installed module.
+     */
     Module getModule(ResourceIdentity identity);
 
+    /**
+     * Returns a module that is associated with the specified class loader.
+     *
+     * <p>
+     * If multiple modules are associated with the same class loader it returns
+     * the first in the natural module order (i.e. the one with the lowest module identifier)
+     *
+     * @param id The identifier of the module to retrieve.
+     * @return A {@code Module} object or {@code null} if the class loader does
+     *         not match any installed module.
+     */
     Module getModule(ClassLoader classLoader);
 
+    /**
+     * Returns a list of all installed modules.
+     * <p>
+     * This method returns a list of all modules installed in the Runtime
+     * at the time of the call to this method. However, since the
+     * Runtime is a very dynamic environment, modules can be installed or
+     * uninstalled at anytime.
+     *
+     * @return A list of {@code Module} objects.
+     */
     Set<Module> getModules();
 
+    /**
+     * Returns a list of installed modules associated with the given class loader.
+     *
+     * @return A list of {@code Module} objects.
+     */
     Set<Module> getModules(ClassLoader classLoader);
 
     /**

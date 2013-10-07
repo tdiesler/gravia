@@ -41,7 +41,7 @@ import org.jboss.gravia.runtime.Runtime;
 import org.jboss.logging.Logger;
 
 /**
- * [TODO]
+ * The abstract base implementation for a {@link Runtime}
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
@@ -51,11 +51,11 @@ public abstract class AbstractRuntime implements Runtime {
     public static Logger LOGGER = Logger.getLogger(Runtime.class.getPackage().getName());
 
     private final Map<Long, Module> modules = new ConcurrentHashMap<Long, Module>();
-    private final RuntimeEventsHandler runtimeEvents;
+    private final RuntimeEventsManager runtimeEvents;
     private final PropertiesProvider properties;
 
     protected AbstractRuntime(PropertiesProvider propertiesProvider) {
-        runtimeEvents = new RuntimeEventsHandler(createExecutorService("RuntimeEvents"));
+        runtimeEvents = new RuntimeEventsManager(createExecutorService("RuntimeEvents"));
         properties = propertiesProvider;
     }
 
@@ -73,11 +73,10 @@ public abstract class AbstractRuntime implements Runtime {
         return properties.getProperty(key, defaultValue);
     }
 
-    @Override
     @SuppressWarnings("unchecked")
     public <A> A adapt(Class<A> type) {
         A result = null;
-        if (type.isAssignableFrom(RuntimeEventsHandler.class)) {
+        if (type.isAssignableFrom(RuntimeEventsManager.class)) {
             result = (A) runtimeEvents;
         }
         return result;
@@ -100,7 +99,7 @@ public abstract class AbstractRuntime implements Runtime {
     @Override
     public final Module getModule(ClassLoader classLoader) {
         Set<Module> modules = getModules(classLoader);
-        return modules.size() == 1 ? modules.iterator().next() : null;
+        return modules.size() > 0 ? modules.iterator().next() : null;
     }
 
     @Override

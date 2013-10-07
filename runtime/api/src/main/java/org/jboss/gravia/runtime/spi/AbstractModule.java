@@ -42,7 +42,7 @@ import org.jboss.gravia.runtime.util.UnmodifiableDictionary;
 import org.jboss.logging.Logger;
 
 /**
- * [TODO]
+ * The abstract base implementaiton for all {@link Module}s.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
@@ -115,6 +115,8 @@ public abstract class AbstractModule implements Module {
     public <A> A adapt(Class<A> type) {
         A result = null;
         if (type.isAssignableFrom(Runtime.class)) {
+            result = (A) runtime;
+        } else if (type.isAssignableFrom(AbstractRuntime.class)) {
             result = (A) runtime;
         } else if (type.isAssignableFrom(ClassLoader.class)) {
             result = (A) classLoader;

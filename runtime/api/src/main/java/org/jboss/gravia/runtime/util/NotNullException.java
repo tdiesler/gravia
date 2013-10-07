@@ -22,7 +22,7 @@
 package org.jboss.gravia.runtime.util;
 
 /**
- * [TODO]
+ * NotNullException
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
@@ -33,6 +33,9 @@ public final class NotNullException {
     private NotNullException() {
     }
 
+    /**
+     * Throws an IllegalArgumentException when the given value is null.
+     */
     public static void assertValue(Object value, String name) {
         if (value == null)
             throw new IllegalArgumentException("Null " + name);

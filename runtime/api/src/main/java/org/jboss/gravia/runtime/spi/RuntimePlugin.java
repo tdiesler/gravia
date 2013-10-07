@@ -26,12 +26,17 @@ import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 
 /**
- * [TODO]
+ * A plugin for the runtime to install internal modules on runtime initiallization.
+ *
+ * @see Runtime#init()
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
 public interface RuntimePlugin  {
 
+    /**
+     * Installs the plugin provided module.
+     */
     Module installPluginModule(Runtime runtime, ClassLoader classLoader) throws ModuleException;
 }

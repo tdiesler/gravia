@@ -52,12 +52,14 @@ import org.jboss.gravia.runtime.util.RemoveOnlyCollection;
 import org.jboss.gravia.runtime.util.RemoveOnlyMap;
 
 /**
- * [TODO]
+ * A manager for runtime listerners and their associated event delivery.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
+ *
+ * @ThreadSafe
  */
-public final class RuntimeEventsHandler {
+public final class RuntimeEventsManager {
 
     private final ExecutorService executorService;
 
@@ -71,7 +73,7 @@ public final class RuntimeEventsHandler {
     /** The set of events that are logged at INFO level */
     private Set<String> infoEvents = new HashSet<String>();
 
-    RuntimeEventsHandler(ExecutorService executorService) {
+    RuntimeEventsManager(ExecutorService executorService) {
         this.executorService = executorService;
         asyncBundleEvents.add(new Integer(ModuleEvent.INSTALLED));
         asyncBundleEvents.add(new Integer(ModuleEvent.RESOLVED));

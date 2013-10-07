@@ -30,26 +30,40 @@ import org.jboss.gravia.runtime.spi.RuntimeFactory;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 
 /**
- * [TODO]
+ * Locates the single Runtime instance
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
+ *
+ * @ThreadSafe
  */
 public final class RuntimeLocator {
 
     private static AtomicReference<Runtime> runtimeReference = new AtomicReference<Runtime>();
 
+    // Hide ctor
+    private RuntimeLocator() {
+    }
+
+    /**
+     * Returns the global runtime instance or {@code null} if the runtime has not been initialized.
+     */
     public static Runtime getRuntime() {
         return runtimeReference.get();
     }
 
+    /**
+     * Sets the global runtime instance.
+     * This method is not intended to be called by client code.
+     * The runtime instance is provided by the target environment.
+     */
     public static void setRuntime(Runtime runtime) {
         runtimeReference.set(runtime);
     }
 
     @Deprecated
     public static Runtime locateRuntime(PropertiesProvider props) {
-        Runtime runtime = getRuntime();
+        Runtime runtime = runtimeReference.get();
         if (runtime == null) {
             ServiceLoader<RuntimeFactory> loader = ServiceLoader.load(RuntimeFactory.class, RuntimeLocator.class.getClassLoader());
             Iterator<RuntimeFactory> iterator = loader.iterator();
@@ -58,7 +72,7 @@ public final class RuntimeLocator {
                 DefaultPropertiesProvider propertiesProvider = new DefaultPropertiesProvider();
                 runtime = factory.createRuntime(props != null ? props : propertiesProvider);
                 runtime.init();
-                setRuntime(runtime);
+                runtimeReference.set(runtime);
             }
         }
         return runtime;

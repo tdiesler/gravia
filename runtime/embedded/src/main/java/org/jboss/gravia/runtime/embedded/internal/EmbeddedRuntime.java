@@ -37,7 +37,7 @@ import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
-import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
+import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
 import org.jboss.gravia.runtime.spi.RuntimePlugin;
 
 /**
@@ -53,7 +53,7 @@ public final class EmbeddedRuntime extends AbstractRuntime {
 
     public EmbeddedRuntime(PropertiesProvider propertiesProvider) {
         super(propertiesProvider);
-        serviceManager = new RuntimeServicesHandler(adapt(RuntimeEventsHandler.class));
+        serviceManager = new RuntimeServicesHandler(adapt(RuntimeEventsManager.class));
         storageHandler = new RuntimeStorageHandler(propertiesProvider, true);
     }
 

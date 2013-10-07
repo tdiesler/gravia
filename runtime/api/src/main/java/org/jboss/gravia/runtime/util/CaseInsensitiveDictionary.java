@@ -30,7 +30,7 @@ import java.util.Set;
 import java.util.Vector;
 
 /**
- * CaseInsensitiveDictionary.
+ * A case insensitive dictionary.
  *
  * @author Thomas.Diesler@jboss.com
  */

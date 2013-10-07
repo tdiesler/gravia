@@ -29,12 +29,12 @@ import java.util.List;
 
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleListener;
-import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.AbstractModuleContext;
-import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
+import org.jboss.gravia.runtime.spi.AbstractRuntime;
+import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
 import org.jboss.gravia.runtime.util.NotNullException;
 
 /**
@@ -200,12 +200,12 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     }
 
     private RuntimeServicesHandler getServicesHandler() {
-        Runtime runtime = getModule().adapt(Runtime.class);
+        AbstractRuntime runtime = getModule().adapt(AbstractRuntime.class);
         return runtime.adapt(RuntimeServicesHandler.class);
     }
 
-    private RuntimeEventsHandler getEventsHandler() {
-        Runtime runtime = getModule().adapt(Runtime.class);
-        return runtime.adapt(RuntimeEventsHandler.class);
+    private RuntimeEventsManager getEventsHandler() {
+        AbstractRuntime runtime = getModule().adapt(AbstractRuntime.class);
+        return runtime.adapt(RuntimeEventsManager.class);
     }
 }

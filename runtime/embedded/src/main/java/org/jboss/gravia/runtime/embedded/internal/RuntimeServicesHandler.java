@@ -40,7 +40,7 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
+import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
 import org.jboss.gravia.runtime.util.NoFilter;
 import org.osgi.framework.Bundle;
 
@@ -52,12 +52,12 @@ import org.osgi.framework.Bundle;
  */
 final class RuntimeServicesHandler {
 
-    private final RuntimeEventsHandler frameworkEvents;
+    private final RuntimeEventsManager frameworkEvents;
     private final Map<String, List<ServiceState<?>>> serviceContainer = new HashMap<String, List<ServiceState<?>>>();
     private final ThreadLocal<ModuleContext> getServiceRecursion = new ThreadLocal<ModuleContext>();
     private final AtomicLong identityGenerator = new AtomicLong();
 
-    RuntimeServicesHandler(RuntimeEventsHandler frameworkEvents) {
+    RuntimeServicesHandler(RuntimeEventsManager frameworkEvents) {
         this.frameworkEvents = frameworkEvents;
     }
 

@@ -8,12 +8,12 @@
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
@@ -42,12 +42,13 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceReference;
 
 /**
- * [TODO]
+ * An internal factory for {@link Filter} objects.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
 final class FilterFactory {
+
     /**
      * FrameworkUtil objects may not be constructed.
      */
@@ -59,22 +60,22 @@ final class FilterFactory {
      * Creates a {@code Filter} object. This {@code Filter} object may be used
      * to match a {@code ServiceReference} object or a {@code Dictionary}
      * object.
-     * 
+     *
      * <p>
      * If the filter cannot be parsed, an {@link InvalidSyntaxException} will be
      * thrown with a human readable message where the filter became unparsable.
-     * 
+     *
      * <p>
      * This method returns a Filter implementation which may not perform as well
      * as the framework implementation-specific Filter implementation returned
      * by {@link ModuleContext#createFilter(String)}.
-     * 
+     *
      * @param filter The filter string.
      * @return A {@code Filter} object encapsulating the filter string.
      * @If {@code filter} contains an invalid
      *         filter string that cannot be parsed.
      * @throws NullPointerException If {@code filter} is null.
-     * 
+     *
      * @see Filter
      */
     static Filter createFilter(String filter) {
@@ -86,7 +87,7 @@ final class FilterFactory {
      * constructor with the desired filter string. A Filter object can be called
      * numerous times to determine if the match argument matches the filter
      * string that was used to create the Filter object.
-     * 
+     *
      * <p>
      * The syntax of a filter string is the string representation of LDAP search
      * filters as defined in RFC 1960: <i>A String Representation of LDAP Search
@@ -95,11 +96,11 @@ final class FilterFactory {
      * Filters</i> (available at http://www.ietf.org/rfc/rfc2254.txt) supersedes
      * RFC 1960 but only adds extensible matching and is not applicable for this
      * API.
-     * 
+     *
      * <p>
      * The string representation of an LDAP search filter is defined by the
      * following grammar. It uses a prefix format.
-     * 
+     *
      * <pre>
      *   &lt;filter&gt; ::= '(' &lt;filtercomp&gt; ')'
      *   &lt;filtercomp&gt; ::= &lt;and&gt; | &lt;or&gt; | &lt;not&gt; | &lt;item&gt;
@@ -121,7 +122,7 @@ final class FilterFactory {
      *   &lt;starval&gt; ::= NULL | &lt;value&gt; '*' &lt;starval&gt;
      *   &lt;final&gt; ::= NULL | &lt;value&gt;
      * </pre>
-     * 
+     *
      * {@code &lt;attr&gt;} is a string representing an attribute, or key, in
      * the properties objects of the registered services. Attribute names are
      * not case sensitive; that is cn and CN both refer to the same attribute.
@@ -133,29 +134,29 @@ final class FilterFactory {
      * although both the {@code &lt;substring&gt;} and {@code &lt;present&gt;}
      * productions can produce the {@code 'attr=*'} construct, this construct is
      * used only to denote a presence filter.
-     * 
+     *
      * <p>
      * Examples of LDAP filters are:
-     * 
+     *
      * <pre>
      *   &quot;(cn=Babs Jensen)&quot;
      *   &quot;(!(cn=Tim Howes))&quot;
      *   &quot;(&amp;(&quot; + Constants.OBJECTCLASS + &quot;=Person)(|(sn=Jensen)(cn=Babs J*)))&quot;
      *   &quot;(o=univ*of*mich*)&quot;
      * </pre>
-     * 
+     *
      * <p>
      * The approximate match ({@code ~=}) is implementation specific but should
      * at least ignore case and white space differences. Optional are codes like
      * soundex or other smart "closeness" comparisons.
-     * 
+     *
      * <p>
      * Comparison of values is not straightforward. Strings are compared
      * differently than numbers and it is possible for a key to have multiple
      * values. Note that that keys in the match argument must always be strings.
      * The comparison is defined by the object type of the key's value. The
      * following rules apply for comparison:
-     * 
+     *
      * <blockquote>
      * <TABLE BORDER=0>
      * <TR>
@@ -188,17 +189,17 @@ final class FilterFactory {
      * </TR>
      * </TABLE>
      * Note: arrays of primitives are also supported. </blockquote>
-     * 
+     *
      * A filter matches a key that has multiple values if it matches at least
      * one of those values. For example,
-     * 
+     *
      * <pre>
      * Dictionary d = new Hashtable();
      * d.put(&quot;cn&quot;, new String[] {&quot;a&quot;, &quot;b&quot;, &quot;c&quot;});
      * </pre>
-     * 
+     *
      * d will match {@code (cn=a)} and also {@code (cn=b)}
-     * 
+     *
      * <p>
      * A filter component that references a key having an unrecognizable data
      * type will evaluate to {@code false} .
@@ -228,12 +229,12 @@ final class FilterFactory {
         /**
          * Constructs a {@link FilterImpl} object. This filter object may be
          * used to match a {@link ServiceReference} or a Dictionary.
-         * 
+         *
          * <p>
          * If the filter cannot be parsed, an {@link InvalidSyntaxException}
          * will be thrown with a human readable message where the filter became
          * unparsable.
-         * 
+         *
          * @param filterString the filter string.
          * @If the filter parameter contains an
          *         invalid filter string that cannot be parsed.
@@ -255,7 +256,7 @@ final class FilterFactory {
          * This {@code Filter} is executed using the keys and values of the
          * referenced service's properties. The keys are looked up in a case
          * insensitive manner.
-         * 
+         *
          * @param reference The reference to the service whose properties are
          *        used in the match.
          * @return {@code true} if the service's properties match this
@@ -271,7 +272,7 @@ final class FilterFactory {
          * This {@code Filter} is executed using the specified
          * {@code Dictionary}'s keys and values. The keys are looked up in a
          * case insensitive manner.
-         * 
+         *
          * @param dictionary The {@code Dictionary} whose key/value pairs are
          *        used in the match.
          * @return {@code true} if the {@code Dictionary}'s values match this
@@ -288,7 +289,7 @@ final class FilterFactory {
          * Filter using a {@code Dictionary}. This {@code Filter} is executed
          * using the specified {@code Dictionary}'s keys and values. The keys
          * are looked up in a normal manner respecting case.
-         * 
+         *
          * @param dictionary The {@code Dictionary} whose key/value pairs are
          *        used in the match.
          * @return {@code true} if the {@code Dictionary}'s values match this
@@ -345,7 +346,7 @@ final class FilterFactory {
          * Filter using a {@code Map}. This {@code Filter} is executed using the
          * specified {@code Map}'s keys and values. The keys are looked up in a
          * normal manner respecting case.
-         * 
+         *
          * @param map The {@code Map} whose key/value pairs are used in the
          *        match. Maps with {@code null} key or values are not supported.
          *        A {@code null} value is considered not present to the filter.
@@ -404,7 +405,7 @@ final class FilterFactory {
          * <p>
          * The filter string is normalized by removing whitespace which does not
          * affect the meaning of the filter.
-         * 
+         *
          * @return This {@code Filter}'s filter string.
          */
         @Override
@@ -421,7 +422,7 @@ final class FilterFactory {
          * <p>
          * The filter string is normalized by removing whitespace which does not
          * affect the meaning of the filter.
-         * 
+         *
          * @return This {@code Filter}'s filter string.
          */
         private StringBuffer normalize() {
@@ -519,11 +520,11 @@ final class FilterFactory {
 
         /**
          * Compares this {@code Filter} to another {@code Filter}.
-         * 
+         *
          * <p>
          * This implementation returns the result of calling
          * {@code this.toString().equals(obj.toString()}.
-         * 
+         *
          * @param obj The object to compare against this {@code Filter}.
          * @return If the other object is a {@code Filter} object, then returns
          *         the result of calling
@@ -545,11 +546,11 @@ final class FilterFactory {
 
         /**
          * Returns the hashCode for this {@code Filter}.
-         * 
+         *
          * <p>
          * This implementation returns the result of calling
          * {@code this.toString().hashCode()}.
-         * 
+         *
          * @return The hashCode of this {@code Filter}.
          */
         @Override
@@ -559,7 +560,7 @@ final class FilterFactory {
 
         /**
          * Encode the value string such that '(', '*', ')' and '\' are escaped.
-         * 
+         *
          * @param value unencoded value string.
          * @return encoded value string.
          */
@@ -1107,10 +1108,10 @@ final class FilterFactory {
 
         /**
          * Map a string for an APPROX (~=) comparison.
-         * 
+         *
          * This implementation removes white spaces. This is the minimum
          * implementation allowed by the OSGi spec.
-         * 
+         *
          * @param input Input string.
          * @return String ready for APPROX comparison.
          */
@@ -1459,7 +1460,7 @@ final class FilterFactory {
 
         /**
          * Create a case insensitive map from the specified dictionary.
-         * 
+         *
          * @param dictionary
          * @throws IllegalArgumentException If {@code dictionary} contains case
          *         variants of the same key name.

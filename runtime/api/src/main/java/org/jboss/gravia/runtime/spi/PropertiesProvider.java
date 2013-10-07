@@ -22,14 +22,34 @@
 package org.jboss.gravia.runtime.spi;
 
 /**
- * [TODO]
+ * A provider for Runtime properties.
+ *
+ * @see RuntimeFactory#createRuntime(PropertiesProvider)
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
 public interface PropertiesProvider {
 
+    /**
+     * Returns the value of the specified property. If the key is not found in
+     * the Runtime properties, the system properties are then searched. The
+     * method returns {@code null} if the property is not found.
+     *
+     * @param key The name of the requested property.
+     * @return The value of the requested property, or {@code null} if the
+     *         property is undefined.
+     */
     Object getProperty(String key);
 
+    /**
+     * Returns the value of the specified property. If the key is not found in
+     * the Runtime properties, the system properties are then searched. The
+     * method returns provided default value if the property is not found.
+     *
+     * @param key The name of the requested property.
+     * @return The value of the requested property, or the provided default value if the
+     *         property is undefined.
+     */
     Object getProperty(String key, Object defaultValue);
 }

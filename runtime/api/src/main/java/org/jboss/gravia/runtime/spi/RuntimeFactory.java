@@ -25,7 +25,10 @@ import org.jboss.gravia.runtime.Runtime;
 
 
 /**
- * [TODO]
+ * A factory for the Runtime.
+ *
+ * <p>
+ * An implementation is provided for each supported target container.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013

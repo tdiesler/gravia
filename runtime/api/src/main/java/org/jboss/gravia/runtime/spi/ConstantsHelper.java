@@ -26,12 +26,12 @@ import org.jboss.gravia.runtime.ServiceEvent;
 
 
 /**
- * String representation for common constants
+ * An internal string representation for common constants
  *
  * @author thomas.diesler@jboss.com
  * @since 04-Mar-2009
  */
-public final class ConstantsHelper {
+final class ConstantsHelper {
 
     // hide ctor
     private ConstantsHelper() {

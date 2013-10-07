@@ -28,7 +28,7 @@ import org.jboss.gravia.runtime.Filter;
 import org.jboss.gravia.runtime.ServiceReference;
 
 /**
- * [TODO]
+ * A dummy filter that matches everything.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013

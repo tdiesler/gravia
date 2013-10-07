@@ -36,7 +36,8 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.spi.AbstractModule;
-import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
+import org.jboss.gravia.runtime.spi.AbstractRuntime;
+import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
 
 /**
  * [TODO]
@@ -61,7 +62,17 @@ final class EmbeddedModule extends AbstractModule {
         this.stateRef.set(State.UNINSTALLED);
     }
 
-    // Module API
+    @Override
+    @SuppressWarnings("unchecked")
+    public <A> A adapt(Class<A> type) {
+        A result = super.adapt(type);
+        if (result == null) {
+            if (type.isAssignableFrom(EmbeddedRuntime.class)) {
+                result = (A) getRuntime();
+            }
+        }
+        return result;
+    }
 
     @Override
     public long getModuleId() {
@@ -114,7 +125,7 @@ final class EmbeddedModule extends AbstractModule {
             setState(State.STARTING);
 
             // #4 A module event of type {@link ModuleEvent#STARTING} is fired.
-            RuntimeEventsHandler eventHandler = getRuntime().adapt(RuntimeEventsHandler.class);
+            RuntimeEventsManager eventHandler = getRuntime().adapt(RuntimeEventsManager.class);
             eventHandler.fireModuleEvent(this, ModuleEvent.STARTING);
 
             // Create the {@link ModuleContext}
@@ -197,7 +208,7 @@ final class EmbeddedModule extends AbstractModule {
             setState(State.STOPPING);
 
             // #4 A module event of type {@link ModuleEvent#STOPPING} is fired.
-            RuntimeEventsHandler eventHandler = getRuntime().adapt(RuntimeEventsHandler.class);
+            RuntimeEventsManager eventHandler = getRuntime().adapt(RuntimeEventsManager.class);
             eventHandler.fireModuleEvent(this, ModuleEvent.STOPPING);
 
             // #5 The {@link ModuleActivator#stop(ModuleContext)} is called
@@ -251,7 +262,7 @@ final class EmbeddedModule extends AbstractModule {
         setState(State.UNINSTALLED);
 
         // #3 A module event of type {@link ModuleEvent#UNINSTALLED} is fired.
-        RuntimeEventsHandler eventHandler = getRuntime().adapt(RuntimeEventsHandler.class);
+        RuntimeEventsManager eventHandler = getRuntime().adapt(RuntimeEventsManager.class);
         eventHandler.fireModuleEvent(this, ModuleEvent.UNINSTALLED);
 
         getRuntime().uninstallModule(this);
@@ -272,6 +283,7 @@ final class EmbeddedModule extends AbstractModule {
     }
 
     private RuntimeStorageHandler getStorageHandler() {
-        return getRuntime().adapt(RuntimeStorageHandler.class);
+        AbstractRuntime runtime = adapt(AbstractRuntime.class);
+        return runtime.adapt(RuntimeStorageHandler.class);
     }
 }
