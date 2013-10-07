@@ -283,13 +283,7 @@ public final class BundleContextAdaptor implements BundleContext {
         public void moduleChanged(ModuleEvent event) {
             int type = event.getType();
             Module module = event.getModule();
-            Module origin = event.getOrigin();
-            BundleEvent bundleEvent;
-            if (origin != null) {
-                bundleEvent = new BundleEvent(type, new BundleAdaptor(module), new BundleAdaptor(origin));
-            } else {
-                bundleEvent = new BundleEvent(type, new BundleAdaptor(module));
-            }
+            BundleEvent bundleEvent = new BundleEvent(type, new BundleAdaptor(module));
             delegate.bundleChanged(bundleEvent);
         }
 

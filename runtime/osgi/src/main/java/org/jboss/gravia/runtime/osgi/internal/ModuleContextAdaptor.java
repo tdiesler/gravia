@@ -223,14 +223,8 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         public void bundleChanged(BundleEvent event) {
             int type = event.getType();
             Module module = mappedModule(event.getBundle());
-            Module origin = mappedModule(event.getOrigin());
             if (module != null) {
-                ModuleEvent moduleEvent;
-                if (origin != null) {
-                    moduleEvent = new ModuleEvent(type, module, origin);
-                } else {
-                    moduleEvent = new ModuleEvent(type, module);
-                }
+                ModuleEvent moduleEvent = new ModuleEvent(type, module);
                 delegate.moduleChanged(moduleEvent);
             }
         }

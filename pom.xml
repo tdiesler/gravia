@@ -311,10 +311,9 @@
                 <artifactId>slf4j-simple</artifactId>
                 <version>${version.slf4j}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
-
+    
     <!-- Build -->
     <build>
         <plugins>
@@ -325,6 +324,16 @@
                     <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
                     <canUpdateCopyright>true</canUpdateCopyright>
                     <licenseName>lgpl_v2_1</licenseName>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <quiet>true</quiet>
+                    <excludePackageNames>*.internal:*.osgi:*.embedded:*.test</excludePackageNames>
+                    <links>
+                        <link>http://www.osgi.org/javadoc/r5/core</link>
+                    </links>
                 </configuration>
             </plugin>
         </plugins>
@@ -359,4 +368,14 @@
         </repository>
     </repositories>
 
+    <!-- Profiles -->
+    <profiles>
+        <profile>
+            <id>distro</id>
+            <build>
+            	<plugins>
+            	</plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

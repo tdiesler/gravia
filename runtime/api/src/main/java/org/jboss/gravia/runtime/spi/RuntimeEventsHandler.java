@@ -8,12 +8,12 @@
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
@@ -74,7 +74,6 @@ public final class RuntimeEventsHandler {
         asyncBundleEvents.add(new Integer(ModuleEvent.RESOLVED));
         asyncBundleEvents.add(new Integer(ModuleEvent.STARTED));
         asyncBundleEvents.add(new Integer(ModuleEvent.STOPPED));
-        asyncBundleEvents.add(new Integer(ModuleEvent.UNRESOLVED));
         asyncBundleEvents.add(new Integer(ModuleEvent.UNINSTALLED));
         infoEvents.add(ConstantsHelper.moduleEvent(ModuleEvent.INSTALLED));
         infoEvents.add(ConstantsHelper.moduleEvent(ModuleEvent.STARTED));
@@ -223,7 +222,7 @@ public final class RuntimeEventsHandler {
         }
 
         // Expose the moduleState wrapper not the state itself
-        final ModuleEvent event = new ModuleEventImpl(type, module, context != null ? context.getModule() : module);
+        final ModuleEvent event = new ModuleEventImpl(type, module);
         final String typeName = ConstantsHelper.moduleEvent(event.getType());
 
         // Nobody is interested
@@ -511,8 +510,8 @@ public final class RuntimeEventsHandler {
 
         private static final long serialVersionUID = -2705304702665185935L;
 
-        ModuleEventImpl(int type, Module module, Module origin) {
-            super(type, module, origin);
+        ModuleEventImpl(int type, Module module) {
+            super(type, module);
         }
 
 

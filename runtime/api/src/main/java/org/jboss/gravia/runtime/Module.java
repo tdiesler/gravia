@@ -26,6 +26,7 @@ import java.util.Dictionary;
 
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.AttachmentKey;
+import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 
@@ -147,24 +148,6 @@ public interface Module extends Attachable {
      * <li>A module event of type {@link ModuleEvent#STOPPED} is fired.
      * </ol>
      *
-     * <b>Preconditions </b>
-     * <ul>
-     * <li>{@code getState()} in &#x007B; {@code ACTIVE} &#x007D;.
-     * </ul>
-     * <b>Postconditions, no exceptions thrown </b>
-     * <ul>
-     * <li>Module autostart setting is modified unless the
-     * {@link #STOP_TRANSIENT} option was set.
-     * <li>{@code getState()} not in &#x007B; {@code ACTIVE}, {@code STOPPING}
-     * &#x007D;.
-     * <li>{@code ModuleActivator.stop} has been called and did not throw an
-     * exception.
-     * </ul>
-     * <b>Postconditions, when an exception is thrown </b>
-     * <ul>
-     * <li>Module autostart setting is modified unless the
-     * {@link #STOP_TRANSIENT} option was set.
-     * </ul>
      * @throws ModuleException If the module cannot be started
      */
     void stop() throws ModuleException;
