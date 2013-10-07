@@ -1,0 +1,11 @@
+org.jboss.gravia.provision
+org.jboss.gravia.provision.spi
+org.jboss.gravia.repository
+org.jboss.gravia.repository.spi
+org.jboss.gravia.resolver
+org.jboss.gravia.resolver.spi
+org.jboss.gravia.resource
+org.jboss.gravia.resource.spi
+org.jboss.gravia.runtime
+org.jboss.gravia.runtime.spi
+org.jboss.gravia.runtime.util
