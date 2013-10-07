@@ -1,6 +1,6 @@
 /*
  * #%L
- * Gravia :: Runtime :: API
+ * JBossOSGi Runtime
  * %%
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
@@ -27,14 +27,9 @@ package org.jboss.gravia.runtime.spi;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public final class NotNullException {
+public interface PropertiesProvider {
 
-    // hide ctor
-    private NotNullException() {
-    }
+    Object getProperty(String key);
 
-    public static void assertValue(Object value, String name) {
-        if (value == null)
-            throw new IllegalArgumentException("Null " + name);
-    }
+    Object getProperty(String key, Object defaultValue);
 }

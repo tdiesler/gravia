@@ -25,9 +25,10 @@ import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
 
 import java.io.File;
 import java.io.IOException;
+
 import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.PropertiesProvider;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 /**
  * [TODO]

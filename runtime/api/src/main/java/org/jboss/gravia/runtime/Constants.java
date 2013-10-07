@@ -21,7 +21,7 @@
  */
 package org.jboss.gravia.runtime;
 
-import org.osgi.framework.ServiceReference;
+import org.jboss.gravia.resource.ManifestBuilder;
 
 /**
  * Defines standard names for the environment system properties, service
@@ -34,6 +34,21 @@ import org.osgi.framework.ServiceReference;
  * @since 27-Sep-2013
  */
 public interface Constants {
+
+    /**
+     * Header attribute identifying the module's activator class.
+     *
+     * <p>
+     * If present, this header specifies the name of the module resource class
+     * that implements the {@code ModuleActivator} interface and whose
+     * {@code start} and {@code stop} methods are called by the Runtime when
+     * the module is started and stopped, respectively.
+     *
+     * <p>
+     * The header value may be retrieved from the {@code Dictionary} object
+     * returned by the {@link Module.getHeaders()} method.
+     */
+    String MODULE_ACTIVATOR = ManifestBuilder.MODULE_ACTIVATOR;
 
     /**
      * Runtime property specifying the persistent storage area used
@@ -99,12 +114,6 @@ public interface Constants {
      * <p>
      * A service's persistent identifier uniquely identifies the service and
      * persists across multiple Runtime invocations.
-     *
-     * <p>
-     * By convention, every module has its own unique namespace, starting with
-     * the module's identifier (see {@link Module#getModuleId()}) and followed
-     * by a dot (.). A module may use this as the prefix of the persistent
-     * identifiers for the services it registers.
      */
     String SERVICE_PID = "service.pid";
 

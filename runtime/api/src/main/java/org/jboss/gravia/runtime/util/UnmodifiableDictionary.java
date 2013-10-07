@@ -1,4 +1,4 @@
-package org.jboss.gravia.runtime.spi;
+package org.jboss.gravia.runtime.util;
 
 import java.io.Serializable;
 import java.util.Dictionary;

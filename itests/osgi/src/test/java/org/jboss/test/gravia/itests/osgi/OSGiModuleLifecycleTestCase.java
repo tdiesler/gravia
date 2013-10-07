@@ -62,7 +62,7 @@ public class OSGiModuleLifecycleTestCase extends ModuleLifecycleTest {
                 builder.addBundleManifestVersion(2);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, Resource.class);
                 builder.addImportPackages(Servlet.class, HttpServlet.class, WebServlet.class);
-                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, archive.getName() + ";version=1.0.0");
+                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, archive.getName() + ";version=1.0.0");
                 builder.addManifestHeader("Web-ContextPath", "/simple");
                 builder.addBundleClasspath("WEB-INF/classes");
                 return builder.openStream();

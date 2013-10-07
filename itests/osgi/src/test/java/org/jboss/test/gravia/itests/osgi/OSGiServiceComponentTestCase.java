@@ -72,7 +72,7 @@ public class OSGiServiceComponentTestCase extends ServiceComponentTest {
                 builder.addBundleVersion("1.0.0");
                 builder.addImportPackages(RuntimeLocator.class, ComponentContext.class, Resource.class);
                 builder.addImportPackages(Servlet.class, HttpServlet.class, WebServlet.class);
-                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, "scr-test;version=1.0.0");
+                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, "scr-test;version=1.0.0");
                 builder.addManifestHeader("Service-Component", "WEB-INF/org.jboss.test.gravia.itests.sub.a.ServiceA.xml,WEB-INF/org.jboss.test.gravia.itests.sub.a1.ServiceA1.xml");
                 builder.addManifestHeader("Web-ContextPath", "/scr-test");
                 builder.addBundleClasspath("WEB-INF/classes");

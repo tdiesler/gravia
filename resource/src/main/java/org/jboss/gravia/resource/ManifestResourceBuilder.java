@@ -42,26 +42,26 @@ public class ManifestResourceBuilder extends DefaultResourceBuilder {
         for (Object key : mainAttributes.keySet()) {
             Attributes.Name name = (Name) key;
             String value = mainAttributes.getValue(name);
-            if (ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY.equals(name.toString())) {
+            if (ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY.equals(name.toString())) {
                 Map<String, Object> atts = new LinkedHashMap<String, Object>();
                 Map<String, String> dirs = new LinkedHashMap<String, String>();
                 String symbolicName = parseParameterizedValue(value, atts, dirs);
                 addIdentityCapability(symbolicName, null, atts, dirs);
-            } else if (ManifestBuilder.GRAVIA_IDENTITY_REQUIREMENT.equals(name.toString())) {
+            } else if (ManifestBuilder.RESOURCE_IDENTITY_REQUIREMENT.equals(name.toString())) {
                 for(String part : ElementParser.parseDelimitedString(value, ',')) {
                     Map<String, Object> atts = new LinkedHashMap<String, Object>();
                     Map<String, String> dirs = new LinkedHashMap<String, String>();
                     String symbolicName = parseParameterizedValue(part, atts, dirs);
                     addIdentityRequirement(symbolicName, null, atts, dirs);
                 }
-            } else if (ManifestBuilder.GRAVIA_CAPABILITY.equals(name.toString())) {
+            } else if (ManifestBuilder.RESOURCE_CAPABILITY.equals(name.toString())) {
                 for(String part : ElementParser.parseDelimitedString(value, ',')) {
                     Map<String, Object> atts = new LinkedHashMap<String, Object>();
                     Map<String, String> dirs = new LinkedHashMap<String, String>();
                     String namespace = parseParameterizedValue(part, atts, dirs);
                     addCapability(namespace, atts, dirs);
                 }
-            } else if (ManifestBuilder.GRAVIA_REQUIREMENT.equals(name.toString())) {
+            } else if (ManifestBuilder.RESOURCE_REQUIREMENT.equals(name.toString())) {
                 for(String part : ElementParser.parseDelimitedString(value, ',')) {
                     Map<String, Object> atts = new LinkedHashMap<String, Object>();
                     Map<String, String> dirs = new LinkedHashMap<String, String>();

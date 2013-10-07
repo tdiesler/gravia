@@ -68,6 +68,7 @@
 						<Export-Package>
 							org.jboss.gravia.runtime;version="${project.version}",
 							org.jboss.gravia.runtime.spi;version="${project.version}",
+							org.jboss.gravia.runtime.util;version="${project.version}",
 						</Export-Package>
 						<Import-Package>
 							org.jboss.gravia.resource;version="[1.0,1.1)",

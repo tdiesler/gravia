@@ -40,26 +40,26 @@ public final class DictionaryResourceBuilder extends DefaultResourceBuilder {
         while (keys.hasMoreElements()) {
             String key = keys.nextElement();
             String value = headers.get(key);
-            if (ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY.equals(key)) {
+            if (ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY.equals(key)) {
                 Map<String, Object> atts = new LinkedHashMap<String, Object>();
                 Map<String, String> dirs = new LinkedHashMap<String, String>();
                 String symbolicName = parseParameterizedValue(value, atts, dirs);
                 addIdentityCapability(symbolicName, null, atts, dirs);
-            } else if (ManifestBuilder.GRAVIA_IDENTITY_REQUIREMENT.equals(key)) {
+            } else if (ManifestBuilder.RESOURCE_IDENTITY_REQUIREMENT.equals(key)) {
                 for(String part : ElementParser.parseDelimitedString(value, ',')) {
                     Map<String, Object> atts = new LinkedHashMap<String, Object>();
                     Map<String, String> dirs = new LinkedHashMap<String, String>();
                     String symbolicName = parseParameterizedValue(part, atts, dirs);
                     addIdentityRequirement(symbolicName, null, atts, dirs);
                 }
-            } else if (ManifestBuilder.GRAVIA_CAPABILITY.equals(key)) {
+            } else if (ManifestBuilder.RESOURCE_CAPABILITY.equals(key)) {
                 for(String part : ElementParser.parseDelimitedString(value, ',')) {
                     Map<String, Object> atts = new LinkedHashMap<String, Object>();
                     Map<String, String> dirs = new LinkedHashMap<String, String>();
                     String namespace = parseParameterizedValue(part, atts, dirs);
                     addCapability(namespace, atts, dirs);
                 }
-            } else if (ManifestBuilder.GRAVIA_REQUIREMENT.equals(key)) {
+            } else if (ManifestBuilder.RESOURCE_REQUIREMENT.equals(key)) {
                 for(String part : ElementParser.parseDelimitedString(value, ',')) {
                     Map<String, Object> atts = new LinkedHashMap<String, Object>();
                     Map<String, String> dirs = new LinkedHashMap<String, String>();

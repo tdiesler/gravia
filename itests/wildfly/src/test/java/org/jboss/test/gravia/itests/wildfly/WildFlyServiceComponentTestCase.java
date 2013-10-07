@@ -57,7 +57,7 @@ public class WildFlyServiceComponentTestCase extends ServiceComponentTest {
             @Override
             public InputStream openStream() {
                 ManifestBuilder builder = new ManifestBuilder();
-                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, "scr-test;version=1.0.0");
+                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, "scr-test;version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.itests.sub.a.ServiceA.xml,OSGI-INF/org.jboss.test.gravia.itests.sub.a1.ServiceA1.xml");
                 builder.addManifestHeader("Dependencies", "org.jboss.gravia");
                 return builder.openStream();

@@ -33,10 +33,10 @@ import java.util.Vector;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
-import org.jboss.gravia.runtime.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
 import org.jboss.gravia.runtime.spi.RuntimePlugin;
 

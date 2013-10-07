@@ -23,6 +23,7 @@ package org.jboss.gravia.runtime;
 
 import java.util.Dictionary;
 import java.util.Set;
+
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 
@@ -32,9 +33,45 @@ import org.jboss.gravia.resource.ResourceIdentity;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public interface Runtime extends PropertiesProvider {
+public interface Runtime {
 
     void init();
+
+    /**
+     * Returns the value of the specified property. If the key is not found in
+     * the Framework properties, the system properties are then searched. The
+     * method returns {@code null} if the property is not found.
+     *
+     * <p>
+     * All bundles must have permission to read properties whose names start
+     * with &quot;org.osgi.&quot;.
+     *
+     * @param key The name of the requested property.
+     * @return The value of the requested property, or {@code null} if the
+     *         property is undefined.
+     * @throws SecurityException If the caller does not have the appropriate
+     *         {@code PropertyPermission} to read the property, and the Java
+     *         Runtime Environment supports permissions.
+     */
+    Object getProperty(String key);
+
+    /**
+     * Returns the value of the specified property. If the key is not found in
+     * the Framework properties, the system properties are then searched. The
+     * method returns {@code null} if the property is not found.
+     *
+     * <p>
+     * All bundles must have permission to read properties whose names start
+     * with &quot;org.osgi.&quot;.
+     *
+     * @param key The name of the requested property.
+     * @return The value of the requested property, or {@code null} if the
+     *         property is undefined.
+     * @throws SecurityException If the caller does not have the appropriate
+     *         {@code PropertyPermission} to read the property, and the Java
+     *         Runtime Environment supports permissions.
+     */
+    Object getProperty(String key, Object defaultValue);
 
     <A> A adapt(Class<A> type);
 

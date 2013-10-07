@@ -27,7 +27,7 @@ import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 
-import org.jboss.gravia.runtime.spi.NotNullException;
+import org.jboss.gravia.runtime.util.NotNullException;
 
 /**
  * [TODO]

@@ -1,6 +1,6 @@
 /*
  * #%L
- * JBossOSGi Runtime
+ * Gravia :: Runtime :: API
  * %%
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime;
+package org.jboss.gravia.runtime.util;
 
 /**
  * [TODO]
@@ -27,9 +27,14 @@ package org.jboss.gravia.runtime;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public interface PropertiesProvider {
+public final class NotNullException {
 
-    Object getProperty(String key);
+    // hide ctor
+    private NotNullException() {
+    }
 
-    Object getProperty(String key, Object defaultValue);
+    public static void assertValue(Object value, String name) {
+        if (value == null)
+            throw new IllegalArgumentException("Null " + name);
+    }
 }

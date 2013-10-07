@@ -24,24 +24,34 @@ package org.jboss.gravia.runtime;
 import java.util.EventObject;
 
 /**
- * [TODO]
+ * An event from the Runtime describing a module lifecycle change.
+ * <p>
+ * {@code ModuleEvent} objects are delivered to
+ * {@code SynchronousModuleListener}s and {@code ModuleListener}s when a change
+ * occurs in a module's lifecycle. A type code is used to identify the event
+ * type for future extendability.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
+ *
+ * @see ModuleListener
+ * @see SynchronousModuleListener
+ *
+ * @Immutable
  */
 public class ModuleEvent extends EventObject {
 
-    static final long       serialVersionUID    = 4080640865971756012L;
+    private static final long serialVersionUID = 1176296577528447208L;
 
     /**
      * Type of module lifecycle change.
      */
-    private final int       type;
+    private final int type;
 
     /**
      * The module has been installed.
      */
-    public final static int INSTALLED           = 0x00000001;
+    public final static int INSTALLED = 0x00000001;
 
     /**
      * The module has been started.
@@ -52,7 +62,7 @@ public class ModuleEvent extends EventObject {
      *
      * @see Module#start()
      */
-    public final static int STARTED             = 0x00000002;
+    public final static int STARTED = 0x00000002;
 
     /**
      * The module has been stopped.
@@ -63,19 +73,19 @@ public class ModuleEvent extends EventObject {
      *
      * @see Module#stop()
      */
-    public final static int STOPPED             = 0x00000004;
+    public final static int STOPPED = 0x00000004;
 
     /**
      * The module has been uninstalled.
      *
      * @see Module#uninstall()
      */
-    public final static int UNINSTALLED         = 0x00000010;
+    public final static int UNINSTALLED = 0x00000010;
 
     /**
      * The module has been resolved.
      */
-    public final static int RESOLVED            = 0x00000020;
+    public final static int RESOLVED = 0x00000020;
 
     /**
      * The module is about to be activated.
@@ -87,7 +97,7 @@ public class ModuleEvent extends EventObject {
      *
      * @see Module#start()
      */
-    public final static int STARTING            = 0x00000080;
+    public final static int STARTING = 0x00000080;
 
     /**
      * The module is about to deactivated.
@@ -99,7 +109,7 @@ public class ModuleEvent extends EventObject {
      *
      * @see Module#stop()
      */
-    public final static int STOPPING            = 0x00000100;
+    public final static int STOPPING = 0x00000100;
 
     /**
      * Creates a module event of the specified type.

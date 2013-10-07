@@ -119,7 +119,7 @@ public class ServiceComponentTestCase  {
                 builder.addExportPackages(ServiceA.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addImportPackages(ServiceA1.class);
-                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_A + ";version=1.0.0");
+                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, BUNDLE_A + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.a.ServiceA.xml");
                 return builder.openStream();
             }
@@ -142,7 +142,7 @@ public class ServiceComponentTestCase  {
                 builder.addBundleActivator(DefaultActivator.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addExportPackages(ServiceA1.class);
-                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_A1 + ";version=1.0.0");
+                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, BUNDLE_A1 + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.a1.ServiceA1.xml");
                 return builder.openStream();
             }

@@ -34,8 +34,8 @@ import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.AbstractModuleContext;
-import org.jboss.gravia.runtime.spi.NotNullException;
 import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
+import org.jboss.gravia.runtime.util.NotNullException;
 
 /**
  * [TODO]

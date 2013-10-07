@@ -37,7 +37,6 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleException;
-import org.jboss.gravia.runtime.PropertiesProvider;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.logging.Logger;
 

@@ -6,16 +6,16 @@ package org.jboss.test.gravia.repository;
  * Copyright (C) 2012 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -135,7 +135,7 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
         ContentCapability ccap = ccaps.get(0).adapt(ContentCapability.class);
         Assert.assertEquals(digest, ccap.getDigest());
         Assert.assertEquals("application/java-archive", ccap.getMimeType());
-        Assert.assertEquals(new Long(392), ccap.getSize());
+        Assert.assertEquals(new Long(391), ccap.getSize());
         File contentFile = new File(new URL(ccap.getContentURL()).getPath()).getCanonicalFile();
         Assert.assertTrue("File exists: " + contentFile, contentFile.exists());
         Assert.assertTrue("Path starts with: " + storageDir.getPath(), contentFile.getPath().startsWith(storageDir.getPath()));
@@ -204,8 +204,8 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
         Assert.assertEquals(digest, cap.getAttribute(ContentNamespace.CONTENT_NAMESPACE));
         Assert.assertEquals("application/java-archive", ccap.getMimeType());
         Assert.assertEquals("application/java-archive", cap.getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE));
-        Assert.assertEquals(new Long(392), ccap.getSize());
-        Assert.assertEquals(new Long(392), cap.getAttribute(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE));
+        Assert.assertEquals(new Long(391), ccap.getSize());
+        Assert.assertEquals(new Long(391), cap.getAttribute(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE));
         String contentURL = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
         File contentFile = new File(new URL(contentURL).getPath()).getCanonicalFile();
         Assert.assertTrue("File exists: " + contentFile, contentFile.exists());

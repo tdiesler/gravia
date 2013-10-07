@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ServiceEvent;
@@ -42,7 +43,7 @@ import org.jboss.gravia.runtime.ServiceException;
 import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
-import org.jboss.gravia.runtime.spi.NotNullException;
+import org.jboss.gravia.runtime.util.NotNullException;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.metadata.CaseInsensitiveDictionary;
 
@@ -64,7 +65,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     private final ServiceReference<S> reference;
     private ServiceRegistration<S> registration;
     private Set<Module> usingModules;
-    private Map<Long, ServiceFactoryHolder<S>> factoryValues;
+    private Map<ResourceIdentity, ServiceFactoryHolder<S>> factoryValues;
 
     // The properties
     private CaseInsensitiveDictionary prevProperties;
@@ -120,13 +121,13 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         S result = null;
         try {
             if (factoryValues == null)
-                factoryValues = new HashMap<Long, ServiceFactoryHolder<S>>();
+                factoryValues = new HashMap<ResourceIdentity, ServiceFactoryHolder<S>>();
 
             ServiceFactoryHolder<S> factoryHolder = getFactoryHolder(module);
             if (factoryHolder == null) {
                 ServiceFactory factory = (ServiceFactory) valueProvider.getValue();
                 factoryHolder = new ServiceFactoryHolder<S>(module, factory);
-                factoryValues.put(module.getModuleId(), factoryHolder);
+                factoryValues.put(module.getIdentity(), factoryHolder);
             }
 
             result = factoryHolder.getService();
@@ -162,7 +163,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
     private ServiceFactoryHolder<S> getFactoryHolder(Module module) {
-        return factoryValues != null ? factoryValues.get(module.getModuleId()) : null;
+        return factoryValues != null ? factoryValues.get(module.getIdentity()) : null;
     }
 
 

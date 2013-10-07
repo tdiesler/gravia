@@ -21,7 +21,7 @@
  */
 package org.jboss.gravia.runtime.osgi;
 
-import org.jboss.gravia.runtime.PropertiesProvider;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.osgi.framework.BundleContext;
 
 

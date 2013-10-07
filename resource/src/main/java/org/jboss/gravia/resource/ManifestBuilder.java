@@ -47,11 +47,11 @@ import org.jboss.logging.Logger;
  */
 public final class ManifestBuilder {
 
-    public static final String GRAVIA_IDENTITY_CAPABILITY = "Gravia-Identity";
-    public static final String GRAVIA_IDENTITY_REQUIREMENT = "Gravia-IdentityRequirement";
-    public static final String GRAVIA_CAPABILITY = "Gravia-Capability";
-    public static final String GRAVIA_REQUIREMENT = "Gravia-Requirement";
-    public static final String GRAVIA_ACTIVATOR = "Gravia-Activator";
+    public static final String RESOURCE_IDENTITY_CAPABILITY = "Resource-Identity";
+    public static final String RESOURCE_IDENTITY_REQUIREMENT = "Resource-IdentityRequirement";
+    public static final String RESOURCE_CAPABILITY = "Resource-Capability";
+    public static final String RESOURCE_REQUIREMENT = "Resource-Requirement";
+    public static final String MODULE_ACTIVATOR = "Module-Activator";
 
     public enum Type {
         String,
@@ -102,7 +102,7 @@ public final class ManifestBuilder {
                 buffer.append(";" + entry.getKey() + ":=\"" + entry.getValue() + "\"");
             }
         }
-        addManifestHeader(GRAVIA_IDENTITY_CAPABILITY, buffer.toString());
+        addManifestHeader(RESOURCE_IDENTITY_CAPABILITY, buffer.toString());
         return this;
     }
 
@@ -139,12 +139,12 @@ public final class ManifestBuilder {
     }
 
     public ManifestBuilder addModuleActivator(String className) {
-        addManifestHeader(GRAVIA_ACTIVATOR, className);
+        addManifestHeader(MODULE_ACTIVATOR, className);
         return this;
     }
 
     public ManifestBuilder addModuleActivator(Class<?> clazz) {
-        addManifestHeader(GRAVIA_ACTIVATOR, clazz.getName());
+        addManifestHeader(MODULE_ACTIVATOR, clazz.getName());
         return this;
     }
 
@@ -229,9 +229,9 @@ public final class ManifestBuilder {
         if (manifest == null)
             throw new IllegalArgumentException("Null manifest");
 
-        String identitySpec = getManifestHeaderInternal(manifest, GRAVIA_IDENTITY_CAPABILITY);
+        String identitySpec = getManifestHeaderInternal(manifest, RESOURCE_IDENTITY_CAPABILITY);
         if (identitySpec == null)
-            throw new IllegalArgumentException("Cannot obtain required header: " + GRAVIA_IDENTITY_CAPABILITY);
+            throw new IllegalArgumentException("Cannot obtain required header: " + RESOURCE_IDENTITY_CAPABILITY);
     }
 
     private static String getManifestHeaderInternal(Manifest manifest, String key) {
@@ -242,9 +242,9 @@ public final class ManifestBuilder {
 
     public Manifest getManifest() {
         if (manifest == null) {
-            addManifestHeader(GRAVIA_IDENTITY_REQUIREMENT, identityRequirements);
-            addManifestHeader(GRAVIA_CAPABILITY, genericCapabilities);
-            addManifestHeader(GRAVIA_REQUIREMENT, genericRequirements);
+            addManifestHeader(RESOURCE_IDENTITY_REQUIREMENT, identityRequirements);
+            addManifestHeader(RESOURCE_CAPABILITY, genericCapabilities);
+            addManifestHeader(RESOURCE_REQUIREMENT, genericRequirements);
             StringWriter out = new StringWriter();
             PrintWriter pw = new PrintWriter(out);
             for(String line : lines) {

@@ -73,7 +73,7 @@ public class OSGiConfigurationAdminTestCase extends ConfigurationAdminTest {
                 builder.addBundleVersion("1.0.0");
                 builder.addImportPackages(RuntimeLocator.class, ComponentContext.class, ConfigurationAdmin.class, Resource.class);
                 builder.addImportPackages(Servlet.class, HttpServlet.class, WebServlet.class);
-                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, "configadmin-test;version=1.0.0");
+                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, "configadmin-test;version=1.0.0");
                 builder.addManifestHeader("Service-Component", "WEB-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml,WEB-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");
                 builder.addManifestHeader("Web-ContextPath", "/configadmin-test");
                 builder.addBundleClasspath("WEB-INF/classes");

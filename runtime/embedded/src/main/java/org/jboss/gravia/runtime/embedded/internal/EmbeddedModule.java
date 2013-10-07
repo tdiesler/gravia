@@ -122,7 +122,7 @@ final class EmbeddedModule extends AbstractModule {
 
             // #5 The {@link ModuleActivator#start(ModuleContext)} method if one is specified, is called.
             try {
-                String className = getHeaders().get(ManifestBuilder.GRAVIA_ACTIVATOR);
+                String className = getHeaders().get(ManifestBuilder.MODULE_ACTIVATOR);
                 if (className != null) {
                     ModuleActivator moduleActivator;
                     synchronized (MODULE_ACTIVATOR_KEY) {
@@ -261,13 +261,9 @@ final class EmbeddedModule extends AbstractModule {
 
     @Override
     public File getDataFile(String filename) {
+        assertNotUninstalled();
         RuntimeStorageHandler storageHandler = getStorageHandler();
         return storageHandler.getDataFile(this, filename);
-    }
-
-    private void assertNotUninstalled() {
-        if (getState() == State.UNINSTALLED)
-            throw new IllegalStateException("Module already uninstalled: " + this);
     }
 
     @Override

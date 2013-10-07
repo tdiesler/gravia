@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime;
+package org.jboss.gravia.runtime.util;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 
 /**

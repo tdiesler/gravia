@@ -22,6 +22,7 @@
 package org.jboss.test.gravia.runtime.embedded;
 
 import java.util.Dictionary;
+
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.Module;

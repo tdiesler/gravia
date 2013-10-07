@@ -25,6 +25,10 @@ import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.runtime.spi.RuntimeFactory;
+import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
+
 /**
  * [TODO]
  *
@@ -43,6 +47,7 @@ public final class RuntimeLocator {
         runtimeReference.set(runtime);
     }
 
+    @Deprecated
     public static Runtime locateRuntime(PropertiesProvider props) {
         Runtime runtime = getRuntime();
         if (runtime == null) {

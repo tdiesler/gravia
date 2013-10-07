@@ -24,13 +24,14 @@ package org.jboss.test.gravia.runtime.embedded;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.jboss.gravia.runtime.Constants;
-import org.jboss.gravia.runtime.DefaultPropertiesProvider;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
-import org.jboss.gravia.runtime.PropertiesProvider;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.osgi.service.cm.ConfigurationAdmin;

@@ -23,6 +23,7 @@ package org.jboss.gravia.runtime.spi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.DictionaryResourceBuilder;
@@ -33,7 +34,11 @@ import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.util.CaseInsensitiveDictionary;
+import org.jboss.gravia.runtime.util.NotNullException;
+import org.jboss.gravia.runtime.util.UnmodifiableDictionary;
 import org.jboss.logging.Logger;
 
 /**
@@ -74,7 +79,7 @@ public abstract class AbstractModule implements Module {
         if (headers == null) {
             headers = new Hashtable<String, String>();
             String identityHeader = getIdentityHeader(resourceIdentity);
-            headers.put(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, identityHeader);
+            headers.put(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, identityHeader);
         }
         this.headers = new UnmodifiableDictionary<String, String>(new CaseInsensitiveDictionary<String>(headers));
 
@@ -117,6 +122,8 @@ public abstract class AbstractModule implements Module {
             result = (A) resource;
         } else if (type.isAssignableFrom(Module.class)) {
             result = (A) this;
+        } else if (type.isAssignableFrom(ModuleContext.class)) {
+            result = (A) getModuleContext();
         }
         return result;
     }
@@ -138,12 +145,18 @@ public abstract class AbstractModule implements Module {
 
     @Override
     public Class<?> loadClass(String className) throws ClassNotFoundException {
+        assertNotUninstalled();
         return classLoader.loadClass(className);
     }
 
     @Override
     public Dictionary<String, String> getHeaders() {
         return headers;
+    }
+
+    protected void assertNotUninstalled() {
+        if (getState() == State.UNINSTALLED)
+            throw new IllegalStateException("Module already uninstalled: " + this);
     }
 
     @Override

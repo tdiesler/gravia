@@ -40,8 +40,8 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.spi.NoFilter;
 import org.jboss.gravia.runtime.spi.RuntimeEventsHandler;
+import org.jboss.gravia.runtime.util.NoFilter;
 import org.osgi.framework.Bundle;
 
 /**
@@ -131,8 +131,7 @@ final class RuntimeServicesHandler {
     ServiceState<?> getServiceReference(ModuleContext context, String clazz) {
         assert clazz != null : "Null clazz";
 
-        boolean checkAssignable = (context.getModule().getModuleId() != 0);
-        List<ServiceState<?>> result = getServiceReferencesInternal(context, clazz, NoFilter.INSTANCE, checkAssignable);
+        List<ServiceState<?>> result = getServiceReferencesInternal(context, clazz, NoFilter.INSTANCE, true);
         if (result.isEmpty())
             return null;
 

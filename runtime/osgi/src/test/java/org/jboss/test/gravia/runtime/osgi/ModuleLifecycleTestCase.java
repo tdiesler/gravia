@@ -64,7 +64,7 @@ public class ModuleLifecycleTestCase {
                 builder.addBundleManifestVersion(2);
                 builder.addBundleActivator(SimpleActivator.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntime.class, Resource.class);
-                builder.addManifestHeader(ManifestBuilder.GRAVIA_IDENTITY_CAPABILITY, archive.getName() + ";version=0.0.0");
+                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, archive.getName() + ";version=0.0.0");
                 return builder.openStream();
             }
         });

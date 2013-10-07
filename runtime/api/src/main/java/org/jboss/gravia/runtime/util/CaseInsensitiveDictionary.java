@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.runtime.spi;
+package org.jboss.gravia.runtime.util;
 
 import java.util.Collections;
 import java.util.Dictionary;
