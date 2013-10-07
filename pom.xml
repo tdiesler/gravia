@@ -326,16 +326,28 @@
                     <licenseName>lgpl_v2_1</licenseName>
                 </configuration>
             </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <quiet>true</quiet>
-                    <excludePackageNames>*.internal:*.osgi:*.embedded:*.test</excludePackageNames>
-                    <links>
-                        <link>http://www.osgi.org/javadoc/r5/core</link>
-                    </links>
-                </configuration>
-            </plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<quiet>true</quiet>
+					<excludePackageNames>*.internal:*.osgi:*.embedded:*.test</excludePackageNames>
+					<links>
+						<link>http://www.osgi.org/javadoc/r5/core</link>
+					</links>
+					<tags>
+						<tag>
+							<name>Immutable</name>
+							<placement>t</placement>
+							<head>Thread Safety: Immutable</head>
+						</tag>
+						<tag>
+							<name>ThreadSafe</name>
+							<placement>t</placement>
+							<head>Thread Safety: ThreadSafe</head>
+						</tag>
+					</tags>
+				</configuration>
+			</plugin>
         </plugins>
     </build>
     

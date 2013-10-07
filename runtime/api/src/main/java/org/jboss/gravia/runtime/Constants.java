@@ -8,12 +8,12 @@
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
@@ -21,8 +21,14 @@
  */
 package org.jboss.gravia.runtime;
 
+import org.osgi.framework.ServiceReference;
+
 /**
- * [TODO]
+ * Defines standard names for the environment system properties, service
+ * properties, and Manifest header attribute keys.
+ * <p>
+ * The values associated with these keys are of type {@code String}, unless
+ * otherwise indicated.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
@@ -58,15 +64,74 @@ public interface Constants {
      */
     String RUNTIME_STORAGE_CLEAN_ONFIRSTINIT = "onFirstInit";
 
-    /** [TODO] */
+    /**
+     * Service property identifying all of the class names under which a service
+     * was registered in the Runtime. The value of this property must be of
+     * type {@code String[]}.
+     *
+     * <p>
+     * This property is set by the Runtime when a service is registered.
+     */
     String OBJECTCLASS = "objectClass";
 
-    /** [TODO] */
+    /**
+     * Service property identifying a service's registration number. The value
+     * of this property must be of type {@code Long}.
+     *
+     * <p>
+     * The value of this property is assigned by the Runtime when a service is
+     * registered. The Runtime assigns a unique value that is larger than all
+     * previously assigned values since the Runtime was started. These values
+     * are NOT persistent across restarts of the Runtime.
+     */
     String SERVICE_ID = "service.id";
 
-    /** [TODO] */
+    /**
+     * Service property identifying a service's persistent identifier.
+     *
+     * <p>
+     * This property may be supplied in the {@code properties}
+     * {@code Dictionary} object passed to the
+     * {@code ModuleContext.registerService} method. The value of this property
+     * must be of type {@code String}, {@code String[]}, or {@code Collection}
+     * of {@code String}.
+     *
+     * <p>
+     * A service's persistent identifier uniquely identifies the service and
+     * persists across multiple Runtime invocations.
+     *
+     * <p>
+     * By convention, every module has its own unique namespace, starting with
+     * the module's identifier (see {@link Module#getModuleId()}) and followed
+     * by a dot (.). A module may use this as the prefix of the persistent
+     * identifiers for the services it registers.
+     */
     String SERVICE_PID = "service.pid";
 
-    /** [TODO] */
+    /**
+     * Service property identifying a service's ranking number.
+     *
+     * <p>
+     * This property may be supplied in the {@code properties
+     * Dictionary} object passed to the {@code ModuleContext.registerService}
+     * method. The value of this property must be of type {@code Integer}.
+     *
+     * <p>
+     * The service ranking is used by the Runtime to determine the <i>natural
+     * order</i> of services, see {@link ServiceReference#compareTo(Object)},
+     * and the <i>default</i> service to be returned from a call to the
+     * {@link ModuleContext#getServiceReference(Class)} or
+     * {@link ModuleContext#getServiceReference(String)} method.
+     *
+     * <p>
+     * The default ranking is zero (0). A service with a ranking of
+     * {@code Integer.MAX_VALUE} is very likely to be returned as the default
+     * service, whereas a service with a ranking of {@code Integer.MIN_VALUE} is
+     * very unlikely to be returned.
+     *
+     * <p>
+     * If the supplied property value is not of type {@code Integer}, it is
+     * deemed to have a ranking value of zero.
+     */
     String SERVICE_RANKING = "service.ranking";
 }

@@ -22,6 +22,7 @@
 package org.jboss.gravia.runtime.osgi;
 
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.osgi.internal.OSGiRuntimeImpl;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -44,7 +45,7 @@ public final class OSGiRuntimeLocator {
         OSGiRuntime runtime = getRuntime();
         if (runtime == null) {
             BundleContextPropertiesProvider props = new BundleContextPropertiesProvider(context);
-            runtime = new OSGiRuntimeFactory().createRuntime(props);
+            runtime = new OSGiRuntimeImpl(context, props);
             RuntimeLocator.setRuntime(runtime);
         }
         return runtime;

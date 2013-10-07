@@ -31,15 +31,13 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
-import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.osgi.metadata.CaseInsensitiveDictionary;
-import org.jboss.osgi.metadata.OSGiMetaData;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
@@ -53,9 +51,6 @@ import org.osgi.framework.Version;
  * @since 27-Sep-2013
  */
 public final class BundleAdaptor implements Bundle {
-
-    static AttachmentKey<OSGiMetaData> OSGI_METADATA_KEY = AttachmentKey.create(OSGiMetaData.class);
-    static AttachmentKey<BundleActivator> BUNDLE_ACTIVATOR_KEY = AttachmentKey.create(BundleActivator.class);
 
     private final Module module;
 
@@ -252,41 +247,12 @@ public final class BundleAdaptor implements Bundle {
     }
 
     private ModuleEntriesProvider getModuleEntriesProvider() {
-        ModuleEntriesProvider provider = module.getAttachment(Module.ENTRIES_PROVIDER_KEY);
-        return provider != null ? provider : new CLassLoaderEntriesProvider();
+        AbstractRuntime runtime = (AbstractRuntime) module.adapt(Runtime.class);
+        return runtime.getModuleEntriesProvider(module);
     }
 
     @Override
     public String toString() {
         return "Bundle[" + module.getIdentity() + "]";
-    }
-
-    private class CLassLoaderEntriesProvider implements ModuleEntriesProvider {
-
-        @Override
-        public URL getEntry(String path) {
-            // [TODO] flawed because of parent first access
-            return getResource(path);
-        }
-
-        @Override
-        public Enumeration<String> getEntryPaths(String path) {
-            throw new UnsupportedOperationException("Bundle.getEntryPaths(String)");
-        }
-
-        @Override
-        public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
-            if (filePattern.contains("*") || recurse == true)
-                throw new UnsupportedOperationException("Bundle.getEntryPaths(String,String,boolean)");
-
-            // [TODO] flawed because of parent first access
-            URL result = getResource(path + "/" + filePattern);
-            if (result == null)
-                return null;
-
-            Vector<URL> vector = new Vector<URL>();
-            vector.add(result);
-            return vector.elements();
-        }
     }
 }

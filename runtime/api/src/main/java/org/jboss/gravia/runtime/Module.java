@@ -25,10 +25,8 @@ import java.io.File;
 import java.util.Dictionary;
 
 import org.jboss.gravia.resource.Attachable;
-import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 
 /**
  * [TODO]
@@ -37,8 +35,6 @@ import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
  * @since 27-Sep-2013
  */
 public interface Module extends Attachable {
-
-    AttachmentKey<ModuleEntriesProvider> ENTRIES_PROVIDER_KEY = AttachmentKey.create(ModuleEntriesProvider.class);
 
     enum State {
         INSTALLED,

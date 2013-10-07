@@ -21,7 +21,10 @@
  */
 package org.jboss.gravia.runtime.osgi.internal;
 
+import java.net.URL;
 import java.util.Dictionary;
+import java.util.Enumeration;
+
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
@@ -29,7 +32,9 @@ import org.jboss.gravia.runtime.PropertiesProvider;
 import org.jboss.gravia.runtime.osgi.OSGiRuntime;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
+import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
 
 /**
@@ -40,8 +45,11 @@ import org.osgi.framework.wiring.BundleWiring;
  */
 public final class OSGiRuntimeImpl extends AbstractRuntime implements OSGiRuntime {
 
-    public OSGiRuntimeImpl(PropertiesProvider propertiesProvider) {
+    private final BundleContext bundleContext;
+
+    public OSGiRuntimeImpl(BundleContext bundleContext, PropertiesProvider propertiesProvider) {
         super(propertiesProvider);
+        this.bundleContext = bundleContext;
     }
 
     @Override
@@ -50,8 +58,13 @@ public final class OSGiRuntimeImpl extends AbstractRuntime implements OSGiRuntim
     }
 
     @Override
-    protected AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
+    public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
         return new ModuleAdaptor(this, classLoader, resource, headers);
+    }
+
+    @Override
+    public ModuleEntriesProvider getModuleEntriesProvider(Module module) {
+        return new OSGiModuleEntriesProvider(module);
     }
 
     @Override
@@ -73,5 +86,33 @@ public final class OSGiRuntimeImpl extends AbstractRuntime implements OSGiRuntim
             module = installModule(classLoader, bundle.getHeaders());
         }
         return module;
+    }
+
+    private class OSGiModuleEntriesProvider implements ModuleEntriesProvider {
+
+        private final Module module;
+
+        OSGiModuleEntriesProvider(Module module) {
+            this.module = module;
+        }
+
+        @Override
+        public Enumeration<String> getEntryPaths(String path) {
+            Bundle bundle = bundleContext.getBundle(module.getModuleId());
+            return bundle.getEntryPaths(path);
+        }
+
+        @Override
+        public URL getEntry(String path) {
+            Bundle bundle = bundleContext.getBundle(module.getModuleId());
+            return bundle.getEntry(path);
+        }
+
+        @Override
+        public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
+            Bundle bundle = bundleContext.getBundle(module.getModuleId());
+            return bundle.findEntries(path, filePattern, recurse);
+        }
+
     }
 }

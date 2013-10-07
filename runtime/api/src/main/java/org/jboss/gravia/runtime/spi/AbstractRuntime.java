@@ -60,7 +60,9 @@ public abstract class AbstractRuntime implements Runtime {
         properties = propertiesProvider;
     }
 
-    protected abstract AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers);
+    public abstract AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers);
+
+    public abstract ModuleEntriesProvider getModuleEntriesProvider(Module module);
 
     @Override
     public final Object getProperty(String key) {
