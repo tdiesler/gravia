@@ -54,7 +54,7 @@
         <version.jboss.osgi.framework>3.0.3.Final</version.jboss.osgi.framework>
         <version.jboss.osgi.metadata>3.0.1.Final</version.jboss.osgi.metadata>
         <version.jboss.shrinkwrap>1.0.0</version.jboss.shrinkwrap>
-        <version.jboss.wildfly>8.0.0.Alpha3</version.jboss.wildfly>
+        <version.jboss.wildfly>8.0.0.Beta1</version.jboss.wildfly>
         <version.junit>4.10</version.junit>
         <version.mockito>1.8.4</version.mockito>
         <version.ops4j.pax.web>3.0.2</version.ops4j.pax.web>
