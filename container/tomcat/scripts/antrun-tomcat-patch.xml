@@ -45,11 +45,12 @@
     <copy todir="${tomcat.patch.dir}/lib" overwrite="true">
         <fileset file="${deploy.artifacts.lib}/*.jar" />
     </copy>
-    <copy todir="${wildfly.patch.dir}/lib" overwrite="true">
+    <copy todir="${tomcat.patch.dir}/lib" overwrite="true">
         <fileset file="${output.dir}/gravia-container-tomcat-${project.version}.jar" />
     </copy>
 	
   	<!-- Zip the tomcat patch -->
   	<zip destfile="${output.dir}/${project.artifactId}-${project.version}-patch.zip" basedir="${tomcat.patch.dir}"/>
+  	<tar destfile="${output.dir}/${project.artifactId}-${project.version}-patch.tar.gz" basedir="${tomcat.patch.dir}"/>
   </target>
 </project>

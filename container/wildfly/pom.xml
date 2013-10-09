@@ -166,6 +166,11 @@
                                     <classifier>patch</classifier>
                                     <type>zip</type>
                                 </artifact>
+                                <artifact>
+                                    <file>${wildfly.patch.file}</file>
+                                    <classifier>patch</classifier>
+                                    <type>tar.gz</type>
+                                </artifact>
                             </artifacts>
                         </configuration>
                     </execution>
