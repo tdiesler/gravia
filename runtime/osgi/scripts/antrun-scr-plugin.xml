@@ -47,7 +47,8 @@
   	
   	<mkdir dir="${output.dir}"/>
   	<scr srcdir="${source.dir}/" destdir="${output.dir}" classpathref="classpath" strictMode="true" specVersion="1.2">
-  		<include name="**/sub/**"/>
+  		<include name="**/sub/**/Service*.java"/>
+  		<exclude name="**/sub/**/*Activator.java"/>
   	</scr>
 
   </target>
