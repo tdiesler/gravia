@@ -28,7 +28,7 @@ import java.util.Properties;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.embedded.spi.EmbeddedRuntimeFactory;
+import org.jboss.gravia.runtime.embedded.EmbeddedRuntimeFactory;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.jboss.msc.service.AbstractService;

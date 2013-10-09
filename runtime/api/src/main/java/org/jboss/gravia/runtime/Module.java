@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -99,10 +99,10 @@ public interface Module extends Attachable {
         /**
          * The module is in the process of starting.
          * <p>
-         * A module is in the {@code STARTING} state when its {@link #start(int)
+         * A module is in the {@code STARTING} state when its {@link #start()
          * start} method is active. A module must be in this state when the module's
          * {@link ModuleActivator#start(ModuleContext)} is called. If the
-         * {@code ModuleActivator.start} method completes without exception, then
+         * {@code ModuleActivator.start(ModuleContext)} method completes without exception, then
          * the module has successfully started and must move to the {@code ACTIVE}
          * state.
          */
@@ -117,7 +117,7 @@ public interface Module extends Attachable {
         /**
          * The module is in the process of stopping.
          * <p>
-         * A module is in the {@code STOPPING} state when its {@link #stop(int)
+         * A module is in the {@code STOPPING} state when its {@link #stop()
          * stop} method is active. A module must be in this state when the module's
          * {@link ModuleActivator#stop(ModuleContext)} method is called. When the
          * {@code ModuleActivator.stop} method completes the module is stopped and
@@ -182,8 +182,8 @@ public interface Module extends Attachable {
      * module.
      *
      * <p>
-     * If this module is not in the {@link #STARTING}, {@link #ACTIVE}, or
-     * {@link #STOPPING} states, then this module has no valid {@code ModuleContext}.
+     * If this module is not in the {@link State#STARTING}, {@link State#ACTIVE}, or
+     * {@link State#STOPPING} states, then this module has no valid {@code ModuleContext}.
      *
      * @return A {@code ModuleContext} for this module or {@code null} if this
      *         module has no valid {@code ModuleContext}.
@@ -323,7 +323,7 @@ public interface Module extends Attachable {
      * If this module's state is {@code UNINSTALLED}, then an
      * {@code IllegalStateException} is thrown.
      *
-     * @param name The name of the class to load.
+     * @param className The name of the class to load.
      * @return The Class object for the requested class.
      */
     Class<?> loadClass(String className) throws ClassNotFoundException;

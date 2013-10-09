@@ -311,7 +311,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
 					<quiet>true</quiet>
-					<excludePackageNames>*.internal:*.osgi:*.embedded:*.test</excludePackageNames>
+					<excludePackageNames>*.extension.gravia:*.internal:*.embedded.osgi:*.test</excludePackageNames>
 					<links>
 						<link>http://www.osgi.org/javadoc/r5/core</link>
 					</links>
@@ -324,7 +324,12 @@
 						<tag>
 							<name>ThreadSafe</name>
 							<placement>t</placement>
-							<head>Thread Safety: ThreadSafe</head>
+							<head>Thread Safety: Thread Safe</head>
+						</tag>
+						<tag>
+							<name>NotThreadSafe</name>
+							<placement>t</placement>
+							<head>Thread Safety: Not Thread Safe</head>
 						</tag>
 					</tags>
 				</configuration>

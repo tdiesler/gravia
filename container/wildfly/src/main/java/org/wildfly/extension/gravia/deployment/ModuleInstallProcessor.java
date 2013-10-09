@@ -33,11 +33,11 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.module.ResourceRoot;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.runtime.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.jboss.modules.ModuleClassLoader;
 import org.wildfly.extension.gravia.GraviaConstants;
 

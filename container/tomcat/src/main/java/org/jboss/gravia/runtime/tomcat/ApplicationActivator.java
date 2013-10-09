@@ -5,16 +5,16 @@
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -31,16 +31,27 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-import org.jboss.gravia.runtime.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
+import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 
+/**
+ * Activates the {@link Runtime} as part of the web app lifecycle.
+ *
+ * @author thomas.diesler@jboss.com
+ * @since 27-Sep-2013
+ */
 @WebListener
 public class ApplicationActivator implements ServletContextListener {
 
+    boolean runtimeCreated;
+
+    /**
+     * Creates the runtime and installs/starts the webapp as a module.
+     */
     @Override
     public void contextInitialized(ServletContextEvent event) {
         ServletContext servletContext = event.getServletContext();
@@ -48,6 +59,7 @@ public class ApplicationActivator implements ServletContextListener {
         if (runtime == null) {
             DefaultPropertiesProvider propsProvider = new DefaultPropertiesProvider();
             runtime = RuntimeLocator.createRuntime(propsProvider);
+            runtimeCreated = true;
             runtime.init();
         }
         Module module = installWebappModule(runtime, servletContext);
@@ -59,12 +71,19 @@ public class ApplicationActivator implements ServletContextListener {
         servletContext.setAttribute(Module.class.getName(), module);
     }
 
+    /**
+     * Uninstalls the webapp's  module.
+     */
     @Override
     public void contextDestroyed(ServletContextEvent event) {
         ServletContext servletContext = event.getServletContext();
         Module module = (Module) servletContext.getAttribute(Module.class.getName());
         if (module != null && module.getState() != Module.State.UNINSTALLED) {
             module.uninstall();
+        }
+        if (runtimeCreated) {
+            RuntimeLocator.releaseRuntime();
+            runtimeCreated = false;
         }
     }
 

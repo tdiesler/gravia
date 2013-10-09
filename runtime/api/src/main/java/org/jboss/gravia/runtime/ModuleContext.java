@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -165,7 +165,6 @@ public interface ModuleContext {
      * @throws IllegalStateException If this ModuleContext is no longer valid.
      * @see ServiceEvent
      * @see ServiceListener
-     * @see ServicePermission
      */
     void addServiceListener(ServiceListener listener, String filter);
 
@@ -230,7 +229,7 @@ public interface ModuleContext {
      * {@link Constants#OBJECTCLASS} property will be an array of string, rather
      * than just a single string.
      *
-     * @param clazz The class name under which the service can be located.
+     * @param className The class name under which the service can be located.
      * @param service The service object or a {@code ServiceFactory} object.
      * @param properties The properties for this service.
      * @return A {@code ServiceRegistration} object for use by the module
@@ -276,7 +275,7 @@ public interface ModuleContext {
      * returned.
      * </ol>
      *
-     * @param clazzes The class names under which the service can be located.
+     * @param classNames The class names under which the service can be located.
      *        The class names in this array will be stored in the service's
      *        properties under the key {@link Constants#OBJECTCLASS}.
      * @param service The service object or a {@code ServiceFactory} object.
@@ -361,7 +360,7 @@ public interface ModuleContext {
      * specified in its {@link Constants#SERVICE_ID} property); that is, the
      * service that was registered first is returned.
      *
-     * @param clazz The class name with which the service was registered.
+     * @param className The class name with which the service was registered.
      * @return A {@code ServiceReference} object, or {@code null} if no services
      *         are registered which implement the named class.
      * @throws IllegalStateException If this ModuleContext is no longer valid.
@@ -460,7 +459,7 @@ public interface ModuleContext {
      * object must return {@code true}
      * </ul>
      *
-     * @param clazz The class name with which the service was registered or
+     * @param className The class name with which the service was registered or
      *        {@code null} for all services.
      * @param filter The filter expression or {@code null} for all services.
      * @return An array of {@code ServiceReference} objects or {@code null} if
@@ -489,7 +488,7 @@ public interface ModuleContext {
      * syntax. If the specified {@code filter} is {@code null}, all registered
      * services are considered to match the filter. If the specified
      * {@code filter} expression cannot be parsed, an
-     * {@link InvalidSyntaxException} will be thrown with a human readable
+     * {@link IllegalArgumentException} will be thrown with a human readable
      * message where the filter became unparsable.
      *
      * <p>
@@ -505,7 +504,7 @@ public interface ModuleContext {
      * expression must match the service.
      * </ul>
      *
-     * @param clazz The class name with which the service was registered or
+     * @param className The class name with which the service was registered or
      *        {@code null} for all services.
      * @param filter The filter expression or {@code null} for all services.
      * @return An array of {@code ServiceReference} objects or {@code null} if
@@ -547,8 +546,8 @@ public interface ModuleContext {
      * an {@code instanceof} all the classes named when the service was
      * registered or the {@code ServiceFactory} object throws an exception or
      * will be recursively called for the context module, {@code null} is
-     * returned and a Runtime event of type {@link RuntimeEvent#ERROR}
-     * containing a {@link ServiceException} describing the error is fired. <br>
+     * returned.
+     * <br>
      * This service object is cached by the Runtime. While the context
      * module's use count for the service is greater than zero, subsequent calls
      * to get the services's service object for the context module will return

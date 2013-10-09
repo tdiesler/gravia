@@ -21,7 +21,7 @@
  */
 package org.jboss.gravia.runtime.embedded.internal;
 
-import org.jboss.gravia.runtime.embedded.spi.AbstractRuntimePlugin;
+import org.jboss.gravia.runtime.embedded.AbstractRuntimePlugin;
 
 /**
  * [TODO]

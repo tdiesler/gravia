@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -83,7 +83,7 @@ public interface Runtime {
     /**
      * Returns the module with the specified resource identity.
      *
-     * @param id The identifier of the module to retrieve.
+     * @param identity The identifier of the module to retrieve.
      * @return A {@code Module} object or {@code null} if the resource identity does
      *         not match any installed module.
      */
@@ -96,7 +96,7 @@ public interface Runtime {
      * If multiple modules are associated with the same class loader it returns
      * the first in the natural module order (i.e. the one with the lowest module identifier)
      *
-     * @param id The identifier of the module to retrieve.
+     * @param classLoader The class loader of the module to retrieve.
      * @return A {@code Module} object or {@code null} if the class loader does
      *         not match any installed module.
      */

@@ -24,10 +24,10 @@ package org.jboss.test.gravia.runtime.embedded;
 import java.util.Dictionary;
 
 import org.jboss.gravia.resource.ManifestBuilder;
-import org.jboss.gravia.runtime.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceReference;
+import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.jboss.test.gravia.runtime.embedded.sub.a.ServiceA;
 import org.junit.Assert;
 import org.junit.Test;

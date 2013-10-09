@@ -26,11 +26,11 @@ import java.util.jar.Manifest;
 import junit.framework.Assert;
 
 import org.jboss.gravia.resource.ManifestBuilder;
-import org.jboss.gravia.runtime.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.jboss.test.gravia.runtime.embedded.sub.a.SimpleActivator;
 import org.junit.Test;
 
