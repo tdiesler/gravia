@@ -1,37 +1,30 @@
 /*
- * JBoss, Home of Professional Open Source.
- * Copyright 2010, Red Hat, Inc., and individual contributors
- * as indicated by the @author tags. See the copyright.txt file in the
- * distribution for a full listing of individual contributors.
- *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- *
- * This software is distributed in the hope that it will be useful,
+ * #%L
+ * Gravia :: Integration Tests :: Common
+ * %%
+ * Copyright (C) 2010 - 2013 JBoss by Red Hat
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as 
+ * published by the Free Software Foundation, either version 2.1 of the 
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public 
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-2.1.html>.
+ * #L%
  */
 package org.jboss.test.gravia.itests;
-
-import java.util.concurrent.TimeUnit;
 
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.test.gravia.itests.sub.ApplicationActivator;
-import org.jboss.test.gravia.itests.sub.SimpleServlet;
-import org.jboss.test.gravia.itests.support.HttpRequest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -43,18 +36,8 @@ import org.junit.Test;
  */
 public abstract class ModuleLifecycleTest {
 
-    public static WebArchive deployment() {
-        WebArchive archive = ShrinkWrap.create(WebArchive.class, "simple.war");
-        archive.addClasses(HttpRequest.class, ApplicationActivator.class, SimpleServlet.class);
-        archive.addClasses(ModuleLifecycleTest.class);
-        return archive;
-    }
-
     @Test
     public void testModuleLifecycle() throws Exception {
-
-        String result = performCall("/simple/servlet?input=Hello");
-        Assert.assertEquals("Hello from Module[simple.war:1.0.0]", result);
 
         Module modA = RuntimeLocator.getRuntime().getModule(getClass().getClassLoader());
         Assert.assertEquals(Module.State.ACTIVE, modA.getState());
@@ -78,10 +61,5 @@ public abstract class ModuleLifecycleTest {
         } catch (IllegalStateException ex) {
             // expected
         }
-    }
-
-    protected String performCall(String path) throws Exception {
-        String urlspec = "http://localhost:8080" + path;
-        return HttpRequest.get(urlspec, 10, TimeUnit.SECONDS);
     }
 }

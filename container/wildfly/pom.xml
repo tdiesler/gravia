@@ -44,6 +44,12 @@
     
     <dependencies>
         <dependency>
+            <groupId>org.wildfly</groupId>
+            <artifactId>wildfly-server</artifactId>
+        </dependency>
+    
+    	<!-- Provided Dependencies -->
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.configadmin</artifactId>
             <scope>provided</scope>
@@ -93,6 +99,12 @@
 	        <artifactId>gravia-runtime-embedded</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-processor</artifactId>
+            <optional>true</optional>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 	<build>
@@ -128,7 +140,7 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
-                        <phase>process-resources</phase>
+                        <phase>package</phase>
                         <configuration>
                             <target>
                                 <ant antfile="${basedir}/scripts/antrun-wildfly-patch.xml" inheritRefs="true"/>

@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 2.1 of the
+ * it under the terms of the GNU Lesser General Public License as 
+ * published by the Free Software Foundation, either version 2.1 of the 
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- *
- * You should have received a copy of the GNU General Lesser Public
+ * 
+ * You should have received a copy of the GNU General Lesser Public 
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -27,12 +27,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.gravia.resource.ResourceIdentity;
@@ -43,33 +43,40 @@ import org.jboss.gravia.runtime.ServiceException;
 import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.util.NotNullException;
+import org.jboss.gravia.runtime.util.UnmodifiableDictionary;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.metadata.CaseInsensitiveDictionary;
 
 /**
- * [TODO]
+ * The internal representation of a service
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
+ *
+ * @ThreadSafe
  */
 @SuppressWarnings("rawtypes")
 final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<S> {
 
     private static Logger LOGGER = Logger.getLogger(ServiceState.class);
 
-    private final RuntimeServicesHandler serviceManager;
+    private final RuntimeServicesManager serviceManager;
     private final Module ownerModule;
     private final String[] classNames;
     private final ValueProvider<S> valueProvider;
     private final ServiceReference<S> reference;
-    private ServiceRegistration<S> registration;
-    private Set<Module> usingModules;
-    private Map<ResourceIdentity, ServiceFactoryHolder<S>> factoryValues;
+    private final Set<AbstractModule> usingModules = new HashSet<AbstractModule>(); // @GuardedBy("usingModules")
+    private final Map<ResourceIdentity, ServiceFactoryHolder<S>> factoryValues; // @GuardedBy("ConcurrentHashMap")
+    private final ServiceRegistration<S> registration;
 
     // The properties
-    private CaseInsensitiveDictionary prevProperties;
-    private CaseInsensitiveDictionary currProperties;
+    private CaseInsensitiveDictionary prevProperties; // @GuardedBy("propsLock")
+    private CaseInsensitiveDictionary currProperties; // @GuardedBy("propsLock")
+    private Object propsLock = new Object();
+
+    private String cachedToString;
 
     interface ValueProvider<S> {
         boolean isFactoryValue();
@@ -77,7 +84,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
     @SuppressWarnings("unchecked")
-    ServiceState(RuntimeServicesHandler serviceManager, Module owner, long serviceId, String[] classNames, ValueProvider<S> valueProvider, Dictionary properties) {
+    ServiceState(RuntimeServicesManager serviceManager, Module owner, long serviceId, String[] classNames, ValueProvider<S> valueProvider, Dictionary properties) {
         assert serviceManager != null : "Null serviceManager";
         assert owner != null : "Null owner";
         assert classNames != null && classNames.length > 0 : "Null clazzes";
@@ -97,10 +104,13 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         properties.put(Constants.SERVICE_ID, serviceId);
         properties.put(Constants.OBJECTCLASS, classNames);
         this.currProperties = new CaseInsensitiveDictionary(properties);
+        this.cachedToString = updateCachedToString();
 
         // Create the {@link ServiceRegistration} and {@link ServiceReference}
         this.registration = new ServiceRegistrationWrapper(this);
         this.reference = new ServiceReferenceWrapper(this);
+
+        this.factoryValues = valueProvider.isFactoryValue() ? new ConcurrentHashMap<ResourceIdentity, ServiceFactoryHolder<S>>() : null;
     }
 
     static ServiceState assertServiceState(ServiceReference sref) {
@@ -120,9 +130,6 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         // Get the ServiceFactory value
         S result = null;
         try {
-            if (factoryValues == null)
-                factoryValues = new HashMap<ResourceIdentity, ServiceFactoryHolder<S>>();
-
             ServiceFactoryHolder<S> factoryHolder = getFactoryHolder(module);
             if (factoryHolder == null) {
                 ServiceFactory factory = (ServiceFactory) valueProvider.getValue();
@@ -193,28 +200,26 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
     private void unregisterInternal() {
         serviceManager.unregisterService(this);
-        usingModules = null;
-        registration = null;
     }
 
 
     @Override
     public Object getProperty(String key) {
-        if (key == null)
-            return null;
-        return currProperties.get(key);
+        synchronized (propsLock) {
+            return key != null ? currProperties.get(key) : null;
+        }
     }
 
 
     @Override
     public String[] getPropertyKeys() {
-        List<String> result = new ArrayList<String>();
-        if (currProperties != null) {
+        synchronized (propsLock) {
+            List<String> result = new ArrayList<String>();
             Enumeration<String> keys = currProperties.keys();
             while (keys.hasMoreElements())
                 result.add(keys.nextElement());
+            return result.toArray(new String[result.size()]);
         }
-        return result.toArray(new String[result.size()]);
     }
 
 
@@ -225,14 +230,16 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
         // Remember the previous properties for a potential
         // delivery of the MODIFIED_ENDMATCH event
-        prevProperties = currProperties;
+        synchronized (propsLock) {
+            prevProperties = currProperties;
 
-        if (properties == null)
-            properties = new Hashtable();
+            if (properties == null)
+                properties = new Hashtable();
 
-        properties.put(Constants.SERVICE_ID, currProperties.get(Constants.SERVICE_ID));
-        properties.put(Constants.OBJECTCLASS, currProperties.get(Constants.OBJECTCLASS));
-        currProperties = new CaseInsensitiveDictionary(properties);
+            properties.put(Constants.SERVICE_ID, currProperties.get(Constants.SERVICE_ID));
+            properties.put(Constants.OBJECTCLASS, currProperties.get(Constants.OBJECTCLASS));
+            currProperties = new CaseInsensitiveDictionary(properties);
+        }
 
         // This event is synchronously delivered after the service properties have been modified.
         serviceManager.fireServiceEvent(ownerModule, ServiceEvent.MODIFIED, this);
@@ -241,7 +248,9 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
     @SuppressWarnings("unchecked")
     Dictionary<String, ?> getPreviousProperties() {
-        return prevProperties;
+        synchronized (propsLock) {
+            return new UnmodifiableDictionary(prevProperties);
+        }
     }
 
 
@@ -256,31 +265,24 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
 
-    void addUsingModule(Module moduleState) {
-        synchronized (this) {
-            if (usingModules == null)
-                usingModules = new HashSet<Module>();
-
-            usingModules.add(moduleState);
+    void addUsingModule(AbstractModule module) {
+        synchronized (usingModules) {
+            usingModules.add(module);
         }
     }
 
 
-    void removeUsingModule(Module module) {
-        synchronized (this) {
-            if (usingModules != null)
-                usingModules.remove(module);
+    void removeUsingModule(AbstractModule module) {
+        synchronized (usingModules) {
+            usingModules.remove(module);
         }
     }
 
 
-    Set<Module> getUsingModulesInternal() {
-        synchronized (this) {
-            if (usingModules == null)
-                return Collections.emptySet();
-
-            // Return an unmodifieable snapshot of the set
-            return Collections.unmodifiableSet(new HashSet<Module>(usingModules));
+    Set<AbstractModule> getUsingModulesInternal() {
+        // Return an unmodifieable snapshot of the set
+        synchronized (usingModules) {
+            return Collections.unmodifiableSet(new HashSet<AbstractModule>(usingModules));
         }
     }
 
@@ -391,13 +393,19 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     }
 
 
-    @Override
     @SuppressWarnings("unchecked")
+    private String updateCachedToString() {
+        synchronized (propsLock) {
+            Hashtable<String, Object> props = new Hashtable<String, Object>(currProperties);
+            String[] classes = (String[]) currProperties.get(Constants.OBJECTCLASS);
+            props.put(Constants.OBJECTCLASS, Arrays.asList(classes));
+            return "ServiceState" + props;
+        }
+    }
+
+    @Override
     public String toString() {
-        Hashtable<String, Object> props = new Hashtable<String, Object>(currProperties);
-        String[] classes = (String[]) props.get(Constants.OBJECTCLASS);
-        props.put(Constants.OBJECTCLASS, Arrays.asList(classes));
-        return "ServiceState" + props;
+        return cachedToString.toString();
     }
 
     class ServiceFactoryHolder<T> {

@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 2.1 of the
+ * it under the terms of the GNU Lesser General Public License as 
+ * published by the Free Software Foundation, either version 2.1 of the 
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- *
- * You should have received a copy of the GNU General Lesser Public
+ * 
+ * You should have received a copy of the GNU General Lesser Public 
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -51,13 +51,14 @@ public abstract class AbstractRuntimeTest {
         final Map<String, Object> props = new HashMap<String, Object>();
         props.put(Constants.RUNTIME_STORAGE, new File("target/runtime").getAbsolutePath());
         props.put(Constants.RUNTIME_STORAGE_CLEAN, Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT);
-        PropertiesProvider propertiesProvider = new DefaultPropertiesProvider(props);
-        runtime = RuntimeLocator.locateRuntime(propertiesProvider);
+        PropertiesProvider propsProvider = new DefaultPropertiesProvider(props);
+        runtime = RuntimeLocator.createRuntime(propsProvider);
+        runtime.init();
     }
 
     @After
     public void tearDown() throws Exception {
-        RuntimeLocator.setRuntime(null);
+        RuntimeLocator.releaseRuntime();
     }
 
     Runtime getRuntime() {

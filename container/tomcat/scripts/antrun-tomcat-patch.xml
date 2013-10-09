@@ -14,7 +14,7 @@
   <!-- ================================================================== -->
   <!-- Setup                                                              -->
   <!-- ================================================================== -->
-  
+  <property name="etc.dir" value="${basedir}/etc" />
   <property name="output.dir" value="${basedir}/target" />
   <property name="resources.dir" value="${basedir}/src/main/resources" />
   <property name="tomcat.patch.dir" value="${output.dir}/tomcat-patch" />
@@ -35,7 +35,7 @@
 
   	<!-- Filter the modules resources -->
     <copy todir="${tomcat.patch.dir}" overwrite="true">
-        <fileset dir="${resources.dir}" />
+        <fileset dir="${etc.dir}" />
 		<filterset>
 	        <filter token="project.version" value="${project.version}" />
       	</filterset>
@@ -44,6 +44,9 @@
   	<!-- Copy module resources-->
     <copy todir="${tomcat.patch.dir}/lib" overwrite="true">
         <fileset file="${deploy.artifacts.lib}/*.jar" />
+    </copy>
+    <copy todir="${wildfly.patch.dir}/lib" overwrite="true">
+        <fileset file="${output.dir}/gravia-container-tomcat-${project.version}.jar" />
     </copy>
 	
   	<!-- Zip the tomcat patch -->

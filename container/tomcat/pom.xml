@@ -45,6 +45,12 @@
 	<!-- Dependencies -->
     <dependencies>
         <dependency>
+            <groupId>org.jboss.spec.javax.servlet</groupId>
+            <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+        </dependency>
+        
+        <!-- Provided Dependencies -->
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.configadmin</artifactId>
             <scope>provided</scope>
@@ -149,7 +155,7 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
-                        <phase>process-resources</phase>
+                        <phase>package</phase>
                         <configuration>
                             <target>
                                 <ant antfile="${basedir}/scripts/antrun-tomcat-patch.xml" inheritRefs="true"/>

@@ -181,6 +181,15 @@ public abstract class AbstractResource implements Resource {
         return attachments;
     }
 
+    boolean isValid() {
+        try {
+            validate();
+            return true;
+        } catch (RuntimeException rte) {
+            return false;
+        }
+    }
+
     void validate() {
 
         // Make sure we have an identity

@@ -14,7 +14,7 @@
   <!-- ================================================================== -->
   <!-- Setup                                                              -->
   <!-- ================================================================== -->
-  
+  <property name="etc.dir" value="${basedir}/etc" />
   <property name="output.dir" value="${basedir}/target" />
   <property name="resources.dir" value="${basedir}/src/main/resources" />
   <property name="wildfly.patch.dir" value="${output.dir}/wildfly-patch" />
@@ -35,7 +35,7 @@
 
   	<!-- Filter the modules resources -->
     <copy todir="${wildfly.patch.dir}" overwrite="true">
-        <fileset dir="${resources.dir}" />
+        <fileset dir="${etc.dir}" />
 		<filterset>
 	        <filter token="project.version" value="${project.version}" />
 	        <filter token="version.apache.felix.configadmin" value="${version.apache.felix.configadmin}" />
@@ -48,6 +48,9 @@
   	<!-- Copy module resources-->
     <copy todir="${wildfly.patch.dir}/modules/system/layers/base/org/jboss/gravia/main" overwrite="true">
         <fileset file="${deploy.artifacts.lib}/*.jar" />
+    </copy>
+    <copy todir="${wildfly.patch.dir}/modules/system/layers/base/org/wildfly/extension/gravia/main" overwrite="true">
+        <fileset file="${output.dir}/gravia-container-wildfly-${project.version}.jar" />
     </copy>
 	
   	<!-- Zip the wildfly patch -->

@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 2.1 of the
+ * it under the terms of the GNU Lesser General Public License as 
+ * published by the Free Software Foundation, either version 2.1 of the 
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- *
- * You should have received a copy of the GNU General Lesser Public
+ * 
+ * You should have received a copy of the GNU General Lesser Public 
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -32,6 +32,7 @@ import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractModuleContext;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
@@ -186,7 +187,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
 
         assertNotDestroyed();
         ServiceState<?> serviceState = ServiceState.assertServiceState(reference);
-        return getServicesHandler().ungetService(getModule(), serviceState);
+        return getServicesHandler().ungetService((AbstractModule) getModule(), serviceState);
     }
 
     @Override
@@ -199,9 +200,9 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
         return getServicesHandler().getService(this, serviceState);
     }
 
-    private RuntimeServicesHandler getServicesHandler() {
+    private RuntimeServicesManager getServicesHandler() {
         AbstractRuntime runtime = getModule().adapt(AbstractRuntime.class);
-        return runtime.adapt(RuntimeServicesHandler.class);
+        return runtime.adapt(RuntimeServicesManager.class);
     }
 
     private RuntimeEventsManager getEventsHandler() {

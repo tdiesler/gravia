@@ -59,6 +59,11 @@
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-container-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-container-tomcat</artifactId>
 	        <classifier>patch</classifier>
             <scope>provided</scope>
 	        <type>zip</type>

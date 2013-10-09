@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 2.1 of the
+ * it under the terms of the GNU Lesser General Public License as 
+ * published by the Free Software Foundation, either version 2.1 of the 
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- *
- * You should have received a copy of the GNU General Lesser Public
+ * 
+ * You should have received a copy of the GNU General Lesser Public 
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -35,6 +35,8 @@ import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.ModuleException;
+import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.osgi.DefaultActivator;
 import org.jboss.gravia.runtime.osgi.OSGiRuntimeLocator;
@@ -44,7 +46,9 @@ import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.test.gravia.runtime.osgi.sub.d.ServiceD;
 import org.jboss.test.gravia.runtime.osgi.sub.d1.ServiceD1;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
@@ -70,7 +74,18 @@ public class ConfigurationAdminTestCase  {
     Deployer deployer;
 
     @ArquillianResource
-    BundleContext context;
+    BundleContext bundleContext;
+
+    @Before
+    public void setUp() throws ModuleException {
+        Runtime runtime = OSGiRuntimeLocator.createRuntime(bundleContext);
+        runtime.init();
+    }
+
+    @After
+    public void tearDown() {
+        OSGiRuntimeLocator.releaseRuntime();
+    }
 
     @Deployment
     @StartLevelAware(autostart = true)
@@ -93,8 +108,8 @@ public class ConfigurationAdminTestCase  {
     @Test
     public void testBasicModule() throws Exception {
 
-        Bundle bundleD = context.installBundle(BUNDLE_D, deployer.getDeployment(BUNDLE_D));
-        Bundle bundleD1 = context.installBundle(BUNDLE_D1, deployer.getDeployment(BUNDLE_D1));
+        Bundle bundleD = bundleContext.installBundle(BUNDLE_D, deployer.getDeployment(BUNDLE_D));
+        Bundle bundleD1 = bundleContext.installBundle(BUNDLE_D1, deployer.getDeployment(BUNDLE_D1));
 
         bundleD.start();
         bundleD1.start();

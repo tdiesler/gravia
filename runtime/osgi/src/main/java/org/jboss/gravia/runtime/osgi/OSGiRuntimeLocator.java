@@ -5,24 +5,26 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 2.1 of the
+ * it under the terms of the GNU Lesser General Public License as 
+ * published by the Free Software Foundation, either version 2.1 of the 
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- *
- * You should have received a copy of the GNU General Lesser Public
+ * 
+ * You should have received a copy of the GNU General Lesser Public 
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
 package org.jboss.gravia.runtime.osgi;
 
+import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.osgi.internal.OSGiRuntimeImpl;
+import org.jboss.gravia.runtime.osgi.internal.OSGiRuntimeFactory;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -33,21 +35,16 @@ import org.osgi.framework.BundleContext;
  */
 public final class OSGiRuntimeLocator {
 
-    public static OSGiRuntime getRuntime() {
-        return (OSGiRuntime) RuntimeLocator.getRuntime();
+    public static Runtime getRuntime() {
+        return RuntimeLocator.getRuntime();
     }
 
-    public static void setRuntime(OSGiRuntime runtime) {
-        RuntimeLocator.setRuntime(runtime);
+    public static Runtime createRuntime(BundleContext context) {
+        PropertiesProvider propsProvider = new BundleContextPropertiesProvider(context);
+        return RuntimeLocator.createRuntime(new OSGiRuntimeFactory(context), propsProvider);
     }
 
-    public static OSGiRuntime locateRuntime(BundleContext context) {
-        OSGiRuntime runtime = getRuntime();
-        if (runtime == null) {
-            BundleContextPropertiesProvider props = new BundleContextPropertiesProvider(context);
-            runtime = new OSGiRuntimeImpl(context, props);
-            RuntimeLocator.setRuntime(runtime);
-        }
-        return runtime;
+    public static void releaseRuntime() {
+        RuntimeLocator.releaseRuntime();
     }
 }

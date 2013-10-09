@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 2.1 of the
+ * it under the terms of the GNU Lesser General Public License as 
+ * published by the Free Software Foundation, either version 2.1 of the 
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- *
- * You should have received a copy of the GNU General Lesser Public
+ * 
+ * You should have received a copy of the GNU General Lesser Public 
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -34,7 +34,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import org.jboss.gravia.runtime.AllServiceListener;
 import org.jboss.gravia.runtime.Constants;
@@ -73,8 +76,7 @@ public final class RuntimeEventsManager {
     /** The set of events that are logged at INFO level */
     private Set<String> infoEvents = new HashSet<String>();
 
-    RuntimeEventsManager(ExecutorService executorService) {
-        this.executorService = executorService;
+    RuntimeEventsManager() {
         asyncBundleEvents.add(new Integer(ModuleEvent.INSTALLED));
         asyncBundleEvents.add(new Integer(ModuleEvent.RESOLVED));
         asyncBundleEvents.add(new Integer(ModuleEvent.STARTED));
@@ -84,6 +86,19 @@ public final class RuntimeEventsManager {
         infoEvents.add(ConstantsHelper.moduleEvent(ModuleEvent.STARTED));
         infoEvents.add(ConstantsHelper.moduleEvent(ModuleEvent.STOPPED));
         infoEvents.add(ConstantsHelper.moduleEvent(ModuleEvent.UNINSTALLED));
+        executorService = createExecutorService("RuntimeEvents");
+    }
+
+    private ExecutorService createExecutorService(final String threadName) {
+        ExecutorService service = Executors.newCachedThreadPool(new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable run) {
+                Thread thread = new Thread(run);
+                thread.setName(threadName);
+                return thread;
+            }
+        });
+        return service;
     }
 
     public void addModuleListener(final Module module, final ModuleListener listener) {
@@ -91,7 +106,7 @@ public final class RuntimeEventsManager {
         synchronized (moduleListeners) {
             List<BundleListenerRegistration> registrations = moduleListeners.get(module);
             if (registrations == null) {
-                registrations = new ArrayList<BundleListenerRegistration>();
+                registrations = new CopyOnWriteArrayList<BundleListenerRegistration>();
                 moduleListeners.put(module, registrations);
             }
             BundleListenerRegistration registration = new BundleListenerRegistration(module, listener);
@@ -104,21 +119,19 @@ public final class RuntimeEventsManager {
 
     public void removeModuleListener(final Module module, final ModuleListener listener) {
         assert listener != null : "Null listener";
-        synchronized (moduleListeners) {
-            List<BundleListenerRegistration> registrations = moduleListeners.get(module);
-            if (registrations != null) {
-                if (registrations.size() > 1) {
-                    Iterator<BundleListenerRegistration> iterator = registrations.iterator();
-                    while(iterator.hasNext()) {
-                        BundleListenerRegistration registration = iterator.next();
-                        if (registration.getListener() == listener) {
-                            iterator.remove();
-                            break;
-                        }
+        List<BundleListenerRegistration> registrations = moduleListeners.get(module);
+        if (registrations != null) {
+            if (registrations.size() > 1) {
+                Iterator<BundleListenerRegistration> iterator = registrations.iterator();
+                while(iterator.hasNext()) {
+                    BundleListenerRegistration registration = iterator.next();
+                    if (registration.getListener() == listener) {
+                        iterator.remove();
+                        break;
                     }
-                } else {
-                    removeBundleListeners(module);
                 }
+            } else {
+                removeBundleListeners(module);
             }
         }
     }
@@ -142,7 +155,7 @@ public final class RuntimeEventsManager {
         synchronized (serviceListeners) {
             List<ServiceListenerRegistration> listeners = serviceListeners.get(module);
             if (listeners == null) {
-                listeners = new ArrayList<ServiceListenerRegistration>();
+                listeners = new CopyOnWriteArrayList<ServiceListenerRegistration>();
                 serviceListeners.put(module, listeners);
             }
 
@@ -176,14 +189,12 @@ public final class RuntimeEventsManager {
 
     public void removeServiceListener(final Module moduleState, final ServiceListener listener) {
         assert listener != null : "Null listener";
-        synchronized (serviceListeners) {
-            List<ServiceListenerRegistration> listeners = serviceListeners.get(moduleState);
-            if (listeners != null) {
-                ServiceListenerRegistration slreg = new ServiceListenerRegistration(moduleState, listener, NoFilter.INSTANCE);
-                int index = listeners.indexOf(slreg);
-                if (index >= 0) {
-                    slreg = listeners.remove(index);
-                }
+        List<ServiceListenerRegistration> listeners = serviceListeners.get(moduleState);
+        if (listeners != null) {
+            ServiceListenerRegistration slreg = new ServiceListenerRegistration(moduleState, listener, NoFilter.INSTANCE);
+            int index = listeners.indexOf(slreg);
+            if (index >= 0) {
+                slreg = listeners.remove(index);
             }
         }
     }
@@ -218,11 +229,9 @@ public final class RuntimeEventsManager {
 
         // Get a snapshot of the current listeners
         final List<BundleListenerRegistration> registrations = new ArrayList<BundleListenerRegistration>();
-        synchronized (moduleListeners) {
-            for (Entry<Module, List<BundleListenerRegistration>> entry : moduleListeners.entrySet()) {
-                for (BundleListenerRegistration blreg : entry.getValue()) {
-                    registrations.add(blreg);
-                }
+        for (Entry<Module, List<BundleListenerRegistration>> entry : moduleListeners.entrySet()) {
+            for (BundleListenerRegistration blreg : entry.getValue()) {
+                registrations.add(blreg);
             }
         }
 
@@ -284,27 +293,24 @@ public final class RuntimeEventsManager {
         //    return;
 
         // Get a snapshot of the current listeners
-        Map<ModuleContext, Collection<ListenerInfo>> listeners;
-        synchronized (serviceListeners) {
-            listeners = new HashMap<ModuleContext, Collection<ListenerInfo>>();
-            for (Entry<Module, List<ServiceListenerRegistration>> entry : serviceListeners.entrySet()) {
-                for (ServiceListenerRegistration listener : entry.getValue()) {
-                    ModuleContext context = listener.getModuleContext();
-                    if (context != null) {
-                        Collection<ListenerInfo> infos = listeners.get(context);
-                        if (infos == null) {
-                            infos = new ArrayList<ListenerInfo>();
-                            listeners.put(context, infos);
-                        }
-                        infos.add(listener.getListenerInfo());
+        Map<ModuleContext, Collection<ListenerInfo>> listeners = new HashMap<ModuleContext, Collection<ListenerInfo>>();
+        for (Entry<Module, List<ServiceListenerRegistration>> entry : serviceListeners.entrySet()) {
+            for (ServiceListenerRegistration listener : entry.getValue()) {
+                ModuleContext context = listener.getModuleContext();
+                if (context != null) {
+                    Collection<ListenerInfo> infos = listeners.get(context);
+                    if (infos == null) {
+                        infos = new ArrayList<ListenerInfo>();
+                        listeners.put(context, infos);
                     }
+                    infos.add(listener.getListenerInfo());
                 }
             }
-            for (Map.Entry<ModuleContext, Collection<ListenerInfo>> entry : listeners.entrySet()) {
-                listeners.put(entry.getKey(), new RemoveOnlyCollection<ListenerInfo>(entry.getValue()));
-            }
-            listeners = new RemoveOnlyMap<ModuleContext, Collection<ListenerInfo>>(listeners);
         }
+        for (Map.Entry<ModuleContext, Collection<ListenerInfo>> entry : listeners.entrySet()) {
+            listeners.put(entry.getKey(), new RemoveOnlyCollection<ListenerInfo>(entry.getValue()));
+        }
+        listeners = new RemoveOnlyMap<ModuleContext, Collection<ListenerInfo>>(listeners);
 
         // Construct the ServiceEvent
         ServiceEvent event = new ServiceEventImpl(type, reference);

@@ -55,6 +55,17 @@
         
         <!-- Provided Dependencies -->
         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.enterprise</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.configadmin</artifactId>
             <scope>provided</scope>
@@ -82,16 +93,6 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.enterprise</artifactId>
             <scope>provided</scope>
         </dependency>
         
@@ -175,22 +176,14 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
 				<configuration>
 					<instructions>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Bundle-Version>${project.version}</Bundle-Version>
-						<Bundle-Activator>org.jboss.gravia.runtime.osgi.internal.RuntimeActivator</Bundle-Activator>
+						<Bundle-Activator>org.jboss.gravia.runtime.osgi.internal.OSGiRuntimeActivator</Bundle-Activator>
 						<Export-Package>
 							org.jboss.gravia.runtime.osgi;version="${project.version}",
 						</Export-Package>
-						<Import-Package>
-							org.jboss.gravia.runtime;version="[1.0,1.1)",
-							org.jboss.gravia.runtime.spi;version="[1.0,1.1)",
-							org.jboss.gravia.runtime.util;version="[1.0,1.1)",
-							org.osgi.framework;version="[1.5,2.0)",
-							org.osgi.framework.wiring;version="[1.1,2.0)",
-							org.osgi.util.tracker;version="[1.4,2.0)",
-						</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

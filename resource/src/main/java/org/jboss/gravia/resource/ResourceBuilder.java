@@ -119,6 +119,11 @@ public interface ResourceBuilder {
     Requirement addRequirement(String namespace, Map<String, Object> atts, Map<String, String> dirs);
 
     /**
+     * Return true if the resource is valid
+     */
+    boolean isValid();
+
+    /**
      * Get the final resource from the builder
      */
     Resource getResource();
