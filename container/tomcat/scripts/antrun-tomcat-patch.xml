@@ -33,15 +33,7 @@
   <!-- ================================================================== -->
   <target name="build" depends="init">
 
-  	<!-- Filter the modules resources -->
-    <copy todir="${tomcat.patch.dir}" overwrite="true">
-        <fileset dir="${etc.dir}" />
-		<filterset>
-	        <filter token="project.version" value="${project.version}" />
-      	</filterset>
-    </copy>
-  	
-  	<!-- Copy module resources-->
+  	<!-- Copy to libs -->
     <copy todir="${tomcat.patch.dir}/lib" overwrite="true">
         <fileset file="${deploy.artifacts.lib}/*.jar" />
     </copy>
