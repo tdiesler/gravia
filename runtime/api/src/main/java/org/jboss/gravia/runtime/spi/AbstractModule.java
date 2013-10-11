@@ -30,8 +30,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.AttachmentKey;
+import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.DictionaryResourceBuilder;
-import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
@@ -85,7 +85,7 @@ public abstract class AbstractModule implements Module, Attachable {
         if (headers == null) {
             headers = new Hashtable<String, String>();
             String identityHeader = getIdentityHeader(resourceIdentity);
-            headers.put(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, identityHeader);
+            headers.put(Constants.GRAVIA_IDENTITY_CAPABILITY, identityHeader);
         }
         this.headers = new UnmodifiableDictionary<String, String>(new CaseInsensitiveDictionary<String>(headers));
 

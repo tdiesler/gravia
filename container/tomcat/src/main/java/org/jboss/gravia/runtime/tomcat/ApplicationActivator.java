@@ -33,6 +33,7 @@ import javax.servlet.annotation.WebListener;
 
 import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
@@ -90,7 +91,7 @@ public class ApplicationActivator implements ServletContextListener {
         if (manifest == null)
             return null;
 
-        ManifestResourceBuilder resbuilder = new ManifestResourceBuilder().load(manifest);
+        ResourceBuilder resbuilder = new ManifestResourceBuilder().load(manifest);
         if (resbuilder.isValid() == false)
             return null;
 

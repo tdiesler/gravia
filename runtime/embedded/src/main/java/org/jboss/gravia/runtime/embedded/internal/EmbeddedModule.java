@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.jboss.gravia.resource.AttachmentKey;
-import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -133,7 +133,7 @@ final class EmbeddedModule extends AbstractModule {
 
             // #5 The {@link ModuleActivator#start(ModuleContext)} method if one is specified, is called.
             try {
-                String className = getHeaders().get(ManifestBuilder.MODULE_ACTIVATOR);
+                String className = getHeaders().get(Constants.MODULE_ACTIVATOR);
                 if (className != null) {
                     ModuleActivator moduleActivator;
                     synchronized (MODULE_ACTIVATOR_KEY) {

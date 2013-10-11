@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,12 +42,12 @@ public class ManifestBuilderTestCase {
     public void testBasicManifest() throws IOException {
 
         ManifestBuilder builder = new ManifestBuilder();
-        builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, "org.acme.foo;version=1.0.0");
+        builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, "org.acme.foo;version=1.0.0");
         Manifest manifest = builder.getManifest();
         Assert.assertNotNull("Manifest not null", manifest);
 
         Attributes attributes = manifest.getMainAttributes();
-        String value = attributes.getValue(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY);
+        String value = attributes.getValue(Constants.GRAVIA_IDENTITY_CAPABILITY);
         Assert.assertEquals("org.acme.foo;version=1.0.0", value);
     }
 }

@@ -21,20 +21,18 @@
  */
 package org.jboss.gravia.resource;
 
-import java.util.Map;
-
-import org.jboss.gravia.resource.spi.AbstractCapability;
-import org.jboss.gravia.resource.spi.AbstractResource;
-
 /**
- * The default {@link Capability}.
+ * Defines a number of {@link Resource} constants.
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public class DefaultCapability extends AbstractCapability {
+public interface Constants  {
 
-    public DefaultCapability(AbstractResource resource, String namespace, Map<String, Object> atts, Map<String, String> dirs) {
-        super(resource, namespace, atts, dirs);
-    }
+    public static final String GRAVIA_IDENTITY_CAPABILITY = "Gravia-Identity";
+    public static final String GRAVIA_IDENTITY_REQUIREMENT = "Gravia-IdentityRequirement";
+    public static final String GRAVIA_CAPABILITY = "Gravia-Capability";
+    public static final String GRAVIA_REQUIREMENT = "Gravia-Requirement";
+    public static final String MODULE_ACTIVATOR = "Module-Activator";
+
 }

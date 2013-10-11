@@ -26,7 +26,7 @@ import java.io.InputStream;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
-import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
@@ -65,7 +65,7 @@ public class OSGiConfigurationAdminTestCase extends ConfigurationAdminTest {
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
                 builder.addImportPackages(RuntimeLocator.class, ComponentContext.class, ConfigurationAdmin.class, Resource.class);
-                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, "configadmin-test;version=1.0.0");
+                builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, "configadmin-test;version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml,OSGI-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");
                 return builder.openStream();
             }

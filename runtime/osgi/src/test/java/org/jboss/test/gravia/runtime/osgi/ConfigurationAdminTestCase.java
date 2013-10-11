@@ -31,7 +31,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -160,7 +160,7 @@ public class ConfigurationAdminTestCase  {
                 builder.addExportPackages(ServiceD.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addImportPackages(ServiceD1.class);
-                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, BUNDLE_D + ";version=1.0.0");
+                builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_D + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.d.ServiceD.xml");
                 return builder.openStream();
             }
@@ -183,7 +183,7 @@ public class ConfigurationAdminTestCase  {
                 builder.addBundleActivator(DefaultActivator.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addExportPackages(ServiceD1.class);
-                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, BUNDLE_D1 + ";version=1.0.0");
+                builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_D1 + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.d1.ServiceD1.xml");
                 return builder.openStream();
             }

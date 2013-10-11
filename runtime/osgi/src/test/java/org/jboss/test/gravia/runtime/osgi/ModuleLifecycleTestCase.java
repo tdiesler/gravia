@@ -26,7 +26,7 @@ import java.io.InputStream;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
@@ -86,7 +86,7 @@ public class ModuleLifecycleTestCase {
                 builder.addBundleManifestVersion(2);
                 builder.addBundleActivator(SimpleActivator.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, Resource.class);
-                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, archive.getName() + ";version=0.0.0");
+                builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, archive.getName() + ";version=0.0.0");
                 return builder.openStream();
             }
         });

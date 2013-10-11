@@ -27,7 +27,7 @@ import org.jboss.arquillian.container.test.api.Deployer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -132,7 +132,7 @@ public class ServiceComponentTestCase  {
                 builder.addExportPackages(ServiceA.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addImportPackages(ServiceA1.class);
-                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, BUNDLE_A + ";version=1.0.0");
+                builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_A + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.a.ServiceA.xml");
                 return builder.openStream();
             }
@@ -155,7 +155,7 @@ public class ServiceComponentTestCase  {
                 builder.addBundleActivator(DefaultActivator.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addExportPackages(ServiceA1.class);
-                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, BUNDLE_A1 + ";version=1.0.0");
+                builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_A1 + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.a1.ServiceA1.xml");
                 return builder.openStream();
             }

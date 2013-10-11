@@ -21,7 +21,6 @@
  */
 package org.jboss.gravia.runtime;
 
-import org.jboss.gravia.resource.ManifestBuilder;
 
 /**
  * Defines standard names for the environment system properties, service
@@ -48,7 +47,7 @@ public interface Constants {
      * The header value may be retrieved from the {@code Dictionary} object
      * returned by the {@link Module#getHeaders()} method.
      */
-    String MODULE_ACTIVATOR = ManifestBuilder.MODULE_ACTIVATOR;
+    String MODULE_ACTIVATOR = "Module-Activator";
 
     /**
      * Runtime property specifying the persistent storage area used

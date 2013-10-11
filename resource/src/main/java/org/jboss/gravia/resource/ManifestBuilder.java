@@ -5,16 +5,16 @@
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -47,11 +47,7 @@ import org.jboss.logging.Logger;
  */
 public final class ManifestBuilder {
 
-    public static final String RESOURCE_IDENTITY_CAPABILITY = "Resource-Identity";
-    public static final String RESOURCE_IDENTITY_REQUIREMENT = "Resource-IdentityRequirement";
-    public static final String RESOURCE_CAPABILITY = "Resource-Capability";
-    public static final String RESOURCE_REQUIREMENT = "Resource-Requirement";
-    public static final String MODULE_ACTIVATOR = "Module-Activator";
+    static final Logger LOGGER = Logger.getLogger(ManifestBuilder.class.getPackage().getName());
 
     public enum Type {
         String,
@@ -60,8 +56,6 @@ public final class ManifestBuilder {
         Long,
         Double
     }
-
-    static final Logger LOGGER = Logger.getLogger(ManifestBuilder.class.getPackage().getName());
 
     private final Map<String, String> identityRequirements = new LinkedHashMap<String, String>();
     private final List<String> genericCapabilities = new ArrayList<String>();
@@ -102,7 +96,7 @@ public final class ManifestBuilder {
                 buffer.append(";" + entry.getKey() + ":=\"" + entry.getValue() + "\"");
             }
         }
-        addManifestHeader(RESOURCE_IDENTITY_CAPABILITY, buffer.toString());
+        addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, buffer.toString());
         return this;
     }
 
@@ -139,12 +133,12 @@ public final class ManifestBuilder {
     }
 
     public ManifestBuilder addModuleActivator(String className) {
-        addManifestHeader(MODULE_ACTIVATOR, className);
+        addManifestHeader(Constants.MODULE_ACTIVATOR, className);
         return this;
     }
 
     public ManifestBuilder addModuleActivator(Class<?> clazz) {
-        addManifestHeader(MODULE_ACTIVATOR, clazz.getName());
+        addManifestHeader(Constants.MODULE_ACTIVATOR, clazz.getName());
         return this;
     }
 
@@ -229,9 +223,9 @@ public final class ManifestBuilder {
         if (manifest == null)
             throw new IllegalArgumentException("Null manifest");
 
-        String identitySpec = getManifestHeaderInternal(manifest, RESOURCE_IDENTITY_CAPABILITY);
+        String identitySpec = getManifestHeaderInternal(manifest, Constants.GRAVIA_IDENTITY_CAPABILITY);
         if (identitySpec == null)
-            throw new IllegalArgumentException("Cannot obtain required header: " + RESOURCE_IDENTITY_CAPABILITY);
+            throw new IllegalArgumentException("Cannot obtain required header: " + Constants.GRAVIA_IDENTITY_CAPABILITY);
     }
 
     private static String getManifestHeaderInternal(Manifest manifest, String key) {
@@ -242,9 +236,9 @@ public final class ManifestBuilder {
 
     public Manifest getManifest() {
         if (manifest == null) {
-            addManifestHeader(RESOURCE_IDENTITY_REQUIREMENT, identityRequirements);
-            addManifestHeader(RESOURCE_CAPABILITY, genericCapabilities);
-            addManifestHeader(RESOURCE_REQUIREMENT, genericRequirements);
+            addManifestHeader(Constants.GRAVIA_IDENTITY_REQUIREMENT, identityRequirements);
+            addManifestHeader(Constants.GRAVIA_CAPABILITY, genericCapabilities);
+            addManifestHeader(Constants.GRAVIA_REQUIREMENT, genericRequirements);
             StringWriter out = new StringWriter();
             PrintWriter pw = new PrintWriter(out);
             for(String line : lines) {

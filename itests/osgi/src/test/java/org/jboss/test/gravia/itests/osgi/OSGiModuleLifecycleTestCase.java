@@ -26,7 +26,7 @@ import java.io.InputStream;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
-import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -57,7 +57,7 @@ public class OSGiModuleLifecycleTestCase extends ModuleLifecycleTest {
                 builder.addBundleVersion("1.0.0");
                 builder.addBundleManifestVersion(2);
                 builder.addImportPackages(RuntimeLocator.class);
-                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, archive.getName() + ";version=1.0.0");
+                builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, archive.getName() + ";version=1.0.0");
                 return builder.openStream();
             }
         });

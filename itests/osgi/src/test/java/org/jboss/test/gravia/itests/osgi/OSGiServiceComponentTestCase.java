@@ -26,7 +26,7 @@ import java.io.InputStream;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
-import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
@@ -64,7 +64,7 @@ public class OSGiServiceComponentTestCase extends ServiceComponentTest {
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
                 builder.addImportPackages(RuntimeLocator.class, ComponentContext.class, Resource.class);
-                builder.addManifestHeader(ManifestBuilder.RESOURCE_IDENTITY_CAPABILITY, "scr-test;version=1.0.0");
+                builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, "scr-test;version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.itests.sub.a.ServiceA.xml,OSGI-INF/org.jboss.test.gravia.itests.sub.a1.ServiceA1.xml");
                 return builder.openStream();
             }
