@@ -31,7 +31,7 @@
     <parent>
         <groupId>org.jboss.gravia</groupId>
         <artifactId>gravia-itests</artifactId>
-        <version>1.0.0.Beta2-SNAPSHOT</version>
+        <version>1.0.0.Beta2</version>
     </parent>
 
     <name>Gravia :: Integration Tests :: Tomcat</name>
@@ -170,7 +170,7 @@
                         <phase>process-test-resources</phase>
                         <configuration>
                             <target>
-                                <copy file="src/test/resources/tomcat-users.xml" todir="${tomcat.home}/conf" overwrite="true"/>
+                                <copy file="src/test/resources/tomcat-users.xml" todir="${tomcat.home}/conf" overwrite="true" />
                             </target>
                         </configuration>
                     </execution>
