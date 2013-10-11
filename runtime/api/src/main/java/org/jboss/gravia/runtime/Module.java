@@ -24,7 +24,6 @@ package org.jboss.gravia.runtime;
 import java.io.File;
 import java.util.Dictionary;
 
-import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 
@@ -82,7 +81,7 @@ import org.jboss.gravia.resource.ResourceIdentity;
  *
  * @ThreadSafe
  */
-public interface Module extends Attachable {
+public interface Module {
 
     /**
      * A module can be in one of six states:

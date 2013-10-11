@@ -31,6 +31,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import org.jboss.gravia.resource.ManifestResourceBuilder;
+import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
@@ -47,8 +49,6 @@ import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 @WebListener
 public class ApplicationActivator implements ServletContextListener {
 
-    boolean runtimeCreated;
-
     /**
      * Creates the runtime and installs/starts the webapp as a module.
      */
@@ -59,16 +59,17 @@ public class ApplicationActivator implements ServletContextListener {
         if (runtime == null) {
             DefaultPropertiesProvider propsProvider = new DefaultPropertiesProvider();
             runtime = RuntimeLocator.createRuntime(propsProvider);
-            runtimeCreated = true;
             runtime.init();
         }
         Module module = installWebappModule(runtime, servletContext);
-        try {
-            module.start();
-        } catch (ModuleException ex) {
-            throw new IllegalStateException(ex);
+        if (module != null) {
+            try {
+                module.start();
+            } catch (ModuleException ex) {
+                throw new IllegalStateException(ex);
+            }
+            servletContext.setAttribute(Module.class.getName(), module);
         }
-        servletContext.setAttribute(Module.class.getName(), module);
     }
 
     /**
@@ -81,19 +82,23 @@ public class ApplicationActivator implements ServletContextListener {
         if (module != null && module.getState() != Module.State.UNINSTALLED) {
             module.uninstall();
         }
-        if (runtimeCreated) {
-            RuntimeLocator.releaseRuntime();
-            runtimeCreated = false;
-        }
     }
 
     private Module installWebappModule(Runtime runtime, ServletContext servletContext) {
+        ClassLoader classLoader = ApplicationActivator.class.getClassLoader();
+        Manifest manifest = getWebappManifest(servletContext);
+        if (manifest == null)
+            return null;
+
+        ManifestResourceBuilder resbuilder = new ManifestResourceBuilder().load(manifest);
+        if (resbuilder.isValid() == false)
+            return null;
+
         Module module;
         try {
-            ClassLoader classLoader = ApplicationActivator.class.getClassLoader();
-            Manifest manifest = getWebappManifest(servletContext);
+            Resource resource = resbuilder.getResource();
             ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(manifest);
-            module = runtime.installModule(classLoader, headersProvider.getHeaders());
+            module = runtime.installModule(classLoader, resource, headersProvider.getHeaders());
             servletContext.setAttribute(Module.class.getName(), module);
         } catch (RuntimeException rte) {
             throw rte;
@@ -104,10 +109,12 @@ public class ApplicationActivator implements ServletContextListener {
     }
 
     private Manifest getWebappManifest(ServletContext servletContext) {
-        Manifest manifest;
+        Manifest manifest = null;
         try {
             URL entry = servletContext.getResource("/" + JarFile.MANIFEST_NAME);
-            manifest = new Manifest(entry.openStream());
+            if (entry != null) {
+                manifest = new Manifest(entry.openStream());
+            }
         } catch (IOException ex) {
             throw new IllegalStateException("Cannot read manifest", ex);
         }
