@@ -22,7 +22,7 @@
                 <include>*:org.apache.felix.scr:jar</include>
             </includes>
             <useStrictFiltering>true</useStrictFiltering>
-            <scope>provided</scope>
+            <scope>compile</scope>
             <unpack>false</unpack>
         </dependencySet>
 
