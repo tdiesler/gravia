@@ -99,6 +99,11 @@
 	        <artifactId>gravia-runtime-embedded</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.shrinkwrap</groupId>
+            <artifactId>shrinkwrap-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 	<build>

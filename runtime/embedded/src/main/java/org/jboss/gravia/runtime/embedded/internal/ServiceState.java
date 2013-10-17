@@ -45,8 +45,8 @@ import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.AbstractModule;
+import org.jboss.gravia.runtime.util.CaseInsensitiveDictionary;
 import org.jboss.gravia.runtime.util.UnmodifiableDictionary;
-import org.jboss.osgi.metadata.CaseInsensitiveDictionary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,8 +73,8 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     private final ServiceRegistration<S> registration;
 
     // The properties
-    private CaseInsensitiveDictionary prevProperties; // @GuardedBy("propsLock")
-    private CaseInsensitiveDictionary currProperties; // @GuardedBy("propsLock")
+    private CaseInsensitiveDictionary<Object> prevProperties; // @GuardedBy("propsLock")
+    private CaseInsensitiveDictionary<Object> currProperties; // @GuardedBy("propsLock")
     private Object propsLock = new Object();
 
     private String cachedToString;
@@ -393,8 +393,6 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         return result;
     }
 
-
-    @SuppressWarnings("unchecked")
     private String updateCachedToString() {
         synchronized (propsLock) {
             Hashtable<String, Object> props = new Hashtable<String, Object>(currProperties);

@@ -21,7 +21,6 @@
                 <include>*:org.apache.felix.metatype:jar</include>
                 <include>*:org.apache.felix.scr:jar</include>
                 <include>*:gravia-*:jar</include>
-                <include>*:jbosgi-metadata:jar</include>
                 <include>*:org.osgi.core:jar</include>
                 <include>*:shrinkwrap-api:jar</include>
                 <include>*:slf4j-api:jar</include>
