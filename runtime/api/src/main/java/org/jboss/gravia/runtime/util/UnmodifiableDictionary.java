@@ -26,6 +26,8 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import org.jboss.gravia.resource.spi.NotNullException;
+
 /**
  * An unmodifiable dictionary.
  *

@@ -25,9 +25,9 @@ import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jboss.gravia.resource.spi.NotNullException;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeFactory;
-import org.jboss.gravia.runtime.util.NotNullException;
 
 /**
  * Locates the a Runtime instance

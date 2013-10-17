@@ -5,16 +5,16 @@
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -44,20 +44,21 @@ import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.resource.spi.AbstractResource;
 import org.jboss.gravia.resource.spi.AbstractWire;
 import org.jboss.gravia.resource.spi.AbstractWiring;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An abstract resolver {@link Resolver}.
  *
  * The resolver maintains order on all levels.
  * This should guarantee reproducable results.
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
 public abstract class AbstractResolver implements Resolver {
 
-    static final Logger LOGGER = Logger.getLogger(Resolver.class.getPackage().getName());
+    static final Logger LOGGER = LoggerFactory.getLogger(Resolver.class.getPackage().getName());
 
     protected abstract AbstractWire createWire(Requirement req, Capability cap);
 
@@ -83,7 +84,7 @@ public abstract class AbstractResolver implements Resolver {
 
     private Map<Resource, List<Wire>> resolveInternal(ResolveContext context, boolean apply) throws ResolutionException {
 
-        LOGGER.debugf("Resolve: mandatory%s optional%s", context.getMandatoryResources(), context.getOptionalResources());
+        LOGGER.debug("Resolve: mandatory{} optional{}", context.getMandatoryResources(), context.getOptionalResources());
 
         // Get the combined set of resources in the context
         Set<Resource> combined = new LinkedHashSet<Resource>();
@@ -100,9 +101,9 @@ public abstract class AbstractResolver implements Resolver {
         Map<Resource, List<Wire>> resourceWires = state.getResult();
         if (LOGGER.isDebugEnabled()) {
             for (Entry<Resource, List<Wire>> entry : resourceWires.entrySet()) {
-                LOGGER.debugf("Resolved: %s", entry.getKey());
+                LOGGER.debug("Resolved: {}", entry.getKey());
                 for (Wire wire : entry.getValue()) {
-                    LOGGER.debugf("   %s", wire);
+                    LOGGER.debug("   {}", wire);
                 }
             }
         }
@@ -240,7 +241,7 @@ public abstract class AbstractResolver implements Resolver {
 
     /**
      * A {@link ResourceSpace} is that of a primary {@link Resource} and its immediate dependencies.
-     * A space cannot contain two versions of the same {@link Resource}. 
+     * A space cannot contain two versions of the same {@link Resource}.
      */
     class ResourceSpace {
 

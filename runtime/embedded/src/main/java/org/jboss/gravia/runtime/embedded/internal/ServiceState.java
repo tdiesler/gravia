@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.resource.spi.NotNullException;
 import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ServiceEvent;
@@ -44,10 +45,10 @@ import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.AbstractModule;
-import org.jboss.gravia.runtime.util.NotNullException;
 import org.jboss.gravia.runtime.util.UnmodifiableDictionary;
-import org.jboss.logging.Logger;
 import org.jboss.osgi.metadata.CaseInsensitiveDictionary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The internal representation of a service
@@ -60,7 +61,7 @@ import org.jboss.osgi.metadata.CaseInsensitiveDictionary;
 @SuppressWarnings("rawtypes")
 final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<S> {
 
-    private static Logger LOGGER = Logger.getLogger(ServiceState.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(ServiceState.class);
 
     private final RuntimeServicesManager serviceManager;
     private final Module ownerModule;
@@ -144,12 +145,12 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
             // null is returned and a Framework event of type {@link FrameworkEvent#ERROR}
             // containing a {@link ServiceException} describing the error is fired.
             if (result == null) {
-                ServiceException sex = new ServiceException("Cannot get factory value", ServiceException.FACTORY_ERROR);
-                LOGGER.error(sex);
+                ServiceException ex = new ServiceException("Cannot get factory value", ServiceException.FACTORY_ERROR);
+                LOGGER.error("Cannot get factory value", ex);
             }
         } catch (Throwable th) {
-            ServiceException sex = new ServiceException("Cannot get factory value", ServiceException.FACTORY_EXCEPTION, th);
-            LOGGER.error(sex);
+            ServiceException ex = new ServiceException("Cannot get factory value", ServiceException.FACTORY_EXCEPTION, th);
+            LOGGER.error("Cannot get factory value", ex);
         }
         return result;
     }
@@ -162,8 +163,8 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
                 try {
                     factoryHolder.ungetService();
                 } catch (RuntimeException rte) {
-                    ServiceException sex = new ServiceException("Cannot unget factory value", ServiceException.FACTORY_EXCEPTION, rte);
-                    LOGGER.error(sex);
+                    ServiceException ex = new ServiceException("Cannot unget factory value", ServiceException.FACTORY_EXCEPTION, rte);
+                    LOGGER.error("Cannot unget factory value", ex);
                 }
             }
         }
@@ -299,7 +300,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
         ClassLoader moduleClassLoader = module.adapt(ClassLoader.class);
         if (moduleClassLoader == null) {
-            LOGGER.infof("No ClassLoader for: %s", module);
+            LOGGER.info("No ClassLoader for: {}", module);
             return false;
         }
 
@@ -309,13 +310,13 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         } catch (ClassNotFoundException ex) {
             // If the requesting module does not have a wire to the
             // service package it cannot be constraint on that package.
-            LOGGER.tracef("Requesting module [%s] cannot load class: %s", module, className);
+            LOGGER.trace("Requesting module [{}] cannot load class: {}", module, className);
             return true;
         }
 
         ClassLoader ownerClassLoader = ownerModule.adapt(ClassLoader.class);
         if (ownerClassLoader == null) {
-            LOGGER.tracef("Registrant module [%s] has no class loader for: %s", ownerModule, className);
+            LOGGER.trace("Registrant module [{}] has no class loader for: {}", ownerModule, className);
             return true;
         }
 
@@ -326,14 +327,14 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         try {
             serviceClass = ownerClassLoader.loadClass(className);
         } catch (ClassNotFoundException e) {
-            LOGGER.tracef("Registrant module [%s] cannot load class: %s", ownerModule, className);
+            LOGGER.trace("Registrant module [{}] cannot load class: {}", ownerModule, className);
             return true;
         }
 
         // If the package source of the registrant module is equal to the package source of the specified module
         // then return true; otherwise return false.
         if (targetClass != serviceClass) {
-            LOGGER.tracef("Not assignable: %s", className);
+            LOGGER.trace("Not assignable: {}", className);
             return false;
         }
 
@@ -379,12 +380,12 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
                 // might be null (for JRE provided types).
                 Class<?> clazz = Class.forName(className, false, valueClass.getClassLoader());
                 if (clazz.isAssignableFrom(valueClass) == false) {
-                    LOGGER.errorf("Service interface [%s] loaded from [%s] is not assignable from [%s] loaded from [%s]", className, clazz.getClassLoader(), valueClass.getName(), valueClass.getClassLoader());
+                    LOGGER.error("Service interface [{}] loaded from [{}] is not assignable from [{}] loaded from [{}]", new Object[] {className, clazz.getClassLoader(), valueClass.getName(), valueClass.getClassLoader()});
                     result = false;
                     break;
                 }
             } catch (ClassNotFoundException ex) {
-                LOGGER.errorf("Cannot load [%s] from: %s", className, module);
+                LOGGER.error("Cannot load [{}] from: {}", className, module);
                 result = false;
                 break;
             }

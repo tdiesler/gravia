@@ -5,16 +5,16 @@
  * Copyright (C) 2012 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -125,7 +125,7 @@ public abstract class AbstractMavenIdentityRepository extends AbstractRepository
 
     @Override
     public Resource findMavenResource(MavenCoordinates mavenid) {
-        LOGGER.infof("Find maven providers for: %s", mavenid);
+        LOGGER.info("Find maven providers for: {}", mavenid);
 
         URL contentURL = null;
         for (URL baseURL : baserepos) {
@@ -135,7 +135,7 @@ public abstract class AbstractMavenIdentityRepository extends AbstractRepository
                 contentURL = url;
                 break;
             } catch (IOException e) {
-                LOGGER.debugf("Cannot access input stream for: %s", url);
+                LOGGER.debug("Cannot access input stream for: {}", url);
             }
         }
 
@@ -145,7 +145,7 @@ public abstract class AbstractMavenIdentityRepository extends AbstractRepository
             builder.addIdentityCapability(mavenid);
             Capability ccap = builder.addCapability(ContentNamespace.CONTENT_NAMESPACE, null, null);
             ccap.getAttributes().put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, contentURL.toExternalForm());
-            LOGGER.debugf("Found maven resource: %s", result = builder.getResource());
+            LOGGER.debug("Found maven resource: {}", result = builder.getResource());
         }
 
         return result;

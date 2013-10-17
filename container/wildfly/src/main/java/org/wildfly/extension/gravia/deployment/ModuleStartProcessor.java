@@ -5,16 +5,16 @@
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -29,8 +29,9 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wildfly.extension.gravia.GraviaConstants;
-import org.wildfly.extension.gravia.GraviaLogger;
 
 /**
  * Start/Stop the attached Gravia Module
@@ -39,6 +40,8 @@ import org.wildfly.extension.gravia.GraviaLogger;
  * @since 08-Oct-2013
  */
 public class ModuleStartProcessor implements DeploymentUnitProcessor {
+
+    static final Logger LOGGER = LoggerFactory.getLogger(GraviaConstants.class.getPackage().getName());
 
     @Override
     public void deploy(final DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
@@ -60,7 +63,7 @@ public class ModuleStartProcessor implements DeploymentUnitProcessor {
             try {
                 module.stop();
             } catch (ModuleException ex) {
-                GraviaLogger.LOGGER.errorf(ex, "Cannot stop module: %s", module);
+                LOGGER.error("Cannot stop module: " + module, ex);
             }
         }
     }

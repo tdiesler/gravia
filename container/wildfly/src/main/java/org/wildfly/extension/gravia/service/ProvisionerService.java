@@ -5,16 +5,16 @@
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -22,9 +22,6 @@
 
 
 package org.wildfly.extension.gravia.service;
-
-import static org.wildfly.extension.gravia.GraviaLogger.LOGGER;
-import static org.wildfly.extension.gravia.GraviaMessages.MESSAGES;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,6 +64,8 @@ import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.importer.ZipImporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wildfly.extension.gravia.GraviaConstants;
 
 /**
@@ -76,6 +75,8 @@ import org.wildfly.extension.gravia.GraviaConstants;
  * @since 27-Jun-2013
  */
 public class ProvisionerService extends AbstractService<Provisioner> {
+
+    static final Logger LOGGER = LoggerFactory.getLogger(GraviaConstants.class.getPackage().getName());
 
     private final InjectedValue<ModelController> injectedController = new InjectedValue<ModelController>();
     private final InjectedValue<Environment> injectedEnvironment = new InjectedValue<Environment>();
@@ -150,7 +151,7 @@ public class ProvisionerService extends AbstractService<Provisioner> {
             InputStream input = getWrappedResourceContent(res, mapping);
             serverDeployer.deploy(runtimeName, input);
         } catch (Throwable th) {
-            throw MESSAGES.cannotProvisionResource(th, res);
+            throw new ProvisionException("Cannot provision resource: " + res, th);
         }
 
         return new DefaultResourceHandle(res) {
@@ -160,7 +161,7 @@ public class ProvisionerService extends AbstractService<Provisioner> {
                 try {
                     serverDeployer.undeploy(runtimeName);
                 } catch (Throwable th) {
-                    throw MESSAGES.cannotUninstallProvisionedResource(th, getResource());
+                    throw new ProvisionException("Cannot uninstall provisioned resource: " + getResource(), th);
                 }
             }
         };
@@ -179,7 +180,7 @@ public class ProvisionerService extends AbstractService<Provisioner> {
     }
 
     private Asset getDeploymentStructureAsset(Resource res, Map<Requirement, Resource> mapping) {
-        LOGGER.infof("Generating dependencies for: %s", res);
+        LOGGER.info("Generating dependencies for: {}", res);
         StringBuffer buffer = new StringBuffer();
         buffer.append("<jboss-deployment-structure xmlns='urn:jboss:deployment-structure:1.2'>");
         buffer.append(" <deployment>");
@@ -197,7 +198,7 @@ public class ProvisionerService extends AbstractService<Provisioner> {
                     modname = "deployment." + modname;
                 }
                 buffer.append("<module name='" + modname + "'/>");
-                LOGGER.infof("  %s", modname);
+                LOGGER.info("  {}", modname);
             }
         }
         buffer.append("  </dependencies>");

@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
 
+import org.jboss.gravia.resource.spi.NotNullException;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.ServiceListener;
@@ -36,7 +37,6 @@ import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractModuleContext;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
-import org.jboss.gravia.runtime.util.NotNullException;
 
 /**
  * [TODO]

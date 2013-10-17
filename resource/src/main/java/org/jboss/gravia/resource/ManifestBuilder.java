@@ -37,7 +37,8 @@ import java.util.Map.Entry;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple manifest builder.
@@ -47,7 +48,7 @@ import org.jboss.logging.Logger;
  */
 public final class ManifestBuilder {
 
-    static final Logger LOGGER = Logger.getLogger(ManifestBuilder.class.getPackage().getName());
+    static final Logger LOGGER = LoggerFactory.getLogger(Resource.class.getPackage().getName());
 
     public enum Type {
         String,
@@ -191,7 +192,7 @@ public final class ManifestBuilder {
         if (target.get(key) == null) {
             target.put(key, entry);
         } else {
-            LOGGER.warnf("Ignore duplicate entery: %s", entry);
+            LOGGER.warn("Ignore duplicate entery: {}", entry);
         }
     }
 
@@ -254,7 +255,7 @@ public final class ManifestBuilder {
 
             String content = out.toString();
             if (LOGGER.isTraceEnabled())
-                LOGGER.tracef(content);
+                LOGGER.trace(content);
 
             try {
                 manifest = new Manifest(new ByteArrayInputStream(content.getBytes()));

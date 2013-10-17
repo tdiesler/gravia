@@ -22,7 +22,6 @@
 <!--
     Set these VM properties in your IDE debugger 
 
-    -Djava.util.logging.manager=org.jboss.logmanager.LogManager 
     -Dtest.archive.directory=${workspace_loc:gravia-itests-tomcat/target}/test-libs 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -40,6 +39,7 @@
 
 	<!-- Properties -->
     <properties>
+        <version.jboss.arquillian.core>1.0.0.Final</version.jboss.arquillian.core>
         <tomcat.home>${project.build.directory}/apache-tomcat-${version.apache.tomcat}</tomcat.home>
     </properties>
     
@@ -69,11 +69,6 @@
 	        <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.spec.javax.servlet</groupId>
             <artifactId>jboss-servlet-api_3.0_spec</artifactId>
             <scope>provided</scope>
@@ -91,11 +86,6 @@
 			<scope>test</scope>
 		</dependency>
         <dependency>
-            <groupId>org.jboss.logmanager</groupId>
-            <artifactId>jboss-logmanager</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.shrinkwrap</groupId>
             <artifactId>shrinkwrap-impl-base</artifactId>
             <scope>test</scope>
@@ -103,6 +93,11 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -182,8 +177,8 @@
 			        <argLine>${surefire.system.args}</argLine>
 			        <redirectTestOutputToFile>false</redirectTestOutputToFile>
 			        <systemPropertyVariables>
-			            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
 			            <test.archive.directory>${project.build.directory}/test-libs</test.archive.directory>
+                        <log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration>
 			        </systemPropertyVariables>
 			    </configuration>
 			</plugin>

@@ -5,16 +5,16 @@
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -37,7 +37,8 @@ import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.ResourceStore;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An abstract {@link ResourceStore}
@@ -47,7 +48,7 @@ import org.jboss.logging.Logger;
  */
 public abstract class AbstractResourceStore implements ResourceStore {
 
-    static final Logger LOGGER = Logger.getLogger(Resource.class.getPackage().getName());
+    static final Logger LOGGER = LoggerFactory.getLogger(Resource.class.getPackage().getName());
 
     private final String storeName;
     private final boolean logCapsReqs;
@@ -117,7 +118,7 @@ public abstract class AbstractResourceStore implements ResourceStore {
             if (getResource(res.getIdentity()) != null)
                 throw new IllegalArgumentException("Resource already added: " + res);
 
-            LOGGER.debugf("Add to %s: %s", storeName, res);
+            LOGGER.debug("Add to {}: {}", storeName, res);
 
             // Add resource capabilites
             for (Capability cap : res.getCapabilities(null)) {
@@ -128,10 +129,10 @@ public abstract class AbstractResourceStore implements ResourceStore {
             // Log cap/req details
             if (logCapsReqs) {
                 for (Capability cap : res.getCapabilities(null)) {
-                    LOGGER.debugf("   %s", cap);
+                    LOGGER.debug("   {}", cap);
                 }
                 for (Requirement req : res.getRequirements(null)) {
-                    LOGGER.debugf("   %s", req);
+                    LOGGER.debug("   {}", req);
                 }
             }
 
@@ -146,7 +147,7 @@ public abstract class AbstractResourceStore implements ResourceStore {
             Resource res = resources.remove(resid);
             if (res != null) {
 
-                LOGGER.debugf("Remove from %s: %s", storeName, res);
+                LOGGER.debug("Remove from {}: {}", storeName, res);
 
                 // Remove resource capabilities
                 for (Capability cap : res.getCapabilities(null)) {

@@ -1,7 +1,7 @@
 <!--
     Set these VM properties in your IDE debugger 
 
-    -Djava.util.logging.manager=org.jboss.logmanager.LogManager 
+    -Dlog4j.configuration=${workspace_loc:gravia-resolver}/src/test/resources/logging.properties
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -22,17 +22,19 @@
 	        <artifactId>gravia-resource</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.jboss.logmanager</groupId>
-            <artifactId>jboss-logmanager</artifactId>
-            <scope>test</scope>
-        </dependency>
+        
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -51,7 +53,7 @@
 				<configuration>
 					<argLine>${surefire.system.args}</argLine>
 					<systemPropertyVariables>
-						<java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+						<log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration>
 					</systemPropertyVariables>
 				</configuration>
 			</plugin>

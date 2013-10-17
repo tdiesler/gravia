@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.jboss.gravia.resource.spi.NotNullException;
+
 /**
  * A case insensitive dictionary.
  *

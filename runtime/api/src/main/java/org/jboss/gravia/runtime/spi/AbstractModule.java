@@ -21,6 +21,8 @@
  */
 package org.jboss.gravia.runtime.spi;
 
+import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
+
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -37,14 +39,13 @@ import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.spi.AttachableSupport;
+import org.jboss.gravia.resource.spi.NotNullException;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.util.CaseInsensitiveDictionary;
-import org.jboss.gravia.runtime.util.NotNullException;
 import org.jboss.gravia.runtime.util.UnmodifiableDictionary;
-import org.jboss.logging.Logger;
 
 /**
  * The abstract base implementaiton for all {@link Module}s.
@@ -53,8 +54,6 @@ import org.jboss.logging.Logger;
  * @since 27-Sep-2013
  */
 public abstract class AbstractModule implements Module, Attachable {
-
-    public static Logger LOGGER = Logger.getLogger(Module.class.getPackage().getName());
 
     private final AbstractRuntime runtime;
     private final ClassLoader classLoader;
@@ -167,14 +166,14 @@ public abstract class AbstractModule implements Module, Attachable {
     }
 
     public void addServiceInUse(ServiceReference<?> serviceState) {
-        LOGGER.tracef("Add service in use %s to: %s", serviceState, this);
+        LOGGER.trace("Add service in use {} to: {}", serviceState, this);
         usedServices.putIfAbsent(serviceState, new AtomicInteger());
         AtomicInteger count = usedServices.get(serviceState);
         count.incrementAndGet();
     }
 
     public int removeServiceInUse(ServiceReference<?> serviceState) {
-        LOGGER.tracef("Remove service in use %s from: %s", serviceState, this);
+        LOGGER.trace("Remove service in use {} from: {}", serviceState, this);
         AtomicInteger count = usedServices.get(serviceState);
         if (count == null)
             return -1;

@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -255,7 +255,7 @@ public final class RuntimeEventsManager {
                     listener.moduleChanged(event);
                 }
             } catch (Throwable th) {
-                LOGGER.warnf(th, "Error while firing module event %s for: %s", typeName, module);
+                LOGGER.warn("Error while firing module event " + typeName + " for: " + module, th);
             }
         }
 
@@ -274,7 +274,7 @@ public final class RuntimeEventsManager {
                                     listener.moduleChanged(event);
                                 }
                             } catch (Throwable th) {
-                                LOGGER.warnf(th, "Error while firing module event %s for: %s", typeName, module);
+                                LOGGER.warn("Error while firing module event " + typeName + " for: " + module, th);
                             }
                         }
                     }
@@ -315,7 +315,7 @@ public final class RuntimeEventsManager {
         // Construct the ServiceEvent
         ServiceEvent event = new ServiceEventImpl(type, reference);
         String typeName = ConstantsHelper.serviceEvent(event.getType());
-        LOGGER.tracef("Service %s: %s", typeName, reference);
+        LOGGER.trace("Service {}: {}", typeName, reference);
 
         // Nobody is interested
         if (listeners.isEmpty())
@@ -362,7 +362,7 @@ public final class RuntimeEventsManager {
                         }
                     }
                 } catch (Throwable th) {
-                    LOGGER.warnf(th, "Error while firing service event %s for: %s", typeName, reference);
+                    LOGGER.warn("Error while firing service event " + typeName + " for: " + reference, th);
                 }
             }
         }

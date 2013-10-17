@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -48,7 +48,8 @@ import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.Wire;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An abstract {@link Provisioner}
@@ -58,7 +59,7 @@ import org.jboss.logging.Logger;
  */
 public abstract class AbstractProvisioner implements Provisioner {
 
-    static final Logger LOGGER = Logger.getLogger(Provisioner.class.getPackage().getName());
+    static final Logger LOGGER = LoggerFactory.getLogger(Provisioner.class.getPackage().getName());
 
     private final Resolver resolver;
     private final Repository repository;
@@ -112,7 +113,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         if (reqs == null)
             throw new IllegalArgumentException("Null reqs");
 
-        LOGGER.debugf("START findResources: %s", reqs);
+        LOGGER.debug("START findResources: {}", reqs);
 
         // Install the unresolved resources into the cloned environment
         List<Resource> unresolved = new ArrayList<Resource>();
@@ -147,9 +148,9 @@ public abstract class AbstractProvisioner implements Provisioner {
         }
 
         AbstractProvisionResult result = new AbstractProvisionResult(mapping, unstatisfied, sorted);
-        LOGGER.debugf("END findResources");
-        LOGGER.debugf("  resources: %s", result.getResources());
-        LOGGER.debugf("  unsatisfied: %s", result.getUnsatisfiedRequirements());
+        LOGGER.debug("END findResources");
+        LOGGER.debug("  resources: {}", result.getResources());
+        LOGGER.debug("  unsatisfied: {}", result.getUnsatisfiedRequirements());
 
         // Sanity check that we can resolve all result resources
         Set<Resource> mandatory = new LinkedHashSet<Resource>();
@@ -158,7 +159,7 @@ public abstract class AbstractProvisioner implements Provisioner {
             ResolveContext context = new DefaultResolveContext(envclone, mandatory, null);
             resolver.resolve(context).entrySet();
         } catch (ResolutionException ex) {
-            LOGGER.warnf(ex, "Cannot resolve provisioner result");
+            LOGGER.warn("Cannot resolve provisioner result", ex);
         }
 
         return result;
@@ -198,7 +199,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         boolean envModified = false;
         Set<Resource> installable = new HashSet<Resource>();
 
-        LOGGER.debugf("Finding unsatisfied reqs");
+        LOGGER.debug("Finding unsatisfied reqs");
 
         Iterator<Requirement> itun = unstatisfied.iterator();
         while (itun.hasNext()) {
@@ -222,7 +223,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         for (Resource res : installable) {
             if (!resources.contains(res)) {
                 Collection<Requirement> reqs = res.getRequirements(null);
-                LOGGER.debugf("Adding %d unsatisfied reqs", reqs.size());
+                LOGGER.debug("Adding %d unsatisfied reqs", reqs.size());
                 unstatisfied.addAll(reqs);
                 env.addResource(res);
                 resources.add(res);
@@ -239,7 +240,7 @@ public abstract class AbstractProvisioner implements Provisioner {
     private Capability findProviderInRepository(Requirement req) {
 
         // Find the providers in the repository
-        LOGGER.debugf("Find in repository: %s", req);
+        LOGGER.debug("Find in repository: {}", req);
         Collection<Capability> providers = repository.findProviders(req);
 
         // Remove abstract resources
@@ -257,14 +258,14 @@ public abstract class AbstractProvisioner implements Provisioner {
         Capability cap = null;
         if (providers.size() == 1) {
             cap = providers.iterator().next();
-            LOGGER.debugf(" Found one: %s", cap);
+            LOGGER.debug(" Found one: {}", cap);
         } else if (providers.size() > 1) {
             List<Capability> sorted = new ArrayList<Capability>(providers);
             getPreferencePolicyInternal().sort(sorted);
-            LOGGER.debugf(" Found multiple: %s", sorted);
+            LOGGER.debug(" Found multiple: {}", sorted);
             cap = sorted.get(0);
         } else {
-            LOGGER.debugf(" Not found: %s", req);
+            LOGGER.debug(" Not found: {}", req);
         }
         return cap;
     }
@@ -286,7 +287,7 @@ public abstract class AbstractProvisioner implements Provisioner {
             unstatisfied.clear();
         } catch (ResolutionException ex) {
             for (Requirement req : ex.getUnresolvedRequirements()) {
-                LOGGER.debugf(" unresolved: %s", req);
+                LOGGER.debug(" unresolved: {}", req);
             }
         }
     }

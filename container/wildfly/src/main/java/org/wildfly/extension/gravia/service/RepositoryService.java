@@ -23,8 +23,6 @@
 
 package org.wildfly.extension.gravia.service;
 
-import static org.wildfly.extension.gravia.GraviaMessages.MESSAGES;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,7 +50,6 @@ import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.value.InjectedValue;
 import org.wildfly.extension.gravia.GraviaConstants;
-import org.wildfly.extension.gravia.GraviaMessages;
 
 /**
  * Service responsible for preloading the {@link Repository}.
@@ -92,7 +89,7 @@ public class RepositoryService extends AbstractService<Repository> {
                         File storageDir = new File(serverenv.getServerDataDir().getPath() + File.separator + "repository");
                         value = storageDir.getCanonicalPath();
                     } catch (IOException ex) {
-                        throw GraviaMessages.MESSAGES.cannotCreateRepositoryStorageArea(ex);
+                        throw new IllegalStateException("Cannot create repository storage area");
                     }
                 }
                 return value != null ? value : defaultValue;
@@ -120,7 +117,7 @@ public class RepositoryService extends AbstractService<Repository> {
                     auxres = reader.nextResource();
                 }
             } catch (IOException e) {
-                throw MESSAGES.cannotInstallGraviaFeature(res.getName());
+                throw new IllegalStateException("Cannot install feature to repository: " + res.getName());
             }
         }
     }

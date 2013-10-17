@@ -32,9 +32,9 @@
     
     <dependencies>
         <module name="javax.api"/>
-        <module name="org.jboss.logging"/>
         <module name="org.jboss.osgi.metadata"/>
         <module name="org.osgi.core"/>
+        <module name="org.slf4j"/>
     </dependencies>
 
 </module>
