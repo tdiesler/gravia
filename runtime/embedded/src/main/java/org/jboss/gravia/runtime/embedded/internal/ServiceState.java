@@ -29,6 +29,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,6 +82,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
     interface ValueProvider<S> {
         boolean isFactoryValue();
+
         S getValue();
     }
 
@@ -155,7 +157,6 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         return result;
     }
 
-
     void ungetScopedValue(Module module) {
         if (valueProvider.isFactoryValue()) {
             ServiceFactoryHolder factoryHolder = getFactoryHolder(module);
@@ -174,16 +175,13 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         return factoryValues != null ? factoryValues.get(module.getIdentity()) : null;
     }
 
-
     ServiceRegistration<S> getRegistration() {
         return registration;
     }
 
-
     List<String> getClassNames() {
         return Arrays.asList(classNames);
     }
-
 
     @Override
     public ServiceReference<S> getReference() {
@@ -191,18 +189,15 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         return reference;
     }
 
-
     @Override
     public void unregister() {
         assertNotUnregistered();
         unregisterInternal();
     }
 
-
     private void unregisterInternal() {
         serviceManager.unregisterService(this);
     }
-
 
     @Override
     public Object getProperty(String key) {
@@ -210,7 +205,6 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
             return key != null ? currProperties.get(key) : null;
         }
     }
-
 
     @Override
     public String[] getPropertyKeys() {
@@ -222,7 +216,6 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
             return result.toArray(new String[result.size()]);
         }
     }
-
 
     @Override
     @SuppressWarnings({ "unchecked" })
@@ -246,7 +239,6 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         serviceManager.fireServiceEvent(ownerModule, ServiceEvent.MODIFIED, this);
     }
 
-
     @SuppressWarnings("unchecked")
     Dictionary<String, ?> getPreviousProperties() {
         synchronized (propsLock) {
@@ -254,17 +246,14 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         }
     }
 
-
     Module getServiceOwner() {
         return ownerModule;
     }
-
 
     @Override
     public Module getModule() {
         return (isUnregistered() ? null : ownerModule);
     }
-
 
     void addUsingModule(AbstractModule module) {
         synchronized (usingModules) {
@@ -272,13 +261,11 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         }
     }
 
-
     void removeUsingModule(AbstractModule module) {
         synchronized (usingModules) {
             usingModules.remove(module);
         }
     }
-
 
     Set<AbstractModule> getUsingModulesInternal() {
         // Return an unmodifieable snapshot of the set
@@ -341,7 +328,6 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         return true;
     }
 
-
     @Override
     public int compareTo(Object sref) {
         if (!(sref instanceof ServiceReference))
@@ -380,7 +366,8 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
                 // might be null (for JRE provided types).
                 Class<?> clazz = Class.forName(className, false, valueClass.getClassLoader());
                 if (clazz.isAssignableFrom(valueClass) == false) {
-                    LOGGER.error("Service interface [{}] loaded from [{}] is not assignable from [{}] loaded from [{}]", new Object[] {className, clazz.getClassLoader(), valueClass.getName(), valueClass.getClassLoader()});
+                    LOGGER.error("Service interface [{}] loaded from [{}] is not assignable from [{}] loaded from [{}]",
+                            new Object[] { className, clazz.getClassLoader(), valueClass.getName(), valueClass.getClassLoader() });
                     result = false;
                     break;
                 }
@@ -395,9 +382,20 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
     private String updateCachedToString() {
         synchronized (propsLock) {
-            Hashtable<String, Object> props = new Hashtable<String, Object>(currProperties);
-            String[] classes = (String[]) currProperties.get(Constants.OBJECTCLASS);
+            Map<String, Object> clone = new LinkedHashMap<String, Object>(currProperties);
+            Map<String, Object> props = new LinkedHashMap<String, Object>();
+            // service.id
+            props.put(Constants.SERVICE_ID, clone.remove(Constants.SERVICE_ID));
+            // service.pid
+            String pid = (String) clone.remove(Constants.SERVICE_PID);
+            if (pid != null) {
+                props.put(Constants.SERVICE_PID, pid);
+            }
+            // objectClass
+            String[] classes = (String[]) clone.remove(Constants.OBJECTCLASS);
             props.put(Constants.OBJECTCLASS, Arrays.asList(classes));
+            // all other props
+            props.putAll(clone);
             return "ServiceState" + props;
         }
     }

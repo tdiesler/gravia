@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
 import org.jboss.gravia.runtime.ModuleEvent;
@@ -112,6 +113,22 @@ public abstract class AbstractRuntime implements Runtime {
         while(iterator.hasNext()) {
             Module module = iterator.next();
             if (!module.adapt(ClassLoader.class).equals(classLoader)) {
+                iterator.remove();
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Set<Module> getModules(String symbolicName, VersionRange range) {
+        Set<Module> result = getModules();
+        Iterator<Module> iterator = result.iterator();
+        while(iterator.hasNext()) {
+            ResourceIdentity modid = iterator.next().getIdentity();
+            if (symbolicName != null && !symbolicName.equals(modid.getSymbolicName())) {
+                iterator.remove();
+            }
+            if (range != null && !range.includes(modid.getVersion())) {
                 iterator.remove();
             }
         }

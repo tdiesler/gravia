@@ -25,6 +25,7 @@ import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
 
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,15 +82,23 @@ public abstract class AbstractModule implements Module, Attachable {
 
         // Build the headers
         ResourceIdentity resourceIdentity = resource.getIdentity();
-        if (headers == null) {
-            headers = new Hashtable<String, String>();
-            String identityHeader = getIdentityHeader(resourceIdentity);
-            headers.put(Constants.GRAVIA_IDENTITY_CAPABILITY, identityHeader);
+        Hashtable<String, String> coloned = new Hashtable<String, String>();
+        if (headers != null) {
+            Enumeration<String> keys = headers.keys();
+            while(keys.hasMoreElements()) {
+                String key = keys.nextElement();
+                String value = headers.get(key);
+                coloned.put(key, value);
+            }
         }
-        this.headers = new UnmodifiableDictionary<String, String>(new CaseInsensitiveDictionary<String>(headers));
+        if (coloned.get(Constants.GRAVIA_IDENTITY_CAPABILITY) == null) {
+            String identityHeader = getIdentityHeader(resourceIdentity);
+            coloned.put(Constants.GRAVIA_IDENTITY_CAPABILITY, identityHeader);
+        }
+        this.headers = new UnmodifiableDictionary<String, String>(new CaseInsensitiveDictionary<String>(coloned));
 
         // Verify the resource & headers identity
-        ResourceIdentity headersIdentity = new DictionaryResourceBuilder().load(headers).getResource().getIdentity();
+        ResourceIdentity headersIdentity = new DictionaryResourceBuilder().load(coloned).getResource().getIdentity();
         if (!resourceIdentity.equals(headersIdentity))
             throw new IllegalArgumentException("Resource and header identity does not match: " + resourceIdentity);
     }

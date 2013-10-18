@@ -21,83 +21,29 @@
  */
 package org.jboss.gravia.resource;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Hashtable;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import org.jboss.gravia.resource.spi.ElementParser;
-
 /**
- * The default {@link Resource} builder.
+ * A manifest {@link Resource} builder.
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
+ *
+ * @NotThreadSafe
  */
-public class ManifestResourceBuilder extends DefaultResourceBuilder {
+public class ManifestResourceBuilder extends DictionaryResourceBuilder {
 
     public ManifestResourceBuilder load(Manifest manifest) {
-        boolean identityFound = false;
-        boolean headerFound = false;
+        Hashtable<String, String> headers = new Hashtable<String, String>();
         Attributes mainatts = manifest.getMainAttributes();
         for (Object key : mainatts.keySet()) {
             String name = key.toString();
             String value = mainatts.getValue(name);
-            if (name.startsWith("Gravia-") || name.equals(Constants.MODULE_ACTIVATOR)) {
-                headerFound = true;
-            }
-            if (Constants.GRAVIA_IDENTITY_CAPABILITY.equals(name)) {
-                Map<String, Object> atts = new LinkedHashMap<String, Object>();
-                Map<String, String> dirs = new LinkedHashMap<String, String>();
-                String symbolicName = parseParameterizedValue(value, atts, dirs);
-                addIdentityCapability(symbolicName, null, atts, dirs);
-                identityFound = true;
-            } else if (Constants.GRAVIA_IDENTITY_REQUIREMENT.equals(name)) {
-                for (String part : ElementParser.parseDelimitedString(value, ',')) {
-                    Map<String, Object> atts = new LinkedHashMap<String, Object>();
-                    Map<String, String> dirs = new LinkedHashMap<String, String>();
-                    String symbolicName = parseParameterizedValue(part, atts, dirs);
-                    addIdentityRequirement(symbolicName, null, atts, dirs);
-                }
-            } else if (Constants.GRAVIA_CAPABILITY.equals(name)) {
-                for (String part : ElementParser.parseDelimitedString(value, ',')) {
-                    Map<String, Object> atts = new LinkedHashMap<String, Object>();
-                    Map<String, String> dirs = new LinkedHashMap<String, String>();
-                    String namespace = parseParameterizedValue(part, atts, dirs);
-                    addCapability(namespace, atts, dirs);
-                }
-            } else if (Constants.GRAVIA_REQUIREMENT.equals(name)) {
-                for (String part : ElementParser.parseDelimitedString(value, ',')) {
-                    Map<String, Object> atts = new LinkedHashMap<String, Object>();
-                    Map<String, String> dirs = new LinkedHashMap<String, String>();
-                    String namespace = parseParameterizedValue(part, atts, dirs);
-                    addRequirement(namespace, atts, dirs);
-                }
-            }
+            headers.put(name, value);
         }
-
-        // Derive the identity from OSGi headers
-        if (headerFound && !identityFound) {
-            String symbolicName = null;
-            Version version = null;
-            for (Object key : mainatts.keySet()) {
-                String name = key.toString();
-                String value = mainatts.getValue(name);
-                if (name.equals("Bundle-SymbolicName")) {
-                    symbolicName = value;
-                    int index = symbolicName.indexOf(';');
-                    if (index > 0) {
-                        symbolicName = symbolicName.substring(0, index);
-                    }
-                } else if (name.equals("Bundle-Version")) {
-                    version = Version.parseVersion(value);
-                }
-            }
-            if (symbolicName != null) {
-                addIdentityCapability(symbolicName, version);
-            }
-        }
-
+        load(headers);
         return this;
     }
 }

@@ -268,8 +268,6 @@ final class EmbeddedModule extends AbstractModule {
         eventHandler.fireModuleEvent(this, ModuleEvent.UNINSTALLED);
 
         getRuntime().uninstallModule(this);
-
-        LOGGER.info("Uninstalled: {}", this);
     }
 
     @Override

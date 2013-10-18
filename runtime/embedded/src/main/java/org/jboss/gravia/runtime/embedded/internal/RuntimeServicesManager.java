@@ -242,13 +242,12 @@ final class RuntimeServicesManager {
     /**
      * Unregister the given service.
      */
-
     void unregisterService(ServiceState<?> serviceState) {
         if (serviceState.isUnregistered())
             return;
 
+        LOGGER.debug("Unregister service: {}", serviceState);
         for (String className : serviceState.getClassNames()) {
-            LOGGER.debug("Unregister service: {}", className);
             try {
                 List<ServiceState<?>> serviceStates = serviceMap.get(className);
                 if (serviceStates != null) {
@@ -279,7 +278,6 @@ final class RuntimeServicesManager {
      * @return <code>false</code> if the context module's use count for the service is zero or if the service has been
      *         unregistered; <code>true</code> otherwise.
      */
-
     boolean ungetService(AbstractModule module, ServiceState<?> serviceState) {
         serviceState.ungetScopedValue(module);
         int useCount = module.removeServiceInUse(serviceState);

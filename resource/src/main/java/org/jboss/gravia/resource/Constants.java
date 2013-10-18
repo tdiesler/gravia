@@ -29,10 +29,12 @@ package org.jboss.gravia.resource;
  */
 public interface Constants  {
 
+    public static final String GRAVIA_ENABLED = "Gravia-Enabled";
     public static final String GRAVIA_IDENTITY_CAPABILITY = "Gravia-Identity";
     public static final String GRAVIA_IDENTITY_REQUIREMENT = "Gravia-IdentityRequirement";
     public static final String GRAVIA_CAPABILITY = "Gravia-Capability";
     public static final String GRAVIA_REQUIREMENT = "Gravia-Requirement";
+
     public static final String MODULE_ACTIVATOR = "Module-Activator";
 
 }

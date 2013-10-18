@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.resource.VersionRange;
 
 /**
  * The Gravia runtime.
@@ -103,23 +104,32 @@ public interface Runtime {
     Module getModule(ClassLoader classLoader);
 
     /**
-     * Returns a list of all installed modules.
+     * Returns the set of all installed modules.
      * <p>
      * This method returns a list of all modules installed in the Runtime
      * at the time of the call to this method. However, since the
      * Runtime is a very dynamic environment, modules can be installed or
      * uninstalled at anytime.
      *
-     * @return A list of {@code Module} objects.
+     * @return The set of {@code Module}s.
      */
     Set<Module> getModules();
 
     /**
-     * Returns a list of installed modules associated with the given class loader.
+     * Returns the set of installed modules associated with the given class loader.
      *
-     * @return A list of {@code Module} objects.
+     * @return The set of {@code Module}s.
      */
     Set<Module> getModules(ClassLoader classLoader);
+
+    /**
+     * Returns the set of installed modules with a given symbolic name or version.
+     * <p>
+     * Both parameters are optional. If a parameter is null it matches all.
+     *
+     * @return The set of {@code Module}s that match.
+     */
+    Set<Module> getModules(String symbolicName, VersionRange range);
 
     /**
      * Installs a module with the given ClassLoader and headers dictionary.

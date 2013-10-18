@@ -21,7 +21,9 @@
   -->
   
 <!--
-    Set these VM properties in your IDE debugger 
+    Set these VM properties in your IDE debugger
+     
+    -Dlog4j.configuration=file://${workspace_loc:gravia-itests-osgi}/src/test/resources/logging.properties
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -85,15 +87,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Remove -->        
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.framework</artifactId>
-            <scope>provided</scope>
-            <version>4.0.3</version>
-        </dependency>
-        
-        
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.jboss.arquillian.junit</groupId>
@@ -108,21 +101,6 @@
         <dependency>
             <groupId>org.jboss.arquillian.osgi</groupId>
             <artifactId>arquillian-osgi-karaf-embedded</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.logmanager</groupId>
-            <artifactId>jboss-logmanager</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.shrinkwrap</groupId>
-            <artifactId>shrinkwrap-impl-base</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -252,7 +230,6 @@ felix.log.level=4
                     <argLine>${surefire.system.args}</argLine>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <systemPropertyVariables>
-                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration>
                     </systemPropertyVariables>
                 </configuration>
