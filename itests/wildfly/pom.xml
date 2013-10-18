@@ -37,8 +37,8 @@
     
     <artifactId>gravia-itests-wildfly</artifactId>
 
+    <!-- Properties -->
     <properties>
-        <project.root.dir>${basedir}</project.root.dir>
         <jboss.home>${project.build.directory}/wildfly-${version.jboss.wildfly}</jboss.home>
     </properties>
     
@@ -61,11 +61,6 @@
 	        <classifier>patch</classifier>
             <scope>provided</scope>
 	        <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.spec.javax.servlet</groupId>
-            <artifactId>jboss-servlet-api_3.0_spec</artifactId>
-            <scope>provided</scope>
         </dependency>
         
         <!-- Test Dependencies -->
