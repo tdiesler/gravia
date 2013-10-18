@@ -22,7 +22,7 @@
 <!--
     Set these VM properties in your IDE debugger 
 
-    -Dtest.archive.directory=${workspace_loc:gravia-itests-wildfly/target}/test-libs 
+    -Dlog4j.configuration=file://${workspace_loc:gravia-itests-wildfly}/src/test/resources/logging.properties
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -149,7 +149,6 @@
 			        <argLine>${surefire.system.args}</argLine>
 			        <redirectTestOutputToFile>false</redirectTestOutputToFile>
 			        <systemPropertyVariables>
-			            <test.archive.directory>${project.build.directory}/test-libs</test.archive.directory>
                         <log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration>
 			        </systemPropertyVariables>
 			    </configuration>

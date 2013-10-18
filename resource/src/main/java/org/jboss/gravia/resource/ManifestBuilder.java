@@ -74,6 +74,10 @@ public final class ManifestBuilder {
         }
     }
 
+    public ManifestBuilder addIdentityCapability(ResourceIdentity identity) {
+        return addIdentityCapability(identity.getSymbolicName(), identity.getVersion());
+    }
+
     public ManifestBuilder addIdentityCapability(String symbolicName, String version) {
         return addIdentityCapability(symbolicName, Version.parseVersion(version), null, null);
     }
