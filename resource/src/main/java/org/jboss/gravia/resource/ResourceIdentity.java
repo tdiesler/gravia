@@ -21,7 +21,8 @@
  */
 package org.jboss.gravia.resource;
 
-import org.jboss.gravia.resource.spi.NotNullException;
+import org.jboss.gravia.utils.NotNullException;
+
 
 /**
  * A resource identity.

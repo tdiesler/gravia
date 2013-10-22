@@ -31,11 +31,11 @@ import java.util.jar.Manifest;
 import junit.framework.Assert;
 
 import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
+import org.jboss.gravia.resource.spi.ManifestBuilder;
 import org.junit.Test;
 
 /**

@@ -40,13 +40,13 @@ import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.spi.AttachableSupport;
-import org.jboss.gravia.resource.spi.NotNullException;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.util.CaseInsensitiveDictionary;
-import org.jboss.gravia.runtime.util.UnmodifiableDictionary;
+import org.jboss.gravia.utils.CaseInsensitiveDictionary;
+import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.UnmodifiableDictionary;
 
 /**
  * The abstract base implementaiton for all {@link Module}s.

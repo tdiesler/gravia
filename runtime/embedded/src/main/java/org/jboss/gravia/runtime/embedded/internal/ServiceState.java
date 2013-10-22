@@ -37,7 +37,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.resource.spi.NotNullException;
 import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ServiceEvent;
@@ -46,8 +45,9 @@ import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.AbstractModule;
-import org.jboss.gravia.runtime.util.CaseInsensitiveDictionary;
-import org.jboss.gravia.runtime.util.UnmodifiableDictionary;
+import org.jboss.gravia.utils.CaseInsensitiveDictionary;
+import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.UnmodifiableDictionary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

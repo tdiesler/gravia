@@ -1,6 +1,6 @@
 /*
  * #%L
- * Gravia :: Runtime :: API
+ * JBossOSGi Framework
  * %%
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
@@ -19,47 +19,51 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.util;
+package org.jboss.gravia.utils;
 
-import java.io.Serializable;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
-
-import org.jboss.gravia.resource.spi.NotNullException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * An unmodifiable dictionary.
+ * A Map that does not allow put operations.
  *
  * @author thomas.diesler@jboss.com
- * @since 02-Dec-2009
+ * @since 23-Jan-2013
  */
-public class UnmodifiableDictionary<K, V> extends Dictionary<K, V> implements Serializable {
+public final class RemoveOnlyMap<K,V> implements Map<K,V> {
 
-    private static final long serialVersionUID = -6793757957920326746L;
+    Map<K,V> delegate;
 
-    private final Dictionary<K, V> delegate;
-
-    public UnmodifiableDictionary(Dictionary<K, V> props) {
-        NotNullException.assertValue(props, "delegate");
-
-        delegate = new Hashtable<K, V>();
-        Enumeration<K> keys = props.keys();
-        while (keys.hasMoreElements()) {
-            K key = keys.nextElement();
-            V val = props.get(key);
-            delegate.put(key, val);
-        }
+    public RemoveOnlyMap(Map<K,V> delegate) {
+        if (delegate == null)
+            throw new IllegalArgumentException("delegate");
+        this.delegate = delegate;
     }
 
     @Override
-    public Enumeration<V> elements() {
-        return delegate.elements();
+    public void clear() {
+        delegate.clear();
     }
 
     @Override
-    public V get(Object key) {
-        return delegate.get(key);
+    public boolean containsKey(Object arg0) {
+        return delegate.containsKey(arg0);
+    }
+
+    @Override
+    public boolean containsValue(Object arg0) {
+        return delegate.containsValue(arg0);
+    }
+
+    @Override
+    public Set<Map.Entry<K, V>> entrySet() {
+        return delegate.entrySet();
+    }
+
+    @Override
+    public V get(Object arg0) {
+        return delegate.get(arg0);
     }
 
     @Override
@@ -68,23 +72,33 @@ public class UnmodifiableDictionary<K, V> extends Dictionary<K, V> implements Se
     }
 
     @Override
-    public Enumeration<K> keys() {
-        return delegate.keys();
+    public Set<K> keySet() {
+        return delegate.keySet();
     }
 
     @Override
-    public V put(K key, V value) {
+    public V put(K arg0, V arg1) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public V remove(Object key) {
+    public void putAll(Map<? extends K, ? extends V> arg0) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public V remove(Object arg0) {
+        return delegate.remove(arg0);
     }
 
     @Override
     public int size() {
         return delegate.size();
+    }
+
+    @Override
+    public Collection<V> values() {
+        return delegate.values();
     }
 
     @Override

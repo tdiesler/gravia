@@ -21,13 +21,17 @@
  */
 package org.jboss.gravia.runtime.util;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jboss.gravia.resource.spi.NotNullException;
+import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.utils.NotNullException;
 
 /**
  * The default properties provider.
@@ -41,7 +45,42 @@ public final class DefaultPropertiesProvider implements PropertiesProvider {
 
     private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
 
+    /**
+     * Discover the configuration properties as follows
+     * <p>
+     * <ol>
+     * <li>Use the explicit 'gravia.properties' system property</li>
+     * <li>Discover the 'gravia.properties' config file as resource</li>
+     * </ol>
+     */
     public DefaultPropertiesProvider() {
+        URL configURL = null;
+
+        // #1 Use the explicit system property
+        String sysprop = System.getProperty(Constants.GRAVIA_PROPERTIES);
+        if (sysprop != null) {
+            try {
+                configURL = new URL(sysprop);
+            } catch (MalformedURLException ex) {
+                throw new IllegalStateException("Invalid configuration URL: " + sysprop);
+            }
+        }
+
+        // #2 discover the config file as resource
+        if (configURL == null) {
+            ClassLoader classLoader = getClass().getClassLoader();
+            configURL = classLoader.getResource(Constants.GRAVIA_PROPERTIES);
+        }
+
+        if (configURL != null) {
+            Properties props = new Properties();
+            try {
+                props.load(configURL.openStream());
+            } catch (IOException ex) {
+                throw new IllegalStateException("Cannot load configuration from: " + configURL, ex);
+            }
+            propsToMap(props, properties);
+        }
     }
 
     public DefaultPropertiesProvider(Map<String, Object> props) {
@@ -51,11 +90,7 @@ public final class DefaultPropertiesProvider implements PropertiesProvider {
 
     public DefaultPropertiesProvider(Properties props) {
         NotNullException.assertValue(props, "props");
-        for (Entry<Object, Object> entry : props.entrySet()) {
-            String key = entry.getKey().toString();
-            Object value = entry.getValue();
-            properties.put(key, value);
-        }
+        propsToMap(props, properties);
     }
 
     @Override
@@ -67,5 +102,13 @@ public final class DefaultPropertiesProvider implements PropertiesProvider {
     public Object getProperty(String key, Object defaultValue) {
         Object value = properties.get(key);
         return value != null ? value : defaultValue;
+    }
+
+    private void propsToMap(Properties props, Map<String, Object> target) {
+        for (Entry<Object, Object> entry : props.entrySet()) {
+            String key = entry.getKey().toString();
+            Object value = entry.getValue();
+            target.put(key, value);
+        }
     }
 }

@@ -79,6 +79,12 @@ public interface Constants {
     String RUNTIME_STORAGE_CLEAN_ONFIRSTINIT = "onFirstInit";
 
     /**
+     * The default configuration file name as well as the
+     * system property to discover it.
+     */
+    String GRAVIA_PROPERTIES = "gravia.properties";
+
+    /**
      * Service property identifying all of the class names under which a service
      * was registered in the Runtime. The value of this property must be of
      * type {@code String[]}.

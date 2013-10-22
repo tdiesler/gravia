@@ -60,6 +60,18 @@
 		<surefire.system.args>-ea</surefire.system.args>
     </properties>
 
+    <!-- Modules -->
+    <modules>
+        <module>provision</module>
+        <module>resource</module>
+        <module>resolver</module>
+        <module>repository</module>
+        <module>runtime</module>
+        <module>container</module>
+        <module>itests</module>
+        <module>utils</module>
+    </modules>
+
     <!-- DependencyManagement -->
     <dependencyManagement>
         <dependencies>
@@ -161,6 +173,11 @@
 		        <artifactId>gravia-runtime-osgi</artifactId>
 		        <version>${project.version}</version>
 	        </dependency>
+            <dependency>
+                <groupId>org.jboss.gravia</groupId>
+                <artifactId>gravia-utils</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 			            
             <!-- JBoss -->
             <dependency>
@@ -337,17 +354,6 @@
         </plugins>
     </build>
     
-    <!-- Modules -->
-    <modules>
-    	<module>provision</module>
-    	<module>resource</module>
-    	<module>resolver</module>
-    	<module>repository</module>
-    	<module>runtime</module>
-		<module>container</module>
-		<module>itests</module>
-    </modules>
-
     <!-- Repositories -->
     <repositories>
         <repository>

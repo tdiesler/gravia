@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.util;
+package org.jboss.gravia.utils;
 
 import java.util.Collections;
 import java.util.Dictionary;
@@ -30,8 +30,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-
-import org.jboss.gravia.resource.spi.NotNullException;
 
 /**
  * A case insensitive dictionary.

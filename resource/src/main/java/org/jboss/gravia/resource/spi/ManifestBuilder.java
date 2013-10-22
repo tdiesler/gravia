@@ -20,7 +20,7 @@
  * #L%
  */
 
-package org.jboss.gravia.resource;
+package org.jboss.gravia.resource.spi;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -37,6 +37,11 @@ import java.util.Map.Entry;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.jboss.gravia.resource.Constants;
+import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.resource.Version;
+import org.jboss.gravia.resource.VersionRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

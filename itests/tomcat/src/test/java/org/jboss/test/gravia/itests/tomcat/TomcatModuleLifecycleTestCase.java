@@ -25,7 +25,7 @@ import java.io.InputStream;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.spi.ManifestBuilder;
 import org.jboss.gravia.runtime.tomcat.ApplicationActivator;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
