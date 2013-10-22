@@ -30,18 +30,24 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Vector;
 
+import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
+import org.jboss.gravia.runtime.embedded.osgi.EmbeddedLogService;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
 import org.jboss.gravia.runtime.spi.RuntimePlugin;
+import org.osgi.service.log.LogService;
 
 /**
- * [TODO]
+ * The embedded runtome implemenation
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
@@ -50,15 +56,28 @@ public final class EmbeddedRuntime extends AbstractRuntime {
 
     private final RuntimeServicesManager serviceManager;
     private final RuntimeStorageHandler storageHandler;
+    private final ResourceIdentity systemIdentity;
 
     public EmbeddedRuntime(PropertiesProvider propertiesProvider) {
         super(propertiesProvider);
         serviceManager = new RuntimeServicesManager(adapt(RuntimeEventsManager.class));
         storageHandler = new RuntimeStorageHandler(propertiesProvider, true);
+        systemIdentity = ResourceIdentity.create("gravia-system", Version.emptyVersion);
+
+        Resource resource = new DefaultResourceBuilder().addIdentityCapability(systemIdentity).getResource();
+        try {
+            installModule(EmbeddedRuntime.class.getClassLoader(), resource, null);
+        } catch (ModuleException ex) {
+            throw new IllegalStateException("Cannot install system module", ex);
+        }
     }
 
     @Override
     public void init() {
+
+        // Install the LogService
+        ModuleContext syscontext = adapt(ModuleContext.class);
+        syscontext.registerService(LogService.class, new EmbeddedLogService(), null);
 
         // Install the plugin modules
         List<Module> pluginModules = new ArrayList<Module>();
@@ -87,7 +106,11 @@ public final class EmbeddedRuntime extends AbstractRuntime {
 
     @Override
     public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
-        return new EmbeddedModule(this, classLoader, resource, headers);
+        if (resource != null && resource.getIdentity().equals(systemIdentity)) {
+            return new SystemModule(this, classLoader, resource);
+        } else {
+            return new EmbeddedModule(this, classLoader, resource, headers);
+        }
     }
 
     @Override

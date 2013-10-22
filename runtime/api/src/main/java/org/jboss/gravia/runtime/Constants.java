@@ -50,6 +50,12 @@ public interface Constants {
     String MODULE_ACTIVATOR = "Module-Activator";
 
     /**
+     * The default configuration file name as well as the
+     * system property to discover it.
+     */
+    String GRAVIA_PROPERTIES = "gravia.properties";
+
+    /**
      * Runtime property specifying the persistent storage area used
      * by the runtime. The value of this property must be a valid file path in
      * the file system to a directory. If the specified directory does not exist
@@ -79,10 +85,12 @@ public interface Constants {
     String RUNTIME_STORAGE_CLEAN_ONFIRSTINIT = "onFirstInit";
 
     /**
-     * The default configuration file name as well as the
-     * system property to discover it.
+     * Runtime property specifying a comma seperated list of URLs each
+     * pointing to a resource that containes ConfigurationAdmin properties.
+     * <p>
+     * The resource name is expected to end in *.cfg and also names the PID
      */
-    String GRAVIA_PROPERTIES = "gravia.properties";
+    String RUNTIME_CONFIGURATIONS = "org.jboss.gravia.runtime.configurations";
 
     /**
      * Service property identifying all of the class names under which a service

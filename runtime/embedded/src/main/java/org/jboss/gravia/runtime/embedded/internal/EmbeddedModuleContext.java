@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -119,7 +119,6 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @SuppressWarnings("unchecked")
     public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
         NotNullException.assertValue(clazz, "clazz");
-
         assertNotDestroyed();
         return (ServiceReference<S>) getServicesHandler().getServiceReference(this, clazz.getName());
     }
@@ -128,7 +127,6 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     public ServiceReference<?> getServiceReference(String className) {
         NotNullException.assertValue(className, "className");
-
         assertNotDestroyed();
         return getServicesHandler().getServiceReference(this, className);
     }
@@ -136,8 +134,8 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     public ServiceReference<?>[] getServiceReferences(String className, String filter) {
         NotNullException.assertValue(className, "className");
-
         assertNotDestroyed();
+
         List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, true);
         if (srefs.isEmpty())
             return null;
@@ -153,8 +151,8 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @SuppressWarnings("unchecked")
     public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter) {
         NotNullException.assertValue(clazz, "clazz");
-
         assertNotDestroyed();
+
         String className = clazz != null ? clazz.getName() : null;
         List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, true);
 
@@ -168,8 +166,8 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     public ServiceReference<?>[] getAllServiceReferences(String className, String filter) {
         NotNullException.assertValue(className, "className");
-
         assertNotDestroyed();
+
         List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, false);
         if (srefs.isEmpty())
             return null;
@@ -184,8 +182,8 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     public boolean ungetService(ServiceReference<?> reference) {
         NotNullException.assertValue(reference, "reference");
-
         assertNotDestroyed();
+
         ServiceState<?> serviceState = ServiceState.assertServiceState(reference);
         return getServicesHandler().ungetService((AbstractModule) getModule(), serviceState);
     }
@@ -194,8 +192,8 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @SuppressWarnings("unchecked")
     public <S> S getService(ServiceReference<S> reference) {
         NotNullException.assertValue(reference, "reference");
-
         assertNotDestroyed();
+
         ServiceState<S> serviceState = ServiceState.assertServiceState(reference);
         return getServicesHandler().getService(this, serviceState);
     }

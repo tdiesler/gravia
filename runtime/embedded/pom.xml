@@ -169,6 +169,7 @@
 				<configuration>
 					<argLine>${surefire.system.args}</argLine>
 					<systemPropertyVariables>
+                        <basedir>${basedir}</basedir>
                         <log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration>
 					</systemPropertyVariables>
 				</configuration>

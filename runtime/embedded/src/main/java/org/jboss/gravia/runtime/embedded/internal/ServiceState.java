@@ -21,6 +21,8 @@
  */
 package org.jboss.gravia.runtime.embedded.internal;
 
+import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,8 +50,6 @@ import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.utils.CaseInsensitiveDictionary;
 import org.jboss.gravia.utils.NotNullException;
 import org.jboss.gravia.utils.UnmodifiableDictionary;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The internal representation of a service
@@ -61,8 +61,6 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("rawtypes")
 final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<S> {
-
-    private static Logger LOGGER = LoggerFactory.getLogger(ServiceState.class);
 
     private final RuntimeServicesManager serviceManager;
     private final Module ownerModule;

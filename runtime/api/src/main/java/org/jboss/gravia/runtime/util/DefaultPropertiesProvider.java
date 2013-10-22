@@ -95,12 +95,15 @@ public final class DefaultPropertiesProvider implements PropertiesProvider {
 
     @Override
     public Object getProperty(String key) {
-        return properties.get(key);
+        return getProperty(key, null);
     }
 
     @Override
     public Object getProperty(String key, Object defaultValue) {
         Object value = properties.get(key);
+        if (value == null) {
+            value = SecurityActions.getSystemProperty(key, null);
+        }
         return value != null ? value : defaultValue;
     }
 

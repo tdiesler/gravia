@@ -33,6 +33,7 @@ import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
@@ -77,6 +78,8 @@ public abstract class AbstractRuntime implements Runtime {
         A result = null;
         if (type.isAssignableFrom(RuntimeEventsManager.class)) {
             result = (A) runtimeEvents;
+        } else if (type.isAssignableFrom(ModuleContext.class)) {
+            result = (A) getModule(0).getModuleContext();
         }
         return result;
     }
