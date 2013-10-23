@@ -37,7 +37,7 @@ import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
-import org.jboss.gravia.runtime.embedded.osgi.EmbeddedLogService;
+import org.jboss.gravia.runtime.embedded.osgi.EmbeddedLogServiceFactory;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
@@ -77,7 +77,7 @@ public final class EmbeddedRuntime extends AbstractRuntime {
 
         // Install the LogService
         ModuleContext syscontext = adapt(ModuleContext.class);
-        syscontext.registerService(LogService.class, new EmbeddedLogService(), null);
+        syscontext.registerService(LogService.class.getName(), new EmbeddedLogServiceFactory(), null);
 
         // Install the plugin modules
         List<Module> pluginModules = new ArrayList<Module>();
