@@ -23,7 +23,7 @@ package org.jboss.test.gravia.runtime.embedded;
 
 import java.util.Dictionary;
 
-import org.jboss.gravia.resource.spi.ManifestBuilder;
+import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceReference;

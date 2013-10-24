@@ -178,12 +178,6 @@
                                     <version>${project.version}</version>
                                     <outputDirectory>${karaf.home}/system/org/jboss/gravia/gravia-runtime-osgi/${project.version}</outputDirectory>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.jboss.gravia</groupId>
-                                    <artifactId>gravia-utils</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${karaf.home}/system/org/jboss/gravia/gravia-utils/${project.version}</outputDirectory>
-                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
@@ -204,7 +198,6 @@
 # Gravia Integration
 # 
 org/apache/felix/org.apache.felix.scr/${version.apache.felix.scr}/org.apache.felix.scr-${version.apache.felix.scr}.jar=40
-org/jboss/gravia/gravia-utils/${project.version}/gravia-utils-${project.version}.jar=40
 org/jboss/gravia/gravia-resource/${project.version}/gravia-resource-${project.version}.jar=40
 org/jboss/gravia/gravia-runtime-api/${project.version}/gravia-runtime-api-${project.version}.jar=40
 org/jboss/gravia/gravia-runtime-osgi/${project.version}/gravia-runtime-osgi-${project.version}.jar=40

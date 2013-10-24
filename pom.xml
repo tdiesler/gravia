@@ -69,7 +69,6 @@
         <module>runtime</module>
         <module>container</module>
         <module>itests</module>
-        <module>utils</module>
     </modules>
 
     <!-- DependencyManagement -->
@@ -173,11 +172,6 @@
 		        <artifactId>gravia-runtime-osgi</artifactId>
 		        <version>${project.version}</version>
 	        </dependency>
-            <dependency>
-                <groupId>org.jboss.gravia</groupId>
-                <artifactId>gravia-utils</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 			            
             <!-- JBoss -->
             <dependency>
