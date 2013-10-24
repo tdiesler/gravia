@@ -21,9 +21,12 @@
  */
 package org.jboss.gravia.runtime.osgi.internal;
 
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
+
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Enumeration;
+
 import org.jboss.gravia.resource.DictionaryResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;

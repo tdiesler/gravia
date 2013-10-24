@@ -21,7 +21,7 @@
  */
 package org.jboss.gravia.runtime.embedded.internal;
 
-import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,13 +67,14 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     private final String[] classNames;
     private final ValueProvider<S> valueProvider;
     private final ServiceReference<S> reference;
-    private final Set<AbstractModule> usingModules = new HashSet<AbstractModule>(); // @GuardedBy("usingModules")
-    private final Map<ResourceIdentity, ServiceFactoryHolder<S>> factoryValues; // @GuardedBy("ConcurrentHashMap")
+    private final Set<AbstractModule> usingModules = new HashSet<AbstractModule>();
+    private final Map<ResourceIdentity, ServiceFactoryHolder<S>> factoryValues;
+    private final ThreadLocal<Module> factoryRecursion = new ThreadLocal<Module>();
     private final ServiceRegistration<S> registration;
 
     // The properties
-    private CaseInsensitiveDictionary<Object> prevProperties; // @GuardedBy("propsLock")
-    private CaseInsensitiveDictionary<Object> currProperties; // @GuardedBy("propsLock")
+    private CaseInsensitiveDictionary<Object> prevProperties;
+    private CaseInsensitiveDictionary<Object> currProperties;
     private Object propsLock = new Object();
 
     private String cachedToString;
@@ -128,9 +129,17 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         if (valueProvider.isFactoryValue() == false)
             return valueProvider.getValue();
 
-        // Get the ServiceFactory value
+        // If this method is called recursively for the same module
+        // then it must return null to break the recursion.
+        if (factoryRecursion.get() == module) {
+            LOGGER.error("ServiceFactory recusion for " + module + " in: " + this, new RuntimeException());
+            return null;
+        }
+
         S result = null;
         try {
+            factoryRecursion.set(module);
+
             ServiceFactoryHolder<S> factoryHolder = getFactoryHolder(module);
             if (factoryHolder == null) {
                 ServiceFactory factory = (ServiceFactory) valueProvider.getValue();
@@ -145,13 +154,19 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
             // null is returned and a Framework event of type {@link FrameworkEvent#ERROR}
             // containing a {@link ServiceException} describing the error is fired.
             if (result == null) {
-                ServiceException ex = new ServiceException("Cannot get factory value", ServiceException.FACTORY_ERROR);
-                LOGGER.error("Cannot get factory value", ex);
+                String message = "Cannot get factory value from: " + this;
+                ServiceException ex = new ServiceException(message, ServiceException.FACTORY_ERROR);
+                LOGGER.error(message, ex);
             }
+
         } catch (Throwable th) {
-            ServiceException ex = new ServiceException("Cannot get factory value", ServiceException.FACTORY_EXCEPTION, th);
-            LOGGER.error("Cannot get factory value", ex);
+            String message = "Cannot get factory value from: " + this;
+            ServiceException ex = new ServiceException(message, ServiceException.FACTORY_EXCEPTION, th);
+            LOGGER.error(message, ex);
+        } finally {
+            factoryRecursion.remove();
         }
+
         return result;
     }
 

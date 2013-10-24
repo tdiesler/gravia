@@ -21,7 +21,7 @@
  */
 package org.jboss.gravia.runtime.embedded.internal;
 
-import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +57,6 @@ final class RuntimeServicesManager {
 
     private final RuntimeEventsManager frameworkEvents;
     private final Map<String, List<ServiceState<?>>> serviceMap = new ConcurrentHashMap<String, List<ServiceState<?>>>();
-    private final ThreadLocal<ModuleContext> getServiceRecursion = new ThreadLocal<ModuleContext>();
     private final AtomicLong identityGenerator = new AtomicLong();
 
     RuntimeServicesManager(RuntimeEventsManager frameworkEvents) {
@@ -105,14 +104,15 @@ final class RuntimeServicesManager {
         LOGGER.debug("Register service: {}", serviceState);
 
         for (String className : classNames) {
-            List<ServiceState<?>> serviceStates = serviceMap.get(className);
-            if (serviceStates != null) {
-                serviceStates.add(serviceState);
-            } else {
-                serviceStates = new CopyOnWriteArrayList<ServiceState<?>>();
-                serviceStates.add(serviceState);
-                serviceMap.put(className, serviceStates);
+            List<ServiceState<?>> serviceStates;
+            synchronized (serviceMap) {
+                serviceStates = serviceMap.get(className);
+                if (serviceStates == null) {
+                    serviceStates = new CopyOnWriteArrayList<ServiceState<?>>();
+                    serviceMap.put(className, serviceStates);
+                }
             }
+            serviceStates.add(serviceState);
         }
         //module.addRegisteredService(serviceState);
 
@@ -214,28 +214,17 @@ final class RuntimeServicesManager {
         if (serviceState.isUnregistered())
             return null;
 
-        // If this method is called recursively for the same module
-        // then it must return null to break the recursion.
-        if (getServiceRecursion.get() == context)
-            return null;
+        // Add the given service ref to the list of used services
+        serviceState.addUsingModule((AbstractModule) context.getModule());
 
-        S value;
-        try {
-            getServiceRecursion.set(context);
+        S value = serviceState.getScopedValue(context.getModule());
 
-            // Add the given service ref to the list of used services
-            serviceState.addUsingModule((AbstractModule) context.getModule());
-
-            value = serviceState.getScopedValue(context.getModule());
-
-            // If the factory returned an invalid value
-            // restore the service usage counts
-            if (value == null) {
-                serviceState.removeUsingModule((AbstractModule) context.getModule());
-            }
-        } finally {
-            getServiceRecursion.remove();
+        // If the factory returned an invalid value
+        // restore the service usage counts
+        if (value == null) {
+            serviceState.removeUsingModule((AbstractModule) context.getModule());
         }
+
         return value;
     }
 

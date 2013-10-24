@@ -21,7 +21,8 @@
  */
 package org.jboss.gravia.runtime.embedded.internal;
 
-import static org.jboss.gravia.runtime.spi.AbstractRuntime.LOGGER;
+
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 
 import java.io.File;
 import java.util.Dictionary;

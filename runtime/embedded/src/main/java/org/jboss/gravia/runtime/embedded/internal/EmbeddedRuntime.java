@@ -21,6 +21,8 @@
  */
 package org.jboss.gravia.runtime.embedded.internal;
 
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -29,6 +31,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Vector;
+
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
 
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.Resource;
@@ -75,9 +80,13 @@ public final class EmbeddedRuntime extends AbstractRuntime {
     @Override
     public void init() {
 
-        // Install the LogService
+        // Register the LogService
         ModuleContext syscontext = adapt(ModuleContext.class);
         syscontext.registerService(LogService.class.getName(), new EmbeddedLogServiceFactory(), null);
+
+        // Register the MBeanServer service
+        MBeanServer mbeanServer = findOrCreateMBeanServer();
+        syscontext.registerService(MBeanServer.class, mbeanServer, null);
 
         // Install the plugin modules
         List<Module> pluginModules = new ArrayList<Module>();
@@ -135,6 +144,26 @@ public final class EmbeddedRuntime extends AbstractRuntime {
     @Override
     protected void uninstallModule(Module module) {
         super.uninstallModule(module);
+    }
+
+    private MBeanServer findOrCreateMBeanServer() {
+        MBeanServer mbeanServer = null;
+
+        ArrayList<MBeanServer> serverArr = MBeanServerFactory.findMBeanServer(null);
+        if (serverArr.size() > 1)
+            LOGGER.warn("Multiple MBeanServer instances: {}", serverArr);
+
+        if (serverArr.size() > 0) {
+            mbeanServer = serverArr.get(0);
+            LOGGER.debug("Found MBeanServer: {}", mbeanServer.getDefaultDomain());
+        }
+
+        if (mbeanServer == null) {
+            LOGGER.debug("No MBeanServer, create one ...");
+            mbeanServer = MBeanServerFactory.createMBeanServer();
+        }
+
+        return mbeanServer;
     }
 
     private class CLassLoaderEntriesProvider implements ModuleEntriesProvider {

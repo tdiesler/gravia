@@ -21,6 +21,8 @@
  */
 package org.jboss.gravia.runtime.spi;
 
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
+
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,8 +39,6 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The abstract base implementation for a {@link Runtime}
@@ -47,8 +47,6 @@ import org.slf4j.LoggerFactory;
  * @since 27-Sep-2013
  */
 public abstract class AbstractRuntime implements Runtime {
-
-    public static final Logger LOGGER = LoggerFactory.getLogger(Runtime.class.getPackage().getName());
 
     private final Map<Long, Module> modules = new ConcurrentHashMap<Long, Module>();
     private final RuntimeEventsManager runtimeEvents;
