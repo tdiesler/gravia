@@ -357,8 +357,8 @@ public final class RuntimeEventsManager {
                     else if (filterstr != null && ServiceEvent.MODIFIED == event.getType()) {
                         Filter filter = listenerReg.filter;
                         if (/* filter.match(reference.getPreviousProperties()) && */ !filter.match(reference)) {
-                            event = new ServiceEventImpl(ServiceEvent.MODIFIED_ENDMATCH, reference);
-                            listener.serviceChanged(event);
+                            ServiceEvent endmatch = new ServiceEventImpl(ServiceEvent.MODIFIED_ENDMATCH, reference);
+                            listener.serviceChanged(endmatch);
                         }
                     }
                 } catch (Throwable th) {
