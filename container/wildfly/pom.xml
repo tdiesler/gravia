@@ -39,7 +39,7 @@
 
     <!-- Properties -->    
     <properties>
-        <wildfly.patch.file>${project.build.directory}/${project.artifactId}-${project.version}-patch.zip</wildfly.patch.file>
+        <wildfly.patch>${project.build.directory}/${project.artifactId}-${project.version}-patch</wildfly.patch>
     </properties>
     
     <dependencies>
@@ -161,12 +161,12 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>${wildfly.patch.file}</file>
+                                    <file>${wildfly.patch}.zip</file>
                                     <classifier>patch</classifier>
                                     <type>zip</type>
                                 </artifact>
                                 <artifact>
-                                    <file>${wildfly.patch.file}</file>
+                                    <file>${wildfly.patch}.tar.gz</file>
                                     <classifier>patch</classifier>
                                     <type>tar.gz</type>
                                 </artifact>

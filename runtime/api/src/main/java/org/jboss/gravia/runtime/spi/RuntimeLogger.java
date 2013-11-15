@@ -21,7 +21,6 @@
  */
 package org.jboss.gravia.runtime.spi;
 
-import org.jboss.gravia.runtime.Runtime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class RuntimeLogger {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(Runtime.class.getPackage().getName());
+    public static final Logger LOGGER = LoggerFactory.getLogger("org.jboss.gravia.runtime");
 
     // Hide ctor
     private RuntimeLogger() {

@@ -5,16 +5,16 @@
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -40,6 +40,7 @@ import org.wildfly.extension.gravia.deployment.ModuleInstallProcessor;
 import org.wildfly.extension.gravia.deployment.ModuleStartProcessor;
 import org.wildfly.extension.gravia.service.EnvironmentService;
 import org.wildfly.extension.gravia.service.GraviaBootstrapService;
+import org.wildfly.extension.gravia.service.ModuleContextService;
 import org.wildfly.extension.gravia.service.ProvisionerService;
 import org.wildfly.extension.gravia.service.RepositoryService;
 import org.wildfly.extension.gravia.service.ResolverService;
@@ -76,6 +77,7 @@ final class GraviaSubsystemAdd extends AbstractBoottimeAddStepHandler {
             public void execute(OperationContext context, ModelNode operation) throws OperationFailedException {
                 newControllers.add(GraviaBootstrapService.addService(context.getServiceTarget(), verificationHandler));
                 newControllers.add(EnvironmentService.addService(context.getServiceTarget(), verificationHandler));
+                newControllers.add(ModuleContextService.addService(context.getServiceTarget(), verificationHandler));
                 newControllers.add(ResolverService.addService(context.getServiceTarget(), verificationHandler));
                 newControllers.add(RepositoryService.addService(context.getServiceTarget(), verificationHandler));
                 newControllers.add(ProvisionerService.addService(context.getServiceTarget(), verificationHandler));

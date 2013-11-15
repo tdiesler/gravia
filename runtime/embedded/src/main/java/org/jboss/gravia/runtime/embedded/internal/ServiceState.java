@@ -129,42 +129,53 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         if (valueProvider.isFactoryValue() == false)
             return valueProvider.getValue();
 
-        // If this method is called recursively for the same module
-        // then it must return null to break the recursion.
-        if (factoryRecursion.get() == module) {
-            LOGGER.error("ServiceFactory recusion for " + module + " in: " + this, new RuntimeException());
-            return null;
-        }
-
         S result = null;
+
+        // [TODO] Remove workaround for Endless loop on class defined failed
+        // https://issues.jboss.org/browse/LOGMGR-88
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         try {
-            factoryRecursion.set(module);
+            Thread.currentThread().setContextClassLoader(null);
 
-            ServiceFactoryHolder<S> factoryHolder = getFactoryHolder(module);
-            if (factoryHolder == null) {
-                ServiceFactory factory = (ServiceFactory) valueProvider.getValue();
-                factoryHolder = new ServiceFactoryHolder<S>(module, factory);
-                factoryValues.put(module.getIdentity(), factoryHolder);
+            // If this method is called recursively for the same module
+            // then it must return null to break the recursion.
+            if (factoryRecursion.get() == module) {
+                LOGGER.error("ServiceFactory recusion for " + module + " in: " + this, new RuntimeException());
+                return null;
             }
 
-            result = factoryHolder.getService();
+            try {
+                factoryRecursion.set(module);
 
-            // If the service object returned by the ServiceFactory object is not an instanceof all the classes named
-            // when the service was registered or the ServiceFactory object throws an exception,
-            // null is returned and a Framework event of type {@link FrameworkEvent#ERROR}
-            // containing a {@link ServiceException} describing the error is fired.
-            if (result == null) {
+                ServiceFactoryHolder<S> factoryHolder = getFactoryHolder(module);
+                if (factoryHolder == null) {
+                    ServiceFactory factory = (ServiceFactory) valueProvider.getValue();
+                    factoryHolder = new ServiceFactoryHolder<S>(module, factory);
+                    factoryValues.put(module.getIdentity(), factoryHolder);
+                }
+
+                result = factoryHolder.getService();
+
+                // If the service object returned by the ServiceFactory object is not an instanceof all the classes named
+                // when the service was registered or the ServiceFactory object throws an exception,
+                // null is returned and a Framework event of type {@link FrameworkEvent#ERROR}
+                // containing a {@link ServiceException} describing the error is fired.
+                if (result == null) {
+                    String message = "Cannot get factory value from: " + this;
+                    ServiceException ex = new ServiceException(message, ServiceException.FACTORY_ERROR);
+                    Thread.currentThread().setContextClassLoader(null);
+                    LOGGER.error(message, ex);
+                }
+
+            } catch (Throwable th) {
                 String message = "Cannot get factory value from: " + this;
-                ServiceException ex = new ServiceException(message, ServiceException.FACTORY_ERROR);
+                ServiceException ex = new ServiceException(message, ServiceException.FACTORY_EXCEPTION, th);
                 LOGGER.error(message, ex);
+            } finally {
+                factoryRecursion.remove();
             }
-
-        } catch (Throwable th) {
-            String message = "Cannot get factory value from: " + this;
-            ServiceException ex = new ServiceException(message, ServiceException.FACTORY_EXCEPTION, th);
-            LOGGER.error(message, ex);
         } finally {
-            factoryRecursion.remove();
+            Thread.currentThread().setContextClassLoader(tccl);
         }
 
         return result;

@@ -79,7 +79,7 @@ public final class DefaultPropertiesProvider implements PropertiesProvider {
             } catch (IOException ex) {
                 throw new IllegalStateException("Cannot load configuration from: " + configURL, ex);
             }
-            propsToMap(props, properties);
+            propsToMap(properties, props);
         }
     }
 
@@ -90,7 +90,7 @@ public final class DefaultPropertiesProvider implements PropertiesProvider {
 
     public DefaultPropertiesProvider(Properties props) {
         NotNullException.assertValue(props, "props");
-        propsToMap(props, properties);
+        propsToMap(properties, props);
     }
 
     @Override
@@ -107,11 +107,13 @@ public final class DefaultPropertiesProvider implements PropertiesProvider {
         return value != null ? value : defaultValue;
     }
 
-    private void propsToMap(Properties props, Map<String, Object> target) {
-        for (Entry<Object, Object> entry : props.entrySet()) {
-            String key = entry.getKey().toString();
-            Object value = entry.getValue();
-            target.put(key, value);
+    private void propsToMap(Map<String, Object> target, Properties props) {
+        synchronized (props) {
+            for (Entry<Object, Object> entry : props.entrySet()) {
+                String key = entry.getKey().toString();
+                Object value = entry.getValue();
+                target.put(key, value);
+            }
         }
     }
 }

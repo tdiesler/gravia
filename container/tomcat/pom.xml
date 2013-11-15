@@ -39,7 +39,7 @@
     
     <!-- Properties -->    
     <properties>
-        <tomcat.patch.file>${project.build.directory}/${project.artifactId}-${project.version}-patch.zip</tomcat.patch.file>
+        <tomcat.patch>${project.build.directory}/${project.artifactId}-${project.version}-patch</tomcat.patch>
     </properties>
     
 	<!-- Dependencies -->
@@ -177,12 +177,12 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>${tomcat.patch.file}</file>
+                                    <file>${tomcat.patch}.zip</file>
                                     <classifier>patch</classifier>
                                     <type>zip</type>
                                 </artifact>
                                 <artifact>
-                                    <file>${tomcat.patch.file}</file>
+                                    <file>${tomcat.patch}.tar.gz</file>
                                     <classifier>patch</classifier>
                                     <type>tar.gz</type>
                                 </artifact>

@@ -42,19 +42,21 @@ import org.jboss.msc.service.ServiceName;
 public interface GraviaConstants {
 
     /** The base name for all gravia services */
-    ServiceName CAMEL_BASE_NAME = ServiceName.JBOSS.append("wildfly", "gravia");
+    ServiceName GRAVIA_BASE_NAME = ServiceName.JBOSS.append("wildfly", "gravia");
     /** The name for the gravia subsystem service */
-    ServiceName CAMEL_SUBSYSTEM_SERVICE_NAME = CAMEL_BASE_NAME.append("Subsystem");
+    ServiceName GRAVIA_SUBSYSTEM_SERVICE_NAME = GRAVIA_BASE_NAME.append("Subsystem");
     /** The name for the {@link Environment} service */
-    ServiceName ENVIRONMENT_SERVICE_NAME = CAMEL_BASE_NAME.append("Environment");
+    ServiceName ENVIRONMENT_SERVICE_NAME = GRAVIA_BASE_NAME.append("Environment");
+    /** The name for the {@link ModuleContext} service */
+    ServiceName MODULE_CONTEXT_SERVICE_NAME = GRAVIA_BASE_NAME.append("ModuleContext");
     /** The name for the {@link Provisioner} service */
-    ServiceName PROVISIONER_SERVICE_NAME = CAMEL_BASE_NAME.append("Provisioner");
+    ServiceName PROVISIONER_SERVICE_NAME = GRAVIA_BASE_NAME.append("Provisioner");
     /** The name for the {@link Repository} service */
-    ServiceName REPOSITORY_SERVICE_NAME = CAMEL_BASE_NAME.append("Repository");
+    ServiceName REPOSITORY_SERVICE_NAME = GRAVIA_BASE_NAME.append("Repository");
     /** The name for the {@link Resolver} service */
-    ServiceName RESOLVER_SERVICE_NAME = CAMEL_BASE_NAME.append("Resolver");
+    ServiceName RESOLVER_SERVICE_NAME = GRAVIA_BASE_NAME.append("Resolver");
     /** The name for the {@link Runtime} service */
-    ServiceName RUNTIME_SERVICE_NAME = CAMEL_BASE_NAME.append("Runtime");
+    ServiceName RUNTIME_SERVICE_NAME = GRAVIA_BASE_NAME.append("Runtime");
 
     /** The deployment names for repository content deployments */
     String REPOSITORY_CONTENT_FILE_SUFFIX = "-repository-content.xml";

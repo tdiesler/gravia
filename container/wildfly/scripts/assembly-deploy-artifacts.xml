@@ -21,6 +21,7 @@
                 <include>*:org.apache.felix.metatype:jar</include>
                 <include>*:org.apache.felix.scr:jar</include>
                 <include>*:gravia-*:jar</include>
+                <include>*:org.osgi.enterprise:jar</include>
             </includes>
             <scope>compile</scope>
             <unpack>false</unpack>

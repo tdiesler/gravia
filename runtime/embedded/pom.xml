@@ -95,13 +95,6 @@
 	<build>
 		<plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <configuration>
-                    <inceptionYear>2013</inceptionYear>
-                </configuration>
-            </plugin>
-            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>

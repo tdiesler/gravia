@@ -24,39 +24,54 @@
 package org.wildfly.extension.gravia.service;
 
 import org.jboss.as.controller.ServiceVerificationHandler;
+import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.Runtime;
 import org.jboss.msc.service.AbstractService;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.msc.service.StopContext;
+import org.jboss.msc.value.InjectedValue;
 import org.wildfly.extension.gravia.GraviaConstants;
 
 /**
- * Service responsible for creating and managing the life-cycle of the gravia subsystem.
+ * Service providing the system {@link ModuleContext}.
  *
  * @author Thomas.Diesler@jboss.com
- * @since 19-Apr-2013
+ * @since 14-Nov-2013
  */
-public class GraviaBootstrapService extends AbstractService<Void> {
+public class ModuleContextService extends AbstractService<ModuleContext> {
 
-    static final Logger LOGGER = LoggerFactory.getLogger(GraviaConstants.class.getPackage().getName());
+    private final InjectedValue<Runtime> injectedRuntime = new InjectedValue<Runtime>();
 
-    public static ServiceController<Void> addService(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
-        GraviaBootstrapService service = new GraviaBootstrapService();
-        ServiceBuilder<Void> builder = serviceTarget.addService(GraviaConstants.GRAVIA_SUBSYSTEM_SERVICE_NAME, service);
+    private ModuleContext syscontext;
+
+    public static ServiceController<ModuleContext> addService(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
+        ModuleContextService service = new ModuleContextService();
+        ServiceBuilder<ModuleContext> builder = serviceTarget.addService(GraviaConstants.MODULE_CONTEXT_SERVICE_NAME, service);
+        builder.addDependency(GraviaConstants.RUNTIME_SERVICE_NAME, Runtime.class, service.injectedRuntime);
         builder.addListener(verificationHandler);
         return builder.install();
     }
 
     // Hide ctor
-    private GraviaBootstrapService() {
+    private ModuleContextService() {
     }
 
     @Override
     public void start(StartContext startContext) throws StartException {
-        LOGGER.info("Activation Gravia Subsystem");
+        syscontext = injectedRuntime.getValue().getModule(0).getModuleContext();
+    }
+
+    @Override
+    public void stop(StopContext context) {
+        syscontext = null;
+    }
+
+    @Override
+    public ModuleContext getValue() throws IllegalStateException {
+        return syscontext;
     }
 }
