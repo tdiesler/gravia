@@ -75,13 +75,13 @@ final class GraviaSubsystemAdd extends AbstractBoottimeAddStepHandler {
         context.addStep(new OperationStepHandler() {
             @Override
             public void execute(OperationContext context, ModelNode operation) throws OperationFailedException {
-                newControllers.add(GraviaBootstrapService.addService(context.getServiceTarget(), verificationHandler));
-                newControllers.add(EnvironmentService.addService(context.getServiceTarget(), verificationHandler));
-                newControllers.add(ModuleContextService.addService(context.getServiceTarget(), verificationHandler));
-                newControllers.add(ResolverService.addService(context.getServiceTarget(), verificationHandler));
-                newControllers.add(RepositoryService.addService(context.getServiceTarget(), verificationHandler));
-                newControllers.add(ProvisionerService.addService(context.getServiceTarget(), verificationHandler));
-                newControllers.add(RuntimeService.addService(context.getServiceTarget(), verificationHandler));
+                newControllers.add(new GraviaBootstrapService().install(context.getServiceTarget(), verificationHandler));
+                newControllers.add(new EnvironmentService().install(context.getServiceTarget(), verificationHandler));
+                newControllers.add(new ModuleContextService().install(context.getServiceTarget(), verificationHandler));
+                newControllers.add(new ResolverService().install(context.getServiceTarget(), verificationHandler));
+                newControllers.add(new RepositoryService().install(context.getServiceTarget(), verificationHandler));
+                newControllers.add(new ProvisionerService().install(context.getServiceTarget(), verificationHandler));
+                newControllers.add(new RuntimeService().install(context.getServiceTarget(), verificationHandler));
                 context.completeStep(OperationContext.RollbackHandler.NOOP_ROLLBACK_HANDLER);
             }
         }, OperationContext.Stage.RUNTIME);

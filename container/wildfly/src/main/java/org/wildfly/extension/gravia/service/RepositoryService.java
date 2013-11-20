@@ -62,16 +62,11 @@ public class RepositoryService extends AbstractService<Repository> {
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
     private Repository repository;
 
-    public static ServiceController<Repository> addService(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
-        RepositoryService service = new RepositoryService();
-        ServiceBuilder<Repository> builder = serviceTarget.addService(GraviaConstants.REPOSITORY_SERVICE_NAME, service);
-        builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, service.injectedServerEnvironment);
+    public ServiceController<Repository> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
+        ServiceBuilder<Repository> builder = serviceTarget.addService(GraviaConstants.REPOSITORY_SERVICE_NAME, this);
+        builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, injectedServerEnvironment);
         builder.addListener(verificationHandler);
         return builder.install();
-    }
-
-    // Hide ctor
-    private RepositoryService() {
     }
 
     @Override

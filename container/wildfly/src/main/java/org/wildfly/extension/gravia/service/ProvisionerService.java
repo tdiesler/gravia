@@ -86,19 +86,14 @@ public class ProvisionerService extends AbstractService<Provisioner> {
     private ModelControllerClient modelControllerClient;
     private Provisioner provisioner;
 
-    public static ServiceController<Provisioner> addService(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
-        ProvisionerService service = new ProvisionerService();
-        ServiceBuilder<Provisioner> builder = serviceTarget.addService(GraviaConstants.PROVISIONER_SERVICE_NAME, service);
-        builder.addDependency(Services.JBOSS_SERVER_CONTROLLER, ModelController.class, service.injectedController);
-        builder.addDependency(GraviaConstants.ENVIRONMENT_SERVICE_NAME, Environment.class, service.injectedEnvironment);
-        builder.addDependency(GraviaConstants.REPOSITORY_SERVICE_NAME, Repository.class, service.injectedRepository);
-        builder.addDependency(GraviaConstants.RESOLVER_SERVICE_NAME, Resolver.class, service.injectedResolver);
+    public ServiceController<Provisioner> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
+        ServiceBuilder<Provisioner> builder = serviceTarget.addService(GraviaConstants.PROVISIONER_SERVICE_NAME, this);
+        builder.addDependency(Services.JBOSS_SERVER_CONTROLLER, ModelController.class, injectedController);
+        builder.addDependency(GraviaConstants.ENVIRONMENT_SERVICE_NAME, Environment.class, injectedEnvironment);
+        builder.addDependency(GraviaConstants.REPOSITORY_SERVICE_NAME, Repository.class, injectedRepository);
+        builder.addDependency(GraviaConstants.RESOLVER_SERVICE_NAME, Resolver.class, injectedResolver);
         builder.addListener(verificationHandler);
         return builder.install();
-    }
-
-    // Hide ctor
-    private ProvisionerService() {
     }
 
     @Override

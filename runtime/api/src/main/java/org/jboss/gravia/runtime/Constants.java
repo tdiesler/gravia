@@ -85,6 +85,11 @@ public interface Constants {
     String RUNTIME_STORAGE_CLEAN_ONFIRSTINIT = "onFirstInit";
 
     /**
+     * The default storage location
+     */
+    String RUNTIME_STORAGE_DEFAULT = "gravia-store";
+
+    /**
      * Runtime property specifying a comma seperated list of URLs each
      * pointing to a resource that containes ConfigurationAdmin properties.
      * <p>

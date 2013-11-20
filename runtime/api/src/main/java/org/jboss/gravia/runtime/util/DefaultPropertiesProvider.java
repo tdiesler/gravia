@@ -24,6 +24,7 @@ package org.jboss.gravia.runtime.util;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -44,6 +45,7 @@ import org.jboss.gravia.utils.NotNullException;
 public final class DefaultPropertiesProvider implements PropertiesProvider {
 
     private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
+    private final boolean systemPropertyDelegation;
 
     /**
      * Discover the configuration properties as follows
@@ -54,43 +56,17 @@ public final class DefaultPropertiesProvider implements PropertiesProvider {
      * </ol>
      */
     public DefaultPropertiesProvider() {
-        URL configURL = null;
-
-        // #1 Use the explicit system property
-        String sysprop = System.getProperty(Constants.GRAVIA_PROPERTIES);
-        if (sysprop != null) {
-            try {
-                configURL = new URL(sysprop);
-            } catch (MalformedURLException ex) {
-                throw new IllegalStateException("Invalid configuration URL: " + sysprop);
-            }
-        }
-
-        // #2 discover the config file as resource
-        if (configURL == null) {
-            ClassLoader classLoader = getClass().getClassLoader();
-            configURL = classLoader.getResource(Constants.GRAVIA_PROPERTIES);
-        }
-
-        if (configURL != null) {
-            Properties props = new Properties();
-            try {
-                props.load(configURL.openStream());
-            } catch (IOException ex) {
-                throw new IllegalStateException("Cannot load configuration from: " + configURL, ex);
-            }
-            propsToMap(properties, props);
-        }
+        this(getDefaultProperties(), true);
     }
 
-    public DefaultPropertiesProvider(Map<String, Object> props) {
+    public DefaultPropertiesProvider(Properties props, boolean sysprops) {
+        this(propsToMap(props), sysprops);
+    }
+
+    public DefaultPropertiesProvider(Map<String, Object> props, boolean sysprops) {
         NotNullException.assertValue(props, "props");
+        systemPropertyDelegation = sysprops;
         properties.putAll(props);
-    }
-
-    public DefaultPropertiesProvider(Properties props) {
-        NotNullException.assertValue(props, "props");
-        propsToMap(properties, props);
     }
 
     @Override
@@ -101,19 +77,51 @@ public final class DefaultPropertiesProvider implements PropertiesProvider {
     @Override
     public Object getProperty(String key, Object defaultValue) {
         Object value = properties.get(key);
-        if (value == null) {
+        if (value == null && systemPropertyDelegation) {
             value = SecurityActions.getSystemProperty(key, null);
         }
         return value != null ? value : defaultValue;
     }
 
-    private void propsToMap(Map<String, Object> target, Properties props) {
+    private static Properties getDefaultProperties() {
+        URL configURL = null;
+
+        // #1 Use the explicit system property
+        String sysprop = SecurityActions.getSystemProperty(Constants.GRAVIA_PROPERTIES, null);
+        if (sysprop != null) {
+            try {
+                configURL = new URL(sysprop);
+            } catch (MalformedURLException ex) {
+                throw new IllegalStateException("Invalid configuration URL: " + sysprop);
+            }
+        }
+
+        // #2 discover the config file as resource
+        if (configURL == null) {
+            ClassLoader classLoader = DefaultPropertiesProvider.class.getClassLoader();
+            configURL = classLoader.getResource(Constants.GRAVIA_PROPERTIES);
+        }
+
+        Properties props = new Properties();
+        if (configURL != null) {
+            try {
+                props.load(configURL.openStream());
+            } catch (IOException ex) {
+                throw new IllegalStateException("Cannot load configuration from: " + configURL, ex);
+            }
+        }
+        return props;
+    }
+
+    private static Map<String, Object> propsToMap(Properties props) {
+        Map<String, Object> result = new HashMap<String, Object>();
         synchronized (props) {
             for (Entry<Object, Object> entry : props.entrySet()) {
                 String key = entry.getKey().toString();
                 Object value = entry.getValue();
-                target.put(key, value);
+                result.put(key, value);
             }
         }
+        return result;
     }
 }

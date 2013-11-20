@@ -48,16 +48,11 @@ public class ModuleContextService extends AbstractService<ModuleContext> {
 
     private ModuleContext syscontext;
 
-    public static ServiceController<ModuleContext> addService(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
-        ModuleContextService service = new ModuleContextService();
-        ServiceBuilder<ModuleContext> builder = serviceTarget.addService(GraviaConstants.MODULE_CONTEXT_SERVICE_NAME, service);
-        builder.addDependency(GraviaConstants.RUNTIME_SERVICE_NAME, Runtime.class, service.injectedRuntime);
+    public ServiceController<ModuleContext> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
+        ServiceBuilder<ModuleContext> builder = serviceTarget.addService(GraviaConstants.MODULE_CONTEXT_SERVICE_NAME, this);
+        builder.addDependency(GraviaConstants.RUNTIME_SERVICE_NAME, Runtime.class, injectedRuntime);
         builder.addListener(verificationHandler);
         return builder.install();
-    }
-
-    // Hide ctor
-    private ModuleContextService() {
     }
 
     @Override

@@ -44,19 +44,14 @@ public class GraviaBootstrapService extends AbstractService<Void> {
 
     static final Logger LOGGER = LoggerFactory.getLogger(GraviaConstants.class.getPackage().getName());
 
-    public static ServiceController<Void> addService(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
-        GraviaBootstrapService service = new GraviaBootstrapService();
-        ServiceBuilder<Void> builder = serviceTarget.addService(GraviaConstants.GRAVIA_SUBSYSTEM_SERVICE_NAME, service);
+    public ServiceController<Void> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
+        ServiceBuilder<Void> builder = serviceTarget.addService(GraviaConstants.GRAVIA_SUBSYSTEM_SERVICE_NAME, this);
         builder.addListener(verificationHandler);
         return builder.install();
     }
 
-    // Hide ctor
-    private GraviaBootstrapService() {
-    }
-
     @Override
     public void start(StartContext startContext) throws StartException {
-        LOGGER.info("Activation Gravia Subsystem");
+        LOGGER.info("Activating Gravia Subsystem");
     }
 }

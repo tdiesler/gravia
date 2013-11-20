@@ -32,7 +32,7 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 /**
- * [TODO]
+ * The runtime file storage handler.
  *
  * @ThreadSafe
  *
@@ -49,8 +49,7 @@ final class RuntimeStorageHandler {
         String dirName = (String) props.getProperty(Constants.RUNTIME_STORAGE);
         if (dirName == null) {
             try {
-                // [TODO] make this configurable for WildFly/Tomcat
-                File storageDir = new File("./target/gravia-store");
+                File storageDir = new File("." + File.separator + Constants.RUNTIME_STORAGE_DEFAULT);
                 dirName = storageDir.getCanonicalPath();
             } catch (IOException ex) {
                 throw new IllegalStateException("Cannot create storage area", ex);

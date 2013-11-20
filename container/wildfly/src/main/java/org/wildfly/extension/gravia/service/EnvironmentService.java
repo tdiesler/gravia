@@ -56,15 +56,10 @@ public class EnvironmentService extends AbstractService<Environment> {
 
     private Environment environment;
 
-    public static ServiceController<Environment> addService(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
-        EnvironmentService service = new EnvironmentService();
-        ServiceBuilder<Environment> builder = serviceTarget.addService(GraviaConstants.ENVIRONMENT_SERVICE_NAME, service);
+    public ServiceController<Environment> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
+        ServiceBuilder<Environment> builder = serviceTarget.addService(GraviaConstants.ENVIRONMENT_SERVICE_NAME, this);
         builder.addListener(verificationHandler);
         return builder.install();
-    }
-
-    // Hide ctor
-    private EnvironmentService() {
     }
 
     @Override
