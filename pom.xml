@@ -46,7 +46,7 @@
         <version.apache.tomcat>7.0.42</version.apache.tomcat>
         <version.javax.servlet30.api>1.0.2.Final</version.javax.servlet30.api>
         <version.jboss.arquillian.core>1.1.1.Final</version.jboss.arquillian.core>
-        <version.jboss.arquillian.osgi>2.1.0.CR2-SNAPSHOT</version.jboss.arquillian.osgi>
+        <version.jboss.arquillian.osgi>2.1.0.CR1</version.jboss.arquillian.osgi>
         <version.jboss.arquillian.tomcat>1.0.0.CR5</version.jboss.arquillian.tomcat>
         <version.jboss.logmanager>1.4.1.Final</version.jboss.logmanager>
         <version.jboss.osgi.metadata>4.0.0.CR1</version.jboss.osgi.metadata>
@@ -254,6 +254,12 @@
             <dependency>
                 <groupId>org.wildfly</groupId>
                 <artifactId>wildfly-arquillian-container-managed</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.arquillian.testenricher</groupId>
+                        <artifactId>arquillian-testenricher-osgi</artifactId>
+                    </exclusion>
+                </exclusions>
                 <version>${version.jboss.wildfly}</version>
             </dependency>
             <dependency>

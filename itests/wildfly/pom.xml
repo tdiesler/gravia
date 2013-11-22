@@ -70,6 +70,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.jboss.arquillian.osgi</groupId>
+            <artifactId>arquillian-osgi-testenricher</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.wildfly</groupId>
             <artifactId>wildfly-arquillian-container-managed</artifactId>
             <scope>test</scope>
@@ -143,6 +148,9 @@
 			    <configuration>
 			        <argLine>${surefire.system.args}</argLine>
 			        <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <dependenciesToScan>
+                        <dependency>org.jboss.gravia:gravia-itests-common</dependency>
+                    </dependenciesToScan>
 			        <systemPropertyVariables>
                         <log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration>
                         <target.container>wildfly</target.container>

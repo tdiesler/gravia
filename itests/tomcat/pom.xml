@@ -166,6 +166,9 @@
 			    <configuration>
 			        <argLine>${surefire.system.args}</argLine>
 			        <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <dependenciesToScan>
+                        <dependency>org.jboss.gravia:gravia-itests-common</dependency>
+                    </dependenciesToScan>
 			        <systemPropertyVariables>
                         <log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration>
                         <target.container>tomcat</target.container>

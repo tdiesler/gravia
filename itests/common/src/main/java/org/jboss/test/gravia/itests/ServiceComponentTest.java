@@ -23,6 +23,9 @@ package org.jboss.test.gravia.itests;
 
 import java.io.InputStream;
 
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Resource;
@@ -40,6 +43,7 @@ import org.jboss.test.gravia.itests.sub.a.ServiceA;
 import org.jboss.test.gravia.itests.sub.a1.ServiceA1;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.osgi.service.component.ComponentContext;
 
 /**
@@ -48,8 +52,11 @@ import org.osgi.service.component.ComponentContext;
  * @author thomas.diesler@jbos.com
  * @since 04-Oct-2013
  */
-public abstract class ServiceComponentTest  {
+@RunWith(Arquillian.class)
+public class ServiceComponentTest  {
 
+    @Deployment
+    @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("scr-test");
         archive.addClasses(ServiceComponentTest.class);

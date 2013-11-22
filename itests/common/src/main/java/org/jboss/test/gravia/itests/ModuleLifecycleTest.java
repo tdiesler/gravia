@@ -23,6 +23,9 @@ package org.jboss.test.gravia.itests;
 
 import java.io.InputStream;
 
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
@@ -36,6 +39,7 @@ import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.test.gravia.itests.ArchiveBuilder.TargetContainer;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test simple module lifecycle
@@ -43,8 +47,11 @@ import org.junit.Test;
  * @author thomas.diesler@jboss.com
  * @since 01-Oct-2013
  */
-public abstract class ModuleLifecycleTest {
+@RunWith(Arquillian.class)
+public class ModuleLifecycleTest {
 
+    @Deployment
+    @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("simple");
         archive.addClasses(ModuleLifecycleTest.class);

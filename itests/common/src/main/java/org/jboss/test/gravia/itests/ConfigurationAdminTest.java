@@ -26,6 +26,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Resource;
@@ -43,6 +46,7 @@ import org.jboss.test.gravia.itests.sub.d.ServiceD;
 import org.jboss.test.gravia.itests.sub.d1.ServiceD1;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
@@ -53,8 +57,11 @@ import org.osgi.service.component.ComponentContext;
  * @author thomas.diesler@jbos.com
  * @since 04-Oct-2013
  */
-public abstract class ConfigurationAdminTest  {
+@RunWith(Arquillian.class)
+public class ConfigurationAdminTest  {
 
+    @Deployment
+    @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("configadmin-test");
         archive.addClasses(ConfigurationAdminTest.class);
