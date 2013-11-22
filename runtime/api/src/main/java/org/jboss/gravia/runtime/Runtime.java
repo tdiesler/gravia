@@ -24,6 +24,7 @@ package org.jboss.gravia.runtime;
 import java.util.Dictionary;
 import java.util.Set;
 
+import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.VersionRange;
@@ -147,7 +148,19 @@ public interface Runtime {
      * The Resource as well as the Dictionary parameter are optional, but
      * one of them must be given to determine the modules's identity.
      * <p>
+     * @see Runtime#installModule(ClassLoader, Resource, Dictionary, Attachable)
+     */
+    Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) throws ModuleException;
+
+    /**
+     * Installs a module with the given ClassLoader.
+     *
+     * The Resource as well as the Dictionary parameter are optional, but
+     * one of them must be given to determine the modules's identity.
+     * <p>
      * An explicit {@link Resource} parameter takes priority.
+     * <p>
+     * An optional application context can be given
      * <p>
      * The following steps are required to install a module:
      * <ol>
@@ -158,5 +171,5 @@ public interface Runtime {
      * <li>The {@code Module} object for the newly or previously installed module is returned.
      * </ol>
      */
-    Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) throws ModuleException;
+    Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) throws ModuleException;
 }

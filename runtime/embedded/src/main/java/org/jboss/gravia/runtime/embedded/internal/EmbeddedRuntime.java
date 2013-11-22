@@ -23,18 +23,16 @@ package org.jboss.gravia.runtime.embedded.internal;
 
 import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.Vector;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 
+import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
@@ -45,7 +43,6 @@ import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.embedded.osgi.EmbeddedLogServiceFactory;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
-import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
 import org.jboss.gravia.runtime.spi.RuntimePlugin;
@@ -57,7 +54,7 @@ import org.osgi.service.log.LogService;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public final class EmbeddedRuntime extends AbstractRuntime {
+public class EmbeddedRuntime extends AbstractRuntime {
 
     private final RuntimeServicesManager serviceManager;
     private final RuntimeStorageHandler storageHandler;
@@ -71,7 +68,7 @@ public final class EmbeddedRuntime extends AbstractRuntime {
 
         Resource resource = new DefaultResourceBuilder().addIdentityCapability(systemIdentity).getResource();
         try {
-            installModule(EmbeddedRuntime.class.getClassLoader(), resource, null);
+            installModule(EmbeddedRuntime.class.getClassLoader(), resource, null, null);
         } catch (ModuleException ex) {
             throw new IllegalStateException("Cannot install system module", ex);
         }
@@ -114,17 +111,15 @@ public final class EmbeddedRuntime extends AbstractRuntime {
     }
 
     @Override
-    public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
+    public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) {
+        AbstractModule module;
         if (resource != null && resource.getIdentity().equals(systemIdentity)) {
-            return new SystemModule(this, classLoader, resource);
+            module = new SystemModule(this, classLoader, resource);
         } else {
-            return new EmbeddedModule(this, classLoader, resource, headers);
+            module = new EmbeddedModule(this, classLoader, resource, headers);
+            module.putAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY, new ClassLoaderEntriesProvider(module));
         }
-    }
-
-    @Override
-    public ModuleEntriesProvider getModuleEntriesProvider(Module module) {
-        return new CLassLoaderEntriesProvider(module.adapt(ClassLoader.class));
+        return module;
     }
 
     @Override
@@ -164,40 +159,5 @@ public final class EmbeddedRuntime extends AbstractRuntime {
         }
 
         return mbeanServer;
-    }
-
-    private class CLassLoaderEntriesProvider implements ModuleEntriesProvider {
-
-        private final ClassLoader classLoader;
-
-        CLassLoaderEntriesProvider(ClassLoader classLoader) {
-            this.classLoader = classLoader;
-        }
-
-        @Override
-        public URL getEntry(String path) {
-            // [TODO] flawed because of parent first access
-            return classLoader.getResource(path);
-        }
-
-        @Override
-        public Enumeration<String> getEntryPaths(String path) {
-            throw new UnsupportedOperationException("Bundle.getEntryPaths(String)");
-        }
-
-        @Override
-        public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
-            if (filePattern.contains("*") || recurse == true)
-                throw new UnsupportedOperationException("Bundle.getEntryPaths(String,String,boolean)");
-
-            // [TODO] flawed because of parent first access
-            URL result = classLoader.getResource(path + "/" + filePattern);
-            if (result == null)
-                return null;
-
-            Vector<URL> vector = new Vector<URL>();
-            vector.add(result);
-            return vector.elements();
-        }
     }
 }

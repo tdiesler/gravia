@@ -39,8 +39,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-container-tomcat</artifactId>
+        </dependency>
+        <dependency>
 	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-runtime-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.osgi.metadata</groupId>
+            <artifactId>jbosgi-metadata</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jboss.shrinkwrap</groupId>

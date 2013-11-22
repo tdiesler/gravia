@@ -32,7 +32,6 @@ import org.jboss.as.server.ServerEnvironmentService;
 import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.embedded.EmbeddedRuntimeFactory;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.jboss.msc.service.AbstractService;
@@ -64,7 +63,7 @@ public class RuntimeService extends AbstractService<Runtime> {
     @Override
     public void start(StartContext startContext) throws StartException {
         PropertiesProvider propertiesProvider = new DefaultPropertiesProvider(getRuntimeProperties(), true);
-        Runtime runtime = RuntimeLocator.createRuntime(new EmbeddedRuntimeFactory(), propertiesProvider);
+        Runtime runtime = RuntimeLocator.createRuntime(new WildFlyRuntimeFactory(), propertiesProvider);
         runtime.init();
     }
 

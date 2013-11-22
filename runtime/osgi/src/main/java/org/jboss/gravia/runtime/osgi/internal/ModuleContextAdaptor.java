@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -37,6 +37,7 @@ import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.spi.AbstractModuleContext;
+import org.jboss.gravia.utils.NotNullException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -56,6 +57,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
 
     ModuleContextAdaptor(Module module, BundleContext bundleContext) {
         super(module);
+        NotNullException.assertValue(bundleContext, "bundleContext");
         this.bundleContext = bundleContext;
     }
 
@@ -107,13 +109,15 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
 
     @Override
     public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
-        return new ServiceReferenceAdaptor<S>(bundleContext.getServiceReference(clazz));
+        org.osgi.framework.ServiceReference<S> sref = bundleContext.getServiceReference(clazz);
+        return sref != null ? new ServiceReferenceAdaptor<S>(sref) : null;
     }
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public ServiceReference<?> getServiceReference(String className) {
-        return new ServiceReferenceAdaptor(bundleContext.getServiceReference(className));
+        org.osgi.framework.ServiceReference<?> sref = bundleContext.getServiceReference(className);
+        return sref != null ? new ServiceReferenceAdaptor(sref) : null;
     }
 
     @Override
@@ -216,6 +220,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         private final ModuleListener delegate;
 
         ModuleListenerAdaptor(ModuleListener delegate) {
+            NotNullException.assertValue(delegate, "delegate");
             this.delegate = delegate;
         }
 
@@ -248,6 +253,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         private final ServiceListener delegate;
 
         ServiceListenerAdaptor(ServiceListener delegate) {
+            NotNullException.assertValue(delegate, "delegate");
             this.delegate = delegate;
         }
 
@@ -277,6 +283,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         private final org.osgi.framework.ServiceReference<S> delegate;
 
         ServiceReferenceAdaptor(org.osgi.framework.ServiceReference<S> delegate) {
+            NotNullException.assertValue(delegate, "delegate");
             this.delegate = delegate;
         }
 
@@ -312,6 +319,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         private final org.osgi.framework.ServiceRegistration<S> delegate;
 
         ServiceRegistrationAdaptor(org.osgi.framework.ServiceRegistration<S> delegate) {
+            NotNullException.assertValue(delegate, "delegate");
             this.delegate = delegate;
         }
 
@@ -336,6 +344,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         private final ServiceFactory<S> delegate;
 
         ServiceFactoryAdaptor(ServiceFactory<S> delegate) {
+            NotNullException.assertValue(delegate, "delegate");
             this.delegate = delegate;
         }
 

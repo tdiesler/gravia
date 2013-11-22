@@ -231,6 +231,7 @@ felix.log.level=4
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <systemPropertyVariables>
                         <log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration>
+                        <target.container>karaf</target.container>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

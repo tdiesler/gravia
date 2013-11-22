@@ -34,10 +34,9 @@ import java.util.Map;
 
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
-import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.utils.CaseInsensitiveDictionary;
+import org.jboss.gravia.utils.NotNullException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -56,6 +55,7 @@ public final class BundleAdaptor implements Bundle {
     private final Module module;
 
     public BundleAdaptor(Module module) {
+        NotNullException.assertValue(module, "module");
         this.module = module;
     }
 
@@ -160,20 +160,20 @@ public final class BundleAdaptor implements Bundle {
 
     @Override
     public URL getEntry(String path) {
-        ModuleEntriesProvider entriesProvider = getModuleEntriesProvider();
-        return entriesProvider.getEntry(path);
+        ModuleEntriesProvider entriesProvider = module.adapt(ModuleEntriesProvider.class);
+        return entriesProvider != null ? entriesProvider.getEntry(path) : null;
     }
 
     @Override
     public Enumeration<String> getEntryPaths(String path) {
-        ModuleEntriesProvider entriesProvider = getModuleEntriesProvider();
-        return entriesProvider.getEntryPaths(path);
+        ModuleEntriesProvider entriesProvider = module.adapt(ModuleEntriesProvider.class);
+        return entriesProvider != null ? entriesProvider.getEntryPaths(path) : null;
     }
 
     @Override
     public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
-        ModuleEntriesProvider entriesProvider = getModuleEntriesProvider();
-        return entriesProvider.findEntries(path, filePattern, recurse);
+        ModuleEntriesProvider entriesProvider = module.adapt(ModuleEntriesProvider.class);
+        return entriesProvider != null ? entriesProvider.findEntries(path, filePattern, recurse) : null;
     }
 
     @Override
@@ -244,11 +244,6 @@ public final class BundleAdaptor implements Bundle {
     @Override
     public boolean hasPermission(Object permission) {
         throw new UnsupportedOperationException("Bundle.hasPermission(Object)");
-    }
-
-    private ModuleEntriesProvider getModuleEntriesProvider() {
-        AbstractRuntime runtime = (AbstractRuntime) module.adapt(Runtime.class);
-        return runtime.getModuleEntriesProvider(module);
     }
 
     @Override

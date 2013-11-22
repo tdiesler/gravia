@@ -34,10 +34,12 @@ import javax.servlet.annotation.WebListener;
 import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
+import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.spi.RuntimeFactory;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 
@@ -58,8 +60,9 @@ public class ApplicationActivator implements ServletContextListener {
         ServletContext servletContext = event.getServletContext();
         Runtime runtime = RuntimeLocator.getRuntime();
         if (runtime == null) {
+            RuntimeFactory runtimeFactory = new TomcatRuntimeFactory();
             DefaultPropertiesProvider propsProvider = new DefaultPropertiesProvider();
-            runtime = RuntimeLocator.createRuntime(propsProvider);
+            runtime = RuntimeLocator.createRuntime(runtimeFactory, propsProvider);
             runtime.init();
         }
         Module module = installWebappModule(runtime, servletContext);
@@ -95,11 +98,14 @@ public class ApplicationActivator implements ServletContextListener {
         if (resbuilder.isValid() == false)
             return null;
 
+        AttachableSupport context = new AttachableSupport();
+        context.putAttachment(TomcatRuntime.SERVLET_CONTEXT_KEY, servletContext);
+
         Module module;
         try {
             Resource resource = resbuilder.getResource();
             ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(manifest);
-            module = runtime.installModule(classLoader, resource, headersProvider.getHeaders());
+            module = runtime.installModule(classLoader, resource, headersProvider.getHeaders(), context);
             servletContext.setAttribute(Module.class.getName(), module);
         } catch (RuntimeException rte) {
             throw rte;

@@ -56,6 +56,8 @@ import org.jboss.gravia.utils.UnmodifiableDictionary;
  */
 public abstract class AbstractModule implements Module, Attachable {
 
+    public static AttachmentKey<ModuleEntriesProvider> MODULE_ENTRIES_PROVIDER_KEY = AttachmentKey.create(ModuleEntriesProvider.class);
+
     private final AbstractRuntime runtime;
     private final ClassLoader classLoader;
     private final Resource resource;
@@ -140,6 +142,8 @@ public abstract class AbstractModule implements Module, Attachable {
             result = (A) this;
         } else if (type.isAssignableFrom(ModuleContext.class)) {
             result = (A) getModuleContext();
+        } else if (type.isAssignableFrom(ModuleEntriesProvider.class)) {
+            result = (A) getAttachment(MODULE_ENTRIES_PROVIDER_KEY);
         }
         return result;
     }

@@ -27,6 +27,7 @@ import java.net.URL;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
+import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.DictionaryResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
@@ -91,13 +92,10 @@ public final class OSGiRuntime extends AbstractRuntime {
     }
 
     @Override
-    public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
-        return new ModuleAdaptor(this, classLoader, resource, headers);
-    }
-
-    @Override
-    public ModuleEntriesProvider getModuleEntriesProvider(Module module) {
-        return new OSGiModuleEntriesProvider(module);
+    public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) {
+        ModuleAdaptor module = new ModuleAdaptor(this, classLoader, resource, headers);
+        module.putAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY, new OSGiModuleEntriesProvider(module));
+        return module;
     }
 
     @Override

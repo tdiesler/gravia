@@ -1,6 +1,6 @@
 /*
  * #%L
- * Gravia :: Integration Tests :: Tomcat
+ * Gravia :: Integration Tests :: Common
  * %%
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
@@ -19,25 +19,22 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.test.gravia.itests.tomcat;
+package org.jboss.gravia.runtime.tomcat;
 
-import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.test.gravia.itests.ServiceComponentTest;
-import org.junit.runner.RunWith;
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.runtime.spi.RuntimeFactory;
 
 /**
- * Test webapp deployemnts
+ * The Tomcat {@link RuntimeFactory}
  *
  * @author thomas.diesler@jboss.com
- * @since 01-Oct-2013
+ * @since 27-Sep-2013
  */
-@RunWith(Arquillian.class)
-public class TomcatServiceComponentTestCase extends ServiceComponentTest {
+public class TomcatRuntimeFactory implements RuntimeFactory {
 
-    @Deployment
-    public static Archive<?> deployment() {
-        return ServiceComponentTest.deployment();
+    @Override
+    public Runtime createRuntime(PropertiesProvider propertiesProvider) {
+        return new TomcatRuntime(propertiesProvider);
     }
 }

@@ -50,14 +50,14 @@ public class TomcatConfigurationAdminTestCase extends ConfigurationAdminTest {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, "configadmin-test.war");
         archive.addClasses(ApplicationActivator.class, ConfigurationAdminTest.class);
         archive.addClasses(ServiceD.class, ServiceD1.class);
-        archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml");
-        archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");
+        archive.addAsWebInfResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml");
+        archive.addAsWebInfResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
                 ManifestBuilder builder = new ManifestBuilder();
                 builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, "configadmin-test;version=1.0.0");
-                builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml,OSGI-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");
+                builder.addManifestHeader("Service-Component", "WEB-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml,WEB-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");
                 return builder.openStream();
             }
         });

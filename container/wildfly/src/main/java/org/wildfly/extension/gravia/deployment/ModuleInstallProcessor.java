@@ -5,16 +5,16 @@
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -33,6 +33,7 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.module.ResourceRoot;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
@@ -40,6 +41,7 @@ import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.jboss.modules.ModuleClassLoader;
 import org.wildfly.extension.gravia.GraviaConstants;
+import org.wildfly.extension.gravia.service.WildflyRuntime;
 
 /**
  * Install/Uninstall the {@link Module} from the {@link Runtime}
@@ -65,11 +67,15 @@ public class ModuleInstallProcessor implements DeploymentUnitProcessor {
             headers = new ManifestHeadersProvider(manifest).getHeaders();
         }
 
+        // Initialize the module install context
+        AttachableSupport context = new AttachableSupport();
+        context.putAttachment(WildflyRuntime.DEPLOYMENT_ROOT_KEY, deploymentRoot);
+
         // Install the module
         ModuleClassLoader classLoader = depUnit.getAttachment(Attachments.MODULE).getClassLoader();
         try {
             Runtime runtime = RuntimeLocator.getRuntime();
-            Module module = runtime.installModule(classLoader, resource, headers);
+            Module module = runtime.installModule(classLoader, resource, headers, context);
             depUnit.putAttachment(GraviaConstants.MODULE_KEY, module);
         } catch (ModuleException ex) {
             throw new DeploymentUnitProcessingException(ex);

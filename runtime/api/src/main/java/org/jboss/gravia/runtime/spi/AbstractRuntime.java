@@ -30,9 +30,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.VersionRange;
+import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -57,9 +59,7 @@ public abstract class AbstractRuntime implements Runtime {
         properties = propertiesProvider;
     }
 
-    public abstract AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers);
-
-    public abstract ModuleEntriesProvider getModuleEntriesProvider(Module module);
+    public abstract AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context);
 
     @Override
     public final Object getProperty(String key) {
@@ -138,16 +138,22 @@ public abstract class AbstractRuntime implements Runtime {
 
     @Override
     public final Module installModule(ClassLoader classLoader, Dictionary<String, String> headers) throws ModuleException {
-        return installModule(classLoader, null, headers);
+        return installModule(classLoader, null, headers, null);
     }
 
     @Override
     public final Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) throws ModuleException {
+        return installModule(classLoader, resource, headers, null);
+    }
 
-        AbstractModule module = createModule(classLoader, resource, headers);
-        if (getModule(module.getIdentity()) != null) {
-            throw new ModuleException("ModuleAlready installed: " + module);
-        }
+    @Override
+    public final Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) throws ModuleException {
+
+        Attachable appcontext = context != null ? context : new AttachableSupport();
+        AbstractModule module = createModule(classLoader, resource, headers, appcontext);
+        if (getModule(module.getIdentity()) != null)
+            throw new ModuleException("Module already installed: " + module);
+
         modules.put(module.getModuleId(), module);
 
         // #1 The module's state is set to {@code INSTALLED}.

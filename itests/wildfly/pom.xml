@@ -145,6 +145,7 @@
 			        <redirectTestOutputToFile>false</redirectTestOutputToFile>
 			        <systemPropertyVariables>
                         <log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration>
+                        <target.container>wildfly</target.container>
 			        </systemPropertyVariables>
 			    </configuration>
 			</plugin>
