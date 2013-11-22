@@ -148,6 +148,7 @@
 			    <configuration>
 			        <argLine>${surefire.system.args}</argLine>
 			        <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <reportNameSuffix>wildfly</reportNameSuffix>
                     <dependenciesToScan>
                         <dependency>org.jboss.gravia:gravia-itests-common</dependency>
                     </dependenciesToScan>

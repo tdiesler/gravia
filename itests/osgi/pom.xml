@@ -229,6 +229,7 @@ felix.log.level=4
                 <configuration>
                     <argLine>${surefire.system.args}</argLine>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <reportNameSuffix>karaf</reportNameSuffix>
                     <dependenciesToScan>
                         <dependency>org.jboss.gravia:gravia-itests-common</dependency>
                     </dependenciesToScan>
