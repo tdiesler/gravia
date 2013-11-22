@@ -21,20 +21,55 @@
  */
 package org.jboss.test.gravia.itests;
 
+import java.io.InputStream;
+
+import org.jboss.gravia.resource.Constants;
+import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.gravia.runtime.tomcat.ApplicationActivator;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
+import org.jboss.shrinkwrap.api.Archive;
+import org.jboss.shrinkwrap.api.asset.Asset;
+import org.jboss.test.gravia.itests.ArchiveBuilder.TargetContainer;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Test webapp deployemnts
+ * Test simple module lifecycle
  *
  * @author thomas.diesler@jboss.com
  * @since 01-Oct-2013
  */
 public abstract class ModuleLifecycleTest {
+
+    public static Archive<?> deployment() {
+        final ArchiveBuilder archive = new ArchiveBuilder("simple");
+        archive.addClasses(ModuleLifecycleTest.class);
+        archive.addWebClasses(ApplicationActivator.class);
+        archive.setManifest(new Asset() {
+            @Override
+            public InputStream openStream() {
+                if (archive.getTargetContainer() == TargetContainer.karaf) {
+                    OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+                    builder.addBundleManifestVersion(2);
+                    builder.addBundleSymbolicName(archive.getName());
+                    builder.addBundleVersion("1.0.0");
+                    builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
+                    builder.addImportPackages(RuntimeLocator.class);
+                    return builder.openStream();
+                } else {
+                    ManifestBuilder builder = new ManifestBuilder();
+                    builder.addIdentityCapability(archive.getName(), "1.0.0");
+                    builder.addManifestHeader("Dependencies", "org.jboss.gravia");
+                    return builder.openStream();
+                }
+            }
+        });
+        return archive.getArchive();
+    }
 
     @Test
     public void testModuleLifecycle() throws Exception {

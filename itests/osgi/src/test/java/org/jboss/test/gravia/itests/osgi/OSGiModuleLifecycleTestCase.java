@@ -21,26 +21,15 @@
  */
 package org.jboss.test.gravia.itests.osgi;
 
-import java.io.InputStream;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.gravia.resource.Constants;
-import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.osgi.metadata.OSGiManifestBuilder;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.Asset;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.gravia.itests.ModuleLifecycleTest;
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 
 /**
- * Test webapp deployemnts
+ * Test simple module lifecycle
  *
  * @author thomas.diesler@jboss.com
  * @since 01-Oct-2013
@@ -48,40 +37,9 @@ import org.osgi.framework.BundleContext;
 @RunWith(Arquillian.class)
 public class OSGiModuleLifecycleTestCase extends ModuleLifecycleTest {
 
-    @ArquillianResource
-    BundleContext syscontext;
-
     @Deployment
     @StartLevelAware(autostart = true)
-    public static JavaArchive deployment() {
-        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "simple");
-        archive.addClasses(ModuleLifecycleTest.class);
-        archive.setManifest(new Asset() {
-            @Override
-            public InputStream openStream() {
-                OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
-                builder.addBundleSymbolicName(archive.getName());
-                builder.addBundleVersion("1.0.0");
-                builder.addBundleManifestVersion(2);
-                builder.addImportPackages(RuntimeLocator.class);
-                builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, archive.getName() + ";version=1.0.0");
-                return builder.openStream();
-            }
-        });
-        return archive;
-    }
-
-    @Test
-    public void testResolveGraviaBundles() throws Exception {
-        getBundle("gravia-runtime-osgi").start();
-    }
-
-    private Bundle getBundle(String symbolicName) {
-        for (Bundle aux : syscontext.getBundles()) {
-            if (symbolicName.equals(aux.getSymbolicName())) {
-                return aux;
-            }
-        }
-        return null;
+    public static Archive<?> deployment() {
+        return ModuleLifecycleTest.deployment();
     }
 }

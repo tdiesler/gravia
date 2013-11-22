@@ -21,20 +21,14 @@
  */
 package org.jboss.test.gravia.itests.tomcat;
 
-import java.io.InputStream;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.gravia.resource.ManifestBuilder;
-import org.jboss.gravia.runtime.tomcat.ApplicationActivator;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.Asset;
-import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.gravia.itests.ModuleLifecycleTest;
 import org.junit.runner.RunWith;
 
 /**
- * Test webapp deployemnts
+ * Test simple module lifecycle
  *
  * @author thomas.diesler@jboss.com
  * @since 01-Oct-2013
@@ -43,17 +37,7 @@ import org.junit.runner.RunWith;
 public class TomcatModuleLifecycleTestCase extends ModuleLifecycleTest {
 
     @Deployment
-    public static WebArchive deployment() {
-        final WebArchive archive = ShrinkWrap.create(WebArchive.class, "simple.war");
-        archive.addClasses(ApplicationActivator.class, ModuleLifecycleTest.class);
-        archive.setManifest(new Asset() {
-            @Override
-            public InputStream openStream() {
-                ManifestBuilder builder = new ManifestBuilder();
-                builder.addIdentityCapability(archive.getName(), "1.0.0");
-                return builder.openStream();
-            }
-        });
-        return archive;
+    public static Archive<?> deployment() {
+        return ModuleLifecycleTest.deployment();
     }
 }

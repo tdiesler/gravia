@@ -21,19 +21,10 @@
  */
 package org.jboss.test.gravia.itests.tomcat;
 
-import java.io.InputStream;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.gravia.resource.Constants;
-import org.jboss.gravia.resource.ManifestBuilder;
-import org.jboss.gravia.runtime.tomcat.ApplicationActivator;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.Asset;
-import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.gravia.itests.ConfigurationAdminTest;
-import org.jboss.test.gravia.itests.sub.d.ServiceD;
-import org.jboss.test.gravia.itests.sub.d1.ServiceD1;
 import org.junit.runner.RunWith;
 
 /**
@@ -46,21 +37,7 @@ import org.junit.runner.RunWith;
 public class TomcatConfigurationAdminTestCase extends ConfigurationAdminTest {
 
     @Deployment
-    public static WebArchive deployment() {
-        final WebArchive archive = ShrinkWrap.create(WebArchive.class, "configadmin-test.war");
-        archive.addClasses(ApplicationActivator.class, ConfigurationAdminTest.class);
-        archive.addClasses(ServiceD.class, ServiceD1.class);
-        archive.addAsWebInfResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml");
-        archive.addAsWebInfResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");
-        archive.setManifest(new Asset() {
-            @Override
-            public InputStream openStream() {
-                ManifestBuilder builder = new ManifestBuilder();
-                builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, "configadmin-test;version=1.0.0");
-                builder.addManifestHeader("Service-Component", "WEB-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml,WEB-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");
-                return builder.openStream();
-            }
-        });
-        return archive;
+    public static Archive<?> deployment() {
+        return ConfigurationAdminTest.deployment();
     }
 }
