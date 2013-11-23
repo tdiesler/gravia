@@ -39,7 +39,8 @@
 
     <!-- Properties -->
     <properties>
-        <jboss.home>${project.build.directory}/wildfly-${version.jboss.wildfly}</jboss.home>
+        <jboss.home>${basedir}/../../../wildfly/build/target/wildfly-${version.jboss.wildfly}</jboss.home>
+        <!--jboss.home>${project.build.directory}/wildfly-${version.jboss.wildfly}</jboss.home-->
     </properties>
     
     <dependencies>
@@ -70,8 +71,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.jboss.arquillian.osgi</groupId>
-            <artifactId>arquillian-osgi-testenricher</artifactId>
+            <groupId>org.jboss.arquillian.testenricher</groupId>
+            <artifactId>arquillian-testenricher-osgi</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -102,6 +103,7 @@
 	        <plugin>
 	            <artifactId>maven-dependency-plugin</artifactId>
 	            <executions>
+                    <!--  
 	                <execution>
 	                    <id>unpack-wildfly</id>
 	                    <phase>process-test-resources</phase>
@@ -121,6 +123,7 @@
 	                        </artifactItems>
 	                    </configuration>
 	                </execution>
+                    -->
 	                <execution>
 	                    <id>unpack-wildfly-patch</id>
 	                    <phase>process-test-resources</phase>

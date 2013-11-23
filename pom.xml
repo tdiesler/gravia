@@ -46,13 +46,13 @@
         <version.apache.tomcat>7.0.42</version.apache.tomcat>
         <version.javax.servlet30.api>1.0.2.Final</version.javax.servlet30.api>
         <version.jboss.arquillian.core>1.1.1.Final</version.jboss.arquillian.core>
-        <version.jboss.arquillian.osgi>2.1.0.CR1</version.jboss.arquillian.osgi>
+        <version.jboss.arquillian.osgi>2.1.0.CR2</version.jboss.arquillian.osgi>
         <version.jboss.arquillian.tomcat>1.0.0.CR5</version.jboss.arquillian.tomcat>
         <version.jboss.logmanager>1.4.1.Final</version.jboss.logmanager>
         <version.jboss.osgi.metadata>4.0.0.CR1</version.jboss.osgi.metadata>
         <version.jboss.shrinkwrap>1.1.2</version.jboss.shrinkwrap>
-        <version.jboss.wildfly>8.0.0.Beta1</version.jboss.wildfly>
-        <version.junit>4.10</version.junit>
+        <version.jboss.wildfly>8.0.0.Beta2-SNAPSHOT</version.jboss.wildfly>
+        <version.junit>4.11</version.junit>
         <version.mockito>1.8.4</version.mockito>
         <version.osgi>5.0.0</version.osgi>
         <version.slf4j>1.5.11</version.slf4j>
@@ -87,18 +87,18 @@
                 <version>${version.jboss.arquillian.osgi}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss.arquillian.osgi</groupId>
-                <artifactId>arquillian-osgi-testenricher</artifactId>
+                <groupId>org.jboss.arquillian.testenricher</groupId>
+                <artifactId>arquillian-testenricher-osgi</artifactId>
                 <version>${version.jboss.arquillian.osgi}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss.arquillian.osgi</groupId>
-                <artifactId>arquillian-osgi-jbosgi-embedded</artifactId>
+                <groupId>org.jboss.arquillian.container</groupId>
+                <artifactId>arquillian-container-jbosgi-embedded</artifactId>
                 <version>${version.jboss.arquillian.osgi}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss.arquillian.osgi</groupId>
-                <artifactId>arquillian-osgi-karaf-embedded</artifactId>
+                <groupId>org.jboss.arquillian.container</groupId>
+                <artifactId>arquillian-container-karaf-embedded</artifactId>
                 <version>${version.jboss.arquillian.osgi}</version>
             </dependency>
 			<dependency>
