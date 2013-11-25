@@ -55,7 +55,7 @@ public class ModuleLifecycleTest {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("simple");
         archive.addClasses(ModuleLifecycleTest.class);
-        archive.addWebClasses(ApplicationActivator.class);
+        archive.addClasses(TargetContainer.tomcat, ApplicationActivator.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {

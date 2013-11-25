@@ -1,0 +1,181 @@
+<!--
+  #%L
+  Gravia Resource
+  %%
+  Copyright (C) 2013 JBoss by Red Hat
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as 
+  published by the Free Software Foundation, either version 2.1 of the 
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Lesser Public License for more details.
+  
+  You should have received a copy of the GNU General Lesser Public 
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/lgpl-2.1.html>.
+  #L%
+  -->
+  
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>org.jboss.gravia</groupId>
+        <artifactId>gravia-container</artifactId>
+        <version>1.1.0.Alpha4-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>gravia-container-karaf</artifactId>
+
+    <name>Gravia :: Container :: Karaf</name>
+    
+    <!-- Properties -->    
+    <properties>
+        <karaf.patch>${project.build.directory}/${project.artifactId}-${project.version}-patch</karaf.patch>
+    </properties>
+    
+	<!-- Dependencies -->
+    <dependencies>
+        <!-- Provided Dependencies -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.arquillian.osgi</groupId>
+            <artifactId>arquillian-osgi-bundle</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-provision</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-repository</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-resolver</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-resource</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-runtime-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-runtime-osgi</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+	<build>
+		<plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-karaf</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.apache.karaf</groupId>
+                                    <artifactId>apache-karaf</artifactId>
+                                    <version>${version.apache.karaf}</version>
+                                    <classifier>minimal</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>directory-single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>deploy-artifacts</finalName>
+                            <ignoreDirFormatExtensions>true</ignoreDirFormatExtensions>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>scripts/assembly-deploy-artifacts.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>build-tomcat-patch</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <ant antfile="${basedir}/scripts/antrun-karaf-patch.xml" inheritRefs="true" />
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${karaf.patch}.zip</file>
+                                    <classifier>patch</classifier>
+                                    <type>zip</type>
+                                </artifact>
+                                <artifact>
+                                    <file>${karaf.patch}.tar.gz</file>
+                                    <classifier>patch</classifier>
+                                    <type>tar.gz</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+		</plugins>
+	</build>
+</project>

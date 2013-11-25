@@ -65,7 +65,7 @@ public class ConfigurationAdminTest  {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("configadmin-test");
         archive.addClasses(ConfigurationAdminTest.class);
-        archive.addWebClasses(ApplicationActivator.class);
+        archive.addClasses(TargetContainer.tomcat, ApplicationActivator.class);
         archive.addClasses(ServiceD.class, ServiceD1.class);
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml");
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");

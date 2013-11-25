@@ -34,9 +34,9 @@
         <version>1.1.0.Alpha4-SNAPSHOT</version>
     </parent>
 
-    <artifactId>gravia-itests-osgi</artifactId>
+    <artifactId>gravia-itests-karaf</artifactId>
     
-    <name>Gravia :: Integration Tests :: OSGi</name>
+    <name>Gravia :: Integration Tests :: Karaf</name>
     
     <!-- Properties -->
     <properties>
@@ -47,44 +47,16 @@
         
         <!-- Provided Dependencies -->
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.configadmin</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.log</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.metatype</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-runtime-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
 	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-itests-common</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-runtime-osgi</artifactId>
+	        <artifactId>gravia-container-karaf</artifactId>
+	        <classifier>patch</classifier>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
+	        <type>zip</type>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -134,92 +106,29 @@
                                     <artifactId>apache-karaf</artifactId>
                                     <version>${version.apache.karaf}</version>
                                     <classifier>minimal</classifier>
-                                    <type>tar.gz</type>
+                                    <type>zip</type>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-bundles</id>
+                        <id>unpack-karaf-patch</id>
                         <phase>process-test-resources</phase>
                         <goals>
-                            <goal>copy</goal>
+                            <goal>unpack</goal>
                         </goals>
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.jboss.arquillian.osgi</groupId>
-                                    <artifactId>arquillian-osgi-bundle</artifactId>
-                                    <version>${version.jboss.arquillian.osgi}</version>
-                                    <outputDirectory>${karaf.home}/system/org/jboss/arquillian/osgi/arquillian-osgi-bundle/${version.jboss.arquillian.osgi}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.scr</artifactId>
-                                    <version>${version.apache.felix.scr}</version>
-                                    <outputDirectory>${karaf.home}/system/org/apache/felix/org.apache.felix.scr/${version.apache.felix.scr}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.jboss.gravia</groupId>
-                                    <artifactId>gravia-resource</artifactId>
+                                    <artifactId>gravia-container-karaf</artifactId>
                                     <version>${project.version}</version>
-                                    <outputDirectory>${karaf.home}/system/org/jboss/gravia/gravia-resource/${project.version}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.jboss.gravia</groupId>
-                                    <artifactId>gravia-runtime-api</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${karaf.home}/system/org/jboss/gravia/gravia-runtime-api/${project.version}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.jboss.gravia</groupId>
-                                    <artifactId>gravia-runtime-osgi</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${karaf.home}/system/org/jboss/gravia/gravia-runtime-osgi/${project.version}</outputDirectory>
+                                    <classifier>patch</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/apache-karaf-${version.apache.karaf}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>process-test-resources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <echo file="${karaf.home}/etc/startup.properties" append="true">
-#
-# Gravia Integration
-# 
-org/apache/felix/org.apache.felix.scr/${version.apache.felix.scr}/org.apache.felix.scr-${version.apache.felix.scr}.jar=40
-org/jboss/gravia/gravia-resource/${project.version}/gravia-resource-${project.version}.jar=40
-org/jboss/gravia/gravia-runtime-api/${project.version}/gravia-runtime-api-${project.version}.jar=40
-org/jboss/gravia/gravia-runtime-osgi/${project.version}/gravia-runtime-osgi-${project.version}.jar=40
-#
-# Arquillian OSGi Integration
-# 
-org/jboss/arquillian/osgi/arquillian-osgi-bundle/${version.jboss.arquillian.osgi}/arquillian-osgi-bundle-${version.jboss.arquillian.osgi}.jar=50
-                                </echo>
-                                
-                                <echo file="${karaf.home}/etc/custom.properties" append="true">
-# Clean the persitent bundle store on Framework INIT                                
-org.osgi.framework.storage.clean=onFirstInit
-
-# The Felix Framewok log level 
-#
-# ERROR = 1;
-# WARNING = 2;
-# INFO = 3;
-# DEBUG = 4;
-felix.log.level=4
-                                </echo>
-                            </target>
                         </configuration>
                     </execution>
                 </executions>

@@ -60,7 +60,7 @@ public class ServiceComponentTest  {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("scr-test");
         archive.addClasses(ServiceComponentTest.class);
-        archive.addWebClasses(ApplicationActivator.class);
+        archive.addClasses(TargetContainer.tomcat, ApplicationActivator.class);
         archive.addClasses(ServiceA.class, ServiceA1.class);
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.a.ServiceA.xml");
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.a1.ServiceA1.xml");

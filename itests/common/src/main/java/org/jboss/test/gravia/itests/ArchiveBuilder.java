@@ -69,8 +69,8 @@ public class ArchiveBuilder  {
         return this;
     }
 
-    public ArchiveBuilder addWebClasses(Class<?>... classes) {
-        if (archive instanceof WebContainer) {
+    public ArchiveBuilder addClasses(TargetContainer target, Class<?>... classes) {
+        if (getTargetContainer() == target) {
             ClassContainer<?> container = (ClassContainer<?>) archive;
             container.addClasses(classes);
         }

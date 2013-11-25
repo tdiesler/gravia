@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ====================================================================== -->
+<!--                                                                        -->
+<!--  JBoss, the OpenSource J2EE webOS                                      -->
+<!--                                                                        -->
+<!--  Distributable under LGPL license.                                     -->
+<!--  See terms of license at http://www.gnu.org.                           -->
+<!--                                                                        -->
+<!-- ====================================================================== -->
+
+<project default="build">
+
+  <!-- ================================================================== -->
+  <!-- Setup                                                              -->
+  <!-- ================================================================== -->
+  <property name="etc.dir" value="${basedir}/etc" />
+  <property name="output.dir" value="${basedir}/target" />
+  <property name="resources.dir" value="${basedir}/src/main/resources" />
+  <property name="karaf.patch.dir" value="${output.dir}/karaf-patch" />
+  <property name="karaf.source.dir" value="${output.dir}/apache-karaf-${version.apache.karaf}" />
+  <property name="deploy.artifacts.dir" value="${output.dir}/deploy-artifacts" />
+  <property name="deploy.artifacts.lib" value="${deploy.artifacts.dir}/lib" />
+  <property name="deploy.artifacts.resources" value="${deploy.artifacts.dir}/resources" />
+
+  <!-- ================================================================== -->
+  <!-- Initialization                                                     -->
+  <!-- ================================================================== -->
+  <target name="init">
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Distribution                                                       -->
+  <!-- ================================================================== -->
+  <target name="build" depends="init">
+
+  	<!-- Copy to libs -->
+    <copy todir="${karaf.patch.dir}/system/org/apache/felix/org.apache.felix.scr/${version.apache.felix.scr}" overwrite="true">
+        <fileset file="${deploy.artifacts.lib}/org.apache.felix.scr-*.jar" />
+    </copy>
+    <copy todir="${karaf.patch.dir}/system/org/jboss/arquillian/osgi/${version.jboss.arquillian.osgi}" overwrite="true">
+        <fileset file="${deploy.artifacts.lib}/arquillian-osgi-bundle-*.jar" />
+    </copy>
+    <copy todir="${karaf.patch.dir}/system/org/jboss/gravia/${project.version}" overwrite="true">
+        <fileset file="${deploy.artifacts.lib}/gravia-resource-*.jar" />
+        <fileset file="${deploy.artifacts.lib}/gravia-runtime-api-*.jar" />
+        <fileset file="${deploy.artifacts.lib}/gravia-runtime-osgi-*.jar" />
+    </copy>
+  	
+    <copy file="${karaf.source.dir}/etc/startup.properties" todir="${karaf.patch.dir}/etc" overwrite="true"/>
+    <echo file="${karaf.patch.dir}/etc/startup.properties" append="true">
+#
+# Gravia Integration
+# 
+org/apache/felix/org.apache.felix.scr/${version.apache.felix.scr}/org.apache.felix.scr-${version.apache.felix.scr}.jar=40
+org/jboss/gravia/${project.version}/gravia-resource-${project.version}.jar=40
+org/jboss/gravia/${project.version}/gravia-runtime-api-${project.version}.jar=40
+org/jboss/gravia/${project.version}/gravia-runtime-osgi-${project.version}.jar=40
+#
+# Arquillian OSGi Integration
+# 
+org/jboss/arquillian/osgi/${version.jboss.arquillian.osgi}/arquillian-osgi-bundle-${version.jboss.arquillian.osgi}.jar=50
+    </echo>
+  	
+    <copy file="${karaf.source.dir}/etc/custom.properties" todir="${karaf.patch.dir}/etc" overwrite="true"/>
+    <echo file="${karaf.patch.dir}/etc/custom.properties" append="true">
+# Clean the persitent bundle store on Framework INIT                                
+org.osgi.framework.storage.clean=onFirstInit
+
+# The Felix Framewok log level 
+#
+# ERROR = 1;
+# WARNING = 2;
+# INFO = 3;
+# DEBUG = 4;
+felix.log.level=4
+    </echo>
+	
+  	<!-- Zip the tomcat patch -->
+  	<zip destfile="${output.dir}/${project.artifactId}-${project.version}-patch.zip" basedir="${karaf.patch.dir}"/>
+  	<tar destfile="${output.dir}/${project.artifactId}-${project.version}-patch.tar.gz" basedir="${karaf.patch.dir}"/>
+  </target>
+</project>

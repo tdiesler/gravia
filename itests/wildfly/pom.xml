@@ -48,11 +48,6 @@
         <!-- Provided Dependencies -->
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-runtime-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-itests-common</artifactId>
             <scope>provided</scope>
         </dependency>

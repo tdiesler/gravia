@@ -108,6 +108,13 @@
 			</dependency>
 
 			<!-- Gravia -->
+            <dependency>
+                <groupId>org.jboss.gravia</groupId>
+                <artifactId>gravia-container-karaf</artifactId>
+                <version>${project.version}</version>
+                <classifier>patch</classifier>
+                <type>zip</type>
+            </dependency>
 	        <dependency>
 		        <groupId>org.jboss.gravia</groupId>
 		        <artifactId>gravia-container-tomcat</artifactId>
