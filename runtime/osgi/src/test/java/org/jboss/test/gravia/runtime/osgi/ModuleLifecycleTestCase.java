@@ -25,6 +25,7 @@ import java.io.InputStream;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.Resource;
@@ -75,6 +76,7 @@ public class ModuleLifecycleTestCase {
     }
 
     @Deployment
+    @StartLevelAware(autostart = true)
     public static JavaArchive createdeployment() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example-bundle");
         archive.addClasses(SimpleActivator.class);
@@ -94,9 +96,14 @@ public class ModuleLifecycleTestCase {
     }
 
     @Test
-    public void testModuleActivator(@ArquillianResource Bundle bundle) throws Exception {
+    public void testSystemModule() throws Exception {
+        Module module = RuntimeLocator.getRuntime().getModule(0);
+        Assert.assertEquals("gravia-system:0.0.0", module.getIdentity().toString());
+        Assert.assertEquals(State.ACTIVE, module.getState());
+    }
 
-        bundle.start();
+    @Test
+    public void testModuleLifecycle(@ArquillianResource Bundle bundle) throws Exception {
 
         Module module = RuntimeLocator.getRuntime().getModule(bundle.getBundleId());
         Assert.assertEquals(bundle.getBundleId(), module.getModuleId());

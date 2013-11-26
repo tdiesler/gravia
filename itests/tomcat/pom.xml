@@ -105,7 +105,7 @@
 	                                <groupId>org.apache.tomcat</groupId>
 	                                <artifactId>tomcat</artifactId>
 	                                <version>${version.apache.tomcat}</version>
-	                                <type>zip</type>
+                                    <type>tar.gz</type>
 	                                <overWrite>false</overWrite>
 	                                <outputDirectory>${project.build.directory}</outputDirectory>
 	                            </artifactItem>
@@ -125,7 +125,7 @@
 	                                <artifactId>gravia-container-tomcat</artifactId>
 	                                <version>${project.version}</version>
 	                                <classifier>patch</classifier>
-	                                <type>zip</type>
+                                    <type>tar.gz</type>
 	                                <overWrite>true</overWrite>
 	                                <outputDirectory>${tomcat.home}</outputDirectory>
 	                            </artifactItem>

@@ -35,6 +35,9 @@
   <target name="build" depends="init">
 
   	<!-- Copy to libs -->
+    <copy todir="${karaf.patch.dir}/system/org/apache/felix/org.apache.felix.metatype/${version.apache.felix.metatype}" overwrite="true">
+        <fileset file="${deploy.artifacts.lib}/org.apache.felix.metatype-*.jar" />
+    </copy>
     <copy todir="${karaf.patch.dir}/system/org/apache/felix/org.apache.felix.scr/${version.apache.felix.scr}" overwrite="true">
         <fileset file="${deploy.artifacts.lib}/org.apache.felix.scr-*.jar" />
     </copy>
@@ -52,6 +55,7 @@
 #
 # Gravia Integration
 # 
+org/apache/felix/org.apache.felix.metatype/${version.apache.felix.metatype}/org.apache.felix.metatype-${version.apache.felix.metatype}.jar=40
 org/apache/felix/org.apache.felix.scr/${version.apache.felix.scr}/org.apache.felix.scr-${version.apache.felix.scr}.jar=40
 org/jboss/gravia/${project.version}/gravia-resource-${project.version}.jar=40
 org/jboss/gravia/${project.version}/gravia-runtime-api-${project.version}.jar=40
@@ -78,6 +82,6 @@ felix.log.level=4
 	
   	<!-- Zip the tomcat patch -->
   	<zip destfile="${output.dir}/${project.artifactId}-${project.version}-patch.zip" basedir="${karaf.patch.dir}"/>
-  	<tar destfile="${output.dir}/${project.artifactId}-${project.version}-patch.tar.gz" basedir="${karaf.patch.dir}"/>
+  	<tar destfile="${output.dir}/${project.artifactId}-${project.version}-patch.tar.gz" basedir="${karaf.patch.dir}" compression="gzip"/>
   </target>
 </project>

@@ -132,7 +132,7 @@
 	                                <artifactId>gravia-container-wildfly</artifactId>
 	                                <version>${project.version}</version>
 	                                <classifier>patch</classifier>
-	                                <type>zip</type>
+                                    <type>tar.gz</type>
 	                                <overWrite>false</overWrite>
 	                                <outputDirectory>${jboss.home}</outputDirectory>
 	                            </artifactItem>

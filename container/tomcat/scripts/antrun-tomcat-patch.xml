@@ -43,6 +43,6 @@
 	
   	<!-- Zip the tomcat patch -->
   	<zip destfile="${output.dir}/${project.artifactId}-${project.version}-patch.zip" basedir="${tomcat.patch.dir}"/>
-  	<tar destfile="${output.dir}/${project.artifactId}-${project.version}-patch.tar.gz" basedir="${tomcat.patch.dir}"/>
+  	<tar destfile="${output.dir}/${project.artifactId}-${project.version}-patch.tar.gz" basedir="${tomcat.patch.dir}" compression="gzip"/>
   </target>
 </project>

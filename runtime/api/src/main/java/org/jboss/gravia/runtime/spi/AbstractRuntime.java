@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.Module;
@@ -41,6 +42,7 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.utils.NotNullException;
 
 /**
  * The abstract base implementation for a {@link Runtime}
@@ -50,11 +52,13 @@ import org.jboss.gravia.runtime.Runtime;
  */
 public abstract class AbstractRuntime implements Runtime {
 
+    private final ResourceIdentity systemIdentity = ResourceIdentity.create("gravia-system", Version.emptyVersion);
     private final Map<Long, Module> modules = new ConcurrentHashMap<Long, Module>();
     private final RuntimeEventsManager runtimeEvents;
     private final PropertiesProvider properties;
 
     protected AbstractRuntime(PropertiesProvider propertiesProvider) {
+        NotNullException.assertValue(propertiesProvider, "propertiesProvider");
         runtimeEvents = new RuntimeEventsManager();
         properties = propertiesProvider;
     }
@@ -80,6 +84,10 @@ public abstract class AbstractRuntime implements Runtime {
             result = (A) getModule(0).getModuleContext();
         }
         return result;
+    }
+
+    protected final ResourceIdentity getSystemIdentity() {
+        return systemIdentity;
     }
 
     @Override

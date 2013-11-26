@@ -43,6 +43,11 @@
         <!-- Provided Dependencies -->
         <dependency>
             <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.metatype</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -101,7 +106,7 @@
                                     <artifactId>apache-karaf</artifactId>
                                     <version>${version.apache.karaf}</version>
                                     <classifier>minimal</classifier>
-                                    <type>zip</type>
+                                    <type>tar.gz</type>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>

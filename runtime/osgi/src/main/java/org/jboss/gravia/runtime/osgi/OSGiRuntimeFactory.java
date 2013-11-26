@@ -25,6 +25,7 @@ import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.osgi.internal.OSGiRuntime;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeFactory;
+import org.jboss.gravia.utils.NotNullException;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -35,14 +36,15 @@ import org.osgi.framework.BundleContext;
  */
 public final class OSGiRuntimeFactory implements RuntimeFactory {
 
-    private final BundleContext context;
+    private final BundleContext syscontext;
 
-    public OSGiRuntimeFactory(BundleContext context) {
-        this.context = context;
+    public OSGiRuntimeFactory(BundleContext syscontext) {
+        NotNullException.assertValue(syscontext, "syscontext");
+        this.syscontext = syscontext;
     }
 
     @Override
     public Runtime createRuntime(PropertiesProvider props) {
-        return new OSGiRuntime(context, props);
+        return new OSGiRuntime(syscontext, props);
     }
 }

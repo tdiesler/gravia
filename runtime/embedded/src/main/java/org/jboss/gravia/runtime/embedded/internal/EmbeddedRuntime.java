@@ -35,8 +35,6 @@ import javax.management.MBeanServerFactory;
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
@@ -58,15 +56,14 @@ public class EmbeddedRuntime extends AbstractRuntime {
 
     private final RuntimeServicesManager serviceManager;
     private final RuntimeStorageHandler storageHandler;
-    private final ResourceIdentity systemIdentity;
 
     public EmbeddedRuntime(PropertiesProvider propertiesProvider) {
         super(propertiesProvider);
         serviceManager = new RuntimeServicesManager(adapt(RuntimeEventsManager.class));
         storageHandler = new RuntimeStorageHandler(propertiesProvider, true);
-        systemIdentity = ResourceIdentity.create("gravia-system", Version.emptyVersion);
 
-        Resource resource = new DefaultResourceBuilder().addIdentityCapability(systemIdentity).getResource();
+        // Install system module
+        Resource resource = new DefaultResourceBuilder().addIdentityCapability(getSystemIdentity()).getResource();
         try {
             installModule(EmbeddedRuntime.class.getClassLoader(), resource, null, null);
         } catch (ModuleException ex) {
@@ -113,7 +110,7 @@ public class EmbeddedRuntime extends AbstractRuntime {
     @Override
     public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) {
         AbstractModule module;
-        if (resource != null && resource.getIdentity().equals(systemIdentity)) {
+        if (resource != null && resource.getIdentity().equals(getSystemIdentity())) {
             module = new SystemModule(this, classLoader, resource);
         } else {
             module = new EmbeddedModule(this, classLoader, resource, headers);

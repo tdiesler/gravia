@@ -28,6 +28,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 
 import org.jboss.gravia.resource.Attachable;
+import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.DictionaryResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
@@ -37,6 +38,7 @@ import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.utils.NotNullException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -56,8 +58,25 @@ public final class OSGiRuntime extends AbstractRuntime {
 
     public OSGiRuntime(BundleContext syscontext, PropertiesProvider propertiesProvider) {
         super(propertiesProvider);
+
+        NotNullException.assertValue(syscontext, "syscontext");
         this.syscontext = syscontext;
-        this.tracker = new BundleTracker<Bundle>(syscontext, Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE | Bundle.STOPPING, null) {
+
+        // Assert system bundle
+        if (syscontext.getBundle().getBundleId() != 0)
+            throw new IllegalArgumentException("Not the system bundle: " + syscontext.getBundle());
+
+        // Install system module
+        Resource resource = new DefaultResourceBuilder().addIdentityCapability(getSystemIdentity()).getResource();
+        try {
+            BundleWiring wiring = syscontext.getBundle().adapt(BundleWiring.class);
+            installModule(wiring.getClassLoader(), resource, null, null);
+        } catch (ModuleException ex) {
+            throw new IllegalStateException("Cannot install system module", ex);
+        }
+
+        // Setup the bundle tracker
+        tracker = new BundleTracker<Bundle>(syscontext, Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE | Bundle.STOPPING, null) {
 
             @Override
             public Bundle addingBundle(Bundle bundle, BundleEvent event) {
@@ -89,6 +108,10 @@ public final class OSGiRuntime extends AbstractRuntime {
     @Override
     public void init() {
         tracker.open();
+    }
+
+    BundleContext getSystemContext() {
+        return syscontext;
     }
 
     @Override
