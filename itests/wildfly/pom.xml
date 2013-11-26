@@ -146,7 +146,7 @@
 			    <artifactId>maven-surefire-plugin</artifactId>
 			    <configuration>
 			        <argLine>${surefire.system.args}</argLine>
-			        <redirectTestOutputToFile>false</redirectTestOutputToFile>
+			        <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <reportNameSuffix>wildfly</reportNameSuffix>
                     <dependenciesToScan>
                         <dependency>org.jboss.gravia:gravia-itests-common</dependency>
