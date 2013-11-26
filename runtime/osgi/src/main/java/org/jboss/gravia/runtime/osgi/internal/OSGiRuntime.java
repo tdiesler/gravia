@@ -88,7 +88,7 @@ public final class OSGiRuntime extends AbstractRuntime {
                     try {
                         installModule(classLoader, bundle.getHeaders());
                     } catch (ModuleException ex) {
-                        LOGGER.error("Cannot install module from: {}", bundle);
+                        LOGGER.error("Cannot install module from: " + bundle, ex);
                     }
                 }
                 return bundle;
