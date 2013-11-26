@@ -39,8 +39,10 @@
 
     <!-- Properties -->
     <properties>
-        <jboss.home>${basedir}/../../../wildfly/build/target/wildfly-${version.jboss.wildfly}</jboss.home>
-        <!--jboss.home>${project.build.directory}/wildfly-${version.jboss.wildfly}</jboss.home-->
+        <jboss.home>${project.build.directory}/wildfly-${version.jboss.wildfly}</jboss.home>
+        
+        <!-- Enable when working with a WildFly SNAPSHOT 
+        <jboss.home>${basedir}/../../../wildfly/build/target/wildfly-${version.jboss.wildfly}</jboss.home-->
     </properties>
     
     <dependencies>
@@ -98,7 +100,7 @@
 	        <plugin>
 	            <artifactId>maven-dependency-plugin</artifactId>
 	            <executions>
-                    <!--  
+                    <!-- Disable when working with a WildFly SNAPSHOT -->  
 	                <execution>
 	                    <id>unpack-wildfly</id>
 	                    <phase>process-test-resources</phase>
@@ -118,7 +120,6 @@
 	                        </artifactItems>
 	                    </configuration>
 	                </execution>
-                    -->
 	                <execution>
 	                    <id>unpack-wildfly-patch</id>
 	                    <phase>process-test-resources</phase>

@@ -36,6 +36,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -46,6 +47,7 @@ import org.junit.runner.RunWith;
  * @since 01-Oct-2013
  */
 @RunWith(Arquillian.class)
+@Ignore("[WFLY-2556] Arquillian integration may break test deployments that have OSGi metadata")
 public class WebappBundleModuleLifecycleTest {
 
     @Deployment
