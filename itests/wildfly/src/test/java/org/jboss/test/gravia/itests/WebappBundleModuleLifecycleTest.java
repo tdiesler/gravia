@@ -23,7 +23,6 @@ package org.jboss.test.gravia.itests;
 
 import java.io.InputStream;
 
-import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.runtime.Module;
@@ -50,7 +49,7 @@ import org.junit.runner.RunWith;
 @Ignore("[WFLY-2556] Arquillian integration may break test deployments that have OSGi metadata")
 public class WebappBundleModuleLifecycleTest {
 
-    @Deployment
+    //@Deployment
     public static Archive<?> deployment() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, "simple.war");
         //archive.addClasses(ApplicationActivator.class);
