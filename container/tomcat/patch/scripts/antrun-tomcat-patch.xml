@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ====================================================================== -->
+<!--                                                                        -->
+<!--  JBoss, the OpenSource J2EE webOS                                      -->
+<!--                                                                        -->
+<!--  Distributable under LGPL license.                                     -->
+<!--  See terms of license at http://www.gnu.org.                           -->
+<!--                                                                        -->
+<!-- ====================================================================== -->
+
+<project default="build">
+
+	<!-- ================================================================== -->
+	<!-- Setup                                                              -->
+	<!-- ================================================================== -->
+	<property name="etc.dir" value="${basedir}/etc" />
+	<property name="output.dir" value="${basedir}/target" />
+	<property name="resources.dir" value="${basedir}/src/main/resources" />
+	<property name="tomcat.patch.dir" value="${output.dir}/tomcat-patch" />
+	<property name="deploy.artifacts.dir" value="${output.dir}/deploy-artifacts" />
+	<property name="deploy.artifacts.lib" value="${deploy.artifacts.dir}/lib" />
+	<property name="deploy.artifacts.resources" value="${deploy.artifacts.dir}/resources" />
+
+	<!-- ================================================================== -->
+	<!-- Initialization                                                     -->
+	<!-- ================================================================== -->
+	<target name="init">
+	</target>
+
+	<!-- ================================================================== -->
+	<!-- Distribution                                                       -->
+	<!-- ================================================================== -->
+	<target name="build" depends="init">
+
+		<!-- Copy to libs -->
+		<copy todir="${tomcat.patch.dir}/lib" overwrite="true">
+			<fileset file="${deploy.artifacts.lib}/org.apache.felix.configadmin-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/org.apache.felix.http.bridge-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/org.apache.felix.log-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/org.apache.felix.metatype-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/org.apache.felix.scr-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/gravia-container-tomcat-extension-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/gravia-resource-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/gravia-runtime-api-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/gravia-runtime-embedded-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/org.osgi.core-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/shrinkwrap-api-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/slf4j-api-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/slf4j-simple-*.jar" />
+		</copy>
+		<copy file="${deploy.artifacts.lib}/gravia-container-tomcat-webapp-${project.version}.war" 
+			tofile="${tomcat.patch.dir}/webapps/gravia.war" overwrite="true"/>
+
+		<!-- Zip the tomcat patch -->
+		<zip destfile="${output.dir}/${project.artifactId}-${project.version}.zip" basedir="${tomcat.patch.dir}"/>
+		<tar destfile="${output.dir}/${project.artifactId}-${project.version}.tar.gz" basedir="${tomcat.patch.dir}" compression="gzip"/>
+	</target>
+</project>

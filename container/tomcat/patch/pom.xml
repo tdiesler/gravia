@@ -20,27 +20,51 @@
   #L%
   -->
   
+<!--
+    Set these VM properties in your IDE debugger 
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     
     <parent>
         <groupId>org.jboss.gravia</groupId>
-        <artifactId>gravia-container</artifactId>
+        <artifactId>gravia-container-tomcat</artifactId>
         <version>1.1.0.Alpha5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>gravia-container-karaf</artifactId>
+    <artifactId>gravia-container-tomcat-patch</artifactId>
 
-    <name>Gravia :: Container :: Karaf</name>
+    <name>Gravia :: Container :: Tomcat :: Patch</name>
     
     <!-- Properties -->    
     <properties>
-        <karaf.patch>${project.build.directory}/${project.artifactId}-${project.version}-patch</karaf.patch>
+        <tomcat.patch>${project.build.directory}/${project.artifactId}-${project.version}</tomcat.patch>
     </properties>
     
 	<!-- Dependencies -->
     <dependencies>
         <!-- Provided Dependencies -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.configadmin</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.log</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.bridge</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.proxy</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.metatype</artifactId>
@@ -52,13 +76,21 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.jboss.arquillian.osgi</groupId>
-            <artifactId>arquillian-osgi-bundle</artifactId>
+	        <groupId>org.jboss.gravia</groupId>
+	        <artifactId>gravia-container-tomcat-extension</artifactId>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-resource</artifactId>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-container-tomcat-webapp</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-resource</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -70,38 +102,34 @@
         </dependency>
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-runtime-osgi</artifactId>
+	        <artifactId>gravia-runtime-embedded</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.shrinkwrap</groupId>
+            <artifactId>shrinkwrap-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
 
 	<build>
 		<plugins>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack-karaf</id>
-                        <phase>process-test-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.apache.karaf</groupId>
-                                    <artifactId>apache-karaf</artifactId>
-                                    <version>${version.apache.karaf}</version>
-                                    <classifier>minimal</classifier>
-                                    <type>tar.gz</type>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -136,7 +164,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <ant antfile="${basedir}/scripts/antrun-karaf-patch.xml" inheritRefs="true" />
+                                <ant antfile="${basedir}/scripts/antrun-tomcat-patch.xml" inheritRefs="true" />
                             </target>
                         </configuration>
                     </execution>
@@ -155,13 +183,11 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>${karaf.patch}.zip</file>
-                                    <classifier>patch</classifier>
+                                    <file>${tomcat.patch}.zip</file>
                                     <type>zip</type>
                                 </artifact>
                                 <artifact>
-                                    <file>${karaf.patch}.tar.gz</file>
-                                    <classifier>patch</classifier>
+                                    <file>${tomcat.patch}.tar.gz</file>
                                     <type>tar.gz</type>
                                 </artifact>
                             </artifacts>

@@ -50,11 +50,13 @@
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-itests-common</artifactId>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-container-karaf</artifactId>
+            <version>${project.version}</version>
 	        <classifier>patch</classifier>
             <scope>provided</scope>
 	        <type>zip</type>

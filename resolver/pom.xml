@@ -20,6 +20,7 @@
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-resource</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

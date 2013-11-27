@@ -39,12 +39,10 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.spi.RuntimeFactory;
-import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 
 /**
- * Activates the {@link Runtime} as part of the web app lifecycle.
+ * Register the Webapp as {@link Module}.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
@@ -53,18 +51,12 @@ import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 public class ApplicationActivator implements ServletContextListener {
 
     /**
-     * Creates the runtime and installs/starts the webapp as a module.
+     * Installs/starts the webapp as a module.
      */
     @Override
     public void contextInitialized(ServletContextEvent event) {
         ServletContext servletContext = event.getServletContext();
         Runtime runtime = RuntimeLocator.getRuntime();
-        if (runtime == null) {
-            RuntimeFactory runtimeFactory = new TomcatRuntimeFactory();
-            DefaultPropertiesProvider propsProvider = new DefaultPropertiesProvider();
-            runtime = RuntimeLocator.createRuntime(runtimeFactory, propsProvider);
-            runtime.init();
-        }
         Module module = installWebappModule(runtime, servletContext);
         if (module != null) {
             try {
@@ -77,7 +69,7 @@ public class ApplicationActivator implements ServletContextListener {
     }
 
     /**
-     * Uninstalls the webapp's  module.
+     * Uninstalls the webapp's module.
      */
     @Override
     public void contextDestroyed(ServletContextEvent event) {

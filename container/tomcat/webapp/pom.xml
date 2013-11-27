@@ -19,50 +19,60 @@
   <http://www.gnu.org/licenses/lgpl-2.1.html>.
   #L%
   -->
+  
+<!--
+    Set these VM properties in your IDE debugger 
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     
     <parent>
         <groupId>org.jboss.gravia</groupId>
-        <artifactId>gravia-runtime</artifactId>
+        <artifactId>gravia-container-tomcat</artifactId>
         <version>1.1.0.Alpha5-SNAPSHOT</version>
     </parent>
 
-    <name>Gravia :: Runtime :: API</name>
-    
-    <artifactId>gravia-runtime-api</artifactId>
-    <packaging>bundle</packaging>
+    <artifactId>gravia-container-tomcat-webapp</artifactId>
+    <packaging>war</packaging>
 
+    <name>Gravia :: Container :: Tomcat :: Webapp</name>
+    
     <dependencies>
         <dependency>
-	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-resource</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.proxy</artifactId>
         </dependency>
         
-        <!-- Provided Dependencies -->
+        <!-- Provided Depdendencies -->
         <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-container-tomcat-extension</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-runtime-api</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.servlet</groupId>
+            <artifactId>jboss-servlet-api_3.0_spec</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<configuration>
-					<instructions>
-						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
