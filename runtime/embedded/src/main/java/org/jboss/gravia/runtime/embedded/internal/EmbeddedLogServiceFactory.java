@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.embedded.osgi;
+package org.jboss.gravia.runtime.embedded.internal;
 
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ServiceFactory;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author thomas.diesler@jboss.com
  * @since 22-Oct-2013
  */
-public final class EmbeddedLogServiceFactory implements ServiceFactory<LogService> {
+final class EmbeddedLogServiceFactory implements ServiceFactory<LogService> {
 
     @Override
     public LogService getService(Module module, ServiceRegistration<LogService> registration) {

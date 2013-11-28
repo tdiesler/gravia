@@ -37,6 +37,7 @@
 		<copy todir="${tomcat.patch.dir}/lib" overwrite="true">
 			<fileset file="${deploy.artifacts.lib}/org.apache.felix.configadmin-*.jar" />
 			<fileset file="${deploy.artifacts.lib}/org.apache.felix.http.bridge-*.jar" />
+			<fileset file="${deploy.artifacts.lib}/org.apache.felix.http.proxy-*.jar" />
 			<fileset file="${deploy.artifacts.lib}/org.apache.felix.log-*.jar" />
 			<fileset file="${deploy.artifacts.lib}/org.apache.felix.metatype-*.jar" />
 			<fileset file="${deploy.artifacts.lib}/org.apache.felix.scr-*.jar" />

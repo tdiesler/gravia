@@ -21,6 +21,8 @@
  */
 package org.jboss.gravia.runtime.embedded.internal;
 
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,7 +41,7 @@ import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
 import org.jboss.gravia.utils.NotNullException;
 
 /**
- * [TODO]
+ * The embedded {@link ModuleContext}
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
@@ -133,7 +135,6 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
 
     @Override
     public ServiceReference<?>[] getServiceReferences(String className, String filter) {
-        NotNullException.assertValue(className, "className");
         assertNotDestroyed();
 
         List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, true);
@@ -150,7 +151,6 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     @SuppressWarnings("unchecked")
     public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter) {
-        NotNullException.assertValue(clazz, "clazz");
         assertNotDestroyed();
 
         String className = clazz != null ? clazz.getName() : null;
@@ -165,7 +165,6 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
 
     @Override
     public ServiceReference<?>[] getAllServiceReferences(String className, String filter) {
-        NotNullException.assertValue(className, "className");
         assertNotDestroyed();
 
         List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, false);
@@ -182,10 +181,13 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     public boolean ungetService(ServiceReference<?> reference) {
         NotNullException.assertValue(reference, "reference");
-        assertNotDestroyed();
-
-        ServiceState<?> serviceState = ServiceState.assertServiceState(reference);
-        return getServicesHandler().ungetService((AbstractModule) getModule(), serviceState);
+        if (isDestroyed()) {
+            LOGGER.warn("Cannot ungetService " + reference + " from already destroyed module context: " + this);
+            return false;
+        } else {
+            ServiceState<?> serviceState = ServiceState.assertServiceState(reference);
+            return getServicesHandler().ungetService((AbstractModule) getModule(), serviceState);
+        }
     }
 
     @Override

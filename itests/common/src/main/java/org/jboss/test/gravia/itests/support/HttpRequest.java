@@ -5,16 +5,16 @@
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -36,21 +36,27 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
+ * @author Thomas.Diesler@jboss.com
  */
 public class HttpRequest {
 
-    public static String get(final String spec, final long timeout, final TimeUnit unit) throws IOException, ExecutionException, TimeoutException {
-        final URL url = new URL(spec);
-        Callable<String> task = new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                return processResponse(url, timeout, unit);
-            }
-        };
-        return execute(task, timeout, unit);
+    public static String get(final String spec, final long timeout, final TimeUnit unit) throws IOException {
+        try {
+            Callable<String> task = new Callable<String>() {
+                @Override
+                public String call() throws Exception {
+                    return processResponse(new URL(spec), timeout, unit);
+                }
+            };
+            return execute(task, timeout, unit);
+        } catch (RuntimeException rte) {
+            throw rte;
+        } catch (Exception ex) {
+            throw new IOException("Error accessing: " + spec, ex);
+        }
     }
 
-    private static String execute(final Callable<String> task, final long timeout, final TimeUnit unit) throws TimeoutException, IOException {
+    private static String execute(final Callable<String> task, final long timeout, final TimeUnit unit) throws TimeoutException, ExecutionException {
         final ExecutorService executor = Executors.newSingleThreadExecutor();
         final Future<String> result = executor.submit(task);
         try {
@@ -61,9 +67,6 @@ public class HttpRequest {
         } catch (InterruptedException e) {
             // should not happen
             throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            // by virtue of the Callable redefinition above I can cast
-            throw new IOException(e);
         } finally {
             executor.shutdownNow();
             try {

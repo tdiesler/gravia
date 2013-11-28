@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.embedded.osgi;
+package org.jboss.gravia.runtime.embedded.spi;
 
 import java.io.File;
 import java.io.IOException;

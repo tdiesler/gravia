@@ -48,6 +48,10 @@ public abstract class AbstractModuleContext implements ModuleContext {
         destroyed.set(true);
     }
 
+    protected boolean isDestroyed() {
+        return destroyed.get();
+    }
+
     @Override
     public Module getModule() {
         return module;
@@ -61,5 +65,9 @@ public abstract class AbstractModuleContext implements ModuleContext {
     protected void assertNotDestroyed() {
         if (destroyed.get())
             throw new IllegalStateException("Invalid ModuleContext for: " + module);
+    }
+
+    public String toString() {
+        return "ModuleContext[" + module.getIdentity() + "]";
     }
 }

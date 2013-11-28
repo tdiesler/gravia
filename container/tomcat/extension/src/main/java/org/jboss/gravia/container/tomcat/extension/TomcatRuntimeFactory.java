@@ -1,8 +1,8 @@
 /*
  * #%L
- * JBossOSGi Framework
+ * Gravia :: Integration Tests :: Common
  * %%
- * Copyright (C) 2013 JBoss by Red Hat
+ * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -19,22 +19,22 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.embedded.internal;
+package org.jboss.gravia.container.tomcat.extension;
 
-import org.jboss.gravia.runtime.embedded.spi.AbstractRuntimePlugin;
-
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.runtime.spi.RuntimeFactory;
 
 /**
- * The internal SCR plugin.
+ * The Tomcat {@link RuntimeFactory}
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public final class ServiceComponentsPlugin extends AbstractRuntimePlugin {
+public class TomcatRuntimeFactory implements RuntimeFactory {
 
     @Override
-    public String getBundleActivator() {
-        return "org.apache.felix.scr.impl.Activator";
+    public Runtime createRuntime(PropertiesProvider propertiesProvider) {
+        return new TomcatRuntime(propertiesProvider);
     }
-
 }

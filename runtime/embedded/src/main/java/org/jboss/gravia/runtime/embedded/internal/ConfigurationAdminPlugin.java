@@ -31,7 +31,7 @@ import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.embedded.AbstractRuntimePlugin;
+import org.jboss.gravia.runtime.embedded.spi.AbstractRuntimePlugin;
 import org.jboss.gravia.utils.StringPropertyReplacer;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;

@@ -110,6 +110,11 @@
             <artifactId>shrinkwrap-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.enterprise</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 	<build>

@@ -17,6 +17,8 @@
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>*:org.apache.felix.configadmin:jar</include>
+                <include>*:org.apache.felix.http.bridge:jar</include>
+                <include>*:org.apache.felix.http.proxy:jar</include>
                 <include>*:org.apache.felix.log:jar</include>
                 <include>*:org.apache.felix.metatype:jar</include>
                 <include>*:org.apache.felix.scr:jar</include>

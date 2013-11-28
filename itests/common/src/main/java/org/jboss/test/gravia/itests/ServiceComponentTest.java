@@ -26,6 +26,7 @@ import java.io.InputStream;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
+import org.jboss.gravia.container.tomcat.extension.ModuleLifecycleListener;
 import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Resource;
@@ -34,7 +35,6 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.tomcat.ApplicationActivator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -60,7 +60,7 @@ public class ServiceComponentTest  {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("scr-test");
         archive.addClasses(ServiceComponentTest.class);
-        archive.addClasses(TargetContainer.tomcat, ApplicationActivator.class);
+        archive.addClasses(TargetContainer.tomcat, ModuleLifecycleListener.class);
         archive.addClasses(ServiceA.class, ServiceA1.class);
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.a.ServiceA.xml");
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.a1.ServiceA1.xml");

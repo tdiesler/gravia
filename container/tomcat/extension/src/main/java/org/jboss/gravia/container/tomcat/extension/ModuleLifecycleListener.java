@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.tomcat;
+package org.jboss.gravia.container.tomcat.extension;
 
 import java.io.IOException;
 import java.net.URL;
@@ -36,19 +36,22 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.embedded.spi.BundleContextAdaptor;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
+import org.osgi.framework.BundleContext;
 
 /**
- * Register the Webapp as {@link Module}.
+ * Register the Webapp as a {@link Module}.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
 @WebListener
-public class ApplicationActivator implements ServletContextListener {
+public class ModuleLifecycleListener implements ServletContextListener {
 
     /**
      * Installs/starts the webapp as a module.
@@ -56,15 +59,27 @@ public class ApplicationActivator implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent event) {
         ServletContext servletContext = event.getServletContext();
-        Runtime runtime = RuntimeLocator.getRuntime();
-        Module module = installWebappModule(runtime, servletContext);
-        if (module != null) {
-            try {
-                module.start();
-            } catch (ModuleException ex) {
-                throw new IllegalStateException(ex);
+        Module module = (Module) servletContext.getAttribute(Module.class.getName());
+        if (module == null) {
+
+            // Install the module
+            Runtime runtime = RuntimeLocator.getRequiredRuntime();
+            module = installWebappModule(runtime, servletContext);
+            if (module != null) {
+                servletContext.setAttribute(Module.class.getName(), module);
+
+                // Start the module
+                try {
+                    module.start();
+                } catch (ModuleException ex) {
+                    throw new IllegalStateException(ex);
+                }
+
+                // HttpService integration
+                ModuleContext moduleContext = module.getModuleContext();
+                BundleContext bundleContext = new BundleContextAdaptor(moduleContext);
+                servletContext.setAttribute("org.osgi.framework.BundleContext", bundleContext);
             }
-            servletContext.setAttribute(Module.class.getName(), module);
         }
     }
 
@@ -81,7 +96,7 @@ public class ApplicationActivator implements ServletContextListener {
     }
 
     private Module installWebappModule(Runtime runtime, ServletContext servletContext) {
-        ClassLoader classLoader = ApplicationActivator.class.getClassLoader();
+        ClassLoader classLoader = servletContext.getClassLoader();
         Manifest manifest = getWebappManifest(servletContext);
         if (manifest == null)
             return null;

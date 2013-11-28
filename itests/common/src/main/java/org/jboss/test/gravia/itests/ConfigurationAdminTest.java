@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
+import org.jboss.gravia.container.tomcat.extension.ModuleLifecycleListener;
 import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Resource;
@@ -37,7 +38,6 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.tomcat.ApplicationActivator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -65,7 +65,7 @@ public class ConfigurationAdminTest  {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("configadmin-test");
         archive.addClasses(ConfigurationAdminTest.class);
-        archive.addClasses(TargetContainer.tomcat, ApplicationActivator.class);
+        archive.addClasses(TargetContainer.tomcat, ModuleLifecycleListener.class);
         archive.addClasses(ServiceD.class, ServiceD1.class);
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml");
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");

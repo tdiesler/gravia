@@ -25,12 +25,12 @@ import java.io.InputStream;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.gravia.container.tomcat.extension.ModuleLifecycleListener;
 import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
-import org.jboss.gravia.runtime.tomcat.ApplicationActivator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -52,7 +52,7 @@ public class WebappBundleModuleLifecycleTest {
     @Deployment
     public static Archive<?> deployment() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, "simple.war");
-        archive.addClasses(ApplicationActivator.class);
+        archive.addClasses(ModuleLifecycleListener.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {

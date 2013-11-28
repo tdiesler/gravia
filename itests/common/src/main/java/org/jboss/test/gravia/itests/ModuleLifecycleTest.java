@@ -26,13 +26,13 @@ import java.io.InputStream;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
+import org.jboss.gravia.container.tomcat.extension.ModuleLifecycleListener;
 import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
-import org.jboss.gravia.runtime.tomcat.ApplicationActivator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -55,7 +55,7 @@ public class ModuleLifecycleTest {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("simple");
         archive.addClasses(ModuleLifecycleTest.class);
-        archive.addClasses(TargetContainer.tomcat, ApplicationActivator.class);
+        archive.addClasses(TargetContainer.tomcat, ModuleLifecycleListener.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {

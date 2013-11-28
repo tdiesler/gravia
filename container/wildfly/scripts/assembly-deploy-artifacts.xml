@@ -23,7 +23,7 @@
                 <include>*:gravia-*:jar</include>
                 <include>*:org.osgi.enterprise:jar</include>
             </includes>
-            <scope>compile</scope>
+            <scope>provided</scope>
             <unpack>false</unpack>
         </dependencySet>
     </dependencySets>

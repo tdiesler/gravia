@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.embedded;
+package org.jboss.gravia.runtime.embedded.spi;
 
 import java.net.URL;
 import java.util.Dictionary;
@@ -31,7 +31,6 @@ import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.embedded.osgi.BundleContextAdaptor;
 import org.jboss.gravia.runtime.spi.RuntimePlugin;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.osgi.framework.BundleActivator;

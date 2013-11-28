@@ -25,16 +25,16 @@ import org.jboss.gravia.runtime.embedded.spi.AbstractRuntimePlugin;
 
 
 /**
- * The internal SCR plugin.
+ * The internal HttpService plugin.
  *
  * @author thomas.diesler@jboss.com
- * @since 27-Sep-2013
+ * @since 28-Nov-2013
  */
-public final class ServiceComponentsPlugin extends AbstractRuntimePlugin {
+public final class HttpServicePlugin extends AbstractRuntimePlugin {
 
     @Override
     public String getBundleActivator() {
-        return "org.apache.felix.scr.impl.Activator";
+        return "org.apache.felix.http.bridge.internal.BridgeActivator";
     }
 
 }

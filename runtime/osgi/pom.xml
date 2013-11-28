@@ -175,6 +175,7 @@
 						<Bundle-Activator>org.jboss.gravia.runtime.osgi.internal.OSGiRuntimeActivator</Bundle-Activator>
 						<Export-Package>
 							org.jboss.gravia.runtime.osgi;version="${project.version}",
+                            org.jboss.gravia.runtime.osgi.spi;version="${project.version}",
 						</Export-Package>
 					</instructions>
 				</configuration>

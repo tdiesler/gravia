@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.fusesource.portable.runtime.tomcat;
+package org.jboss.gravia.container.tomcat.webapp;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;

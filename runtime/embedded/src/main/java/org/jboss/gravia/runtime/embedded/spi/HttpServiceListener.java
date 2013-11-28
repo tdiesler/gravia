@@ -19,22 +19,18 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.tomcat;
+package org.jboss.gravia.runtime.embedded.spi;
 
-import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.spi.PropertiesProvider;
-import org.jboss.gravia.runtime.spi.RuntimeFactory;
+import javax.servlet.annotation.WebListener;
+
+import org.apache.felix.http.proxy.ProxyListener;
 
 /**
- * The Tomcat {@link RuntimeFactory}
+ * Listener for {@link HttpService} events
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public class TomcatRuntimeFactory implements RuntimeFactory {
-
-    @Override
-    public Runtime createRuntime(PropertiesProvider propertiesProvider) {
-        return new TomcatRuntime(propertiesProvider);
-    }
+@WebListener
+public class HttpServiceListener extends ProxyListener {
 }
