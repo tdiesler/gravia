@@ -35,20 +35,22 @@
 
 		<!-- Copy to libs -->
 		<copy todir="${tomcat.patch.dir}/lib" overwrite="true">
-			<fileset file="${deploy.artifacts.lib}/org.apache.felix.configadmin-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/org.apache.felix.http.bridge-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/org.apache.felix.http.proxy-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/org.apache.felix.log-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/org.apache.felix.metatype-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/org.apache.felix.scr-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/gravia-container-tomcat-extension-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/gravia-resource-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/gravia-runtime-api-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/gravia-runtime-embedded-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/org.osgi.core-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/shrinkwrap-api-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/slf4j-api-*.jar" />
-			<fileset file="${deploy.artifacts.lib}/slf4j-simple-*.jar" />
+	        <fileset dir="${deploy.artifacts.lib}">
+				<include name="org.apache.felix.configadmin-*.jar" />
+				<include name="org.apache.felix.http.bridge-*.jar" />
+				<include name="org.apache.felix.http.proxy-*.jar" />
+				<include name="org.apache.felix.log-*.jar" />
+				<include name="org.apache.felix.metatype-*.jar" />
+				<include name="org.apache.felix.scr-*.jar" />
+				<include name="gravia-container-tomcat-extension-*.jar" />
+				<include name="gravia-resource-*.jar" />
+				<include name="gravia-runtime-api-*.jar" />
+				<include name="gravia-runtime-embedded-*.jar" />
+				<include name="org.osgi.core-*.jar" />
+				<include name="shrinkwrap-api-*.jar" />
+				<include name="slf4j-api-*.jar" />
+				<include name="slf4j-simple-*.jar" />
+	        </fileset>
 		</copy>
 		<copy file="${deploy.artifacts.lib}/gravia-container-tomcat-webapp-${project.version}.war" 
 			tofile="${tomcat.patch.dir}/webapps/gravia.war" overwrite="true"/>

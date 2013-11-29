@@ -53,7 +53,7 @@ public abstract class AbstractRuntimePlugin implements RuntimePlugin, ModuleActi
         String resourceName = getBundleActivator().replace('.', '/') + ".class";
         URL resurl = classLoader.getResource(resourceName);
         if (resurl == null)
-            throw new ModuleException("Cannot load BundleActivator resource: " + resourceName);
+            throw new ModuleException("Cannot load BundleActivator resource '" + resourceName + "' from: " + classLoader);
 
         String urlpath = resurl.toExternalForm();
         urlpath = urlpath.substring(0, urlpath.indexOf(resourceName));

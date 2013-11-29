@@ -29,61 +29,70 @@
     
     <parent>
         <groupId>org.jboss.gravia</groupId>
-        <artifactId>gravia-container-tomcat</artifactId>
+        <artifactId>gravia-container-wildfly</artifactId>
         <version>1.1.0.Alpha5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>gravia-container-tomcat-webapp</artifactId>
-    <packaging>war</packaging>
+    <artifactId>gravia-container-wildfly-extension</artifactId>
+    
+    <name>Gravia :: Container :: WildFly :: Extension</name>
 
-    <name>Gravia :: Container :: Tomcat :: Webapp</name>
+    <!-- Properties -->    
+    <properties>
+        <wildfly.patch>${project.build.directory}/${project.artifactId}-${project.version}-patch</wildfly.patch>
+    </properties>
     
     <dependencies>
-        <!-- Provided Depdendencies -->
         <dependency>
             <groupId>org.jboss.gravia</groupId>
-            <artifactId>gravia-container-tomcat-extension</artifactId>
+            <artifactId>gravia-provision</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-repository</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-resolver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-resource</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-runtime-api</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-runtime-embedded</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.shrinkwrap</groupId>
+            <artifactId>shrinkwrap-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wildfly</groupId>
+            <artifactId>wildfly-server</artifactId>
+        </dependency>
+    
+    	<!-- Provided Dependencies -->
         <dependency>
             <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-runtime-embedded</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jboss.spec.javax.servlet</groupId>
-            <artifactId>jboss-servlet-api_3.0_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.enterprise</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
-    
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+
+	<build>
+		<plugins>
+		</plugins>
+	</build>
 </project>

@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.gravia.itests;
+package org.jboss.test.gravia.itests.wildfly;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +39,8 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.embedded.spi.HttpServiceListener;
+import org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyListener;
+import org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyServlet;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -65,7 +66,7 @@ public class HttpServiceTestCase {
     @Deployment
     public static Archive<?> deployment() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, "http-service.war");
-        archive.addClasses(ModuleLifecycleListener.class, HttpServiceServlet.class, HttpServiceListener.class);
+        archive.addClasses(ModuleLifecycleListener.class, HttpServiceProxyServlet.class, HttpServiceProxyListener.class);
         archive.addClasses(HttpRequest.class);
         archive.addAsResource(STRING_ASSET, "res/message.txt");
         archive.setManifest(new Asset() {
@@ -73,6 +74,7 @@ public class HttpServiceTestCase {
             public InputStream openStream() {
                 ManifestBuilder builder = new ManifestBuilder();
                 builder.addIdentityCapability("http-service", "1.0.0");
+                builder.addManifestHeader("Dependencies", "org.jboss.gravia,org.jboss.shrinkwrap.core");
                 return builder.openStream();
             }
         });
@@ -81,6 +83,7 @@ public class HttpServiceTestCase {
 
     @Test
     public void testServletAccess() throws Exception {
+        System.out.println(HttpService.class.getClassLoader());
         Runtime runtime = RuntimeLocator.getRuntime();
         Module module = runtime.getModule(getClass().getClassLoader());
         ModuleContext context = module.getModuleContext();
@@ -108,6 +111,7 @@ public class HttpServiceTestCase {
 
     @Test
     public void testResourceAccess() throws Exception {
+        System.out.println(HttpService.class.getClassLoader());
         Runtime runtime = RuntimeLocator.getRuntime();
         Module module = runtime.getModule(getClass().getClassLoader());
         ModuleContext context = module.getModuleContext();

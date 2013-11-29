@@ -19,17 +19,19 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.test.gravia.itests;
+package org.jboss.test.gravia.itests.tomcat;
 
 import java.io.InputStream;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.container.tomcat.extension.ModuleLifecycleListener;
+import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -45,17 +47,22 @@ import org.junit.runner.RunWith;
  * @since 01-Oct-2013
  */
 @RunWith(Arquillian.class)
-public class WebappModuleLifecycleTest {
+public class WebappBundleModuleLifecycleTest {
 
     @Deployment
     public static Archive<?> deployment() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, "simple.war");
+        archive.addClasses(ModuleLifecycleListener.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
-                ManifestBuilder builder = new ManifestBuilder();
-                builder.addIdentityCapability(archive.getName(), "1.0.0");
-                builder.addManifestHeader("Dependencies", "org.jboss.gravia,org.jboss.shrinkwrap.core");
+                OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+                builder.addBundleManifestVersion(2);
+                builder.addBundleSymbolicName(archive.getName());
+                builder.addBundleVersion("1.0.0");
+                builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
+                builder.addImportPackages(RuntimeLocator.class);
+                builder.addBundleClasspath("WEB-INF/classes");
                 return builder.openStream();
             }
         });

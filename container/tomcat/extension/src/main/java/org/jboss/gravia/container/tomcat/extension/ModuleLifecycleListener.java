@@ -58,28 +58,30 @@ public class ModuleLifecycleListener implements ServletContextListener {
      */
     @Override
     public void contextInitialized(ServletContextEvent event) {
+
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
         ServletContext servletContext = event.getServletContext();
-        Module module = (Module) servletContext.getAttribute(Module.class.getName());
+        Module module = runtime.getModule(servletContext.getClassLoader());
+
+        // Install the module
         if (module == null) {
-
-            // Install the module
-            Runtime runtime = RuntimeLocator.getRequiredRuntime();
             module = installWebappModule(runtime, servletContext);
-            if (module != null) {
-                servletContext.setAttribute(Module.class.getName(), module);
+        }
 
-                // Start the module
-                try {
-                    module.start();
-                } catch (ModuleException ex) {
-                    throw new IllegalStateException(ex);
-                }
+        // Start the module
+        if (module != null) {
+            servletContext.setAttribute(Module.class.getName(), module);
 
-                // HttpService integration
-                ModuleContext moduleContext = module.getModuleContext();
-                BundleContext bundleContext = new BundleContextAdaptor(moduleContext);
-                servletContext.setAttribute("org.osgi.framework.BundleContext", bundleContext);
+            try {
+                module.start();
+            } catch (ModuleException ex) {
+                throw new IllegalStateException(ex);
             }
+
+            // HttpService integration
+            ModuleContext moduleContext = module.getModuleContext();
+            BundleContext bundleContext = new BundleContextAdaptor(moduleContext);
+            servletContext.setAttribute("org.osgi.framework.BundleContext", bundleContext);
         }
     }
 

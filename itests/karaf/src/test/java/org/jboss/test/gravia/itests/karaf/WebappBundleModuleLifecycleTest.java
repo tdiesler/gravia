@@ -19,12 +19,13 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.test.gravia.itests;
+package org.jboss.test.gravia.itests.karaf;
 
 import java.io.InputStream;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.container.tomcat.extension.ModuleLifecycleListener;
 import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.runtime.Module;
@@ -50,6 +51,7 @@ import org.junit.runner.RunWith;
 public class WebappBundleModuleLifecycleTest {
 
     @Deployment
+    @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, "simple.war");
         archive.addClasses(ModuleLifecycleListener.class);

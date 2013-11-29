@@ -21,16 +21,38 @@
  */
 package org.jboss.gravia.runtime.embedded.spi;
 
-import javax.servlet.annotation.WebListener;
+import java.io.IOException;
 
-import org.apache.felix.http.proxy.ProxyListener;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+
+import org.apache.felix.http.proxy.ProxyServlet;
 
 /**
- * Listener for {@link HttpService} events
+ * Proxy servlet for the {@link HttpService}
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-@WebListener
-public class HttpServiceListener extends ProxyListener {
+@SuppressWarnings("serial")
+@WebServlet(name = "HttpServiceServlet", urlPatterns = { "/*" }, loadOnStartup = 1)
+public class HttpServiceProxyServlet extends HttpServlet
+{
+    private final ProxyServlet delegate = new ProxyServlet();
+
+    public void init(ServletConfig config) throws ServletException {
+        delegate.init(config);
+    }
+
+    public void destroy() {
+        delegate.destroy();
+    }
+
+    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+        delegate.service(req, res);
+    }
 }

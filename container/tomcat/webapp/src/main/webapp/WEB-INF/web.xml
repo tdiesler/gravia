@@ -25,12 +25,12 @@
         <listener-class>org.jboss.gravia.container.tomcat.webapp.GraviaActivator</listener-class>
     </listener>
     <listener>
-        <listener-class>org.jboss.gravia.runtime.embedded.spi.HttpServiceListener</listener-class>
+        <listener-class>org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyListener</listener-class>
     </listener>
 
     <servlet>
         <servlet-name>proxy</servlet-name>
-        <servlet-class>org.jboss.gravia.runtime.embedded.spi.HttpServiceServlet</servlet-class>
+        <servlet-class>org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>

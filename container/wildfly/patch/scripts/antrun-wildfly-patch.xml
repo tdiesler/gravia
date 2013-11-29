@@ -39,6 +39,7 @@
 		<filterset>
 	        <filter token="project.version" value="${project.version}" />
 	        <filter token="version.apache.felix.configadmin" value="${version.apache.felix.configadmin}" />
+	        <filter token="version.apache.felix.http" value="${version.apache.felix.http}" />
 	        <filter token="version.apache.felix.log" value="${version.apache.felix.log}" />
 	        <filter token="version.apache.felix.metatype" value="${version.apache.felix.metatype}" />
 		    <filter token="version.apache.felix.scr" value="${version.apache.felix.scr}" />
@@ -49,20 +50,32 @@
   	<!-- Copy module resources-->
     <copy todir="${wildfly.patch.dir}/modules/system/layers/base/org/jboss/gravia/main" overwrite="true">
         <fileset dir="${deploy.artifacts.lib}">
-        	<include name="gravia-*"/>
-        	<include name="org.apache.felix.*"/>
+			<include name="org.apache.felix.configadmin-*.jar" />
+			<include name="org.apache.felix.http.bridge-*.jar" />
+			<include name="org.apache.felix.http.proxy-*.jar" />
+			<include name="org.apache.felix.log-*.jar" />
+			<include name="org.apache.felix.metatype-*.jar" />
+			<include name="org.apache.felix.scr-*.jar" />
+			<include name="gravia-provision-*.jar" />
+			<include name="gravia-repository-*.jar" />
+			<include name="gravia-resolver-*.jar" />
+			<include name="gravia-resource-*.jar" />
+			<include name="gravia-runtime-api-*.jar" />
+			<include name="gravia-runtime-embedded-*.jar" />
        	</fileset>
     </copy>
     <copy todir="${wildfly.patch.dir}/modules/system/layers/base/org/osgi/enterprise/main" overwrite="true">
         <fileset file="${deploy.artifacts.lib}/org.osgi.enterprise-*.jar" />
     </copy>
     <copy todir="${wildfly.patch.dir}/modules/system/layers/base/org/wildfly/extension/gravia/main" overwrite="true">
-        <fileset file="${output.dir}/gravia-container-wildfly-${project.version}.jar" />
+        <fileset dir="${deploy.artifacts.lib}">
+			<include name="gravia-container-wildfly-extension-*.jar" />
+       	</fileset>
     </copy>
 	
   	<!-- Zip the wildfly patch -->
-  	<zip destfile="${output.dir}/${project.artifactId}-${project.version}-patch.zip" basedir="${wildfly.patch.dir}"/>
-  	<tar destfile="${output.dir}/${project.artifactId}-${project.version}-patch.tar.gz" basedir="${wildfly.patch.dir}" compression="gzip"/>
+  	<zip destfile="${output.dir}/${project.artifactId}-${project.version}.zip" basedir="${wildfly.patch.dir}"/>
+  	<tar destfile="${output.dir}/${project.artifactId}-${project.version}.tar.gz" basedir="${wildfly.patch.dir}" compression="gzip"/>
   	
   </target>
 </project>
