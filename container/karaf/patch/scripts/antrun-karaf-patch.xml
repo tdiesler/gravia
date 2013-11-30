@@ -34,7 +34,13 @@
   <!-- ================================================================== -->
   <target name="build" depends="init">
 
-  	<!-- Copy to libs -->
+  	<!-- Copy to system -->
+    <copy todir="${karaf.patch.dir}/system/org/apache/felix/org.apache.felix.eventadmin/${version.apache.felix.eventadmin}" overwrite="true">
+        <fileset file="${deploy.artifacts.lib}/org.apache.felix.eventadmin-*.jar" />
+    </copy>
+    <copy todir="${karaf.patch.dir}/system/org/apache/felix/org.apache.felix.http/${version.apache.felix.http}" overwrite="true">
+        <fileset file="${deploy.artifacts.lib}/org.apache.felix.http.bundle-*.jar" />
+    </copy>
     <copy todir="${karaf.patch.dir}/system/org/apache/felix/org.apache.felix.metatype/${version.apache.felix.metatype}" overwrite="true">
         <fileset file="${deploy.artifacts.lib}/org.apache.felix.metatype-*.jar" />
     </copy>
@@ -55,6 +61,8 @@
 #
 # Gravia Integration
 # 
+org/apache/felix/org.apache.felix.eventadmin/${version.apache.felix.eventadmin}/org.apache.felix.eventadmin-${version.apache.felix.eventadmin}.jar=40
+org/apache/felix/org.apache.felix.http/${version.apache.felix.http}/org.apache.felix.http.bundle-${version.apache.felix.http}.jar=40
 org/apache/felix/org.apache.felix.metatype/${version.apache.felix.metatype}/org.apache.felix.metatype-${version.apache.felix.metatype}.jar=40
 org/apache/felix/org.apache.felix.scr/${version.apache.felix.scr}/org.apache.felix.scr-${version.apache.felix.scr}.jar=40
 org/jboss/gravia/${project.version}/gravia-resource-${project.version}.jar=40
@@ -71,17 +79,20 @@ org/jboss/arquillian/osgi/${version.jboss.arquillian.osgi}/arquillian-osgi-bundl
 # Clean the persitent bundle store on Framework INIT                                
 org.osgi.framework.storage.clean=onFirstInit
 
+# Enable Jetty HttpService
+org.apache.felix.http.jettyEnabled=true
+    	
 # The Felix Framewok log level 
 #
 # ERROR = 1;
 # WARNING = 2;
 # INFO = 3;
 # DEBUG = 4;
-felix.log.level=4
+# felix.log.level=4
     </echo>
 	
   	<!-- Zip the tomcat patch -->
-  	<zip destfile="${output.dir}/${project.artifactId}-${project.version}-patch.zip" basedir="${karaf.patch.dir}"/>
-  	<tar destfile="${output.dir}/${project.artifactId}-${project.version}-patch.tar.gz" basedir="${karaf.patch.dir}" compression="gzip"/>
+  	<zip destfile="${output.dir}/${project.artifactId}-${project.version}.zip" basedir="${karaf.patch.dir}"/>
+  	<tar destfile="${output.dir}/${project.artifactId}-${project.version}.tar.gz" basedir="${karaf.patch.dir}" compression="gzip"/>
   </target>
 </project>

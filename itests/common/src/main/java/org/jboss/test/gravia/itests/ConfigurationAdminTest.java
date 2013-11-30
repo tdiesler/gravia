@@ -72,7 +72,7 @@ public class ConfigurationAdminTest  {
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
-                if (archive.getTargetContainer() == TargetContainer.karaf) {
+                if (ArchiveBuilder.getTargetContainer() == TargetContainer.karaf) {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(archive.getName());

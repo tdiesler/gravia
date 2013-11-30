@@ -19,21 +19,23 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.gravia.itests.wildfly;
+package org.jboss.test.gravia.itests.karaf;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.container.tomcat.extension.ModuleLifecycleListener;
-import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
@@ -41,6 +43,7 @@ import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyListener;
 import org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyServlet;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -64,6 +67,7 @@ public class HttpServiceTestCase {
     static StringAsset STRING_ASSET = new StringAsset("Hello from Resource");
 
     @Deployment
+    @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, "http-service.war");
         archive.addClasses(ModuleLifecycleListener.class, HttpServiceProxyServlet.class, HttpServiceProxyListener.class);
@@ -72,9 +76,13 @@ public class HttpServiceTestCase {
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
-                ManifestBuilder builder = new ManifestBuilder();
-                builder.addIdentityCapability("http-service", "1.0.0");
-                builder.addManifestHeader("Dependencies", "org.jboss.gravia,org.jboss.shrinkwrap.core");
+                OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+                builder.addBundleManifestVersion(2);
+                builder.addBundleSymbolicName("http-service");
+                builder.addBundleVersion("1.0.0");
+                builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
+                builder.addImportPackages(RuntimeLocator.class, Servlet.class, HttpServlet.class, HttpService.class);
+                builder.addBundleClasspath("WEB-INF/classes");
                 return builder.openStream();
             }
         });
@@ -144,7 +152,7 @@ public class HttpServiceTestCase {
     }
 
     private String performCall(String path) throws Exception {
-        return HttpRequest.get("http://localhost:8080/http-service" + path, 2, TimeUnit.SECONDS);
+        return HttpRequest.get("http://localhost:8080" + path, 2, TimeUnit.SECONDS);
     }
 
     @SuppressWarnings("serial")

@@ -53,14 +53,6 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-container-karaf</artifactId>
-            <version>${project.version}</version>
-	        <classifier>patch</classifier>
-            <scope>provided</scope>
-	        <type>zip</type>
-        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
@@ -125,9 +117,8 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.jboss.gravia</groupId>
-                                    <artifactId>gravia-container-karaf</artifactId>
+                                    <artifactId>gravia-container-karaf-patch</artifactId>
                                     <version>${project.version}</version>
-                                    <classifier>patch</classifier>
                                     <type>tar.gz</type>
                                     <outputDirectory>${project.build.directory}/apache-karaf-${version.apache.karaf}</outputDirectory>
                                 </artifactItem>
@@ -140,7 +131,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>${surefire.system.args}</argLine>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
                     <reportNameSuffix>karaf</reportNameSuffix>
                     <dependenciesToScan>
                         <dependency>org.jboss.gravia:gravia-itests-common</dependency>

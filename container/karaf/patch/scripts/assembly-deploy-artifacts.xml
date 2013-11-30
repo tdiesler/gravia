@@ -17,6 +17,8 @@
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>*:arquillian-osgi-bundle:jar</include>
+                <include>*:org.apache.felix.eventadmin:jar</include>
+                <include>*:org.apache.felix.http.bundle:jar</include>
                 <include>*:org.apache.felix.metatype:jar</include>
                 <include>*:org.apache.felix.scr:jar</include>
                 <include>*:gravia-resource:jar</include>

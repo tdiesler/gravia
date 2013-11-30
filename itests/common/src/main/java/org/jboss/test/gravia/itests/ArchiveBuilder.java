@@ -59,7 +59,7 @@ public class ArchiveBuilder  {
         return name;
     }
 
-    public TargetContainer getTargetContainer () {
+    public static TargetContainer getTargetContainer () {
         return TargetContainer.valueOf(System.getProperty("target.container"));
     }
 
