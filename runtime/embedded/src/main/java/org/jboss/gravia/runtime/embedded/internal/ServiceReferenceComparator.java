@@ -23,7 +23,6 @@ package org.jboss.gravia.runtime.embedded.internal;
 
 import java.util.Comparator;
 
-import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.ServiceReference;
 
 
@@ -51,8 +50,8 @@ final class ServiceReferenceComparator implements Comparator<ServiceReference<?>
 
     @Override
     public int compare(ServiceReference<?> ref1, ServiceReference<?> ref2) {
-        long thisId = getProperty(ref1, Constants.SERVICE_ID);
-        long otherId = getProperty(ref1, Constants.SERVICE_ID);
+        long thisId = getProperty(ref1, org.jboss.gravia.Constants.SERVICE_ID);
+        long otherId = getProperty(ref1, org.jboss.gravia.Constants.SERVICE_ID);
 
         // If this ServiceReference and the specified ServiceReference have the same service id they are equal
         if (thisId == otherId)
@@ -60,8 +59,8 @@ final class ServiceReferenceComparator implements Comparator<ServiceReference<?>
 
         // This ServiceReference is less than the specified ServiceReference if it has a lower service ranking
         // and greater if it has a higher service ranking.
-        long thisRanking = getProperty(ref1, Constants.SERVICE_RANKING);
-        long otherRanking = getProperty(ref2, Constants.SERVICE_RANKING);
+        long thisRanking = getProperty(ref1, org.jboss.gravia.Constants.SERVICE_RANKING);
+        long otherRanking = getProperty(ref2, org.jboss.gravia.Constants.SERVICE_RANKING);
         if (thisRanking != otherRanking)
             return thisRanking < otherRanking ? -1 : 1;
 

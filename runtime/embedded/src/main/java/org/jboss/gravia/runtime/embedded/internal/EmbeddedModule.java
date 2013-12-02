@@ -31,8 +31,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.AttachmentKey;
-import org.jboss.gravia.resource.Constants;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;

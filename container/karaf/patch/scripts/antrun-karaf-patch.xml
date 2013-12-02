@@ -82,6 +82,9 @@ org.osgi.framework.storage.clean=onFirstInit
 # Enable Jetty HttpService
 org.apache.felix.http.jettyEnabled=true
     	
+# The Runtime type
+org.jboss.gravia.runtime.type=karaf
+    	
 # The Felix Framewok log level 
 #
 # ERROR = 1;

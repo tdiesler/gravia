@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import org.jboss.gravia.resource.Constants;
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.junit.Assert;
 import org.junit.Test;

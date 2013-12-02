@@ -40,7 +40,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import org.jboss.gravia.runtime.AllServiceListener;
-import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Filter;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -332,7 +331,7 @@ public final class RuntimeEventsManager {
                 // Service events must only be delivered to event listeners which can validly cast the event
                 if (!listenerReg.isAllServiceListener()) {
                     boolean assignableToOwner = true;
-                    String[] clazzes = (String[]) reference.getProperty(Constants.OBJECTCLASS);
+                    String[] clazzes = (String[]) reference.getProperty(org.jboss.gravia.Constants.OBJECTCLASS);
                     for (String clazz : clazzes) {
                         if (reference.isAssignableTo(owner, clazz) == false) {
                             assignableToOwner = false;

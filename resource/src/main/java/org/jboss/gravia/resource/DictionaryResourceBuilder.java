@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.spi.ElementParser;
 
 /**

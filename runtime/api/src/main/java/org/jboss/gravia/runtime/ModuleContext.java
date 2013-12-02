@@ -143,7 +143,7 @@ public interface ModuleContext {
      * <p>
      * The listener is called if the filter criteria is met. To filter based
      * upon the class of the service, the filter should reference the
-     * {@link Constants#OBJECTCLASS} property. If {@code filter} is {@code null}
+     * {@link org.jboss.gravia.Constants#OBJECTCLASS} property. If {@code filter} is {@code null}
      * , all services are considered to match the filter.
      *
      * <p>
@@ -226,7 +226,7 @@ public interface ModuleContext {
      * {@link #registerService(String[], Object, Dictionary)} and is provided as
      * a convenience when {@code service} will only be registered under a single
      * class name. Note that even in this case the value of the service's
-     * {@link Constants#OBJECTCLASS} property will be an array of string, rather
+     * {@link org.jboss.gravia.Constants#OBJECTCLASS} property will be an array of string, rather
      * than just a single string.
      *
      * @param className The class name under which the service can be located.
@@ -262,9 +262,9 @@ public interface ModuleContext {
      * <li>The Runtime adds the following service properties to the service
      * properties from the specified {@code Dictionary} (which may be
      * {@code null}): <br/>
-     * A property named {@link Constants#SERVICE_ID} identifying the
+     * A property named {@link org.jboss.gravia.Constants#SERVICE_ID} identifying the
      * registration number of the service <br/>
-     * A property named {@link Constants#OBJECTCLASS} containing all the
+     * A property named {@link org.jboss.gravia.Constants#OBJECTCLASS} containing all the
      * specified classes. <br/>
      * Properties with these names in the specified {@code Dictionary} will be
      * ignored.
@@ -277,7 +277,7 @@ public interface ModuleContext {
      *
      * @param classNames The class names under which the service can be located.
      *        The class names in this array will be stored in the service's
-     *        properties under the key {@link Constants#OBJECTCLASS}.
+     *        properties under the key {@link org.jboss.gravia.Constants#OBJECTCLASS}.
      * @param service The service object or a {@code ServiceFactory} object.
      * @param properties The properties for this service. The keys in the
      *        properties object must all be {@code String} objects. See
@@ -319,10 +319,10 @@ public interface ModuleContext {
      * interested in any service that implements the specified class.
      * <p>
      * If multiple such services exist, the service with the highest ranking (as
-     * specified in its {@link Constants#SERVICE_RANKING} property) is returned.
+     * specified in its {@link org.jboss.gravia.Constants#SERVICE_RANKING} property) is returned.
      * <p>
      * If there is a tie in ranking, the service with the lowest service ID (as
-     * specified in its {@link Constants#SERVICE_ID} property); that is, the
+     * specified in its {@link org.jboss.gravia.Constants#SERVICE_ID} property); that is, the
      * service that was registered first is returned.
      *
      * @param <S> Type of Service.
@@ -353,11 +353,11 @@ public interface ModuleContext {
      * <p>
      * If multiple such services exist, the service with the highest priority is
      * selected. This priority is defined as the service reference with the
-     * highest ranking (as specified in its {@link Constants#SERVICE_RANKING}
+     * highest ranking (as specified in its {@link org.jboss.gravia.Constants#SERVICE_RANKING}
      * property) is returned.
      * <p>
      * If there is a tie in ranking, the service with the lowest service ID (as
-     * specified in its {@link Constants#SERVICE_ID} property); that is, the
+     * specified in its {@link org.jboss.gravia.Constants#SERVICE_ID} property); that is, the
      * service that was registered first is returned.
      *
      * @param className The class name with which the service was registered.
@@ -397,7 +397,7 @@ public interface ModuleContext {
      * <ul>
      * <li>The service must have been registered with the name of the specified
      * class. The complete list of class names with which a service was
-     * registered is available from the service's {@link Constants#OBJECTCLASS
+     * registered is available from the service's {@link org.jboss.gravia.Constants#OBJECTCLASS
      * objectClass} property.
      * <li>If the specified {@code filter} is not {@code null}, the filter
      * expression must match the service.
@@ -449,7 +449,7 @@ public interface ModuleContext {
      * <li>If the specified class name, {@code clazz}, is not {@code null}, the
      * service must have been registered with the specified class name. The
      * complete list of class names with which a service was registered is
-     * available from the service's {@link Constants#OBJECTCLASS objectClass}
+     * available from the service's {@link org.jboss.gravia.Constants#OBJECTCLASS objectClass}
      * property.
      * <li>If the specified {@code filter} is not {@code null}, the filter
      * expression must match the service.
@@ -498,7 +498,7 @@ public interface ModuleContext {
      * <li>If the specified class name, {@code clazz}, is not {@code null}, the
      * service must have been registered with the specified class name. The
      * complete list of class names with which a service was registered is
-     * available from the service's {@link Constants#OBJECTCLASS objectClass}
+     * available from the service's {@link org.jboss.gravia.Constants#OBJECTCLASS objectClass}
      * property.
      * <li>If the specified {@code filter} is not {@code null}, the filter
      * expression must match the service.

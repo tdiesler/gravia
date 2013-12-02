@@ -30,7 +30,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.utils.NotNullException;
 
@@ -87,7 +86,7 @@ public final class DefaultPropertiesProvider implements PropertiesProvider {
         URL configURL = null;
 
         // #1 Use the explicit system property
-        String sysprop = SecurityActions.getSystemProperty(Constants.GRAVIA_PROPERTIES, null);
+        String sysprop = SecurityActions.getSystemProperty(org.jboss.gravia.Constants.GRAVIA_PROPERTIES, null);
         if (sysprop != null) {
             try {
                 configURL = new URL(sysprop);
@@ -99,7 +98,7 @@ public final class DefaultPropertiesProvider implements PropertiesProvider {
         // #2 discover the config file as resource
         if (configURL == null) {
             ClassLoader classLoader = DefaultPropertiesProvider.class.getClassLoader();
-            configURL = classLoader.getResource(Constants.GRAVIA_PROPERTIES);
+            configURL = classLoader.getResource(org.jboss.gravia.Constants.GRAVIA_PROPERTIES);
         }
 
         Properties props = new Properties();

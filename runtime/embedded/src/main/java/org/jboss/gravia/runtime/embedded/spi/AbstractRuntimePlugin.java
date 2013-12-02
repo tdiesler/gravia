@@ -68,8 +68,8 @@ public abstract class AbstractRuntimePlugin implements RuntimePlugin, ModuleActi
         Dictionary<String, String> headers = new ManifestHeadersProvider(manifest).getHeaders();
         String symbolicName = headers.get(Constants.BUNDLE_SYMBOLICNAME);
         String version = headers.get(Constants.BUNDLE_VERSION);
-        headers.put(org.jboss.gravia.resource.Constants.GRAVIA_IDENTITY_CAPABILITY, symbolicName + ";version=" + version);
-        headers.put(org.jboss.gravia.resource.Constants.MODULE_ACTIVATOR, getClass().getName());
+        headers.put(org.jboss.gravia.Constants.GRAVIA_IDENTITY_CAPABILITY, symbolicName + ";version=" + version);
+        headers.put(org.jboss.gravia.Constants.MODULE_ACTIVATOR, getClass().getName());
         return runtime.installModule(classLoader, headers);
     }
 

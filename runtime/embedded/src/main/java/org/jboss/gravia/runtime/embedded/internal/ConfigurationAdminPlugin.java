@@ -27,7 +27,6 @@ import java.util.Hashtable;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceReference;
@@ -57,7 +56,7 @@ public final class ConfigurationAdminPlugin extends AbstractRuntimePlugin {
         ConfigurationAdmin configAdmin = context.getService(sref);
 
         Runtime runtime = context.getModule().adapt(Runtime.class);
-        String confspecs = (String) runtime.getProperty(Constants.RUNTIME_CONFIGURATIONS);
+        String confspecs = (String) runtime.getProperty(org.jboss.gravia.Constants.RUNTIME_CONFIGURATIONS);
         if (confspecs != null) {
             for (String spec : confspecs.split(",")) {
                 String urlspec = StringPropertyReplacer.replaceProperties(spec.trim());

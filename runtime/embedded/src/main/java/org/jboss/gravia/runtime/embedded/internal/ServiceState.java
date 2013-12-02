@@ -39,7 +39,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceException;
@@ -103,8 +102,8 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         if (properties == null)
             properties = new Hashtable();
 
-        properties.put(Constants.SERVICE_ID, serviceId);
-        properties.put(Constants.OBJECTCLASS, classNames);
+        properties.put(org.jboss.gravia.Constants.SERVICE_ID, serviceId);
+        properties.put(org.jboss.gravia.Constants.OBJECTCLASS, classNames);
         this.currProperties = new CaseInsensitiveDictionary(properties);
         this.cachedToString = updateCachedToString();
 
@@ -254,8 +253,8 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
             if (properties == null)
                 properties = new Hashtable();
 
-            properties.put(Constants.SERVICE_ID, currProperties.get(Constants.SERVICE_ID));
-            properties.put(Constants.OBJECTCLASS, currProperties.get(Constants.OBJECTCLASS));
+            properties.put(org.jboss.gravia.Constants.SERVICE_ID, currProperties.get(org.jboss.gravia.Constants.SERVICE_ID));
+            properties.put(org.jboss.gravia.Constants.OBJECTCLASS, currProperties.get(org.jboss.gravia.Constants.OBJECTCLASS));
             currProperties = new CaseInsensitiveDictionary(properties);
         }
 
@@ -409,15 +408,15 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
             Map<String, Object> clone = new LinkedHashMap<String, Object>(currProperties);
             Map<String, Object> props = new LinkedHashMap<String, Object>();
             // service.id
-            props.put(Constants.SERVICE_ID, clone.remove(Constants.SERVICE_ID));
+            props.put(org.jboss.gravia.Constants.SERVICE_ID, clone.remove(org.jboss.gravia.Constants.SERVICE_ID));
             // service.pid
-            String pid = (String) clone.remove(Constants.SERVICE_PID);
+            String pid = (String) clone.remove(org.jboss.gravia.Constants.SERVICE_PID);
             if (pid != null) {
-                props.put(Constants.SERVICE_PID, pid);
+                props.put(org.jboss.gravia.Constants.SERVICE_PID, pid);
             }
             // objectClass
-            String[] classes = (String[]) clone.remove(Constants.OBJECTCLASS);
-            props.put(Constants.OBJECTCLASS, Arrays.asList(classes));
+            String[] classes = (String[]) clone.remove(org.jboss.gravia.Constants.OBJECTCLASS);
+            props.put(org.jboss.gravia.Constants.OBJECTCLASS, Arrays.asList(classes));
             // all other props
             props.putAll(clone);
             return "ServiceState" + props;
@@ -454,7 +453,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
                     // The Framework will check if the returned service object is an instance of all the
                     // classes named when the service was registered. If not, then null is returned to the module.
-                    if (checkValidClassNames(ownerModule, (String[]) getProperty(Constants.OBJECTCLASS), retValue) == false)
+                    if (checkValidClassNames(ownerModule, (String[]) getProperty(org.jboss.gravia.Constants.OBJECTCLASS), retValue) == false)
                         return null;
 
                     value = retValue;

@@ -29,7 +29,6 @@ import java.util.Properties;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.server.ServerEnvironment;
 import org.jboss.as.server.ServerEnvironmentService;
-import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
@@ -80,11 +79,12 @@ public class RuntimeService extends AbstractService<Runtime> {
 
         Properties properties = new Properties();
         ServerEnvironment serverEnv = getServerEnvironment();
-        File storageDir = new File(serverEnv.getServerDataDir().getPath() + File.separator + Constants.RUNTIME_STORAGE_DEFAULT);
+        File storageDir = new File(serverEnv.getServerDataDir().getPath() + File.separator + org.jboss.gravia.Constants.RUNTIME_STORAGE_DEFAULT);
 
         // Gravia integration properties
-        properties.setProperty(Constants.RUNTIME_STORAGE_CLEAN, Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT);
-        properties.setProperty(Constants.RUNTIME_STORAGE, storageDir.getAbsolutePath());
+        properties.setProperty(org.jboss.gravia.Constants.RUNTIME_STORAGE_CLEAN, org.jboss.gravia.Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT);
+        properties.setProperty(org.jboss.gravia.Constants.RUNTIME_STORAGE, storageDir.getAbsolutePath());
+        properties.setProperty(org.jboss.gravia.Constants.RUNTIME_TYPE, "wildfly");
 
         return properties;
     }

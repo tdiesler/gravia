@@ -1,8 +1,8 @@
 /*
  * #%L
- * JBossOSGi Runtime
+ * JBossOSGi Resolver API
  * %%
- * Copyright (C) 2013 JBoss by Red Hat
+ * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -19,8 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime;
-
+package org.jboss.gravia;
 
 /**
  * Defines standard names for the environment system properties, service
@@ -30,9 +29,34 @@ package org.jboss.gravia.runtime;
  * otherwise indicated.
  *
  * @author thomas.diesler@jboss.com
- * @since 27-Sep-2013
+ * @since 02-Jul-2010
  */
-public interface Constants {
+public interface Constants  {
+
+    /**
+     * Manifest header to mark an OSGi Bundle as Gravia enabled.
+     * The module identity is derived from the Bundle-SymbolicName and Bundle-Version.
+     */
+    public static final String GRAVIA_ENABLED = "Gravia-Enabled";
+
+    /**
+     * Manifest header that defines the module's identitiy.
+     */
+    public static final String GRAVIA_IDENTITY_CAPABILITY = "Gravia-Identity";
+
+    /**
+     * Manifest header that defines a module identitiy requirement.
+     */
+    public static final String GRAVIA_IDENTITY_REQUIREMENT = "Gravia-IdentityRequirement";
+
+    /**
+     * Manifest header that defines a generic module capability.
+     */
+    public static final String GRAVIA_CAPABILITY = "Gravia-Capability";
+    /**
+     * Manifest header that defines a generic module requirement.
+     */
+    public static final String GRAVIA_REQUIREMENT = "Gravia-Requirement";
 
     /**
      * Header attribute identifying the module's activator class.
@@ -54,6 +78,14 @@ public interface Constants {
      * system property to discover it.
      */
     String GRAVIA_PROPERTIES = "gravia.properties";
+
+    /**
+     * Runtime property specifying a comma seperated list of URLs each
+     * pointing to a resource that containes ConfigurationAdmin properties.
+     * <p>
+     * The resource name is expected to end in *.cfg and also names the PID
+     */
+    String RUNTIME_CONFIGURATIONS = "org.jboss.gravia.runtime.configurations";
 
     /**
      * Runtime property specifying the persistent storage area used
@@ -90,12 +122,9 @@ public interface Constants {
     String RUNTIME_STORAGE_DEFAULT = "gravia-store";
 
     /**
-     * Runtime property specifying a comma seperated list of URLs each
-     * pointing to a resource that containes ConfigurationAdmin properties.
-     * <p>
-     * The resource name is expected to end in *.cfg and also names the PID
+     * A string value representing the type of the runtime (e.g. tomcat,wildfly,karaf,etc)
      */
-    String RUNTIME_CONFIGURATIONS = "org.jboss.gravia.runtime.configurations";
+    String RUNTIME_TYPE = "org.jboss.gravia.runtime.type";
 
     /**
      * Service property identifying all of the class names under which a service

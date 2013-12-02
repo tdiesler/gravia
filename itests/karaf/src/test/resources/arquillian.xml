@@ -27,8 +27,8 @@
 	<container qualifier="jboss" default="true">
 		<configuration>
 			<property name="karafHome">target/apache-karaf-${version.apache.karaf}</property>
-            <property name="karafBeginningStartLevel">100</property>
             <property name="bootstrapCompleteService">org.osgi.service.http.HttpService</property>
+            <property name="karafBeginningStartLevel">100</property>
 		</configuration>
 	</container>
 </arquillian>

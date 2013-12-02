@@ -30,7 +30,6 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 import org.jboss.gravia.container.tomcat.extension.TomcatRuntimeFactory;
-import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
@@ -73,11 +72,13 @@ public class GraviaActivator implements ServletContextListener {
 
         // Gravia integration properties
         File catalinaWork = new File(catalinaHome.getPath() + File.separator + "work");
-        File storageDir = new File(catalinaWork.getPath() + File.separator + Constants.RUNTIME_STORAGE_DEFAULT);
+        File storageDir = new File(catalinaWork.getPath() + File.separator + org.jboss.gravia.Constants.RUNTIME_STORAGE_DEFAULT);
 
         Properties properties = new Properties();
-        properties.setProperty(Constants.RUNTIME_STORAGE_CLEAN, Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT);
-        properties.setProperty(Constants.RUNTIME_STORAGE, storageDir.getAbsolutePath());
+        properties.setProperty(org.jboss.gravia.Constants.RUNTIME_STORAGE_CLEAN, org.jboss.gravia.Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT);
+        properties.setProperty(org.jboss.gravia.Constants.RUNTIME_STORAGE, storageDir.getAbsolutePath());
+        properties.setProperty(org.jboss.gravia.Constants.RUNTIME_TYPE, "tomcat");
+
         return properties;
     }
 }

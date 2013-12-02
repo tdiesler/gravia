@@ -27,7 +27,6 @@ import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 import java.io.File;
 import java.io.IOException;
 
-import org.jboss.gravia.runtime.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
@@ -46,10 +45,10 @@ final class RuntimeStorageHandler {
     RuntimeStorageHandler(PropertiesProvider props, boolean firstInit) {
 
         // Create the storage area
-        String dirName = (String) props.getProperty(Constants.RUNTIME_STORAGE);
+        String dirName = (String) props.getProperty(org.jboss.gravia.Constants.RUNTIME_STORAGE);
         if (dirName == null) {
             try {
-                File storageDir = new File("." + File.separator + Constants.RUNTIME_STORAGE_DEFAULT);
+                File storageDir = new File("." + File.separator + org.jboss.gravia.Constants.RUNTIME_STORAGE_DEFAULT);
                 dirName = storageDir.getCanonicalPath();
             } catch (IOException ex) {
                 throw new IllegalStateException("Cannot create storage area", ex);
@@ -58,8 +57,8 @@ final class RuntimeStorageHandler {
         storageArea = new File(dirName).getAbsoluteFile();
 
         // Cleanup the storage area
-        String storageClean = (String) props.getProperty(Constants.RUNTIME_STORAGE_CLEAN);
-        if (firstInit == true && Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT.equals(storageClean)) {
+        String storageClean = (String) props.getProperty(org.jboss.gravia.Constants.RUNTIME_STORAGE_CLEAN);
+        if (firstInit == true && org.jboss.gravia.Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT.equals(storageClean)) {
             LOGGER.debug("Deleting storage: {}", storageArea.getAbsolutePath());
             deleteRecursive(storageArea);
         }

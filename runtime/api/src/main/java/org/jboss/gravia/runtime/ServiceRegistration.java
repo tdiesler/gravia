@@ -62,7 +62,7 @@ public interface ServiceRegistration<T> {
      * Updates the properties associated with a service.
      *
      * <p>
-     * The {@link Constants#OBJECTCLASS} and {@link Constants#SERVICE_ID} keys
+     * The {@link org.jboss.gravia.Constants#OBJECTCLASS} and {@link org.jboss.gravia.Constants#SERVICE_ID} keys
      * cannot be modified by this method. These values are set by the Runtime
      * when the service is registered.
      *

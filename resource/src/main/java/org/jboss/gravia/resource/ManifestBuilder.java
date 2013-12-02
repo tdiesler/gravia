@@ -37,6 +37,7 @@ import java.util.Map.Entry;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.jboss.gravia.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
