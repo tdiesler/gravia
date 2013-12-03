@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -41,11 +43,15 @@ import java.util.concurrent.TimeoutException;
 public class HttpRequest {
 
     public static String get(final String spec, final long timeout, final TimeUnit unit) throws IOException {
+        return get(spec, null, timeout, unit);
+    }
+
+    public static String get(final String spec, final Map<String, String> headers, final long timeout, final TimeUnit unit) throws IOException {
         try {
             Callable<String> task = new Callable<String>() {
                 @Override
                 public String call() throws Exception {
-                    return processResponse(new URL(spec), timeout, unit);
+                    return processResponse(new URL(spec), headers, timeout, unit);
                 }
             };
             return execute(task, timeout, unit);
@@ -77,16 +83,7 @@ public class HttpRequest {
         }
     }
 
-    private static String read(final InputStream in) throws IOException {
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        int b;
-        while ((b = in.read()) != -1) {
-            out.write(b);
-        }
-        return out.toString();
-    }
-
-    private static String processResponse(URL url, long timeout, TimeUnit unit) throws IOException {
+    private static String processResponse(URL url, Map<String, String> headers, long timeout, TimeUnit unit) throws IOException {
         int responseCode = 0;
         String lastError = "No Error";
         String lastResult = "No Result";
@@ -94,15 +91,29 @@ public class HttpRequest {
         long start = System.currentTimeMillis();
         while (responseCode != HttpURLConnection.HTTP_OK && now < start + unit.toMillis(timeout)) {
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            if (headers != null) {
+                for (Entry<String, String> entry : headers.entrySet()) {
+                    con.addRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
             con.setDoInput(true);
             try {
                 responseCode = con.getResponseCode();
                 if (responseCode != HttpURLConnection.HTTP_OK) {
                     InputStream err = con.getErrorStream();
-                    try {
-                        lastError = read(err);
-                    } finally {
-                        err.close();
+                    if (err != null) {
+                        try {
+                            lastError = read(err);
+                        } finally {
+                            err.close();
+                        }
+                    } else {
+                        InputStream in = con.getInputStream();
+                        try {
+                            lastError = read(in);
+                        } finally {
+                            in.close();
+                        }
                     }
                 } else {
                     InputStream in = con.getInputStream();
@@ -127,5 +138,14 @@ public class HttpRequest {
             throw new IOException(lastError);
 
         return lastResult;
+    }
+
+    private static String read(final InputStream in) throws IOException {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        int b;
+        while ((b = in.read()) != -1) {
+            out.write(b);
+        }
+        return out.toString();
     }
 }
