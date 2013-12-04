@@ -24,6 +24,7 @@ package org.jboss.gravia.container.tomcat.extension;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -36,8 +37,14 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
+import org.apache.catalina.Role;
+import org.apache.catalina.User;
+import org.apache.catalina.UserDatabase;
+import org.apache.catalina.users.MemoryUserDatabase;
+
 public class GraviaLoginModule implements LoginModule {
 
+    private UserDatabase userDatabase;
     private CallbackHandler callbackHandler;
     private UserPrincipal userPrincipal;
     private RolePrincipal rolePrincipal;
@@ -49,6 +56,12 @@ public class GraviaLoginModule implements LoginModule {
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         this.callbackHandler = callbackHandler;
         this.subject = subject;
+        try {
+            userDatabase = new MemoryUserDatabase();
+            userDatabase.open();
+        } catch (Exception ex) {
+            throw new IllegalStateException("Cannot open user database", ex);
+        }
     }
 
     @Override
@@ -60,23 +73,26 @@ public class GraviaLoginModule implements LoginModule {
 
         try {
             callbackHandler.handle(callbacks);
-            String name = ((NameCallback) callbacks[0]).getName();
+            String username = ((NameCallback) callbacks[0]).getName();
             String password = String.valueOf(((PasswordCallback) callbacks[1]).getPassword());
 
             // Here we validate the credentials against some
             // authentication/authorization provider.
 
-            // For this example we are just checking if
-            // user is "user123" and password is "pass123"
-            if (name != null && name.equals("userName") && password != null && password.equals("userPass")) {
+            User user = userDatabase.findUser(username);
+            if (user != null && user.getPassword().equals(password)) {
 
                 // We store the username and roles
                 // fetched from the credentials provider
                 // to be used later in commit() method.
 
-                login = name;
+                login = username;
                 userGroups = new ArrayList<String>();
-                userGroups.add("adminRole");
+                Iterator<Role> roles = user.getRoles();
+                while(roles.hasNext()) {
+                    Role role = roles.next();
+                    userGroups.add(role.getName());
+                }
                 return true;
             }
 
@@ -118,15 +134,11 @@ public class GraviaLoginModule implements LoginModule {
         return true;
     }
 
-    public static class UserPrincipal implements Principal {
+    private static class UserPrincipal implements Principal {
 
-        private String name;
+        private final String name;
 
         public UserPrincipal(String name) {
-            this.name = name;
-        }
-
-        public void setName(String name) {
             this.name = name;
         }
 
@@ -137,15 +149,11 @@ public class GraviaLoginModule implements LoginModule {
 
     }
 
-    public static class RolePrincipal implements Principal {
+    private static class RolePrincipal implements Principal {
 
-        private String name;
+        private final String name;
 
         public RolePrincipal(String name) {
-            this.name = name;
-        }
-
-        public void setName(String name) {
             this.name = name;
         }
 
@@ -153,6 +161,5 @@ public class GraviaLoginModule implements LoginModule {
         public String getName() {
             return name;
         }
-
     }
 }

@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.gravia.itests.karaf;
+package org.jboss.test.gravia.itests;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +41,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.container.tomcat.extension.ModuleLifecycleListener;
+import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
@@ -55,6 +56,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.test.gravia.itests.ArchiveBuilder.TargetContainer;
 import org.jboss.test.gravia.itests.support.HttpRequest;
 import org.jboss.test.gravia.itests.support.SecureHttpContext;
 import org.junit.Assert;
@@ -85,16 +87,23 @@ public class HttpServiceSecureTestCase {
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
-                OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
-                builder.addBundleManifestVersion(2);
-                builder.addBundleSymbolicName(archive.getName());
-                builder.addBundleVersion("1.0.0");
-                builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
-                builder.addImportPackages(RuntimeLocator.class, Servlet.class, HttpServlet.class, HttpService.class);
-                builder.addImportPackages(Subject.class, Callback.class, LoginContext.class);
-                builder.addImportPackages(Logger.class);
-                builder.addBundleClasspath("WEB-INF/classes");
-                return builder.openStream();
+                if (ArchiveBuilder.getTargetContainer() == TargetContainer.karaf) {
+                    OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+                    builder.addBundleManifestVersion(2);
+                    builder.addBundleSymbolicName(archive.getName());
+                    builder.addBundleVersion("1.0.0");
+                    builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
+                    builder.addImportPackages(RuntimeLocator.class, Servlet.class, HttpServlet.class, HttpService.class);
+                    builder.addImportPackages(Subject.class, Callback.class, LoginContext.class);
+                    builder.addImportPackages(Logger.class);
+                    builder.addBundleClasspath("WEB-INF/classes");
+                    return builder.openStream();
+                } else {
+                    ManifestBuilder builder = new ManifestBuilder();
+                    builder.addIdentityCapability("http-service-secure", "1.0.0");
+                    builder.addManifestHeader("Dependencies", "org.jboss.gravia,org.jboss.shrinkwrap.core");
+                    return builder.openStream();
+                }
             }
         });
         return archive;
@@ -115,7 +124,8 @@ public class HttpServiceSecureTestCase {
             assertNotAvailable(reqspec, headers);
 
             HttpContext base = httpService.createDefaultHttpContext();
-            HttpContext secureContext = new SecureHttpContext(base, "karaf", "graviaRole");
+            String realm = "karaf".equals(getRuntimeType()) ? "karaf" : "ApplicationRealm";
+            HttpContext secureContext = new SecureHttpContext(base, realm, "graviaRole");
 
             // Register the test servlet and make a call
             httpService.registerServlet("/service", new HttpServiceServlet(module), null, secureContext);
@@ -147,7 +157,8 @@ public class HttpServiceSecureTestCase {
             assertNotAvailable(reqspec, headers);
 
             HttpContext base = httpService.createDefaultHttpContext();
-            HttpContext secureContext = new SecureHttpContext(base, "karaf", "graviaRole");
+            String realm = "karaf".equals(getRuntimeType()) ? "karaf" : "ApplicationRealm";
+            HttpContext secureContext = new SecureHttpContext(base, realm, "graviaRole");
 
             // Register the test resource and make a call
             httpService.registerResources("/resource", "/res", secureContext);
@@ -173,10 +184,13 @@ public class HttpServiceSecureTestCase {
     }
 
     private String performCall(String path, Map<String, String> headers) throws Exception {
-        Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        Object runtimeType = runtime.getProperty(Constants.RUNTIME_TYPE);
-        String context = "karaf".equals(runtimeType) ? "" : "/http-service-secure";
+        String context = "karaf".equals(getRuntimeType()) ? "" : "/http-service-secure";
         return HttpRequest.get("http://localhost:8080" + context + path, headers, 2, TimeUnit.SECONDS);
+    }
+
+    private String getRuntimeType() {
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        return (String) runtime.getProperty(Constants.RUNTIME_TYPE);
     }
 
     @SuppressWarnings("serial")

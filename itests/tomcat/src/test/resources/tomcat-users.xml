@@ -26,7 +26,9 @@
   and thus are ignored when reading this file. Do not forget to remove
   <!.. ..> that surrounds them.
 -->
+  <role rolename="graviaRole"/>
   <role rolename="tomcat"/>
   <role rolename="manager-script"/>
   <user username="tomcat" password="tomcat" roles="tomcat,manager-script"/>
+  <user username="graviaUser" password="graviaPass" roles="graviaRole"/>
 </tomcat-users>
