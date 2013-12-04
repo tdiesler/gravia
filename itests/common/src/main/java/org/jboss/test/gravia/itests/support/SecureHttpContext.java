@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.security.Principal;
+import java.security.acl.Group;
+import java.util.Enumeration;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -141,7 +143,7 @@ public class SecureHttpContext implements HttpContext {
             if (role != null && role.length() > 0) {
                 boolean found = false;
                 for (Principal p : subject.getPrincipals()) {
-                    if (role.equals(p.getName())) {
+                    if (role.equals(p.getName()) || p instanceof Group && isGroupMember((Group) p, role)) {
                         found = true;
                         break;
                     }
@@ -158,6 +160,17 @@ public class SecureHttpContext implements HttpContext {
             LOGGER.warn("Login failed", e);
             return null;
         }
+    }
+
+    private boolean isGroupMember(Group group, String member) {
+        Enumeration<? extends Principal> members = group.members();
+        while(members.hasMoreElements()) {
+            Principal m = members.nextElement();
+            if (member.equals(m.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String base64Decode(String srcString) {
