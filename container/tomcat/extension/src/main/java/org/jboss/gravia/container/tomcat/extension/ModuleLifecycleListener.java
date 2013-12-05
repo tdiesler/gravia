@@ -115,7 +115,6 @@ public class ModuleLifecycleListener implements ServletContextListener {
             Resource resource = resbuilder.getResource();
             ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(manifest);
             module = runtime.installModule(classLoader, resource, headersProvider.getHeaders(), context);
-            servletContext.setAttribute(Module.class.getName(), module);
         } catch (RuntimeException rte) {
             throw rte;
         } catch (ModuleException ex) {

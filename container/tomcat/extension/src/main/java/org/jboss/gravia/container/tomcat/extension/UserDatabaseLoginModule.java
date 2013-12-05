@@ -42,7 +42,7 @@ import org.apache.catalina.User;
 import org.apache.catalina.UserDatabase;
 import org.apache.catalina.users.MemoryUserDatabase;
 
-public class GraviaLoginModule implements LoginModule {
+public class UserDatabaseLoginModule implements LoginModule {
 
     private UserDatabase userDatabase;
     private CallbackHandler callbackHandler;
