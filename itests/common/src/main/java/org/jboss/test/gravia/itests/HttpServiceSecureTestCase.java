@@ -190,7 +190,8 @@ public class HttpServiceSecureTestCase {
 
     private String getRuntimeType() {
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        return (String) runtime.getProperty(Constants.RUNTIME_TYPE);
+        String runtimeType = (String) runtime.getProperty(Constants.RUNTIME_TYPE);
+        return runtimeType != null ? runtimeType : "karaf";
     }
 
     @SuppressWarnings("serial")

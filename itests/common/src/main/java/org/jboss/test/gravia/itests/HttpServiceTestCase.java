@@ -161,10 +161,14 @@ public class HttpServiceTestCase {
     }
 
     private String performCall(String path) throws Exception {
-        Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        Object runtimeType = runtime.getProperty(Constants.RUNTIME_TYPE);
-        String context = "karaf".equals(runtimeType) ? "" : "/http-service";
+        String context = "karaf".equals(getRuntimeType()) ? "" : "/http-service";
         return HttpRequest.get("http://localhost:8080" + context + path, 2, TimeUnit.SECONDS);
+    }
+
+    private String getRuntimeType() {
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        String runtimeType = (String) runtime.getProperty(Constants.RUNTIME_TYPE);
+        return runtimeType != null ? runtimeType : "karaf";
     }
 
     @SuppressWarnings("serial")
