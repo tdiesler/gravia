@@ -32,11 +32,12 @@ import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
-import org.jboss.test.gravia.itests.ArchiveBuilder.TargetContainer;
+import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,11 +56,11 @@ public class ModuleLifecycleTest {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("simple");
         archive.addClasses(ModuleLifecycleTest.class);
-        archive.addClasses(TargetContainer.tomcat, ModuleLifecycleListener.class);
+        archive.addClasses(RuntimeType.TOMCAT, ModuleLifecycleListener.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
-                if (ArchiveBuilder.getTargetContainer() == TargetContainer.karaf) {
+                if (ArchiveBuilder.getTargetContainer() == RuntimeType.KARAF) {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(archive.getName());

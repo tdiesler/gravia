@@ -19,8 +19,9 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.test.gravia.itests;
+package org.jboss.test.gravia.itests.support;
 
+import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -42,13 +43,9 @@ public class ArchiveBuilder  {
     private final String name;
     private final Archive<?> archive;
 
-    public enum TargetContainer {
-        karaf, tomcat, wildfly
-    }
-
     public ArchiveBuilder(String name) {
         this.name = name;
-        if (getTargetContainer() == TargetContainer.tomcat) {
+        if (getTargetContainer() == RuntimeType.TOMCAT) {
             archive = ShrinkWrap.create(WebArchive.class, name + ".war");
         } else {
             archive = ShrinkWrap.create(JavaArchive.class, name + ".jar");
@@ -59,8 +56,8 @@ public class ArchiveBuilder  {
         return name;
     }
 
-    public static TargetContainer getTargetContainer () {
-        return TargetContainer.valueOf(System.getProperty("target.container"));
+    public static RuntimeType getTargetContainer () {
+        return RuntimeType.getRuntimeType(System.getProperty("target.container"));
     }
 
     public ArchiveBuilder addClasses(Class<?>... classes) {
@@ -69,7 +66,7 @@ public class ArchiveBuilder  {
         return this;
     }
 
-    public ArchiveBuilder addClasses(TargetContainer target, Class<?>... classes) {
+    public ArchiveBuilder addClasses(RuntimeType target, Class<?>... classes) {
         if (getTargetContainer() == target) {
             ClassContainer<?> container = (ClassContainer<?>) archive;
             container.addClasses(classes);

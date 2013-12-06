@@ -41,6 +41,7 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyListener;
 import org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyServlet;
@@ -50,7 +51,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.test.gravia.itests.ArchiveBuilder.TargetContainer;
+import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.jboss.test.gravia.itests.support.HttpRequest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -78,7 +79,7 @@ public class HttpServiceTestCase {
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
-                if (ArchiveBuilder.getTargetContainer() == TargetContainer.karaf) {
+                if (ArchiveBuilder.getTargetContainer() == RuntimeType.KARAF) {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName("http-service");
@@ -161,14 +162,8 @@ public class HttpServiceTestCase {
     }
 
     private String performCall(String path) throws Exception {
-        String context = "karaf".equals(getRuntimeType()) ? "" : "/http-service";
+        String context = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "" : "/http-service";
         return HttpRequest.get("http://localhost:8080" + context + path, 2, TimeUnit.SECONDS);
-    }
-
-    private String getRuntimeType() {
-        Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        String runtimeType = (String) runtime.getProperty(Constants.RUNTIME_TYPE);
-        return runtimeType != null ? runtimeType : "karaf";
     }
 
     @SuppressWarnings("serial")

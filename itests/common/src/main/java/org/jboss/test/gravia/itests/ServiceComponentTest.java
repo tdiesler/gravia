@@ -34,13 +34,14 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
-import org.jboss.test.gravia.itests.ArchiveBuilder.TargetContainer;
 import org.jboss.test.gravia.itests.sub.a.ServiceA;
 import org.jboss.test.gravia.itests.sub.a1.ServiceA1;
+import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,14 +61,14 @@ public class ServiceComponentTest  {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("scr-test");
         archive.addClasses(ServiceComponentTest.class);
-        archive.addClasses(TargetContainer.tomcat, ModuleLifecycleListener.class);
+        archive.addClasses(RuntimeType.TOMCAT, ModuleLifecycleListener.class);
         archive.addClasses(ServiceA.class, ServiceA1.class);
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.a.ServiceA.xml");
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.a1.ServiceA1.xml");
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
-                if (ArchiveBuilder.getTargetContainer() == TargetContainer.karaf) {
+                if (ArchiveBuilder.getTargetContainer() == RuntimeType.KARAF) {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(archive.getName());

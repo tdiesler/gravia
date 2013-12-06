@@ -37,13 +37,14 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
-import org.jboss.test.gravia.itests.ArchiveBuilder.TargetContainer;
 import org.jboss.test.gravia.itests.sub.d.ServiceD;
 import org.jboss.test.gravia.itests.sub.d1.ServiceD1;
+import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,14 +66,14 @@ public class ConfigurationAdminTest  {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("configadmin-test");
         archive.addClasses(ConfigurationAdminTest.class);
-        archive.addClasses(TargetContainer.tomcat, ModuleLifecycleListener.class);
+        archive.addClasses(RuntimeType.TOMCAT, ModuleLifecycleListener.class);
         archive.addClasses(ServiceD.class, ServiceD1.class);
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml");
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
-                if (ArchiveBuilder.getTargetContainer() == TargetContainer.karaf) {
+                if (ArchiveBuilder.getTargetContainer() == RuntimeType.KARAF) {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(archive.getName());
