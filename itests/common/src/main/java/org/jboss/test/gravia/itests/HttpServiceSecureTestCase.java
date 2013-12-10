@@ -40,7 +40,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.container.tomcat.extension.ModuleLifecycleListener;
+import org.jboss.gravia.container.tomcat.extension.WebAppContextListener;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -48,8 +48,6 @@ import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyListener;
-import org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyServlet;
 import org.jboss.gravia.utils.Base64Encoder;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
@@ -59,6 +57,9 @@ import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.jboss.test.gravia.itests.support.HttpRequest;
+import org.jboss.test.gravia.itests.support.AnnotatedProxyListener;
+import org.jboss.test.gravia.itests.support.AnnotatedProxyServlet;
+import org.jboss.test.gravia.itests.support.AnnotatedContextListener;
 import org.jboss.test.gravia.itests.support.SecureHttpContext;
 import org.junit.Assert;
 import org.junit.Test;
@@ -82,7 +83,8 @@ public class HttpServiceSecureTestCase {
     @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, "http-service-secure.war");
-        archive.addClasses(ModuleLifecycleListener.class, HttpServiceProxyServlet.class, HttpServiceProxyListener.class);
+        archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
+        archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(HttpRequest.class, SecureHttpContext.class, Base64Encoder.class);
         archive.addAsResource(STRING_ASSET, "res/message.txt");
         archive.setManifest(new Asset() {
@@ -177,7 +179,7 @@ public class HttpServiceSecureTestCase {
 
     private void assertNotAvailable(String reqspec, Map<String, String> headers) throws Exception {
         try {
-            performCall(reqspec, headers);
+            performCall(reqspec, headers, 500, TimeUnit.MILLISECONDS);
             Assert.fail("IOException expected");
         } catch (IOException ex) {
             // expected
@@ -185,8 +187,12 @@ public class HttpServiceSecureTestCase {
     }
 
     private String performCall(String path, Map<String, String> headers) throws Exception {
+        return performCall(path, headers, 2, TimeUnit.SECONDS);
+    }
+
+    private String performCall(String path, Map<String, String> headers, long timeout, TimeUnit unit) throws Exception {
         String context = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "" : "/http-service-secure";
-        return HttpRequest.get("http://localhost:8080" + context + path, headers, 2, TimeUnit.SECONDS);
+        return HttpRequest.get("http://localhost:8080" + context + path, headers, timeout, unit);
     }
 
     @SuppressWarnings("serial")

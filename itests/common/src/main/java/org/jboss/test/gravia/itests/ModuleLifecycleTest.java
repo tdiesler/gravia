@@ -27,7 +27,6 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.container.tomcat.extension.ModuleLifecycleListener;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -38,6 +37,7 @@ import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.test.gravia.itests.support.ArchiveBuilder;
+import org.jboss.test.gravia.itests.support.AnnotatedContextListener;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +56,7 @@ public class ModuleLifecycleTest {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("simple");
         archive.addClasses(ModuleLifecycleTest.class);
-        archive.addClasses(RuntimeType.TOMCAT, ModuleLifecycleListener.class);
+        archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {

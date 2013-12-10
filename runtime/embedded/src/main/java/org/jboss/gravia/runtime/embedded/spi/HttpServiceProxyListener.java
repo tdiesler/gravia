@@ -21,8 +21,6 @@
  */
 package org.jboss.gravia.runtime.embedded.spi;
 
-import javax.servlet.annotation.WebListener;
-
 import org.apache.felix.http.proxy.ProxyListener;
 
 /**
@@ -31,6 +29,5 @@ import org.apache.felix.http.proxy.ProxyListener;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-@WebListener
 public class HttpServiceProxyListener extends ProxyListener {
 }

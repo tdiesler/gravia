@@ -71,6 +71,7 @@ public class UserDatabaseLoginModule implements LoginModule {
         callbacks[0] = new NameCallback("login");
         callbacks[1] = new PasswordCallback("password", true);
 
+        userGroups = new ArrayList<String>();
         try {
             callbackHandler.handle(callbacks);
             String username = ((NameCallback) callbacks[0]).getName();
@@ -87,18 +88,18 @@ public class UserDatabaseLoginModule implements LoginModule {
                 // to be used later in commit() method.
 
                 login = username;
-                userGroups = new ArrayList<String>();
                 Iterator<Role> roles = user.getRoles();
                 while(roles.hasNext()) {
                     Role role = roles.next();
                     userGroups.add(role.getName());
                 }
+
+                // Login success
                 return true;
+
+            } else {
+                throw new LoginException("Authentication failed");
             }
-
-            // If credentials are NOT OK we throw a LoginException
-            throw new LoginException("Authentication failed");
-
         } catch (IOException e) {
             throw new LoginException(e.getMessage());
         } catch (UnsupportedCallbackException e) {
@@ -108,23 +109,24 @@ public class UserDatabaseLoginModule implements LoginModule {
 
     @Override
     public boolean commit() throws LoginException {
-
+        if (login == null || userGroups.isEmpty()) {
+            return false;
+        }
         userPrincipal = new UserPrincipal(login);
         subject.getPrincipals().add(userPrincipal);
-
-        if (userGroups != null && userGroups.size() > 0) {
-            for (String groupName : userGroups) {
-                rolePrincipal = new RolePrincipal(groupName);
-                subject.getPrincipals().add(rolePrincipal);
-            }
+        for (String groupName : userGroups) {
+            rolePrincipal = new RolePrincipal(groupName);
+            subject.getPrincipals().add(rolePrincipal);
         }
-
         return true;
     }
 
     @Override
     public boolean abort() throws LoginException {
-        return false;
+        login = null;
+        userPrincipal = null;
+        rolePrincipal = null;
+        return true;
     }
 
     @Override

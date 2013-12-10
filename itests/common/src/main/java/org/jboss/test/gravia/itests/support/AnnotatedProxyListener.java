@@ -19,38 +19,19 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.embedded.spi;
+package org.jboss.test.gravia.itests.support;
 
-import java.io.IOException;
+import javax.servlet.annotation.WebListener;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
-
-import org.apache.felix.http.proxy.ProxyServlet;
+import org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyListener;
+import org.osgi.service.http.HttpService;
 
 /**
- * Proxy servlet for the {@link HttpService}
+ * Listener for {@link HttpService} events
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-@SuppressWarnings("serial")
-public class HttpServiceProxyServlet extends HttpServlet
-{
-    private final ProxyServlet delegate = new ProxyServlet();
-
-    public void init(ServletConfig config) throws ServletException {
-        delegate.init(config);
-    }
-
-    public void destroy() {
-        delegate.destroy();
-    }
-
-    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-        delegate.service(req, res);
-    }
+@WebListener
+public class AnnotatedProxyListener extends HttpServiceProxyListener {
 }

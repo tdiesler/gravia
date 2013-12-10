@@ -29,7 +29,6 @@ import java.util.jar.Manifest;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 
 import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
@@ -50,8 +49,7 @@ import org.osgi.framework.BundleContext;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-@WebListener
-public class ModuleLifecycleListener implements ServletContextListener {
+public class WebAppContextListener implements ServletContextListener {
 
     /**
      * Installs/starts the webapp as a module.

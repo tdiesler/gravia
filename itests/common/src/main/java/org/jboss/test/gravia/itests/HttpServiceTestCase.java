@@ -24,6 +24,7 @@ package org.jboss.test.gravia.itests;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.Servlet;
@@ -35,7 +36,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.container.tomcat.extension.ModuleLifecycleListener;
+import org.jboss.gravia.container.tomcat.extension.WebAppContextListener;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -43,8 +44,6 @@ import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyListener;
-import org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyServlet;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -53,6 +52,9 @@ import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.jboss.test.gravia.itests.support.HttpRequest;
+import org.jboss.test.gravia.itests.support.AnnotatedProxyListener;
+import org.jboss.test.gravia.itests.support.AnnotatedProxyServlet;
+import org.jboss.test.gravia.itests.support.AnnotatedContextListener;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,7 +75,8 @@ public class HttpServiceTestCase {
     @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, "http-service.war");
-        archive.addClasses(ModuleLifecycleListener.class, HttpServiceProxyServlet.class, HttpServiceProxyListener.class);
+        archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
+        archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(HttpRequest.class);
         archive.addAsResource(STRING_ASSET, "res/message.txt");
         archive.setManifest(new Asset() {
@@ -154,7 +157,7 @@ public class HttpServiceTestCase {
 
     private void assertNotAvailable(String reqspec) throws Exception {
         try {
-            performCall(reqspec);
+            performCall(reqspec, null, 500, TimeUnit.MILLISECONDS);
             Assert.fail("IOException expected");
         } catch (IOException ex) {
             // expected
@@ -162,8 +165,12 @@ public class HttpServiceTestCase {
     }
 
     private String performCall(String path) throws Exception {
+        return performCall(path, null, 2, TimeUnit.SECONDS);
+    }
+
+    private String performCall(String path, Map<String, String> headers, long timeout, TimeUnit unit) throws Exception {
         String context = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "" : "/http-service";
-        return HttpRequest.get("http://localhost:8080" + context + path, 2, TimeUnit.SECONDS);
+        return HttpRequest.get("http://localhost:8080" + context + path, headers, timeout, unit);
     }
 
     @SuppressWarnings("serial")
