@@ -25,9 +25,9 @@ import java.util.Dictionary;
 
 import javax.servlet.ServletContext;
 
-import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.WebAppContextListener;
 import org.jboss.gravia.runtime.embedded.internal.EmbeddedRuntime;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
@@ -48,7 +48,7 @@ public class TomcatRuntime extends EmbeddedRuntime {
     @Override
     public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) {
         AbstractModule module = super.createModule(classLoader, resource, headers, context);
-        ServletContext servletContext = context.getAttachment(Constants.SERVLET_CONTEXT_KEY);
+        ServletContext servletContext = context.getAttachment(WebAppContextListener.SERVLET_CONTEXT_KEY);
         if (servletContext != null) {
             ModuleEntriesProvider entriesProvider = new ServletContextEntriesProvider(servletContext);
             module.putAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY, entriesProvider);

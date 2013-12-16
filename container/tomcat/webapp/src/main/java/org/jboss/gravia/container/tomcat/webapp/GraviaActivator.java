@@ -36,7 +36,6 @@ import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.embedded.spi.BundleContextAdaptor;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 
 /**
  * Activates the {@link Runtime} as part of the web app lifecycle.
@@ -51,9 +50,6 @@ public class GraviaActivator implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
-
-        ClassLoader classLoader = ComponentContext.class.getClassLoader();
-        System.out.println(classLoader);
 
         // Create the runtime
         Properties sysprops = getRuntimeProperties();

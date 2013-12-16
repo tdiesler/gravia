@@ -21,10 +21,6 @@
  */
 package org.jboss.gravia;
 
-import javax.servlet.ServletContext;
-
-import org.jboss.gravia.resource.AttachmentKey;
-
 /**
  * Defines standard names for the environment system properties, service
  * properties, and Manifest header attribute keys.
@@ -194,6 +190,4 @@ public interface Constants  {
      * deemed to have a ranking value of zero.
      */
     String SERVICE_RANKING = "service.ranking";
-
-    AttachmentKey<ServletContext> SERVLET_CONTEXT_KEY = AttachmentKey.create(ServletContext.class);
 }

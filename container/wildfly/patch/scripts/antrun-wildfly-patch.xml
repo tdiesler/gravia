@@ -52,7 +52,6 @@
         <fileset dir="${deploy.artifacts.lib}">
 			<include name="org.apache.felix.configadmin-*.jar" />
 			<include name="org.apache.felix.http.bridge-*.jar" />
-			<include name="org.apache.felix.http.proxy-*.jar" />
 			<include name="org.apache.felix.log-*.jar" />
 			<include name="org.apache.felix.metatype-*.jar" />
 			<include name="org.apache.felix.scr-*.jar" />

@@ -100,9 +100,6 @@ public class ConfigurationAdminTest  {
         Runtime runtime = RuntimeLocator.getRuntime();
         Module module = runtime.getModule(getClass().getClassLoader());
 
-        ClassLoader classLoader = ComponentContext.class.getClassLoader();
-        System.out.println(classLoader);
-
         ModuleContext ctxA = module.getModuleContext();
         ServiceReference<ServiceD> srefD = ctxA.getServiceReference(ServiceD.class);
         Assert.assertNotNull("ServiceReference not null", srefD);

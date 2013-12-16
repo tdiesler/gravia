@@ -30,7 +30,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.jboss.gravia.Constants;
+import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
@@ -46,6 +46,8 @@ import org.osgi.framework.BundleContext;
  * @since 27-Sep-2013
  */
 public class WebAppContextListener implements ServletContextListener {
+
+    public static final AttachmentKey<ServletContext> SERVLET_CONTEXT_KEY = AttachmentKey.create(ServletContext.class);
 
     /**
      * Installs/starts the webapp as a module.
@@ -101,7 +103,7 @@ public class WebAppContextListener implements ServletContextListener {
             return null;
 
         AttachableSupport context = new AttachableSupport();
-        context.putAttachment(Constants.SERVLET_CONTEXT_KEY, servletContext);
+        context.putAttachment(SERVLET_CONTEXT_KEY, servletContext);
 
         Module module;
         try {
