@@ -45,6 +45,13 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         
+        <!-- Provided Dependencies -->
+        <dependency>
+            <groupId>org.jboss.spec.javax.servlet</groupId>
+            <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        
         <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -66,6 +73,10 @@
 				<configuration>
 					<instructions>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Import-Package>
+                            javax.servlet;version="[2.5,4.0)";resolution:=optional,
+                            *
+                        </Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.container.tomcat.extension;
+package org.jboss.gravia.runtime;
 
 import java.io.IOException;
 import java.net.URL;
@@ -30,17 +30,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.spi.AttachableSupport;
-import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.ModuleContext;
-import org.jboss.gravia.runtime.ModuleException;
-import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.embedded.spi.BundleContextAdaptor;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -77,8 +73,7 @@ public class WebAppContextListener implements ServletContextListener {
             }
 
             // HttpService integration
-            ModuleContext moduleContext = module.getModuleContext();
-            BundleContext bundleContext = new BundleContextAdaptor(moduleContext);
+            BundleContext bundleContext = module.adapt(Bundle.class).getBundleContext();
             servletContext.setAttribute("org.osgi.framework.BundleContext", bundleContext);
         }
     }
@@ -106,7 +101,7 @@ public class WebAppContextListener implements ServletContextListener {
             return null;
 
         AttachableSupport context = new AttachableSupport();
-        context.putAttachment(TomcatRuntime.SERVLET_CONTEXT_KEY, servletContext);
+        context.putAttachment(Constants.SERVLET_CONTEXT_KEY, servletContext);
 
         Module module;
         try {

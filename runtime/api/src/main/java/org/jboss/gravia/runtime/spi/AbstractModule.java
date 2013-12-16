@@ -47,6 +47,7 @@ import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.utils.CaseInsensitiveDictionary;
 import org.jboss.gravia.utils.NotNullException;
 import org.jboss.gravia.utils.UnmodifiableDictionary;
+import org.osgi.framework.Bundle;
 
 /**
  * The abstract base implementaiton for all {@link Module}s.
@@ -130,7 +131,9 @@ public abstract class AbstractModule implements Module, Attachable {
     @SuppressWarnings("unchecked")
     public <A> A adapt(Class<A> type) {
         A result = null;
-        if (type.isAssignableFrom(Runtime.class)) {
+        if (type.isAssignableFrom(Bundle.class)) {
+            result = (A) getBundleAdaptor(this);
+        } else if (type.isAssignableFrom(Runtime.class)) {
             result = (A) runtime;
         } else if (type.isAssignableFrom(AbstractRuntime.class)) {
             result = (A) runtime;
@@ -147,6 +150,8 @@ public abstract class AbstractModule implements Module, Attachable {
         }
         return result;
     }
+
+    protected abstract Bundle getBundleAdaptor(Module module);
 
     @Override
     public <T> T putAttachment(AttachmentKey<T> key, T value) {

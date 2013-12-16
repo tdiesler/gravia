@@ -23,8 +23,8 @@ package org.jboss.test.gravia.itests.support;
 
 import javax.servlet.annotation.WebListener;
 
-import org.jboss.gravia.container.tomcat.extension.WebAppContextListener;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.WebAppContextListener;
 
 /**
  * Register the Webapp as a {@link Module}.

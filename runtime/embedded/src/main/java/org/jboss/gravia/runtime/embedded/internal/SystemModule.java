@@ -24,10 +24,13 @@ package org.jboss.gravia.runtime.embedded.internal;
 import java.io.File;
 
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
+import org.jboss.gravia.runtime.embedded.spi.BundleAdaptor;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
+import org.osgi.framework.Bundle;
 
 /**
  * The system module
@@ -69,6 +72,11 @@ public final class SystemModule extends AbstractModule {
     @Override
     public void uninstall() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected Bundle getBundleAdaptor(Module module) {
+        return new BundleAdaptor(this);
     }
 
     @Override

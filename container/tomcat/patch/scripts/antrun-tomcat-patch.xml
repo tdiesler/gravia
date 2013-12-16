@@ -36,18 +36,10 @@
 		<!-- Copy to libs -->
 		<copy todir="${tomcat.patch.dir}/lib" overwrite="true">
 	        <fileset dir="${deploy.artifacts.lib}">
-				<include name="org.apache.felix.configadmin-*.jar" />
-				<include name="org.apache.felix.http.bridge-*.jar" />
-				<include name="org.apache.felix.http.proxy-*.jar" />
-				<include name="org.apache.felix.log-*.jar" />
-				<include name="org.apache.felix.metatype-*.jar" />
-				<include name="org.apache.felix.scr-*.jar" />
-				<include name="gravia-container-tomcat-extension-*.jar" />
 				<include name="gravia-resource-*.jar" />
 				<include name="gravia-runtime-api-*.jar" />
-				<include name="gravia-runtime-embedded-*.jar" />
 				<include name="org.osgi.core-*.jar" />
-				<include name="shrinkwrap-api-*.jar" />
+				<include name="org.osgi.enterprise-*.jar" />
 				<include name="slf4j-api-*.jar" />
 				<include name="slf4j-simple-*.jar" />
 	        </fileset>

@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.Dictionary;
 
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.spi.AbstractModule;
@@ -82,6 +83,11 @@ final class ModuleAdaptor extends AbstractModule {
                 return State.UNINSTALLED;
         }
         throw new IllegalArgumentException("Unsupported bundle state: " + bundleState);
+    }
+
+    @Override
+    protected Bundle getBundleAdaptor(Module module) {
+        return bundle;
     }
 
     @Override

@@ -46,42 +46,6 @@
     <dependencies>
         <!-- Provided Dependencies -->
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.configadmin</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.log</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.http.bridge</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.http.proxy</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.metatype</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-container-tomcat-extension</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-container-tomcat-webapp</artifactId>
             <version>${project.version}</version>
@@ -101,19 +65,13 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-runtime-embedded</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.shrinkwrap</groupId>
-            <artifactId>shrinkwrap-api</artifactId>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <artifactId>org.osgi.enterprise</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

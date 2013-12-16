@@ -21,6 +21,7 @@
  */
 package org.jboss.test.gravia.itests;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -40,7 +41,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.container.tomcat.extension.WebAppContextListener;
+import org.jboss.gravia.container.tomcat.extension.UserDatabaseLoginModule;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -48,6 +49,7 @@ import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceReference;
+import org.jboss.gravia.runtime.WebAppContextListener;
 import org.jboss.gravia.utils.Base64Encoder;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
@@ -55,6 +57,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.jboss.test.gravia.itests.support.HttpRequest;
 import org.jboss.test.gravia.itests.support.AnnotatedProxyListener;
@@ -86,6 +89,7 @@ public class HttpServiceSecureTestCase {
         archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
         archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(HttpRequest.class, SecureHttpContext.class, Base64Encoder.class);
+        archive.addClasses(UserDatabaseLoginModule.class);
         archive.addAsResource(STRING_ASSET, "res/message.txt");
         archive.setManifest(new Asset() {
             @Override
@@ -109,6 +113,8 @@ public class HttpServiceSecureTestCase {
                 }
             }
         });
+        File[] libs = Maven.resolver().loadPomFromFile("pom.xml").resolve("org.apache.felix:org.apache.felix.http.proxy").withoutTransitivity().asFile();
+        archive.addAsLibraries(libs);
         return archive;
     }
 

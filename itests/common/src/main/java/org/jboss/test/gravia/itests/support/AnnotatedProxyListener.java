@@ -23,7 +23,7 @@ package org.jboss.test.gravia.itests.support;
 
 import javax.servlet.annotation.WebListener;
 
-import org.jboss.gravia.runtime.embedded.spi.HttpServiceProxyListener;
+import org.apache.felix.http.proxy.ProxyListener;
 import org.osgi.service.http.HttpService;
 
 /**
@@ -33,5 +33,5 @@ import org.osgi.service.http.HttpService;
  * @since 27-Sep-2013
  */
 @WebListener
-public class AnnotatedProxyListener extends HttpServiceProxyListener {
+public class AnnotatedProxyListener extends ProxyListener {
 }

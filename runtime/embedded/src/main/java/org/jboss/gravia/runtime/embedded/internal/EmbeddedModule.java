@@ -34,13 +34,16 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleException;
+import org.jboss.gravia.runtime.embedded.spi.BundleAdaptor;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
+import org.osgi.framework.Bundle;
 
 /**
  * [TODO]
@@ -107,6 +110,11 @@ final class EmbeddedModule extends AbstractModule {
     @Override
     public void setState(State newState) {
         stateRef.set(newState);
+    }
+
+    @Override
+    protected Bundle getBundleAdaptor(Module module) {
+        return new BundleAdaptor(this);
     }
 
     @Override

@@ -5,16 +5,16 @@
  * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -39,15 +39,15 @@ public class ServiceD1 {
     final String name = getClass().getSimpleName() + "#" + INSTANCE_COUNT.incrementAndGet();
 
     final CountDownLatch modifiedLatch = new CountDownLatch(1);
-    private volatile Map<String, String> config;
+    private volatile Map<String, ?> config;
 
     @Activate
-    void activate(ComponentContext context, Map<String, String> config) {
+    void activate(ComponentContext context, Map<String, ?> config) {
         this.config = config;
     }
 
     @Modified
-    void modified(Map<String, String> config) {
+    void modified(Map<String, ?> config) {
         this.config = config;
         modifiedLatch.countDown();
     }
@@ -61,7 +61,7 @@ public class ServiceD1 {
     }
 
     public String doStuff(String msg) {
-        String fooval = config.get("foo");
+        Object fooval = config.get("foo");
         return name + ":" + fooval + ":" + msg;
     }
 

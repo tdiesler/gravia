@@ -39,22 +39,41 @@
     <name>Gravia :: Container :: Tomcat :: Webapp</name>
     
     <dependencies>
-        <!-- Provided Depdendencies -->
         <dependency>
             <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-container-tomcat-extension</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-runtime-embedded</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.http.api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.http.base</artifactId>
+                </exclusion>
+            </exclusions>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.proxy</artifactId>
+        </dependency>
+        
+        <!-- Provided Depdendencies -->
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-resource</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-runtime-api</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.gravia</groupId>
-            <artifactId>gravia-runtime-embedded</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -69,8 +88,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.enterprise</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

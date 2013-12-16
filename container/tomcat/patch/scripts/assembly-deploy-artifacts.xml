@@ -16,19 +16,11 @@
             <outputDirectory>lib</outputDirectory>
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
-                <include>*:org.apache.felix.configadmin:jar</include>
-                <include>*:org.apache.felix.http.bridge:jar</include>
-                <include>*:org.apache.felix.http.proxy:jar</include>
-                <include>*:org.apache.felix.log:jar</include>
-                <include>*:org.apache.felix.metatype:jar</include>
-                <include>*:org.apache.felix.scr:jar</include>
-                <include>*:gravia-container-tomcat-extension:jar</include>
                 <include>*:gravia-container-tomcat-webapp:war</include>
                 <include>*:gravia-resource:jar</include>
                 <include>*:gravia-runtime-api:jar</include>
-                <include>*:gravia-runtime-embedded:jar</include>
                 <include>*:org.osgi.core:jar</include>
-                <include>*:shrinkwrap-api:jar</include>
+                <include>*:org.osgi.enterprise:jar</include>
                 <include>*:slf4j-api:jar</include>
                 <include>*:slf4j-simple:jar</include>
             </includes>
