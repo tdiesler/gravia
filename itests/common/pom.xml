@@ -39,14 +39,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.jboss.gravia</groupId>
-            <artifactId>gravia-container-tomcat-extension</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
 	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-runtime-api</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.proxy</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jboss.osgi.metadata</groupId>
@@ -84,6 +83,17 @@
             <groupId>org.jboss.arquillian.testenricher</groupId>
             <artifactId>arquillian-testenricher-osgi</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-container-tomcat-extension</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jboss.gravia</groupId>
+                    <artifactId>gravia-runtime-embedded</artifactId>
+                </exclusion>
+            </exclusions>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>

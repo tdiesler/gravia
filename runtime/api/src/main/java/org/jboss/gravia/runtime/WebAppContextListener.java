@@ -92,7 +92,7 @@ public class WebAppContextListener implements ServletContextListener {
         }
     }
 
-    private Module installWebappModule(Runtime runtime, ServletContext servletContext) {
+    public Module installWebappModule(Runtime runtime, ServletContext servletContext) {
         ClassLoader classLoader = servletContext.getClassLoader();
         Manifest manifest = getWebappManifest(servletContext);
         if (manifest == null)
