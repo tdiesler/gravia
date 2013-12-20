@@ -33,14 +33,18 @@ import javax.servlet.annotation.WebListener;
 
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.container.tomcat.extension.TomcatRuntimeFactory;
+import org.jboss.gravia.provision.DefaultProvisioner;
+import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
 import org.jboss.gravia.repository.DefaultPersistentRepository;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
+import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
 import org.jboss.gravia.repository.RepositoryAggregator;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
-import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
+import org.jboss.gravia.resolver.DefaultResolver;
+import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
@@ -61,7 +65,9 @@ public class GraviaActivator implements ServletContextListener {
     private final static File catalinaHome = new File(SecurityActions.getSystemProperty("catalina.home", null));
     private final static File catalinaWork = new File(catalinaHome.getPath() + File.separator + "work");
 
-    private ServiceRegistration<Repository> registration;
+    private ServiceRegistration<Repository> repositoryRegistration;
+    private ServiceRegistration<Provisioner> provisionerRegistration;
+    private ServiceRegistration<Resolver> resolverRegistration;
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
@@ -78,11 +84,29 @@ public class GraviaActivator implements ServletContextListener {
         BundleContext bundleContext = new BundleContextAdaptor(moduleContext);
         servletContext.setAttribute("org.osgi.framework.BundleContext", bundleContext);
 
-        // Register the {@link Repository} as a service
-        registerRepositoryService(runtime);
+        // Register the {@link Repository}, {@link Resolver}, {@link Provisioner} services
+        Repository repository = registerRepositoryService(runtime);
+        Resolver resolver = registerResolverService(runtime);
+        registerProvisionerService(runtime, repository, resolver);
     }
 
-    private void registerRepositoryService(final Runtime runtime) {
+    private Provisioner registerProvisionerService(Runtime runtime, Repository repository, Resolver resolver) {
+        Provisioner provisioner = new DefaultProvisioner(resolver, repository) {
+
+        };
+        ModuleContext syscontext = runtime.getModule(0).getModuleContext();
+        provisionerRegistration = syscontext.registerService(Provisioner.class, provisioner, null);
+        return provisioner;
+    }
+
+    private Resolver registerResolverService(Runtime runtime) {
+        Resolver resolver = new DefaultResolver();
+        ModuleContext syscontext = runtime.getModule(0).getModuleContext();
+        resolverRegistration = syscontext.registerService(Resolver.class, resolver, null);
+        return resolver;
+    }
+
+    private Repository registerRepositoryService(final Runtime runtime) {
         ConfigurationPropertyProvider propertyProvider = new ConfigurationPropertyProvider() {
             @Override
             public String getProperty(String key, String defaultValue) {
@@ -114,14 +138,19 @@ public class GraviaActivator implements ServletContextListener {
 
         // Register the repository as a service
         ModuleContext syscontext = runtime.getModule(0).getModuleContext();
-        registration = syscontext.registerService(Repository.class, repository, null);
+        repositoryRegistration = syscontext.registerService(Repository.class, repository, null);
+
+        return repository;
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent event) {
-        if (registration != null) {
-            registration.unregister();
-        }
+        if (provisionerRegistration != null)
+            provisionerRegistration.unregister();
+        if (repositoryRegistration != null)
+            repositoryRegistration.unregister();
+        if (resolverRegistration != null)
+            resolverRegistration.unregister();
     }
 
     private Properties getRuntimeProperties(ServletContext servletContext) {

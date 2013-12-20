@@ -49,6 +49,8 @@ import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.msc.service.AbstractService;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
@@ -79,17 +81,20 @@ public class ProvisionerService extends AbstractService<Provisioner> {
     static final Logger LOGGER = LoggerFactory.getLogger(GraviaConstants.class.getPackage().getName());
 
     private final InjectedValue<ModelController> injectedController = new InjectedValue<ModelController>();
+    private final InjectedValue<ModuleContext> injectedModuleContext = new InjectedValue<ModuleContext>();
     private final InjectedValue<Environment> injectedEnvironment = new InjectedValue<Environment>();
     private final InjectedValue<Repository> injectedRepository = new InjectedValue<Repository>();
     private final InjectedValue<Resolver> injectedResolver = new InjectedValue<Resolver>();
     private ServerDeploymentManager serverDeploymentManager;
     private ModelControllerClient modelControllerClient;
+    private ServiceRegistration<Provisioner> registration;
     private Provisioner provisioner;
 
     public ServiceController<Provisioner> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<Provisioner> builder = serviceTarget.addService(GraviaConstants.PROVISIONER_SERVICE_NAME, this);
         builder.addDependency(Services.JBOSS_SERVER_CONTROLLER, ModelController.class, injectedController);
         builder.addDependency(GraviaConstants.ENVIRONMENT_SERVICE_NAME, Environment.class, injectedEnvironment);
+        builder.addDependency(GraviaConstants.MODULE_CONTEXT_SERVICE_NAME, ModuleContext.class, injectedModuleContext);
         builder.addDependency(GraviaConstants.REPOSITORY_SERVICE_NAME, Repository.class, injectedRepository);
         builder.addDependency(GraviaConstants.RESOLVER_SERVICE_NAME, Resolver.class, injectedResolver);
         builder.addListener(verificationHandler);
@@ -117,10 +122,17 @@ public class ProvisionerService extends AbstractService<Provisioner> {
                 return installResourceInternal(resource, mapping);
             }
         };
+
+        // Register the provisioner as a service
+        ModuleContext syscontext = injectedModuleContext.getValue();
+        registration = syscontext.registerService(Provisioner.class, provisioner, null);
     }
 
     @Override
     public void stop(StopContext context) {
+        if (registration != null) {
+            registration.unregister();
+        }
         try {
             modelControllerClient.close();
         } catch (IOException ex) {

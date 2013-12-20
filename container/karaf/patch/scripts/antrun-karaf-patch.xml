@@ -52,8 +52,10 @@
     </copy>
     <copy todir="${karaf.patch.dir}/system/org/jboss/gravia/${project.version}" overwrite="true">
         <fileset file="${deploy.artifacts.lib}/gravia-container-common-*.jar" />
-        <fileset file="${deploy.artifacts.lib}/gravia-resource-*.jar" />
+        <fileset file="${deploy.artifacts.lib}/gravia-provision-*.jar" />
         <fileset file="${deploy.artifacts.lib}/gravia-repository-*.jar" />
+        <fileset file="${deploy.artifacts.lib}/gravia-resolver-*.jar" />
+        <fileset file="${deploy.artifacts.lib}/gravia-resource-*.jar" />
         <fileset file="${deploy.artifacts.lib}/gravia-runtime-api-*.jar" />
         <fileset file="${deploy.artifacts.lib}/gravia-runtime-osgi-*.jar" />
     </copy>
@@ -71,7 +73,9 @@ org/jboss/gravia/${project.version}/gravia-resource-${project.version}.jar=40
 org/jboss/gravia/${project.version}/gravia-runtime-api-${project.version}.jar=40
 org/jboss/gravia/${project.version}/gravia-runtime-osgi-${project.version}.jar=40
 org/jboss/gravia/${project.version}/gravia-repository-${project.version}.jar=41
+org/jboss/gravia/${project.version}/gravia-resolver-${project.version}.jar=41
 org/jboss/gravia/${project.version}/gravia-container-common-${project.version}.jar=42
+org/jboss/gravia/${project.version}/gravia-provision-${project.version}.jar=43
     	
 #
 # Arquillian OSGi Integration

@@ -22,17 +22,11 @@
 package org.jboss.test.gravia.itests;
 
 import java.io.InputStream;
-import java.util.Collection;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.IdentityRequirementBuilder;
+import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.ManifestBuilder;
-import org.jboss.gravia.resource.Requirement;
-import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
@@ -48,19 +42,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Test initial {@link Repository} content.
+ * Test {@link Resolver} service.
  *
  * @author thomas.diesler@jboss.com
  * @since 19-Dec-2013
  */
 @RunWith(Arquillian.class)
-public class BootstrapRepositoryContentTest {
+public class ResolverServiceTest {
 
-    private Repository repository;
+    private Resolver resolver;
 
     @Deployment
     public static Archive<?> deployment() {
-        final ArchiveBuilder archive = new ArchiveBuilder("bootstrap-repository");
+        final ArchiveBuilder archive = new ArchiveBuilder("resolver-service");
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
@@ -70,7 +64,7 @@ public class BootstrapRepositoryContentTest {
                     builder.addBundleSymbolicName(archive.getName());
                     builder.addBundleVersion("1.0.0");
                     builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
-                    builder.addImportPackages(Runtime.class, Resource.class, Repository.class);
+                    builder.addImportPackages(Runtime.class, Resolver.class);
                     return builder.openStream();
                 } else {
                     ManifestBuilder builder = new ManifestBuilder();
@@ -87,16 +81,13 @@ public class BootstrapRepositoryContentTest {
     public void setUp() throws Exception {
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
         ModuleContext syscontext = runtime.getModule(0).getModuleContext();
-        ServiceReference<Repository> sref = syscontext.getServiceReference(Repository.class);
-        Assert.assertNotNull("Repository reference not null", sref);
-        repository = syscontext.getService(sref);
-        Assert.assertNotNull("Repository not null", repository);
+        ServiceReference<Resolver> sref = syscontext.getServiceReference(Resolver.class);
+        Assert.assertNotNull("Resolver reference not null", sref);
+        resolver = syscontext.getService(sref);
     }
 
     @Test
-    public void testRepositoryContent() throws Exception {
-        Requirement freq = new IdentityRequirementBuilder("camel.core.feature", (String)null).getRequirement();
-        Collection<Capability> providers = repository.findProviders(freq);
-        Assert.assertEquals("One provider", 1, providers.size());
+    public void testResolver() throws Exception {
+        Assert.assertNotNull("Resolver not null", resolver);
     }
 }

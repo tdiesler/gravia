@@ -17,6 +17,8 @@
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>*:gravia-container-tomcat-webapp:war</include>
+                <include>*:gravia-provision:jar</include>
+                <include>*:gravia-resolver:jar</include>
                 <include>*:gravia-resource:jar</include>
                 <include>*:gravia-repository:jar</include>
                 <include>*:gravia-runtime-api:jar</include>
