@@ -42,7 +42,7 @@ import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.jboss.test.gravia.runtime.osgi.sub.a.SimpleActivator;
+import org.jboss.test.gravia.runtime.osgi.sub.a.SimpleBundleActivator;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -79,14 +79,14 @@ public class ModuleLifecycleTestCase {
     @StartLevelAware(autostart = true)
     public static JavaArchive createdeployment() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example-bundle");
-        archive.addClasses(SimpleActivator.class);
+        archive.addClasses(SimpleBundleActivator.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
-                builder.addBundleActivator(SimpleActivator.class);
+                builder.addBundleActivator(SimpleBundleActivator.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, Resource.class);
                 builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, archive.getName() + ";version=0.0.0");
                 return builder.openStream();
@@ -97,7 +97,7 @@ public class ModuleLifecycleTestCase {
 
     @Test
     public void testSystemModule() throws Exception {
-        Module module = RuntimeLocator.getRuntime().getModule(0);
+        Module module = RuntimeLocator.getRequiredRuntime().getModule(0);
         Assert.assertEquals("gravia-system:0.0.0", module.getIdentity().toString());
         Assert.assertEquals(State.ACTIVE, module.getState());
     }
@@ -105,7 +105,7 @@ public class ModuleLifecycleTestCase {
     @Test
     public void testModuleLifecycle(@ArquillianResource Bundle bundle) throws Exception {
 
-        Module module = RuntimeLocator.getRuntime().getModule(bundle.getBundleId());
+        Module module = RuntimeLocator.getRequiredRuntime().getModule(bundle.getBundleId());
         Assert.assertEquals(bundle.getBundleId(), module.getModuleId());
 
         Assert.assertEquals("example-bundle:0.0.0", module.getIdentity().toString());

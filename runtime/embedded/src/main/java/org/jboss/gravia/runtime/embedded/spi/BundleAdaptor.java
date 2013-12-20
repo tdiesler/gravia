@@ -31,6 +31,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -167,13 +168,29 @@ public final class BundleAdaptor implements Bundle {
     @Override
     public Enumeration<String> getEntryPaths(String path) {
         ModuleEntriesProvider entriesProvider = module.adapt(ModuleEntriesProvider.class);
-        return entriesProvider != null ? entriesProvider.getEntryPaths(path) : null;
+        Enumeration<String> result = null;
+        if (entriesProvider != null) {
+            List<String> paths = entriesProvider.getEntryPaths(path);
+            if (paths.size() > 0) {
+                Vector<String> vector = new Vector<String>(paths);
+                result = vector.elements();
+            }
+        }
+        return result;
     }
 
     @Override
     public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
         ModuleEntriesProvider entriesProvider = module.adapt(ModuleEntriesProvider.class);
-        return entriesProvider != null ? entriesProvider.findEntries(path, filePattern, recurse) : null;
+        Enumeration<URL> result = null;
+        if (entriesProvider != null) {
+            List<URL> paths = entriesProvider.findEntries(path, filePattern, recurse);
+            if (paths.size() > 0) {
+                Vector<URL> vector = new Vector<URL>(paths);
+                result = vector.elements();
+            }
+        }
+        return result;
     }
 
     @Override

@@ -21,7 +21,11 @@
  */
 package org.jboss.gravia.container.tomcat.extension;
 
+import javax.servlet.ServletContext;
+
+import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.WebAppContextListener;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeFactory;
 
@@ -33,8 +37,16 @@ import org.jboss.gravia.runtime.spi.RuntimeFactory;
  */
 public class TomcatRuntimeFactory implements RuntimeFactory {
 
+    private final ServletContext servletContext;
+
+    public TomcatRuntimeFactory(ServletContext servletContext) {
+        this.servletContext = servletContext;
+    }
+
     @Override
     public Runtime createRuntime(PropertiesProvider propertiesProvider) {
-        return new TomcatRuntime(propertiesProvider);
+        AttachableSupport context = new AttachableSupport();
+        context.putAttachment(WebAppContextListener.SERVLET_CONTEXT_KEY, servletContext);
+        return new TomcatRuntime(propertiesProvider, context);
     }
 }

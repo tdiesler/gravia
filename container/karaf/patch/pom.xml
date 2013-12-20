@@ -68,7 +68,19 @@
         </dependency>
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-resource</artifactId>
+	        <artifactId>gravia-container-common</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-resource</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-repository</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

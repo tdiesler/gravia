@@ -32,13 +32,13 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.gravia.Constants;
+import org.jboss.gravia.runtime.DefaultBundleActivator;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.osgi.DefaultActivator;
 import org.jboss.gravia.runtime.osgi.OSGiRuntimeLocator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -147,7 +147,7 @@ public class ConfigurationAdminTestCase  {
     @Deployment(name = BUNDLE_D, managed = false, testable = false)
     public static JavaArchive getBundleD() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, BUNDLE_D);
-        archive.addClasses(ServiceD.class, DefaultActivator.class);
+        archive.addClasses(ServiceD.class, DefaultBundleActivator.class);
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.d.ServiceD.xml");
         archive.setManifest(new Asset() {
             @Override
@@ -156,7 +156,7 @@ public class ConfigurationAdminTestCase  {
                 builder.addBundleManifestVersion(2);
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
-                builder.addBundleActivator(DefaultActivator.class);
+                builder.addBundleActivator(DefaultBundleActivator.class);
                 builder.addExportPackages(ServiceD.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addImportPackages(ServiceD1.class);
@@ -171,7 +171,7 @@ public class ConfigurationAdminTestCase  {
     @Deployment(name = BUNDLE_D1, managed = false, testable = false)
     public static JavaArchive getBundleD1() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, BUNDLE_D1);
-        archive.addClasses(ServiceD1.class, DefaultActivator.class);
+        archive.addClasses(ServiceD1.class, DefaultBundleActivator.class);
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.d1.ServiceD1.xml");
         archive.setManifest(new Asset() {
             @Override
@@ -180,7 +180,7 @@ public class ConfigurationAdminTestCase  {
                 builder.addBundleManifestVersion(2);
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
-                builder.addBundleActivator(DefaultActivator.class);
+                builder.addBundleActivator(DefaultBundleActivator.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addExportPackages(ServiceD1.class);
                 builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_D1 + ";version=1.0.0");

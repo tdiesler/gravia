@@ -35,6 +35,7 @@ import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.jboss.test.gravia.runtime.embedded.sub.a.ServiceC;
+import org.jboss.test.gravia.runtime.embedded.support.AbstractRuntimeTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.service.cm.Configuration;

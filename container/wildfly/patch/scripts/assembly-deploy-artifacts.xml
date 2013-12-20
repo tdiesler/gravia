@@ -21,6 +21,7 @@
                 <include>*:org.apache.felix.log:jar</include>
                 <include>*:org.apache.felix.metatype:jar</include>
                 <include>*:org.apache.felix.scr:jar</include>
+                <include>*:gravia-container-common:jar</include>
                 <include>*:gravia-container-wildfly-extension:jar</include>
                 <include>*:gravia-provision:jar</include>
                 <include>*:gravia-resolver:jar</include>

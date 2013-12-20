@@ -23,8 +23,10 @@ package org.jboss.gravia.runtime.osgi.internal;
 
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.osgi.OSGiRuntimeLocator;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.BundleTracker;
 
 /**
  * Activate the OSGi Runtime
@@ -33,6 +35,8 @@ import org.osgi.framework.BundleContext;
  * @since 27-Sep-2013
  */
 public final class OSGiRuntimeActivator implements BundleActivator {
+
+    private BundleTracker<Bundle> tracker;
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -43,6 +47,9 @@ public final class OSGiRuntimeActivator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        if (tracker != null) {
+            tracker.close();
+        }
         OSGiRuntimeLocator.releaseRuntime();
     }
 

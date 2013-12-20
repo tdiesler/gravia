@@ -19,12 +19,11 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.runtime.embedded.internal;
+package org.jboss.test.gravia.runtime.embedded.support;
 
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.Vector;
-
+import java.util.Collections;
+import java.util.List;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.utils.NotNullException;
@@ -52,22 +51,18 @@ class ClassLoaderEntriesProvider implements ModuleEntriesProvider {
     }
 
     @Override
-    public Enumeration<String> getEntryPaths(String path) {
+    public List<String> getEntryPaths(String path) {
         throw new UnsupportedOperationException("Bundle.getEntryPaths(String)");
     }
 
     @Override
-    public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
+    public List<URL> findEntries(String path, String filePattern, boolean recurse) {
         if (filePattern.contains("*") || recurse == true)
             throw new UnsupportedOperationException("Bundle.getEntryPaths(String,String,boolean)");
 
         // [TODO] flawed because of parent first access
         URL result = classLoader.getResource(path + "/" + filePattern);
-        if (result == null)
-            return null;
 
-        Vector<URL> vector = new Vector<URL>();
-        vector.add(result);
-        return vector.elements();
+        return result != null ? Collections.singletonList(result) : Collections.<URL>emptyList();
     }
 }

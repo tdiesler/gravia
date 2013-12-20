@@ -19,20 +19,27 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.test.gravia.runtime.embedded;
+package org.jboss.test.gravia.runtime.embedded.support;
 
+import java.util.Dictionary;
+
+import org.jboss.gravia.resource.Attachable;
+import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.embedded.internal.EmbeddedRuntime;
+import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.runtime.spi.RuntimeFactory;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * [TODO].
+ * Abstract embedded runtome test.
  *
  * @author thomas.diesler@jbos.com
  * @since 27-Sep-2013
@@ -44,7 +51,20 @@ public abstract class AbstractRuntimeTest {
     @Before
     public void setUp() throws Exception {
         PropertiesProvider propsProvider = new DefaultPropertiesProvider();
-        runtime = RuntimeLocator.createRuntime(propsProvider);
+        RuntimeFactory factory = new RuntimeFactory() {
+            @Override
+            public Runtime createRuntime(PropertiesProvider propertiesProvider) {
+                return new EmbeddedRuntime(propertiesProvider, null) {
+                    @Override
+                    public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) {
+                        AbstractModule module = super.createModule(classLoader, resource, headers, context);
+                        module.putAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY, new ClassLoaderEntriesProvider(module));
+                        return module;
+                    }
+                };
+            }
+        };
+        runtime = RuntimeLocator.createRuntime(factory, propsProvider);
         runtime.init();
     }
 
@@ -53,11 +73,11 @@ public abstract class AbstractRuntimeTest {
         RuntimeLocator.releaseRuntime();
     }
 
-    Runtime getRuntime() {
+    public Runtime getRuntime() {
         return runtime;
     }
 
-    ConfigurationAdmin getConfigurationAdmin(Module module) {
+    public ConfigurationAdmin getConfigurationAdmin(Module module) {
         ModuleContext context = module.getModuleContext();
         return context.getService(context.getServiceReference(ConfigurationAdmin.class));
     }

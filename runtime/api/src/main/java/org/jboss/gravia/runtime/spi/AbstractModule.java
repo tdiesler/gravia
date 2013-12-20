@@ -23,10 +23,12 @@ package org.jboss.gravia.runtime.spi;
 
 import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 
+import java.net.URL;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -177,6 +179,24 @@ public abstract class AbstractModule implements Module, Attachable {
     @Override
     public Dictionary<String, String> getHeaders() {
         return headers;
+    }
+
+    @Override
+    public URL getEntry(String path) {
+        ModuleEntriesProvider entriesProvider = adapt(ModuleEntriesProvider.class);
+        return entriesProvider != null ? entriesProvider.getEntry(path) : null;
+    }
+
+    @Override
+    public List<String> getEntryPaths(String path) {
+        ModuleEntriesProvider entriesProvider = adapt(ModuleEntriesProvider.class);
+        return entriesProvider != null ? entriesProvider.getEntryPaths(path) : Collections.<String>emptyList();
+    }
+
+    @Override
+    public List<URL> findEntries(String path, String filePattern, boolean recurse) {
+        ModuleEntriesProvider entriesProvider = adapt(ModuleEntriesProvider.class);
+        return entriesProvider != null ? entriesProvider.findEntries(path, filePattern, recurse) : Collections.<URL>emptyList();
     }
 
     public Set<ServiceReference<?>> getServicesInUseInternal() {

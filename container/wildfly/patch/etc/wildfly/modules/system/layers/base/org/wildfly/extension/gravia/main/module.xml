@@ -6,6 +6,7 @@
     </properties>
 
     <resources>
+        <resource-root path="gravia-container-common-@project.version@.jar"/>
         <resource-root path="gravia-container-wildfly-extension-@project.version@.jar"/>
     </resources>
 

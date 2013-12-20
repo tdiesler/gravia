@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.AttachmentKey;
+import org.jboss.gravia.utils.NotNullException;
 
 
 /**
@@ -39,33 +40,37 @@ public class AttachableSupport implements Attachable {
     private Map<AttachmentKey<?>, Object> attachments;
 
     @Override
-    public synchronized <T> T putAttachment(AttachmentKey<T> clazz, T value) {
+    public synchronized <T> T putAttachment(AttachmentKey<T> key, T value) {
+        NotNullException.assertValue(key, "key");
+        NotNullException.assertValue(value, "value");
         if (attachments == null)
             attachments = new HashMap<AttachmentKey<?>, Object>();
 
         @SuppressWarnings("unchecked")
-        T result = (T) attachments.get(clazz);
-        attachments.put(clazz, value);
+        T result = (T) attachments.get(key);
+        attachments.put(key, value);
         return result;
     }
 
     @Override
-    public synchronized <T> T getAttachment(AttachmentKey<T> clazz) {
+    public synchronized <T> T getAttachment(AttachmentKey<T> key) {
+        NotNullException.assertValue(key, "key");
         if (attachments == null)
             return null;
 
         @SuppressWarnings("unchecked")
-        T result = (T) attachments.get(clazz);
+        T result = (T) attachments.get(key);
         return result;
     }
 
     @Override
-    public synchronized <T> T removeAttachment(AttachmentKey<T> clazz) {
+    public synchronized <T> T removeAttachment(AttachmentKey<T> key) {
+        NotNullException.assertValue(key, "key");
         if (attachments == null)
             return null;
 
         @SuppressWarnings("unchecked")
-        T result = (T) attachments.remove(clazz);
+        T result = (T) attachments.remove(key);
         return result;
     }
 }

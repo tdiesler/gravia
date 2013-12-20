@@ -40,6 +40,7 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
+import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
 import org.jboss.gravia.runtime.spi.RuntimePlugin;
@@ -56,7 +57,7 @@ public class EmbeddedRuntime extends AbstractRuntime {
     private final RuntimeServicesManager serviceManager;
     private final RuntimeStorageHandler storageHandler;
 
-    public EmbeddedRuntime(PropertiesProvider propertiesProvider) {
+    public EmbeddedRuntime(PropertiesProvider propertiesProvider, Attachable context) {
         super(propertiesProvider);
         serviceManager = new RuntimeServicesManager(adapt(RuntimeEventsManager.class));
         storageHandler = new RuntimeStorageHandler(propertiesProvider, true);
@@ -64,7 +65,7 @@ public class EmbeddedRuntime extends AbstractRuntime {
         // Install system module
         Resource resource = new DefaultResourceBuilder().addIdentityCapability(getSystemIdentity()).getResource();
         try {
-            installModule(EmbeddedRuntime.class.getClassLoader(), resource, null, null);
+            installModule(EmbeddedRuntime.class.getClassLoader(), resource, null, context);
         } catch (ModuleException ex) {
             throw new IllegalStateException("Cannot install system module", ex);
         }
@@ -113,7 +114,10 @@ public class EmbeddedRuntime extends AbstractRuntime {
             module = new SystemModule(this, classLoader, resource);
         } else {
             module = new EmbeddedModule(this, classLoader, resource, headers);
-            module.putAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY, new ClassLoaderEntriesProvider(module));
+        }
+        ModuleEntriesProvider entriesProvider = context.getAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY);
+        if (entriesProvider != null) {
+            module.putAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY, entriesProvider);
         }
         return module;
     }

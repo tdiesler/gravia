@@ -35,7 +35,7 @@
 
   	<!-- Filter the modules resources -->
     <copy todir="${wildfly.patch.dir}" overwrite="true">
-        <fileset dir="${etc.dir}" />
+        <fileset dir="${etc.dir}/wildfly" />
 		<filterset>
 	        <filter token="project.version" value="${project.version}" />
 	        <filter token="version.apache.felix.configadmin" value="${version.apache.felix.configadmin}" />
@@ -68,6 +68,7 @@
     </copy>
     <copy todir="${wildfly.patch.dir}/modules/system/layers/base/org/wildfly/extension/gravia/main" overwrite="true">
         <fileset dir="${deploy.artifacts.lib}">
+			<include name="gravia-container-common-*.jar" />
 			<include name="gravia-container-wildfly-extension-*.jar" />
        	</fileset>
     </copy>

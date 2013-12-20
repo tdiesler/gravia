@@ -24,8 +24,11 @@ package org.jboss.gravia.runtime.osgi.internal;
 import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.List;
 
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
@@ -80,7 +83,6 @@ public final class OSGiRuntime extends AbstractRuntime {
 
             @Override
             public Bundle addingBundle(Bundle bundle, BundleEvent event) {
-                super.addingBundle(bundle, event);
                 BundleWiring wiring = bundle.adapt(BundleWiring.class);
                 ClassLoader classLoader = wiring != null ? wiring.getClassLoader() : null;
                 ResourceBuilder resBuilder = new DictionaryResourceBuilder().load(bundle.getHeaders());
@@ -135,9 +137,17 @@ public final class OSGiRuntime extends AbstractRuntime {
         }
 
         @Override
-        public Enumeration<String> getEntryPaths(String path) {
+        public List<String> getEntryPaths(String path) {
             Bundle bundle = syscontext.getBundle(module.getModuleId());
-            return bundle.getEntryPaths(path);
+            Enumeration<String> paths = bundle.getEntryPaths(path);
+            List<String> result = new ArrayList<String>();
+            if (paths != null) {
+                while (paths.hasMoreElements()) {
+                    String element = paths.nextElement();
+                    result.add(element);
+                }
+            }
+            return Collections.unmodifiableList(result);
         }
 
         @Override
@@ -147,9 +157,17 @@ public final class OSGiRuntime extends AbstractRuntime {
         }
 
         @Override
-        public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
+        public List<URL> findEntries(String path, String filePattern, boolean recurse) {
             Bundle bundle = syscontext.getBundle(module.getModuleId());
-            return bundle.findEntries(path, filePattern, recurse);
+            Enumeration<URL> paths = bundle.findEntries(path, filePattern, recurse);
+            List<URL> result = new ArrayList<URL>();
+            if (paths != null) {
+                while (paths.hasMoreElements()) {
+                    URL element = paths.nextElement();
+                    result.add(element);
+                }
+            }
+            return Collections.unmodifiableList(result);
         }
 
     }

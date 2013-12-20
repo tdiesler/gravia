@@ -157,8 +157,7 @@ public abstract class AbstractRuntime implements Runtime {
     @Override
     public final Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) throws ModuleException {
 
-        Attachable appcontext = context != null ? context : new AttachableSupport();
-        AbstractModule module = createModule(classLoader, resource, headers, appcontext);
+        AbstractModule module = createModule(classLoader, resource, headers, context != null ? context : new AttachableSupport());
         if (getModule(module.getIdentity()) != null)
             throw new ModuleException("Module already installed: " + module);
 

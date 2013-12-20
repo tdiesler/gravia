@@ -65,7 +65,7 @@ public class WebappModuleLifecycleTest {
     @Test
     public void testModuleLifecycle() throws Exception {
 
-        Module modA = RuntimeLocator.getRuntime().getModule(getClass().getClassLoader());
+        Module modA = RuntimeLocator.getRequiredRuntime().getModule(getClass().getClassLoader());
         Assert.assertEquals(Module.State.ACTIVE, modA.getState());
 
         ModuleContext context = modA.getModuleContext();

@@ -41,8 +41,8 @@ import org.jboss.gravia.runtime.spi.PropertiesProvider;
  */
 public class TomcatRuntime extends EmbeddedRuntime {
 
-    public TomcatRuntime(PropertiesProvider propertiesProvider) {
-        super(propertiesProvider);
+    public TomcatRuntime(PropertiesProvider propertiesProvider, Attachable context) {
+        super(propertiesProvider, context);
     }
 
     @Override

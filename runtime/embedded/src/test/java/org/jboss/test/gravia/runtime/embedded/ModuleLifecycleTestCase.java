@@ -29,7 +29,8 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
-import org.jboss.test.gravia.runtime.embedded.sub.a.SimpleActivator;
+import org.jboss.test.gravia.runtime.embedded.sub.a.SimpleModuleActivator;
+import org.jboss.test.gravia.runtime.embedded.support.AbstractRuntimeTest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -47,7 +48,7 @@ public class ModuleLifecycleTestCase extends AbstractRuntimeTest {
         Manifest manifest = new ManifestBuilder().addIdentityCapability("moduleA", "1.0.0").getManifest();
         ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(manifest);
 
-        Module modA = getRuntime().installModule(SimpleActivator.class.getClassLoader(), headersProvider.getHeaders());
+        Module modA = getRuntime().installModule(SimpleModuleActivator.class.getClassLoader(), headersProvider.getHeaders());
         Assert.assertEquals(Module.State.RESOLVED, modA.getState());
 
         modA.start();
@@ -78,10 +79,10 @@ public class ModuleLifecycleTestCase extends AbstractRuntimeTest {
     public void testModuleActivator() throws Exception {
 
         ManifestBuilder builder = new ManifestBuilder().addIdentityCapability("moduleA", "1.0.0");
-        builder.addModuleActivator(SimpleActivator.class);
+        builder.addModuleActivator(SimpleModuleActivator.class);
         ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(builder.getManifest());
 
-        Module modA = getRuntime().installModule(SimpleActivator.class.getClassLoader(), headersProvider.getHeaders());
+        Module modA = getRuntime().installModule(SimpleModuleActivator.class.getClassLoader(), headersProvider.getHeaders());
         Assert.assertEquals(Module.State.RESOLVED, modA.getState());
 
         ModuleContext ctxA = modA.getModuleContext();

@@ -1,32 +1,13 @@
-<!--
-  #%L
-  Gravia Resource
-  %%
-  Copyright (C) 2013 JBoss by Red Hat
-  %%
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Lesser General Public License as 
-  published by the Free Software Foundation, either version 2.1 of the 
-  License, or (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Lesser Public License for more details.
-  
-  You should have received a copy of the GNU General Lesser Public 
-  License along with this program.  If not, see
-  <http://www.gnu.org/licenses/lgpl-2.1.html>.
-  #L%
-  -->
-  
-<!--
-    Set these VM properties in your IDE debugger 
+<!-- #%L Gravia Resource %% Copyright (C) 2013 JBoss by Red Hat %% This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser 
+    General Public License as published by the Free Software Foundation, either version 2.1 of the License, or (at your option) any later version. This program is distributed 
+    in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General 
+    Lesser Public License for more details. You should have received a copy of the GNU General Lesser Public License along with this program. If not, see <http://www.gnu.org/licenses/lgpl-2.1.html>. 
+    #L% -->
 
--->
+<!-- Set these VM properties in your IDE debugger -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>org.jboss.gravia</groupId>
         <artifactId>gravia-container-tomcat</artifactId>
@@ -37,7 +18,7 @@
     <packaging>war</packaging>
 
     <name>Gravia :: Container :: Tomcat :: Webapp</name>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.jboss.gravia</groupId>
@@ -63,11 +44,17 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.http.proxy</artifactId>
         </dependency>
-        
+
         <!-- Provided Depdendencies -->
         <dependency>
             <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-resource</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-repository</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -93,14 +80,41 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/webapp-resources</outputDirectory>
+                            <overWrite>true</overWrite>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.jboss.gravia</groupId>
+                                    <artifactId>gravia-container-common</artifactId>
+                                    <version>${project.version}</version>
+                                    <includes>META-INF/repository-content/**</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <webResources>
+                        <resource>
+                            <directory>${project.build.directory}/webapp-resources</directory>
+                        </resource>
+                    </webResources>
                 </configuration>
             </plugin>
         </plugins>

@@ -37,6 +37,7 @@
 		<copy todir="${tomcat.patch.dir}/lib" overwrite="true">
 	        <fileset dir="${deploy.artifacts.lib}">
 				<include name="gravia-resource-*.jar" />
+				<include name="gravia-repository-*.jar" />
 				<include name="gravia-runtime-api-*.jar" />
 				<include name="org.osgi.core-*.jar" />
 				<include name="org.osgi.enterprise-*.jar" />

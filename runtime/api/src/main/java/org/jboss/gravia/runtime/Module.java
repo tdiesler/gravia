@@ -22,7 +22,9 @@
 package org.jboss.gravia.runtime;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
@@ -209,6 +211,64 @@ public interface Module {
      *         module's Manifest headers and values.
      */
     Dictionary<String, String> getHeaders();
+
+    /**
+     * Returns a URL to the entry at the specified path in this module. This
+     * modules's class loader is not used to search for the entry. Only the
+     * contents of this module are searched for the entry.
+     * <p>
+     * The specified path is always relative to the root of this module and may
+     * begin with &quot;/&quot;. A path value of &quot;/&quot; indicates the
+     * root of this module.
+     *
+     * @param path The path name of the entry.
+     * @return A URL to the entry, or {@code null} if no entry could be found.
+     */
+    URL getEntry(String path);
+
+    /**
+     * Returns an Enumeration of all the paths ({@code String} objects) to
+     * entries within this module whose longest sub-path matches the specified
+     * path. This module's class loader is not used to search for entries. Only
+     * the contents of this module are searched.
+     * <p>
+     * The specified path is always relative to the root of this module and may
+     * begin with a &quot;/&quot;. A path value of &quot;/&quot; indicates the
+     * root of this module.
+     * <p>
+     * Returned paths indicating subdirectory paths end with a &quot;/&quot;.
+     * The returned paths are all relative to the root of this module and must
+     * not begin with &quot;/&quot;.
+     *
+     * @param path The path name for which to return entry paths.
+     * @return A list of the entry paths ({@code String} objects).
+     */
+    List<String> getEntryPaths(String path);
+
+    /**
+     * Returns entries in this module. This module's
+     * class loader is not used to search for entries. Only the contents of this
+     * module is searched for the specified entries.
+     *
+     * <p>
+     * URLs for directory entries must have their path end with &quot;/&quot;.
+     *
+     * @param path The path name in which to look. The path is always relative
+     *        to the root of this module and may begin with &quot;/&quot;. A
+     *        path value of &quot;/&quot; indicates the root of this module.
+     * @param filePattern The file name pattern for selecting entries in the
+     *        specified path. The pattern is only matched against the last
+     *        element of the entry path. If the entry is a directory then the
+     *        trailing &quot;/&quot; is not used for pattern matching. Substring
+     *        matching is supported, as specified in the Filter specification,
+     *        using the wildcard character (&quot;*&quot;). If null is
+     *        specified, this is equivalent to &quot;*&quot; and matches all
+     *        files.
+     * @param recurse If {@code true}, recurse into subdirectories. Otherwise
+     *        only return entries from the specified path.
+     * @return A list of URL objects for each matching entry.
+     */
+    List<URL> findEntries(String path, String filePattern, boolean recurse);
 
     /**
      * Starts this module.

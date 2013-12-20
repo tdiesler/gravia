@@ -59,6 +59,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-repository</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
 	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-runtime-api</artifactId>
             <version>${project.version}</version>

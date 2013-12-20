@@ -35,10 +35,12 @@ import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
 import org.jboss.gravia.repository.DefaultPersistentRepository;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryReader;
-import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
 import org.jboss.gravia.repository.RepositoryAggregator;
+import org.jboss.gravia.repository.RepositoryReader;
+import org.jboss.gravia.repository.RepositoryStorage;
+import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleClassLoader;
 import org.jboss.modules.Resource;
@@ -48,6 +50,7 @@ import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
+import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.InjectedValue;
 import org.wildfly.extension.gravia.GraviaConstants;
 
@@ -59,12 +62,15 @@ import org.wildfly.extension.gravia.GraviaConstants;
  */
 public class RepositoryService extends AbstractService<Repository> {
 
+    private final InjectedValue<ModuleContext> injectedModuleContext = new InjectedValue<ModuleContext>();
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
+    private ServiceRegistration<Repository> registration;
     private Repository repository;
 
     public ServiceController<Repository> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<Repository> builder = serviceTarget.addService(GraviaConstants.REPOSITORY_SERVICE_NAME, this);
         builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, injectedServerEnvironment);
+        builder.addDependency(GraviaConstants.MODULE_CONTEXT_SERVICE_NAME, ModuleContext.class, injectedModuleContext);
         builder.addListener(verificationHandler);
         return builder.install();
     }
@@ -73,7 +79,7 @@ public class RepositoryService extends AbstractService<Repository> {
     public void start(StartContext startContext) throws StartException {
 
         // Create the {@link ConfigurationPropertyProvider}
-        final ConfigurationPropertyProvider propertyProvider = new ConfigurationPropertyProvider() {
+        ConfigurationPropertyProvider propertyProvider = new ConfigurationPropertyProvider() {
             @Override
             public String getProperty(String key, String defaultValue) {
                 String value = null;
@@ -90,11 +96,8 @@ public class RepositoryService extends AbstractService<Repository> {
                 return value != null ? value : defaultValue;
             }
         };
-
         DefaultMavenIdentityRepository mavenRepo = new DefaultMavenIdentityRepository(propertyProvider);
         repository = new DefaultPersistentRepository(propertyProvider, new RepositoryAggregator(mavenRepo));
-
-        RepositoryStorage storage = repository.adapt(RepositoryStorage.class);
 
         // Install gravia features to the repository
         ModuleClassLoader classLoader = Module.getCallerModule().getClassLoader();
@@ -106,6 +109,7 @@ public class RepositoryService extends AbstractService<Repository> {
                 RepositoryReader reader = new DefaultRepositoryXMLReader(input);
                 org.jboss.gravia.resource.Resource auxres = reader.nextResource();
                 while (auxres != null) {
+                    RepositoryStorage storage = repository.adapt(RepositoryStorage.class);
                     if (storage.getResource(auxres.getIdentity()) == null) {
                         storage.addResource(auxres);
                     }
@@ -114,6 +118,17 @@ public class RepositoryService extends AbstractService<Repository> {
             } catch (IOException e) {
                 throw new IllegalStateException("Cannot install feature to repository: " + res.getName());
             }
+        }
+
+        // Register the repository as a service
+        ModuleContext syscontext = injectedModuleContext.getValue();
+        registration = syscontext.registerService(Repository.class, repository, null);
+    }
+
+    @Override
+    public void stop(StopContext context) {
+        if (registration != null) {
+            registration.unregister();
         }
     }
 

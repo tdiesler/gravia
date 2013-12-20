@@ -28,13 +28,13 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.gravia.Constants;
+import org.jboss.gravia.runtime.DefaultBundleActivator;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.osgi.DefaultActivator;
 import org.jboss.gravia.runtime.osgi.OSGiRuntimeLocator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -119,7 +119,7 @@ public class ServiceComponentTestCase  {
     @Deployment(name = BUNDLE_A, managed = false, testable = false)
     public static JavaArchive getBundleA() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, BUNDLE_A);
-        archive.addClasses(ServiceA.class, DefaultActivator.class);
+        archive.addClasses(ServiceA.class, DefaultBundleActivator.class);
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.a.ServiceA.xml");
         archive.setManifest(new Asset() {
             @Override
@@ -128,7 +128,7 @@ public class ServiceComponentTestCase  {
                 builder.addBundleManifestVersion(2);
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
-                builder.addBundleActivator(DefaultActivator.class);
+                builder.addBundleActivator(DefaultBundleActivator.class);
                 builder.addExportPackages(ServiceA.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addImportPackages(ServiceA1.class);
@@ -143,7 +143,7 @@ public class ServiceComponentTestCase  {
     @Deployment(name = BUNDLE_A1, managed = false, testable = false)
     public static JavaArchive getBundleA1() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, BUNDLE_A1);
-        archive.addClasses(ServiceA1.class, DefaultActivator.class);
+        archive.addClasses(ServiceA1.class, DefaultBundleActivator.class);
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.a1.ServiceA1.xml");
         archive.setManifest(new Asset() {
             @Override
@@ -152,7 +152,7 @@ public class ServiceComponentTestCase  {
                 builder.addBundleManifestVersion(2);
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
-                builder.addBundleActivator(DefaultActivator.class);
+                builder.addBundleActivator(DefaultBundleActivator.class);
                 builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addExportPackages(ServiceA1.class);
                 builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_A1 + ";version=1.0.0");

@@ -21,6 +21,8 @@
  */
 package org.jboss.gravia.runtime.osgi.internal;
 
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
+
 import java.io.File;
 import java.util.Dictionary;
 
@@ -113,6 +115,7 @@ final class ModuleAdaptor extends AbstractModule {
         } catch (BundleException ex) {
             throw ModuleException.launderThrowable(ex);
         }
+        LOGGER.info("Started: {}", this);
     }
 
     @Override
@@ -122,6 +125,7 @@ final class ModuleAdaptor extends AbstractModule {
         } catch (BundleException ex) {
             throw ModuleException.launderThrowable(ex);
         }
+        LOGGER.info("Stopped: {}", this);
     }
 
     @Override

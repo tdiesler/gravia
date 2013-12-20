@@ -23,8 +23,11 @@ package org.jboss.gravia.container.tomcat.extension;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 
@@ -57,27 +60,45 @@ public class ServletContextEntriesProvider implements ModuleEntriesProvider {
     }
 
     @Override
-    public Enumeration<String> getEntryPaths(String path) {
-        throw new UnsupportedOperationException("Bundle.getEntryPaths(String)");
+    public List<String> getEntryPaths(String path) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
-        if (filePattern.contains("*") || recurse == true)
-            throw new UnsupportedOperationException("Bundle.getEntryPaths(String,String,boolean)");
+    public List<URL> findEntries(String path, String filePattern, boolean recurse) {
+        NotNullException.assertValue(path, "path");
+        if (recurse == true)
+            throw new UnsupportedOperationException("Cannot handle recursive resource discovery");
 
-        URL result;
-        try {
-            result = servletContext.getResource(path + "/" + filePattern);
-        } catch (MalformedURLException e) {
-            result = null;
+        if (!path.startsWith("/"))
+            path = "/" + path;
+        if (filePattern == null)
+            filePattern = "*";
+
+        List<URL> result = new ArrayList<URL>();
+        Set<String> paths = servletContext.getResourcePaths(path);
+        if (paths != null) {
+            Pattern pattern = convertToPattern(filePattern);
+            for (String childPath : paths) {
+                int index = childPath.lastIndexOf('/');
+                String filename = index >= 0 ? childPath.substring(index + 1) : childPath;
+                if (pattern.matcher(filename).matches()) {
+                    try {
+                        URL resurl = servletContext.getResource(path + "/" + filename);
+                        result.add(resurl);
+                    } catch (MalformedURLException ex) {
+                        throw new IllegalStateException(ex);
+                    }
+                }
+            }
         }
 
-        if (result == null)
-            return null;
+        return Collections.unmodifiableList(result);
+    }
 
-        Vector<URL> vector = new Vector<URL>();
-        vector.add(result);
-        return vector.elements();
+    // Convert file pattern (RFC 1960-based Filter) into a RegEx pattern
+    private Pattern convertToPattern(String filePattern) {
+        filePattern = filePattern.replace("*", ".*");
+        return Pattern.compile("^" + filePattern + "$");
     }
 }

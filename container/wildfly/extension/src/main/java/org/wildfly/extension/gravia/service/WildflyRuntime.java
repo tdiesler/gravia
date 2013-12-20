@@ -42,8 +42,8 @@ public class WildflyRuntime extends EmbeddedRuntime {
 
     public static AttachmentKey<ResourceRoot> DEPLOYMENT_ROOT_KEY = AttachmentKey.create(ResourceRoot.class);
 
-    public WildflyRuntime(PropertiesProvider propertiesProvider) {
-        super(propertiesProvider);
+    public WildflyRuntime(PropertiesProvider propertiesProvider, Attachable context) {
+        super(propertiesProvider, context);
     }
 
     @Override

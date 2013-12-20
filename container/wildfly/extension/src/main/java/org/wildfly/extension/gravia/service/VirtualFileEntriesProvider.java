@@ -23,9 +23,9 @@ package org.wildfly.extension.gravia.service;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Enumeration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Vector;
 import java.util.regex.Pattern;
 
 import org.jboss.as.server.deployment.module.ResourceRoot;
@@ -60,37 +60,31 @@ public class VirtualFileEntriesProvider implements ModuleEntriesProvider {
     }
 
     @Override
-    public Enumeration<String> getEntryPaths(String path) {
+    public List<String> getEntryPaths(String path) {
         VirtualFile pathChild = rootFile.getChild(path);
         List<VirtualFile> entries = pathChild.getChildren();
-        if (entries.isEmpty())
-            return null;
-
-        Vector<String> result = new Vector<String>();
+        List<String> result = new ArrayList<String>();
         for (VirtualFile entry : entries) {
             result.add(entry.getPathName());
         }
-
-        return result.elements();
+        return Collections.unmodifiableList(result);
     }
 
     @Override
-    public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
-        if (filePattern.contains("*") || recurse == true)
-            throw new UnsupportedOperationException("Bundle.getEntryPaths(String,String,boolean)");
+    public List<URL> findEntries(String path, String filePattern, boolean recurse) {
 
+        if (filePattern == null)
+            filePattern = "*";
+
+        List<URL> result = new ArrayList<URL>();
         VirtualFile pathChild = rootFile.getChild(path);
-        List<VirtualFile> entries = pathChild.getChildren();
-        if (entries.isEmpty())
-            return null;
-
-        Vector<URL> result = getResultVector(entries, filePattern);
-        return result.elements();
+        Pattern pattern = convertToPattern(filePattern);
+        fillResultList(pathChild, pattern, recurse, result);
+        return Collections.unmodifiableList(result);
     }
 
-    private Vector<URL> getResultVector(List<VirtualFile> entries, String filePattern) {
-        Vector<URL> result = new Vector<URL>();
-        Pattern pattern = convertToPattern(filePattern);
+    private void fillResultList(VirtualFile pathChild, Pattern pattern, boolean recurse, List<URL> result) {
+        List<VirtualFile> entries = pathChild.getChildren();
         for(VirtualFile vfile : entries) {
             String resname = vfile.getPathName();
             if (resname.startsWith("/")) {
@@ -104,13 +98,15 @@ public class VirtualFileEntriesProvider implements ModuleEntriesProvider {
                 } catch (MalformedURLException e) {
                     // ignore
                 }
+                if (recurse) {
+                    fillResultList(vfile, pattern, recurse, result);
+                }
             }
         }
-        return result;
     }
 
     // Convert file pattern (RFC 1960-based Filter) into a RegEx pattern
-    private static Pattern convertToPattern(String filePattern) {
+    private Pattern convertToPattern(String filePattern) {
         filePattern = filePattern.replace("*", ".*");
         return Pattern.compile("^" + filePattern + "$");
     }

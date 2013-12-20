@@ -36,6 +36,6 @@ public final class EmbeddedRuntimeFactory implements RuntimeFactory {
 
     @Override
     public Runtime createRuntime(PropertiesProvider props) {
-        return new EmbeddedRuntime(props);
+        return new EmbeddedRuntime(props, null);
     }
 }
