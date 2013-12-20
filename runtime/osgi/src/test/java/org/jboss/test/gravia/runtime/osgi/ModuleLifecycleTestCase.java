@@ -77,7 +77,7 @@ public class ModuleLifecycleTestCase {
 
     @Deployment
     @StartLevelAware(autostart = true)
-    public static JavaArchive createdeployment() {
+    public static JavaArchive deployment() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example-bundle");
         archive.addClasses(SimpleBundleActivator.class);
         archive.setManifest(new Asset() {

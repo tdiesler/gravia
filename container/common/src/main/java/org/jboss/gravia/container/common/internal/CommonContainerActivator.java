@@ -29,9 +29,14 @@ import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
-import org.jboss.gravia.runtime.DefaultBundleActivator;
+import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceReference;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 /**
  * Activate the {@link Repository} in the runtime.
@@ -39,18 +44,24 @@ import org.jboss.gravia.runtime.ServiceReference;
  * @author thomas.diesler@jboss.com
  * @since 20-Dec-2012
  */
-public final class CommonContainerActivator extends DefaultBundleActivator {
+public final class CommonContainerActivator implements BundleActivator {
 
     @Override
-    public void start(final ModuleContext context) throws Exception {
-        ServiceReference<Repository> sref = context.getServiceReference(Repository.class);
+    public void start(BundleContext context) throws Exception {
+
+        Bundle bundle = context.getBundle();
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Module module = runtime.getModule(bundle.getBundleId());
+        ModuleContext syscontext = module.getModuleContext();
+
+        ServiceReference<Repository> sref = syscontext.getServiceReference(Repository.class);
         if (sref == null)
             return;
 
         try {
             if (sref != null) {
-                Repository repository = context.getService(sref);
-                for (URL path : context.getModule().findEntries("META-INF/repository-content", "*.xml", false)) {
+                Repository repository = syscontext.getService(sref);
+                for (URL path : syscontext.getModule().findEntries("META-INF/repository-content", "*.xml", false)) {
                     try {
                         RepositoryReader reader = new DefaultRepositoryXMLReader(path.openStream());
                         org.jboss.gravia.resource.Resource auxres = reader.nextResource();
@@ -67,7 +78,11 @@ public final class CommonContainerActivator extends DefaultBundleActivator {
                 }
             }
         } finally {
-            context.ungetService(sref);
+            syscontext.ungetService(sref);
         }
+    }
+
+    @Override
+    public void stop(BundleContext context) throws Exception {
     }
 }

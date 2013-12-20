@@ -29,10 +29,14 @@ import org.jboss.gravia.repository.DefaultPersistentRepository;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryAggregator;
 import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
-import org.jboss.gravia.runtime.DefaultBundleActivator;
+import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 /**
  * Activate the {@link Repository} in the runtime.
@@ -40,34 +44,39 @@ import org.jboss.gravia.runtime.ServiceRegistration;
  * @author thomas.diesler@jboss.com
  * @since 20-Dec-2012
  */
-public final class RepositoryActivator extends DefaultBundleActivator {
+public final class RepositoryActivator implements BundleActivator {
 
     private ServiceRegistration<Repository> registration;
 
     @Override
-    public void start(final ModuleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
 
         // Create the {@link ConfigurationPropertyProvider}
-        final ConfigurationPropertyProvider propertyProvider = new ConfigurationPropertyProvider() {
+        ConfigurationPropertyProvider propertyProvider = new ConfigurationPropertyProvider() {
             @Override
             public String getProperty(String key, String defaultValue) {
-                Runtime runtime = context.getModule().adapt(Runtime.class);
+                Runtime runtime = RuntimeLocator.getRequiredRuntime();
                 Object value = runtime.getProperty(key, defaultValue);
                 if (value == null && Repository.PROPERTY_REPOSITORY_STORAGE_DIR.equals(key)) {
-                    File dirname = context.getModule().getDataFile("repository");
+                    File dirname = context.getBundle().getDataFile("repository");
                     value = dirname.getAbsolutePath();
                 }
                 return value != null ? (String) value : null;
             }
         };
 
+        Bundle bundle = context.getBundle();
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Module module = runtime.getModule(bundle.getBundleId());
+        ModuleContext syscontext = module.getModuleContext();
+
         DefaultMavenIdentityRepository mavenRepo = new DefaultMavenIdentityRepository(propertyProvider);
         Repository repository = new DefaultPersistentRepository(propertyProvider, new RepositoryAggregator(mavenRepo));
-        registration = context.registerService(Repository.class, repository, null);
+        registration = syscontext.registerService(Repository.class, repository, null);
     }
 
     @Override
-    public void stop(ModuleContext context) throws Exception {
+    public void stop(BundleContext context) throws Exception {
         if (registration != null) {
             registration.unregister();
         }

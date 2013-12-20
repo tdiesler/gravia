@@ -26,10 +26,15 @@ import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.Resolver;
-import org.jboss.gravia.runtime.DefaultBundleActivator;
+import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 /**
  * Activate the {@link Resolver} in the runtime.
@@ -37,31 +42,31 @@ import org.jboss.gravia.runtime.ServiceRegistration;
  * @author thomas.diesler@jboss.com
  * @since 20-Dec-2012
  */
-public final class ProvisionerActivator extends DefaultBundleActivator {
+public final class ProvisionerActivator implements BundleActivator {
 
-    private ServiceReference<Resolver> resolverRef;
-    private ServiceReference<Repository> repositoryRef;
     private ServiceRegistration<Provisioner> registration;
 
     @Override
-    public void start(final ModuleContext context) throws Exception {
-        resolverRef = context.getServiceReference(Resolver.class);
-        Resolver resolver = context.getService(resolverRef);
-        repositoryRef = context.getServiceReference(Repository.class);
-        Repository repository = context.getService(repositoryRef);
+    public void start(BundleContext context) throws Exception {
+
+        Bundle bundle = context.getBundle();
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Module module = runtime.getModule(bundle.getBundleId());
+        ModuleContext syscontext = module.getModuleContext();
+
+        ServiceReference<Resolver> resolverRef = syscontext.getServiceReference(Resolver.class);
+        Resolver resolver = syscontext.getService(resolverRef);
+        ServiceReference<Repository> repositoryRef = syscontext.getServiceReference(Repository.class);
+        Repository repository = syscontext.getService(repositoryRef);
         Provisioner provisioner = new DefaultProvisioner(resolver, repository) {
 
         };
-        registration = context.registerService(Provisioner.class, provisioner, null);
+        registration = syscontext.registerService(Provisioner.class, provisioner, null);
     }
 
     @Override
-    public void stop(ModuleContext context) throws Exception {
+    public void stop(BundleContext context) throws Exception {
         if (registration != null)
             registration.unregister();
-        if (repositoryRef != null)
-            context.ungetService(repositoryRef);
-        if (resolverRef != null)
-            context.ungetService(resolverRef);
     }
 }

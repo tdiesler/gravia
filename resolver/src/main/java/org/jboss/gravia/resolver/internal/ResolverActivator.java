@@ -24,9 +24,14 @@ package org.jboss.gravia.resolver.internal;
 
 import org.jboss.gravia.resolver.DefaultResolver;
 import org.jboss.gravia.resolver.Resolver;
-import org.jboss.gravia.runtime.DefaultBundleActivator;
+import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 /**
  * Activate the {@link Resolver} in the runtime.
@@ -34,17 +39,23 @@ import org.jboss.gravia.runtime.ServiceRegistration;
  * @author thomas.diesler@jboss.com
  * @since 20-Dec-2012
  */
-public final class ResolverActivator extends DefaultBundleActivator {
+public final class ResolverActivator implements BundleActivator {
 
     private ServiceRegistration<Resolver> registration;
 
     @Override
-    public void start(final ModuleContext context) throws Exception {
-        registration = context.registerService(Resolver.class, new DefaultResolver(), null);
+    public void start(BundleContext context) {
+
+        Bundle bundle = context.getBundle();
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Module module = runtime.getModule(bundle.getBundleId());
+        ModuleContext syscontext = module.getModuleContext();
+
+        registration = syscontext.registerService(Resolver.class, new DefaultResolver(), null);
     }
 
     @Override
-    public void stop(ModuleContext context) throws Exception {
+    public void stop(BundleContext context) throws Exception {
         if (registration != null) {
             registration.unregister();
         }
