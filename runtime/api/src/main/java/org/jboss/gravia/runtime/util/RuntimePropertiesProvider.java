@@ -1,8 +1,8 @@
 /*
  * #%L
- * JBossOSGi Repository
+ * JBossOSGi Runtime
  * %%
- * Copyright (C) 2012 - 2013 JBoss by Red Hat
+ * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -19,20 +19,38 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.repository;
+package org.jboss.gravia.runtime.util;
 
-import org.jboss.gravia.repository.spi.AbstractMavenIdentityRepository;
+import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 /**
- * A simple {@link Repository} that delegates to a maven repositories.
+ * A properties provider that delegates to the runtime.
  *
  * @author thomas.diesler@jboss.com
- * @since 16-Jan-2012
+ * @since 27-Sep-2013
+ *
+ * @ThreadSafe
  */
-public class DefaultMavenIdentityRepository extends AbstractMavenIdentityRepository {
+public class RuntimePropertiesProvider implements PropertiesProvider {
 
-    public DefaultMavenIdentityRepository(PropertiesProvider propertyProvider) {
-        super(propertyProvider);
+    private final Runtime runtime;
+
+    public RuntimePropertiesProvider(Runtime runtime) {
+        this.runtime = runtime;
+    }
+
+    public Runtime getRuntime() {
+        return runtime;
+    }
+
+    @Override
+    public Object getProperty(String key) {
+        return getProperty(key, null);
+    }
+
+    @Override
+    public Object getProperty(String key, Object defaultValue) {
+        return runtime.getProperty(key, defaultValue);
     }
 }

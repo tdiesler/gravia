@@ -28,12 +28,13 @@ import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
 import org.jboss.gravia.repository.DefaultPersistentRepository;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryAggregator;
-import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.runtime.util.RuntimePropertiesProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -51,12 +52,12 @@ public final class RepositoryActivator implements BundleActivator {
     @Override
     public void start(final BundleContext context) throws Exception {
 
-        // Create the {@link ConfigurationPropertyProvider}
-        ConfigurationPropertyProvider propertyProvider = new ConfigurationPropertyProvider() {
+        // Create the {@link PropertiesProvider}
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        PropertiesProvider propertyProvider = new RuntimePropertiesProvider(runtime) {
             @Override
-            public String getProperty(String key, String defaultValue) {
-                Runtime runtime = RuntimeLocator.getRequiredRuntime();
-                Object value = runtime.getProperty(key, defaultValue);
+            public Object getProperty(String key, Object defaultValue) {
+                Object value = super.getProperty(key, defaultValue);
                 if (value == null && Repository.PROPERTY_REPOSITORY_STORAGE_DIR.equals(key)) {
                     File dirname = context.getBundle().getDataFile("repository");
                     value = dirname.getAbsolutePath();
@@ -66,7 +67,6 @@ public final class RepositoryActivator implements BundleActivator {
         };
 
         Bundle bundle = context.getBundle();
-        Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Module module = runtime.getModule(bundle.getBundleId());
         ModuleContext syscontext = module.getModuleContext();
 

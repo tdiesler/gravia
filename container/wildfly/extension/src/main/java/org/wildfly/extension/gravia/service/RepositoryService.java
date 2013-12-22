@@ -35,12 +35,13 @@ import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
 import org.jboss.gravia.repository.DefaultPersistentRepository;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
 import org.jboss.gravia.repository.RepositoryAggregator;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleClassLoader;
 import org.jboss.modules.Resource;
@@ -79,11 +80,10 @@ public class RepositoryService extends AbstractService<Repository> {
     public void start(StartContext startContext) throws StartException {
 
         // Create the {@link ConfigurationPropertyProvider}
-        ConfigurationPropertyProvider propertyProvider = new ConfigurationPropertyProvider() {
+        PropertiesProvider propertyProvider = new DefaultPropertiesProvider() {
             @Override
-            public String getProperty(String key, String defaultValue) {
+            public Object getProperty(String key, Object defaultValue) {
                 String value = null;
-                // [TODO] Make this configurable via subsystem properties
                 if (Repository.PROPERTY_REPOSITORY_STORAGE_DIR.equals(key)) {
                     try {
                         ServerEnvironment serverenv = injectedServerEnvironment.getValue();

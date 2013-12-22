@@ -35,6 +35,7 @@ import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 /**
  * An abstract {@link PersistentRepository}.
@@ -44,22 +45,22 @@ import org.jboss.gravia.resource.ResourceIdentity;
  */
 public abstract class AbstractPersistentRepository extends AbstractRepository implements PersistentRepository {
 
-    private final ConfigurationPropertyProvider propertyProvider;
+    private final PropertiesProvider propertyProvider;
     private final Repository delegate;
     private RepositoryStorage storage;
 
-    public AbstractPersistentRepository(ConfigurationPropertyProvider propertyProvider) {
+    public AbstractPersistentRepository(PropertiesProvider propertyProvider) {
         this(propertyProvider, null);
     }
 
-    public AbstractPersistentRepository(ConfigurationPropertyProvider propertyProvider, Repository delegate) {
+    public AbstractPersistentRepository(PropertiesProvider propertyProvider, Repository delegate) {
         this.propertyProvider = propertyProvider;
         this.delegate = delegate;
     }
 
-    protected abstract RepositoryStorage createRepositoryStorage(PersistentRepository repository, ConfigurationPropertyProvider propertyProvider);
+    protected abstract RepositoryStorage createRepositoryStorage(PersistentRepository repository, PropertiesProvider propertyProvider);
 
-    protected ConfigurationPropertyProvider getConfigurationPropertyProvider() {
+    protected PropertiesProvider getPropertiesProvider() {
         return propertyProvider;
     }
 
@@ -85,7 +86,7 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
     @Override
     public RepositoryStorage getRepositoryStorage() {
         if (storage == null) {
-            storage = createRepositoryStorage(this, getConfigurationPropertyProvider());
+            storage = createRepositoryStorage(this, getPropertiesProvider());
         }
         return storage;
     }

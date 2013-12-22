@@ -39,7 +39,6 @@ import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.MavenIdentityRequirementBuilder;
 import org.jboss.gravia.repository.PersistentRepository;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
 import org.jboss.gravia.repository.RepositoryAggregator;
 import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryStorage;
@@ -50,6 +49,7 @@ import org.jboss.gravia.resource.IdentityRequirementBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +70,7 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
     public void setUp() throws IOException {
         storageDir = new File("./target/repository");
         deleteRecursive(storageDir);
-        ConfigurationPropertyProvider propertyProvider = Mockito.mock(ConfigurationPropertyProvider.class);
+        PropertiesProvider propertyProvider = Mockito.mock(PropertiesProvider.class);
         Mockito.when(propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
         Repository delegate = new RepositoryAggregator(new DefaultMavenIdentityRepository(propertyProvider));
         repository = new DefaultPersistentRepository(propertyProvider, delegate);

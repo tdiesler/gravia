@@ -41,7 +41,7 @@ public final class BundleContextPropertiesProvider implements PropertiesProvider
 
     @Override
     public Object getProperty(String key) {
-        return bundleContext.getProperty(key);
+        return getProperty(key, null);
     }
 
     @Override

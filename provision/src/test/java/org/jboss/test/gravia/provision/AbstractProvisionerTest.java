@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -40,7 +40,6 @@ import org.jboss.gravia.repository.DefaultPersistentRepository;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.PersistentRepository;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
 import org.jboss.gravia.repository.RepositoryAggregator;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
@@ -48,6 +47,7 @@ import org.jboss.gravia.resolver.DefaultResolver;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.junit.Before;
 import org.mockito.Mockito;
 
@@ -69,7 +69,7 @@ public abstract class AbstractProvisionerTest {
         File storageDir = new File("./target/repository/" + System.currentTimeMillis()).getCanonicalFile();
         environment = new DefaultEnvironment("TestEnv");
         Resolver resolver = new DefaultResolver();
-        ConfigurationPropertyProvider propertyProvider = Mockito.mock(ConfigurationPropertyProvider.class);
+        PropertiesProvider propertyProvider = Mockito.mock(PropertiesProvider.class);
         Mockito.when(propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
         Repository delegate = new RepositoryAggregator(new DefaultMavenIdentityRepository(propertyProvider));
         repository = new DefaultPersistentRepository(propertyProvider, delegate);

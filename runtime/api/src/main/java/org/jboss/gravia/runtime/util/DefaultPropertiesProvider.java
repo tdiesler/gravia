@@ -41,7 +41,7 @@ import org.jboss.gravia.utils.NotNullException;
  *
  * @ThreadSafe
  */
-public final class DefaultPropertiesProvider implements PropertiesProvider {
+public class DefaultPropertiesProvider implements PropertiesProvider {
 
     private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
     private final boolean systemPropertyDelegation;

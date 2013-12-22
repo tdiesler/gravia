@@ -39,7 +39,6 @@ import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
 import org.jboss.gravia.repository.DefaultPersistentRepository;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
 import org.jboss.gravia.repository.RepositoryAggregator;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
@@ -50,6 +49,7 @@ import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.embedded.spi.BundleContextAdaptor;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.osgi.framework.BundleContext;
 
@@ -107,14 +107,14 @@ public class GraviaActivator implements ServletContextListener {
     }
 
     private Repository registerRepositoryService(final Runtime runtime) {
-        ConfigurationPropertyProvider propertyProvider = new ConfigurationPropertyProvider() {
+        PropertiesProvider propertyProvider = new DefaultPropertiesProvider() {
             @Override
-            public String getProperty(String key, String defaultValue) {
+            public Object getProperty(String key, Object defaultValue) {
                 Object value = runtime.getProperty(key);
                 if (value == null && Repository.PROPERTY_REPOSITORY_STORAGE_DIR.equals(key)) {
                     value = new File(catalinaWork.getPath() + File.separator + "repository").getAbsolutePath();
                 }
-                return value != null ? (String) value : defaultValue;
+                return value != null ? value : defaultValue;
             }
         };
         DefaultMavenIdentityRepository mavenRepo = new DefaultMavenIdentityRepository(propertyProvider);

@@ -39,6 +39,8 @@ import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 
 /**
  * A simple {@link Repository} that delegates to a maven repositories.
@@ -64,15 +66,10 @@ public abstract class AbstractMavenIdentityRepository extends AbstractRepository
     }
 
     public AbstractMavenIdentityRepository() {
-        this(new ConfigurationPropertyProvider() {
-            @Override
-            public String getProperty(String key, String defaultValue) {
-                return SecurityActions.getSystemProperty(key, defaultValue);
-            }
-        });
+        this(new DefaultPropertiesProvider());
     }
 
-    public AbstractMavenIdentityRepository(ConfigurationPropertyProvider propertyProvider) {
+    public AbstractMavenIdentityRepository(PropertiesProvider propertyProvider) {
         Configuration configuration = getConfiguration(propertyProvider);
         baserepos = Collections.unmodifiableList(configuration.getBaseURLs());
     }
@@ -84,12 +81,12 @@ public abstract class AbstractMavenIdentityRepository extends AbstractRepository
      * #2 The default JBoss Nexus repository
      * #3 The default Maven Central repository
      */
-    protected Configuration getConfiguration(final ConfigurationPropertyProvider propertyProvider) {
+    protected Configuration getConfiguration(final PropertiesProvider propertyProvider) {
         return new Configuration() {
             @Override
             public List<URL> getBaseURLs() {
                 List<URL> result = new ArrayList<URL>();
-                String property = propertyProvider.getProperty(PROPERTY_MAVEN_REPOSITORY_BASE_URLS, null);
+                String property = (String) propertyProvider.getProperty(PROPERTY_MAVEN_REPOSITORY_BASE_URLS);
                 if (property == null) {
                     property = "";
                     String userhome = SecurityActions.getSystemProperty("user.home", "");

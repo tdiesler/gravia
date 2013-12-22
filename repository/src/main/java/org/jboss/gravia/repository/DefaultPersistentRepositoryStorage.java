@@ -5,16 +5,16 @@
  * Copyright (C) 2012 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -32,10 +32,10 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
-import org.jboss.gravia.repository.Repository.ConfigurationPropertyProvider;
 import org.jboss.gravia.repository.spi.AbstractPersistentRepositoryStorage;
 import org.jboss.gravia.repository.spi.RepositoryContentHelper;
 import org.jboss.gravia.resource.ResourceBuilder;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 /**
  * A simple {@link RepositoryStorage} that uses
@@ -51,13 +51,13 @@ public class DefaultPersistentRepositoryStorage extends AbstractPersistentReposi
     private final File storageDir;
     private final File repoFile;
 
-    public DefaultPersistentRepositoryStorage(PersistentRepository repository, ConfigurationPropertyProvider propertyProvider) {
+    public DefaultPersistentRepositoryStorage(PersistentRepository repository, PropertiesProvider propertyProvider) {
         super(repository, propertyProvider);
         if (propertyProvider == null)
             throw new IllegalArgumentException("Null propertyProvider");
 
-        String filename = propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_FILE, REPOSITORY_XML_NAME);
-        String dirname = propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null);
+        String filename = (String) propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_FILE, REPOSITORY_XML_NAME);
+        String dirname = (String) propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null);
         if (dirname == null)
             throw new IllegalArgumentException("Cannot obtain property: " + Repository.PROPERTY_REPOSITORY_STORAGE_DIR);
 
