@@ -29,14 +29,12 @@ import org.jboss.gravia.repository.DefaultMavenDelegateRepository;
 import org.jboss.gravia.repository.DefaultRepositoryStorage;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryBuilder;
-import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.repository.RepositoryRuntimeRegistration;
+import org.jboss.gravia.repository.RepositoryRuntimeRegistration.Registration;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.util.RuntimePropertiesProvider;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -48,7 +46,7 @@ import org.osgi.framework.BundleContext;
  */
 public final class RepositoryActivator implements BundleActivator {
 
-    private ServiceRegistration<Repository> registration;
+    private Registration registration;
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -67,14 +65,10 @@ public final class RepositoryActivator implements BundleActivator {
             }
         };
 
-        Bundle bundle = context.getBundle();
-        Module module = runtime.getModule(bundle.getBundleId());
-        ModuleContext syscontext = module.getModuleContext();
-
         RepositoryBuilder builder = new RepositoryBuilder(propertyProvider);
         builder.setRepositoryDelegate(new DefaultMavenDelegateRepository(propertyProvider));
         builder.setRepositoryStorage(new DefaultRepositoryStorage(propertyProvider));
-        registration = syscontext.registerService(Repository.class, builder.getRepository(), null);
+        registration =  RepositoryRuntimeRegistration.registerRepository(runtime, builder.getRepository());
     }
 
     @Override

@@ -41,6 +41,8 @@ import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryBuilder;
 import org.jboss.gravia.repository.RepositoryReader;
+import org.jboss.gravia.repository.RepositoryRuntimeRegistration;
+import org.jboss.gravia.repository.RepositoryRuntimeRegistration.Registration;
 import org.jboss.gravia.resolver.DefaultResolver;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -64,7 +66,7 @@ public class GraviaActivator implements ServletContextListener {
     private final static File catalinaHome = new File(SecurityActions.getSystemProperty("catalina.home", null));
     private final static File catalinaWork = new File(catalinaHome.getPath() + File.separator + "work");
 
-    private ServiceRegistration<Repository> repositoryRegistration;
+    private Registration repositoryRegistration;
     private ServiceRegistration<Provisioner> provisionerRegistration;
     private ServiceRegistration<Resolver> resolverRegistration;
 
@@ -135,8 +137,7 @@ public class GraviaActivator implements ServletContextListener {
         }
 
         // Register the repository as a service
-        ModuleContext syscontext = runtime.getModule(0).getModuleContext();
-        repositoryRegistration = syscontext.registerService(Repository.class, repository, null);
+        repositoryRegistration =  RepositoryRuntimeRegistration.registerRepository(runtime, repository);
 
         return repository;
     }

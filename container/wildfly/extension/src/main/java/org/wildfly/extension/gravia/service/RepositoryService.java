@@ -38,9 +38,10 @@ import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryBuilder;
 import org.jboss.gravia.repository.RepositoryReader;
+import org.jboss.gravia.repository.RepositoryRuntimeRegistration;
+import org.jboss.gravia.repository.RepositoryRuntimeRegistration.Registration;
 import org.jboss.gravia.repository.RepositoryStorage;
-import org.jboss.gravia.runtime.ModuleContext;
-import org.jboss.gravia.runtime.ServiceRegistration;
+import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.jboss.modules.Module;
@@ -64,15 +65,15 @@ import org.wildfly.extension.gravia.GraviaConstants;
  */
 public class RepositoryService extends AbstractService<Repository> {
 
-    private final InjectedValue<ModuleContext> injectedModuleContext = new InjectedValue<ModuleContext>();
+    private final InjectedValue<Runtime> injectedRuntime = new InjectedValue<Runtime>();
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
-    private ServiceRegistration<Repository> registration;
+    private Registration registration;
     private Repository repository;
 
     public ServiceController<Repository> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<Repository> builder = serviceTarget.addService(GraviaConstants.REPOSITORY_SERVICE_NAME, this);
         builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, injectedServerEnvironment);
-        builder.addDependency(GraviaConstants.MODULE_CONTEXT_SERVICE_NAME, ModuleContext.class, injectedModuleContext);
+        builder.addDependency(GraviaConstants.RUNTIME_SERVICE_NAME, Runtime.class, injectedRuntime);
         builder.addListener(verificationHandler);
         return builder.install();
     }
@@ -124,8 +125,8 @@ public class RepositoryService extends AbstractService<Repository> {
         }
 
         // Register the repository as a service
-        ModuleContext syscontext = injectedModuleContext.getValue();
-        registration = syscontext.registerService(Repository.class, repository, null);
+        Runtime runtime = injectedRuntime.getValue();
+        registration =  RepositoryRuntimeRegistration.registerRepository(runtime, repository);
     }
 
     @Override
