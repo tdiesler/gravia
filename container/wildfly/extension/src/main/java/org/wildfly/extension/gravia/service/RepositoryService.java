@@ -31,11 +31,12 @@ import java.util.Iterator;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.server.ServerEnvironment;
 import org.jboss.as.server.ServerEnvironmentService;
-import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
-import org.jboss.gravia.repository.DefaultPersistentRepository;
+import org.jboss.gravia.Constants;
+import org.jboss.gravia.repository.DefaultMavenDelegateRepository;
+import org.jboss.gravia.repository.DefaultRepositoryStorage;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryAggregator;
+import org.jboss.gravia.repository.RepositoryBuilder;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -83,8 +84,8 @@ public class RepositoryService extends AbstractService<Repository> {
         PropertiesProvider propertyProvider = new DefaultPropertiesProvider() {
             @Override
             public Object getProperty(String key, Object defaultValue) {
-                String value = null;
-                if (Repository.PROPERTY_REPOSITORY_STORAGE_DIR.equals(key)) {
+                Object value = super.getProperty(key, defaultValue);
+                if (value == null && Constants.PROPERTY_REPOSITORY_STORAGE_DIR.equals(key)) {
                     try {
                         ServerEnvironment serverenv = injectedServerEnvironment.getValue();
                         File storageDir = new File(serverenv.getServerDataDir().getPath() + File.separator + "repository");
@@ -96,8 +97,10 @@ public class RepositoryService extends AbstractService<Repository> {
                 return value != null ? value : defaultValue;
             }
         };
-        DefaultMavenIdentityRepository mavenRepo = new DefaultMavenIdentityRepository(propertyProvider);
-        repository = new DefaultPersistentRepository(propertyProvider, new RepositoryAggregator(mavenRepo));
+        RepositoryBuilder builder = new RepositoryBuilder(propertyProvider);
+        builder.setRepositoryDelegate(new DefaultMavenDelegateRepository(propertyProvider));
+        builder.setRepositoryStorage(new DefaultRepositoryStorage(propertyProvider));
+        repository = builder.getRepository();
 
         // Install gravia features to the repository
         ModuleClassLoader classLoader = Module.getCallerModule().getClassLoader();

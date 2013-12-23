@@ -21,18 +21,18 @@
  */
 package org.jboss.gravia.repository;
 
-import org.jboss.gravia.repository.spi.AbstractMavenIdentityRepository;
+import org.jboss.gravia.repository.spi.AbstractMavenDelegateRepository;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 /**
- * A simple {@link Repository} that delegates to a maven repositories.
+ * A simple {@link Repository} that delegates to maven repositories.
  *
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public class DefaultMavenIdentityRepository extends AbstractMavenIdentityRepository {
+public class DefaultMavenDelegateRepository extends AbstractMavenDelegateRepository {
 
-    public DefaultMavenIdentityRepository(PropertiesProvider propertyProvider) {
+    public DefaultMavenDelegateRepository(PropertiesProvider propertyProvider) {
         super(propertyProvider);
     }
 }

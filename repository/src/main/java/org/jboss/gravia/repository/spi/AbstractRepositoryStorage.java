@@ -33,9 +33,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.jboss.gravia.repository.ContentCapability;
 import org.jboss.gravia.repository.ContentNamespace;
 import org.jboss.gravia.repository.MavenCoordinates;
-import org.jboss.gravia.repository.MavenIdentityRepository;
+import org.jboss.gravia.repository.MavenDelegateRepository;
 import org.jboss.gravia.repository.Namespace100.Attribute;
-import org.jboss.gravia.repository.PersistentRepository;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryAggregator;
 import org.jboss.gravia.repository.RepositoryContent;
@@ -58,12 +57,12 @@ import org.jboss.gravia.runtime.spi.PropertiesProvider;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public abstract class AbstractPersistentRepositoryStorage extends MemoryRepositoryStorage {
+public abstract class AbstractRepositoryStorage extends MemoryRepositoryStorage {
 
     private final AtomicLong increment = new AtomicLong();
 
-    public AbstractPersistentRepositoryStorage(PersistentRepository repository, PropertiesProvider propertyProvider) {
-        super(repository);
+    public AbstractRepositoryStorage(PropertiesProvider propertyProvider, Repository repository) {
+        super(propertyProvider, repository);
     }
 
     public void initRepositoryStorage() throws RepositoryStorageException {
@@ -79,11 +78,6 @@ public abstract class AbstractPersistentRepositoryStorage extends MemoryReposito
             }
             reader.close();
         }
-    }
-
-    @Override
-    public PersistentRepository getRepository() {
-        return (PersistentRepository) super.getRepository();
     }
 
     protected abstract ResourceBuilder createResourceBuilder();
@@ -123,15 +117,16 @@ public abstract class AbstractPersistentRepositoryStorage extends MemoryReposito
     }
 
     private Resource getMavenResource(MavenCoordinates mavenid) {
-        MavenIdentityRepository mvnrepo = null;
-        Repository delegate = getRepository().getDelegate();
-        if (delegate instanceof MavenIdentityRepository) {
-            mvnrepo = (MavenIdentityRepository) delegate;
+        MavenDelegateRepository mvnrepo = null;
+        Repository repository = getRepository();
+        Repository delegate = repository.getFallbackRepository();
+        if (delegate instanceof MavenDelegateRepository) {
+            mvnrepo = (MavenDelegateRepository) delegate;
         } else if (delegate instanceof RepositoryAggregator) {
             RepositoryAggregator aggregator = (RepositoryAggregator) delegate;
             for (Repository repo : aggregator.getDelegates()) {
-                if (repo instanceof MavenIdentityRepository) {
-                    mvnrepo = (MavenIdentityRepository) repo;
+                if (repo instanceof MavenDelegateRepository) {
+                    mvnrepo = (MavenDelegateRepository) repo;
                     break;
                 }
             }

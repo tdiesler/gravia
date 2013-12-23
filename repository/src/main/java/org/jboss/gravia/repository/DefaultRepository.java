@@ -1,4 +1,5 @@
 package org.jboss.gravia.repository;
+
 /*
  * #%L
  * JBossOSGi Repository
@@ -21,19 +22,22 @@ package org.jboss.gravia.repository;
  * #L%
  */
 
-import org.jboss.gravia.resource.ResourceStore;
+import org.jboss.gravia.repository.spi.AbstractRepository;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 /**
- * Repository resource storage
+ * The default {@link PersistentRepository}.
  *
  * @author thomas.diesler@jboss.com
- * @since 16-Jan-2012
+ * @since 11-May-2012
  */
-public interface RepositoryStorage extends ResourceStore {
+public class DefaultRepository extends AbstractRepository {
 
-    /**
-     * Get the repository reader for this storage
-     */
-    RepositoryReader getRepositoryReader();
+    public DefaultRepository(PropertiesProvider propertyProvider) {
+        super(propertyProvider, null, null);
+    }
 
+    public DefaultRepository(PropertiesProvider propertyProvider, RepositoryStorage storage, Repository delegate) {
+        super(propertyProvider, storage, delegate);
+    }
 }

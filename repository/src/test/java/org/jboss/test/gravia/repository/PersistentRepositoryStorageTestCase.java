@@ -31,10 +31,10 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.repository.ContentCapability;
 import org.jboss.gravia.repository.ContentNamespace;
-import org.jboss.gravia.repository.DefaultPersistentRepositoryStorage;
-import org.jboss.gravia.repository.PersistentRepository;
+import org.jboss.gravia.repository.DefaultRepositoryStorage;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryReader;
@@ -59,7 +59,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 /**
- * Test the {@link DefaultPersistentRepositoryStorage}
+ * Test the {@link DefaultRepositoryStorage}
  *
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
@@ -68,7 +68,7 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
 
     private File storageDir;
     private RepositoryStorage storage;
-    private PersistentRepository repository;
+    private Repository repository;
     private PropertiesProvider propertyProvider;
     private File resAjar;
     private File resAtxt;
@@ -76,11 +76,11 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
     @Before
     public void setUp() throws Exception {
         storageDir = new File("./target/repository/" + System.currentTimeMillis()).getCanonicalFile();
-        repository = Mockito.mock(PersistentRepository.class);
+        repository = Mockito.mock(Repository.class);
         Mockito.when(repository.getName()).thenReturn("MockedRepo");
         propertyProvider = Mockito.mock(PropertiesProvider.class);
-        Mockito.when(propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
-        storage = new DefaultPersistentRepositoryStorage(repository, propertyProvider);
+        Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
+        storage = new DefaultRepositoryStorage(propertyProvider, repository);
 
         // Write the bundle to the location referenced by repository-testA.xml
         resAjar = new File("./target/resA.jar");
@@ -161,7 +161,7 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
         verifyResource(resource);
         verifyProviders(storage);
 
-        RepositoryStorage other = new DefaultPersistentRepositoryStorage(repository, propertyProvider);
+        RepositoryStorage other = new DefaultRepositoryStorage(propertyProvider);
         verifyProviders(other);
     }
 

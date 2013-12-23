@@ -28,7 +28,7 @@ import java.util.List;
 
 import org.jboss.gravia.repository.ContentCapability;
 import org.jboss.gravia.repository.ContentNamespace;
-import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
+import org.jboss.gravia.repository.DefaultMavenDelegateRepository;
 import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.MavenIdentityRequirementBuilder;
 import org.jboss.gravia.repository.Repository;
@@ -42,7 +42,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test the {@link DefaultMavenIdentityRepository}
+ * Test the {@link DefaultMavenDelegateRepository}
  *
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
@@ -55,7 +55,7 @@ public class MavenIdentityRepositoryTestCase extends AbstractRepositoryTest {
     public void setUp() throws IOException {
         File storageDir = new File("./target/repository");
         deleteRecursive(storageDir);
-        repository = new DefaultMavenIdentityRepository(new DefaultPropertiesProvider());
+        repository = new DefaultMavenDelegateRepository(new DefaultPropertiesProvider());
     }
 
     @Test

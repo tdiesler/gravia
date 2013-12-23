@@ -190,4 +190,19 @@ public interface Constants  {
      * deemed to have a ranking value of zero.
      */
     String SERVICE_RANKING = "service.ranking";
+
+    /**
+     * The property that defines the Maven Repository base URLs.
+     */
+    String PROPERTY_MAVEN_REPOSITORY_BASE_URLS = "org.jboss.gravia.repository.maven.base.urls";
+
+    /**
+     * The property that defines the repository storage directory.
+     */
+    String PROPERTY_REPOSITORY_STORAGE_DIR = "org.jboss.gravia.repository.storage.dir";
+
+    /**
+     * The property that defines the repository storage file.
+     */
+    String PROPERTY_REPOSITORY_STORAGE_FILE = "org.jboss.gravia.repository.storage.file";
 }

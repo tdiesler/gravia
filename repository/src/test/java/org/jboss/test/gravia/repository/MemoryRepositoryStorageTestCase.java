@@ -23,7 +23,6 @@ package org.jboss.test.gravia.repository;
 
 import java.util.Collection;
 
-import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.repository.spi.MemoryRepositoryStorage;
@@ -33,6 +32,7 @@ import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.RequirementBuilder;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public class MemoryRepositoryStorageTestCase extends AbstractRepositoryTest {
 
     @Before
     public void setUp() throws Exception {
-        storage = new MemoryRepositoryStorage(Mockito.mock(Repository.class));
+        storage = new MemoryRepositoryStorage(Mockito.mock(PropertiesProvider.class), null);
         RepositoryReader reader = getRepositoryReader("xml/sample-repository.xml");
         storage.addResource(reader.nextResource());
     }

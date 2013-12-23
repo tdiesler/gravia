@@ -1,6 +1,6 @@
 /*
  * #%L
- * JBossOSGi Repository: API
+ * Gravia Repository
  * %%
  * Copyright (C) 2012 - 2013 JBoss by Red Hat
  * %%
@@ -21,18 +21,10 @@
  */
 package org.jboss.gravia.repository;
 
-/**
- * Factory for {@link RepositoryStorage} creation
- *
- * @author thomas.diesler@jboss.com
- * @since 22-May-2012
- */
-public interface RepositoryStorageFactory {
+import org.jboss.gravia.resource.Resource;
 
-    /**
-     * Create the storage for a given repository
-     *
-     * @param repository The associated repository
-     */
-    RepositoryStorage create(Repository repository);
+public interface MavenDelegateRepository extends Repository {
+
+    Resource findMavenResource(MavenCoordinates mavenid);
+
 }

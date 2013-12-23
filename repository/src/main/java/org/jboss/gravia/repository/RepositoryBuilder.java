@@ -1,5 +1,9 @@
 package org.jboss.gravia.repository;
 
+import org.jboss.gravia.repository.spi.AbstractRepository;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.utils.NotNullException;
+
 /*
  * #%L
  * JBossOSGi Repository
@@ -22,27 +26,33 @@ package org.jboss.gravia.repository;
  * #L%
  */
 
-import org.jboss.gravia.repository.spi.AbstractPersistentRepository;
-import org.jboss.gravia.runtime.spi.PropertiesProvider;
+
 
 /**
- * The default {@link PersistentRepository}.
+ * A {@link Repository} aggregator.
  *
  * @author thomas.diesler@jboss.com
  * @since 11-May-2012
  */
-public class DefaultPersistentRepository extends AbstractPersistentRepository {
+public class RepositoryBuilder {
 
-    public DefaultPersistentRepository(PropertiesProvider propertyProvider) {
-        this(propertyProvider, null);
+    private final AbstractRepository repository;
+
+    public RepositoryBuilder(PropertiesProvider propertyProvider) {
+        repository = new DefaultRepository(propertyProvider);
     }
 
-    public DefaultPersistentRepository(PropertiesProvider propertyProvider, Repository delegate) {
-        super(propertyProvider, delegate);
+    public void setRepositoryStorage(RepositoryStorage storage) {
+        NotNullException.assertValue(storage, "storage");
+        repository.setRepositoryStorage(storage);
     }
 
-    @Override
-    protected RepositoryStorage createRepositoryStorage(PersistentRepository repository, PropertiesProvider propertyProvider) {
-        return new DefaultPersistentRepositoryStorage(repository, propertyProvider);
+    public void setRepositoryDelegate(Repository delegate) {
+        NotNullException.assertValue(delegate, "delegate");
+        repository.setFallbackRepository(delegate);
+    }
+
+    public Repository getRepository() {
+        return repository;
     }
 }

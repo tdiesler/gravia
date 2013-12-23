@@ -30,9 +30,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.repository.ContentNamespace;
 import org.jboss.gravia.repository.MavenCoordinates;
-import org.jboss.gravia.repository.MavenIdentityRepository;
+import org.jboss.gravia.repository.MavenDelegateRepository;
 import org.jboss.gravia.repository.MavenResourceBuilder;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resource.Capability;
@@ -48,11 +49,11 @@ import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public abstract class AbstractMavenIdentityRepository extends AbstractRepository implements MavenIdentityRepository {
+public abstract class AbstractMavenDelegateRepository extends AbstractRepository implements MavenDelegateRepository {
 
     private final List<URL> baserepos;
 
-    /** The configuration for the {@link AbstractMavenIdentityRepository} */
+    /** The configuration for the {@link AbstractMavenDelegateRepository} */
     public interface Configuration {
 
         /** The default JBoss Nexus repository: http://repository.jboss.org/nexus/content/groups/public */
@@ -65,11 +66,12 @@ public abstract class AbstractMavenIdentityRepository extends AbstractRepository
         List<URL> getBaseURLs();
     }
 
-    public AbstractMavenIdentityRepository() {
+    public AbstractMavenDelegateRepository() {
         this(new DefaultPropertiesProvider());
     }
 
-    public AbstractMavenIdentityRepository(PropertiesProvider propertyProvider) {
+    public AbstractMavenDelegateRepository(PropertiesProvider propertyProvider) {
+        super(propertyProvider);
         Configuration configuration = getConfiguration(propertyProvider);
         baserepos = Collections.unmodifiableList(configuration.getBaseURLs());
     }
@@ -86,7 +88,7 @@ public abstract class AbstractMavenIdentityRepository extends AbstractRepository
             @Override
             public List<URL> getBaseURLs() {
                 List<URL> result = new ArrayList<URL>();
-                String property = (String) propertyProvider.getProperty(PROPERTY_MAVEN_REPOSITORY_BASE_URLS);
+                String property = (String) propertyProvider.getProperty(Constants.PROPERTY_MAVEN_REPOSITORY_BASE_URLS);
                 if (property == null) {
                     property = "";
                     String userhome = SecurityActions.getSystemProperty("user.home", "");

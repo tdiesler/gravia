@@ -29,20 +29,19 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.provision.DefaultEnvironment;
 import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.Environment;
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ProvisionResult;
 import org.jboss.gravia.provision.Provisioner;
-import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
-import org.jboss.gravia.repository.DefaultPersistentRepository;
+import org.jboss.gravia.repository.DefaultMavenDelegateRepository;
+import org.jboss.gravia.repository.DefaultRepositoryStorage;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
-import org.jboss.gravia.repository.PersistentRepository;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryAggregator;
+import org.jboss.gravia.repository.RepositoryBuilder;
 import org.jboss.gravia.repository.RepositoryReader;
-import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.resolver.DefaultResolver;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.Requirement;
@@ -60,8 +59,8 @@ import org.mockito.Mockito;
 public abstract class AbstractProvisionerTest {
 
     AtomicLong installIndex = new AtomicLong();
-    PersistentRepository repository;
-    Provisioner provisionService;
+    Repository repository;
+    Provisioner provisioner;
     Environment environment;
 
     @Before
@@ -70,21 +69,22 @@ public abstract class AbstractProvisionerTest {
         environment = new DefaultEnvironment("TestEnv");
         Resolver resolver = new DefaultResolver();
         PropertiesProvider propertyProvider = Mockito.mock(PropertiesProvider.class);
-        Mockito.when(propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
-        Repository delegate = new RepositoryAggregator(new DefaultMavenIdentityRepository(propertyProvider));
-        repository = new DefaultPersistentRepository(propertyProvider, delegate);
-        provisionService = new DefaultProvisioner(resolver, repository);
+        Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
+        RepositoryBuilder builder = new RepositoryBuilder(propertyProvider);
+        builder.setRepositoryDelegate(new DefaultMavenDelegateRepository(propertyProvider));
+        builder.setRepositoryStorage(new DefaultRepositoryStorage(propertyProvider));
+        provisioner = new DefaultProvisioner(resolver, repository = builder.getRepository());
     }
 
     Provisioner getProvisioner() {
-        return provisionService;
+        return provisioner;
     }
 
     Environment getEnvironment() {
         return environment;
     }
 
-    PersistentRepository getRepository() {
+    Repository getRepository() {
         return repository;
     }
 
@@ -99,11 +99,10 @@ public abstract class AbstractProvisionerTest {
     }
 
     void setupRepository(String config) throws XMLStreamException {
-        RepositoryStorage storage = getRepository().adapt(RepositoryStorage.class);
         RepositoryReader reader = getRepositoryReader(config);
         Resource res = reader.nextResource();
         while (res != null) {
-            storage.addResource(res);
+            getRepository().addResource(res);
             res = reader.nextResource();
         }
     }

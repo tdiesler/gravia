@@ -32,7 +32,8 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
-import org.jboss.gravia.repository.spi.AbstractPersistentRepositoryStorage;
+import org.jboss.gravia.Constants;
+import org.jboss.gravia.repository.spi.AbstractRepositoryStorage;
 import org.jboss.gravia.repository.spi.RepositoryContentHelper;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
@@ -44,22 +45,24 @@ import org.jboss.gravia.runtime.spi.PropertiesProvider;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public class DefaultPersistentRepositoryStorage extends AbstractPersistentRepositoryStorage {
+public class DefaultRepositoryStorage extends AbstractRepositoryStorage {
 
     public static final String REPOSITORY_XML_NAME = "repository.xml";
 
     private final File storageDir;
     private final File repoFile;
 
-    public DefaultPersistentRepositoryStorage(PersistentRepository repository, PropertiesProvider propertyProvider) {
-        super(repository, propertyProvider);
-        if (propertyProvider == null)
-            throw new IllegalArgumentException("Null propertyProvider");
+    public DefaultRepositoryStorage(PropertiesProvider propertyProvider) {
+        this(propertyProvider, null);
+    }
 
-        String filename = (String) propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_FILE, REPOSITORY_XML_NAME);
-        String dirname = (String) propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null);
+    public DefaultRepositoryStorage(PropertiesProvider propertyProvider, Repository repository) {
+        super(propertyProvider, repository);
+
+        String filename = (String) propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_FILE, REPOSITORY_XML_NAME);
+        String dirname = (String) propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, null);
         if (dirname == null)
-            throw new IllegalArgumentException("Cannot obtain property: " + Repository.PROPERTY_REPOSITORY_STORAGE_DIR);
+            throw new IllegalArgumentException("Cannot obtain property: " + Constants.PROPERTY_REPOSITORY_STORAGE_DIR);
 
         storageDir = new File(dirname).getAbsoluteFile();
         repoFile = new File(dirname + File.separator + filename).getAbsoluteFile();

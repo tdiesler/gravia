@@ -24,10 +24,11 @@ package org.jboss.gravia.repository.internal;
 
 import java.io.File;
 
-import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
-import org.jboss.gravia.repository.DefaultPersistentRepository;
+import org.jboss.gravia.Constants;
+import org.jboss.gravia.repository.DefaultMavenDelegateRepository;
+import org.jboss.gravia.repository.DefaultRepositoryStorage;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryAggregator;
+import org.jboss.gravia.repository.RepositoryBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
@@ -58,7 +59,7 @@ public final class RepositoryActivator implements BundleActivator {
             @Override
             public Object getProperty(String key, Object defaultValue) {
                 Object value = super.getProperty(key, defaultValue);
-                if (value == null && Repository.PROPERTY_REPOSITORY_STORAGE_DIR.equals(key)) {
+                if (value == null && Constants.PROPERTY_REPOSITORY_STORAGE_DIR.equals(key)) {
                     File dirname = context.getBundle().getDataFile("repository");
                     value = dirname.getAbsolutePath();
                 }
@@ -70,9 +71,10 @@ public final class RepositoryActivator implements BundleActivator {
         Module module = runtime.getModule(bundle.getBundleId());
         ModuleContext syscontext = module.getModuleContext();
 
-        DefaultMavenIdentityRepository mavenRepo = new DefaultMavenIdentityRepository(propertyProvider);
-        Repository repository = new DefaultPersistentRepository(propertyProvider, new RepositoryAggregator(mavenRepo));
-        registration = syscontext.registerService(Repository.class, repository, null);
+        RepositoryBuilder builder = new RepositoryBuilder(propertyProvider);
+        builder.setRepositoryDelegate(new DefaultMavenDelegateRepository(propertyProvider));
+        builder.setRepositoryStorage(new DefaultRepositoryStorage(propertyProvider));
+        registration = syscontext.registerService(Repository.class, builder.getRepository(), null);
     }
 
     @Override

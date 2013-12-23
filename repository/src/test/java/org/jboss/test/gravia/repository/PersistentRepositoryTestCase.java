@@ -31,15 +31,16 @@ import java.util.Collection;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.repository.ContentCapability;
 import org.jboss.gravia.repository.ContentNamespace;
-import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
-import org.jboss.gravia.repository.DefaultPersistentRepository;
+import org.jboss.gravia.repository.DefaultMavenDelegateRepository;
+import org.jboss.gravia.repository.DefaultRepository;
+import org.jboss.gravia.repository.DefaultRepositoryStorage;
 import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.MavenIdentityRequirementBuilder;
-import org.jboss.gravia.repository.PersistentRepository;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryAggregator;
+import org.jboss.gravia.repository.RepositoryBuilder;
 import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.resource.Capability;
@@ -56,14 +57,14 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 /**
- * Test the {@link DefaultPersistentRepository}
+ * Test the {@link DefaultRepository}
  *
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
 public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
 
-    private PersistentRepository repository;
+    private Repository repository;
     private File storageDir;
 
     @Before
@@ -71,9 +72,11 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
         storageDir = new File("./target/repository");
         deleteRecursive(storageDir);
         PropertiesProvider propertyProvider = Mockito.mock(PropertiesProvider.class);
-        Mockito.when(propertyProvider.getProperty(Repository.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
-        Repository delegate = new RepositoryAggregator(new DefaultMavenIdentityRepository(propertyProvider));
-        repository = new DefaultPersistentRepository(propertyProvider, delegate);
+        Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
+        RepositoryBuilder builder = new RepositoryBuilder(propertyProvider);
+        builder.setRepositoryDelegate(new DefaultMavenDelegateRepository(propertyProvider));
+        builder.setRepositoryStorage(new DefaultRepositoryStorage(propertyProvider));
+        repository = builder.getRepository();
     }
 
     @Test

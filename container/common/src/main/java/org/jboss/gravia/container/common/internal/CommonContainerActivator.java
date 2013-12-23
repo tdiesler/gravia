@@ -28,7 +28,7 @@ import java.net.URL;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryReader;
-import org.jboss.gravia.repository.RepositoryStorage;
+import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
@@ -64,12 +64,9 @@ public final class CommonContainerActivator implements BundleActivator {
                 for (URL path : syscontext.getModule().findEntries("META-INF/repository-content", "*.xml", false)) {
                     try {
                         RepositoryReader reader = new DefaultRepositoryXMLReader(path.openStream());
-                        org.jboss.gravia.resource.Resource auxres = reader.nextResource();
+                        Resource auxres = reader.nextResource();
                         while (auxres != null) {
-                            RepositoryStorage storage = repository.adapt(RepositoryStorage.class);
-                            if (storage.getResource(auxres.getIdentity()) == null) {
-                                storage.addResource(auxres);
-                            }
+                            repository.addResource(auxres);
                             auxres = reader.nextResource();
                         }
                     } catch (IOException e) {

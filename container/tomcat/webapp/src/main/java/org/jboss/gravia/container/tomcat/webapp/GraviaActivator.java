@@ -35,13 +35,12 @@ import org.jboss.gravia.Constants;
 import org.jboss.gravia.container.tomcat.extension.TomcatRuntimeFactory;
 import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.Provisioner;
-import org.jboss.gravia.repository.DefaultMavenIdentityRepository;
-import org.jboss.gravia.repository.DefaultPersistentRepository;
+import org.jboss.gravia.repository.DefaultMavenDelegateRepository;
+import org.jboss.gravia.repository.DefaultRepositoryStorage;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryAggregator;
+import org.jboss.gravia.repository.RepositoryBuilder;
 import org.jboss.gravia.repository.RepositoryReader;
-import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.resolver.DefaultResolver;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -111,24 +110,23 @@ public class GraviaActivator implements ServletContextListener {
             @Override
             public Object getProperty(String key, Object defaultValue) {
                 Object value = runtime.getProperty(key);
-                if (value == null && Repository.PROPERTY_REPOSITORY_STORAGE_DIR.equals(key)) {
+                if (value == null && Constants.PROPERTY_REPOSITORY_STORAGE_DIR.equals(key)) {
                     value = new File(catalinaWork.getPath() + File.separator + "repository").getAbsolutePath();
                 }
                 return value != null ? value : defaultValue;
             }
         };
-        DefaultMavenIdentityRepository mavenRepo = new DefaultMavenIdentityRepository(propertyProvider);
-        Repository repository = new DefaultPersistentRepository(propertyProvider, new RepositoryAggregator(mavenRepo));
+        RepositoryBuilder builder = new RepositoryBuilder(propertyProvider);
+        builder.setRepositoryDelegate(new DefaultMavenDelegateRepository(propertyProvider));
+        builder.setRepositoryStorage(new DefaultRepositoryStorage(propertyProvider));
+        Repository repository = builder.getRepository();
 
         for (URL path : runtime.getModule(0).findEntries("META-INF/repository-content", "*.xml", false)) {
             try {
                 RepositoryReader reader = new DefaultRepositoryXMLReader(path.openStream());
                 org.jboss.gravia.resource.Resource auxres = reader.nextResource();
                 while (auxres != null) {
-                    RepositoryStorage storage = repository.adapt(RepositoryStorage.class);
-                    if (storage.getResource(auxres.getIdentity()) == null) {
-                        storage.addResource(auxres);
-                    }
+                    repository.addResource(auxres);
                     auxres = reader.nextResource();
                 }
             } catch (IOException e) {

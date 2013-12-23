@@ -5,16 +5,16 @@
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -38,7 +38,6 @@ import org.jboss.gravia.provision.Provisioner.ResourceHandle;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryReader;
-import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.resource.DefaultRequirementBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
@@ -125,10 +124,7 @@ public class ProvisionerSupport {
                 RepositoryReader reader = new DefaultRepositoryXMLReader(input);
                 Resource auxres = reader.nextResource();
                 while (auxres != null) {
-                    RepositoryStorage storage = getRepository().adapt(RepositoryStorage.class);
-                    if (storage.getResource(auxres.getIdentity()) == null) {
-                        storage.addResource(auxres);
-                    }
+                    getRepository().addResource(auxres);
                     auxres = reader.nextResource();
                 }
             }

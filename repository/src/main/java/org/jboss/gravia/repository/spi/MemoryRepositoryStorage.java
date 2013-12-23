@@ -33,6 +33,7 @@ import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 /**
  * A {@link RepositoryStorage} that maintains its state in local memory
@@ -42,19 +43,20 @@ import org.jboss.gravia.resource.ResourceIdentity;
  */
 public class MemoryRepositoryStorage extends DefaultResourceStore implements RepositoryStorage {
 
-    private final Repository repository;
     private final AtomicLong increment = new AtomicLong();
+    private Repository repository;
 
-    public MemoryRepositoryStorage(Repository repository) {
+    public MemoryRepositoryStorage(PropertiesProvider propertyProvider, Repository repository) {
         super(MemoryRepositoryStorage.class.getSimpleName(), true);
-        if (repository == null)
-            throw new IllegalArgumentException("Null repository");
         this.repository = repository;
     }
 
-    @Override
     public Repository getRepository() {
         return repository;
+    }
+
+    void setRepository(Repository repository) {
+        this.repository = repository;
     }
 
     @Override
