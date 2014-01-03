@@ -36,11 +36,9 @@ import org.jboss.gravia.provision.Environment;
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ProvisionResult;
 import org.jboss.gravia.provision.Provisioner;
-import org.jboss.gravia.repository.DefaultMavenDelegateRepository;
-import org.jboss.gravia.repository.DefaultRepositoryStorage;
+import org.jboss.gravia.repository.DefaultRepository;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryBuilder;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.resolver.DefaultResolver;
 import org.jboss.gravia.resolver.Resolver;
@@ -70,10 +68,8 @@ public abstract class AbstractProvisionerTest {
         Resolver resolver = new DefaultResolver();
         PropertiesProvider propertyProvider = Mockito.mock(PropertiesProvider.class);
         Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
-        RepositoryBuilder builder = new RepositoryBuilder(propertyProvider);
-        builder.setRepositoryDelegate(new DefaultMavenDelegateRepository(propertyProvider));
-        builder.setRepositoryStorage(new DefaultRepositoryStorage(propertyProvider));
-        provisioner = new DefaultProvisioner(resolver, repository = builder.getRepository());
+        repository = new DefaultRepository(propertyProvider);
+        provisioner = new DefaultProvisioner(resolver, repository);
     }
 
     Provisioner getProvisioner() {

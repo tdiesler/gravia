@@ -29,6 +29,9 @@
 			<property name="karafHome">target/apache-karaf-${version.apache.karaf}</property>
             <property name="bootstrapCompleteService">org.osgi.service.http.HttpService</property>
             <property name="karafBeginningStartLevel">100</property>
+            <property name="jmxServiceURL">service:jmx:rmi://127.0.0.1:44444/jndi/rmi://127.0.0.1:1099/karaf-root</property>
+            <property name="jmxUsername">karaf</property>
+            <property name="jmxPassword">karaf</property>
 		</configuration>
 	</container>
 </arquillian>

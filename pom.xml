@@ -49,7 +49,7 @@
         <version.apache.tomcat>7.0.42</version.apache.tomcat>
         <version.javax.servlet30.api>1.0.2.Final</version.javax.servlet30.api>
         <version.jboss.arquillian.core>1.1.1.Final</version.jboss.arquillian.core>
-        <version.jboss.arquillian.osgi>2.1.0.CR4</version.jboss.arquillian.osgi>
+        <version.jboss.arquillian.osgi>2.1.0.CR5-SNAPSHOT</version.jboss.arquillian.osgi>
         <version.jboss.arquillian.tomcat>1.0.0.CR5</version.jboss.arquillian.tomcat>
         <version.jboss.osgi.metadata>4.0.0.CR1</version.jboss.osgi.metadata>
         <version.jboss.shrinkwrap>1.1.2</version.jboss.shrinkwrap>
@@ -65,6 +65,7 @@
 
     <!-- Modules -->
     <modules>
+        <module>arquillian</module>
         <module>provision</module>
         <module>resource</module>
         <module>resolver</module>
@@ -79,6 +80,21 @@
         <dependencies>
 
             <!-- Arquillian -->
+            <dependency>
+                <groupId>org.jboss.arquillian.container</groupId>
+                <artifactId>arquillian-container-spi</artifactId>
+                <version>${version.jboss.arquillian.core}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.container</groupId>
+                <artifactId>arquillian-container-test-spi</artifactId>
+                <version>${version.jboss.arquillian.core}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.test</groupId>
+                <artifactId>arquillian-test-spi</artifactId>
+                <version>${version.jboss.arquillian.core}</version>
+            </dependency>
             <dependency>
                 <groupId>org.jboss.arquillian.junit</groupId>
                 <artifactId>arquillian-junit-container</artifactId>
@@ -101,7 +117,7 @@
             </dependency>
             <dependency>
                 <groupId>org.jboss.arquillian.container</groupId>
-                <artifactId>arquillian-container-karaf-embedded</artifactId>
+                <artifactId>arquillian-container-karaf-managed</artifactId>
                 <version>${version.jboss.arquillian.osgi}</version>
             </dependency>
 			<dependency>

@@ -21,6 +21,8 @@
  */
 package org.jboss.gravia.resource;
 
+import java.io.Serializable;
+
 import org.jboss.gravia.utils.NotNullException;
 
 
@@ -32,7 +34,9 @@ import org.jboss.gravia.utils.NotNullException;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2013
  */
-public final class ResourceIdentity {
+public final class ResourceIdentity implements Serializable {
+
+    private static final long serialVersionUID = 1298038841291027896L;
 
     private final String symbolicName;
     private final Version version;

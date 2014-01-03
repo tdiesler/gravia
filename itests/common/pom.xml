@@ -40,7 +40,12 @@
     <dependencies>
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-provision</artifactId>
+	        <artifactId>gravia-arquillian-container</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-provision</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -34,10 +34,14 @@ import org.jboss.gravia.runtime.spi.PropertiesProvider;
 public class DefaultRepository extends AbstractRepository {
 
     public DefaultRepository(PropertiesProvider propertyProvider) {
-        super(propertyProvider, null, null);
+        super(propertyProvider);
+        setRepositoryStorage(new DefaultRepositoryStorage(propertyProvider, this));
+        setFallbackRepository(new DefaultMavenDelegateRepository(propertyProvider));
     }
 
-    public DefaultRepository(PropertiesProvider propertyProvider, RepositoryStorage storage, Repository delegate) {
-        super(propertyProvider, storage, delegate);
+    public DefaultRepository(PropertiesProvider propertyProvider, RepositoryStorage storage, Repository fallback) {
+        super(propertyProvider);
+        setRepositoryStorage(storage);
+        setFallbackRepository(fallback);
     }
 }

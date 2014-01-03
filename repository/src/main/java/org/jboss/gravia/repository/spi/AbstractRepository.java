@@ -56,13 +56,7 @@ public abstract class AbstractRepository implements Repository, RepositoryMBean 
     private Repository fallback;
 
     public AbstractRepository(PropertiesProvider propertyProvider) {
-        this(propertyProvider, null, null);
-    }
-
-    public AbstractRepository(PropertiesProvider propertyProvider, RepositoryStorage storage, Repository delegate) {
         this.propertiesProvider = propertyProvider;
-        this.storage = storage;
-        this.fallback = delegate;
     }
 
     @Override
@@ -82,9 +76,6 @@ public abstract class AbstractRepository implements Repository, RepositoryMBean 
         NotNullException.assertValue(storage, "storage");
         if (this.storage != null)
             throw new IllegalStateException("RepositoryStorage already set");
-        if (storage instanceof AbstractRepositoryStorage) {
-            ((AbstractRepositoryStorage) storage).setRepository(this);
-        }
         this.storage = storage;
     }
 

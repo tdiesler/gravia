@@ -29,15 +29,13 @@
         <version>1.1.0.Alpha9-SNAPSHOT</version>
     </parent>
 
-    <name>Gravia :: Container</name>
+    <name>Gravia :: Arquillian</name>
     
-    <artifactId>gravia-container</artifactId>
+    <artifactId>gravia-arquillian</artifactId>
 	<packaging>pom</packaging>
 	
 	<modules>
-        <module>karaf</module>
-        <module>tomcat</module>
-		<module>wildfly</module>
+		<module>container</module>
 	</modules>
 	
 </project>

@@ -161,7 +161,7 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
         verifyResource(resource);
         verifyProviders(storage);
 
-        RepositoryStorage other = new DefaultRepositoryStorage(propertyProvider);
+        RepositoryStorage other = new DefaultRepositoryStorage(propertyProvider, repository);
         verifyProviders(other);
     }
 

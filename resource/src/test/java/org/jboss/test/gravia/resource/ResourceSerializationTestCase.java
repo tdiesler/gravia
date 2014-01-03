@@ -22,6 +22,11 @@
 package org.jboss.test.gravia.resource;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
@@ -33,28 +38,32 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Unit tests for the {@link DefaultResourceBuilder} class
+ * Unit tests for {@link Resource} serialization
  *
  * @author Thomas.Diesler@jboss.com
  */
-public class ResourceBuilderTestCase  {
+public class ResourceSerializationTestCase  {
 
     @Test
-    public void testAttributeMutability() throws Exception {
+    public void testResourceSerialization() throws Exception {
         ResourceBuilder builder = new DefaultResourceBuilder();
         Capability cap = builder.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, "test1");
         cap.getAttributes().put("foo", "bar");
-        Resource res = builder.getResource();
-        ResourceIdentity resid = res.getIdentity();
+        Resource resout = builder.getResource();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();;
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(resout);
+        oos.close();
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ObjectInputStream ois = new ObjectInputStream(bais);
+        Resource resin = (Resource) ois.readObject();
+
+        ResourceIdentity resid = resin.getIdentity();
         Assert.assertEquals("test1", resid.getSymbolicName());
         Assert.assertEquals(Version.emptyVersion, resid.getVersion());
-        Capability icap = res.getIdentityCapability();
+        Capability icap = resin.getIdentityCapability();
         Assert.assertEquals("bar", icap.getAttribute("foo"));
-        try {
-            icap.getAttributes().remove("foo");
-            Assert.fail("UnsupportedOperationException expected");
-        } catch (UnsupportedOperationException ex) {
-            // expected
-        }
     }
 }

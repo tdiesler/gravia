@@ -23,6 +23,7 @@ package org.jboss.gravia.runtime.embedded.internal;
 
 import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Iterator;
@@ -155,7 +156,7 @@ public class EmbeddedRuntime extends AbstractRuntime {
 
         if (mbeanServer == null) {
             LOGGER.debug("No MBeanServer, create one ...");
-            mbeanServer = MBeanServerFactory.createMBeanServer();
+            mbeanServer = ManagementFactory.getPlatformMBeanServer();
         }
 
         return mbeanServer;

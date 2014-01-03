@@ -34,13 +34,10 @@ import java.util.jar.Manifest;
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.repository.ContentCapability;
 import org.jboss.gravia.repository.ContentNamespace;
-import org.jboss.gravia.repository.DefaultMavenDelegateRepository;
 import org.jboss.gravia.repository.DefaultRepository;
-import org.jboss.gravia.repository.DefaultRepositoryStorage;
 import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.MavenIdentityRequirementBuilder;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryBuilder;
 import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.resource.Capability;
@@ -73,10 +70,7 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
         deleteRecursive(storageDir);
         PropertiesProvider propertyProvider = Mockito.mock(PropertiesProvider.class);
         Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
-        RepositoryBuilder builder = new RepositoryBuilder(propertyProvider);
-        builder.setRepositoryDelegate(new DefaultMavenDelegateRepository(propertyProvider));
-        builder.setRepositoryStorage(new DefaultRepositoryStorage(propertyProvider));
-        repository = builder.getRepository();
+        repository = new DefaultRepository(propertyProvider);
     }
 
     @Test

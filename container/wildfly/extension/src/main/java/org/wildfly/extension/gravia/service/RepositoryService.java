@@ -25,28 +25,18 @@ package org.wildfly.extension.gravia.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
 
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.server.ServerEnvironment;
 import org.jboss.as.server.ServerEnvironmentService;
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.repository.DefaultMavenDelegateRepository;
-import org.jboss.gravia.repository.DefaultRepositoryStorage;
-import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
+import org.jboss.gravia.repository.DefaultRepository;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryBuilder;
-import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryRuntimeRegistration;
 import org.jboss.gravia.repository.RepositoryRuntimeRegistration.Registration;
-import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
-import org.jboss.modules.Module;
-import org.jboss.modules.ModuleClassLoader;
-import org.jboss.modules.Resource;
 import org.jboss.msc.service.AbstractService;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
@@ -98,31 +88,7 @@ public class RepositoryService extends AbstractService<Repository> {
                 return value != null ? value : defaultValue;
             }
         };
-        RepositoryBuilder builder = new RepositoryBuilder(propertyProvider);
-        builder.setRepositoryDelegate(new DefaultMavenDelegateRepository(propertyProvider));
-        builder.setRepositoryStorage(new DefaultRepositoryStorage(propertyProvider));
-        repository = builder.getRepository();
-
-        // Install gravia features to the repository
-        ModuleClassLoader classLoader = Module.getCallerModule().getClassLoader();
-        Iterator<Resource> itres = classLoader.iterateResources("META-INF/repository-content", false);
-        while(itres.hasNext()) {
-            Resource res = itres.next();
-            try {
-                InputStream input = res.openStream();
-                RepositoryReader reader = new DefaultRepositoryXMLReader(input);
-                org.jboss.gravia.resource.Resource auxres = reader.nextResource();
-                while (auxres != null) {
-                    RepositoryStorage storage = repository.adapt(RepositoryStorage.class);
-                    if (storage.getResource(auxres.getIdentity()) == null) {
-                        storage.addResource(auxres);
-                    }
-                    auxres = reader.nextResource();
-                }
-            } catch (IOException e) {
-                throw new IllegalStateException("Cannot install feature to repository: " + res.getName());
-            }
-        }
+        repository = new DefaultRepository(propertyProvider);
 
         // Register the repository as a service
         Runtime runtime = injectedRuntime.getValue();

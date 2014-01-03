@@ -27,6 +27,8 @@ import java.util.Collection;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.gravia.Constants;
+import org.jboss.gravia.arquillian.container.ContainerSetup;
+import org.jboss.gravia.arquillian.container.ContainerSetupTask;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityRequirementBuilder;
@@ -44,6 +46,7 @@ import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -54,7 +57,15 @@ import org.junit.runner.RunWith;
  * @since 19-Dec-2013
  */
 @RunWith(Arquillian.class)
+@ContainerSetup(RepositoryServiceTest.Setup.class)
+@Ignore
 public class RepositoryServiceTest {
+
+    public static class Setup extends ContainerSetupTask {
+        protected String[] getInitialFeatureNames() {
+            return new String[] { "camel.core" };
+        }
+    }
 
     private Repository repository;
 
@@ -95,7 +106,7 @@ public class RepositoryServiceTest {
 
     @Test
     public void testRepositoryContent() throws Exception {
-        Requirement freq = new IdentityRequirementBuilder("camel.core.feature", (String)null).getRequirement();
+        Requirement freq = new IdentityRequirementBuilder("camel.core.feature", (String) null).getRequirement();
         Collection<Capability> providers = repository.findProviders(freq);
         Assert.assertEquals("One provider", 1, providers.size());
     }

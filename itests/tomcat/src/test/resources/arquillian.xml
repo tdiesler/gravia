@@ -30,6 +30,7 @@
 			<property name="catalinaHome">${tomcat.home}</property>
 			<property name="user">tomcat</property>
 			<property name="pass">tomcat</property>
-		</configuration>
+            <property name="jmxServiceURL">service:jmx:rmi:///jndi/rmi://localhost:8089/jmxrmi</property>
+		</configuration>                  
 	</container>
 </arquillian>

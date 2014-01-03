@@ -44,7 +44,7 @@ import org.jboss.gravia.runtime.spi.PropertiesProvider;
 public class MemoryRepositoryStorage extends DefaultResourceStore implements RepositoryStorage {
 
     private final AtomicLong increment = new AtomicLong();
-    private Repository repository;
+    private final Repository repository;
 
     public MemoryRepositoryStorage(PropertiesProvider propertyProvider, Repository repository) {
         super(MemoryRepositoryStorage.class.getSimpleName(), true);
@@ -53,10 +53,6 @@ public class MemoryRepositoryStorage extends DefaultResourceStore implements Rep
 
     public Repository getRepository() {
         return repository;
-    }
-
-    void setRepository(Repository repository) {
-        this.repository = repository;
     }
 
     @Override

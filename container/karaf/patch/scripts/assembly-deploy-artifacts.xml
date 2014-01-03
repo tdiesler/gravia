@@ -21,7 +21,6 @@
                 <include>*:org.apache.felix.http.bundle:jar</include>
                 <include>*:org.apache.felix.metatype:jar</include>
                 <include>*:org.apache.felix.scr:jar</include>
-                <include>*:gravia-container-common:jar</include>
                 <include>*:gravia-provision:jar</include>
                 <include>*:gravia-repository:jar</include>
                 <include>*:gravia-resolver:jar</include>

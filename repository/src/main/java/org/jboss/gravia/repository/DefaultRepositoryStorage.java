@@ -52,10 +52,6 @@ public class DefaultRepositoryStorage extends AbstractRepositoryStorage {
     private final File storageDir;
     private final File repoFile;
 
-    public DefaultRepositoryStorage(PropertiesProvider propertyProvider) {
-        this(propertyProvider, null);
-    }
-
     public DefaultRepositoryStorage(PropertiesProvider propertyProvider, Repository repository) {
         super(propertyProvider, repository);
 

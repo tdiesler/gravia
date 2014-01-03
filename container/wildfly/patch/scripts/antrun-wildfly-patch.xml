@@ -68,7 +68,6 @@
     </copy>
     <copy todir="${wildfly.patch.dir}/modules/system/layers/base/org/wildfly/extension/gravia/main" overwrite="true">
         <fileset dir="${deploy.artifacts.lib}">
-			<include name="gravia-container-common-*.jar" />
 			<include name="gravia-container-wildfly-extension-*.jar" />
        	</fileset>
     </copy>

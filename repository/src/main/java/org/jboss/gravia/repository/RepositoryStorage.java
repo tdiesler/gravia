@@ -32,6 +32,11 @@ import org.jboss.gravia.resource.ResourceStore;
 public interface RepositoryStorage extends ResourceStore {
 
     /**
+     * Get the associated repository
+     */
+    Repository getRepository();
+
+    /**
      * Get the repository reader for this storage
      */
     RepositoryReader getRepositoryReader();
