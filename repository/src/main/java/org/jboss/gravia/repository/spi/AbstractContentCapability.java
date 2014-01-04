@@ -38,6 +38,8 @@ import org.jboss.gravia.resource.spi.AbstractResource;
  */
 public class AbstractContentCapability extends AbstractCapability implements ContentCapability {
 
+    private static final long serialVersionUID = -1477324375627957571L;
+
     private String mimeType;
     private String digest;
     private String contentURL;

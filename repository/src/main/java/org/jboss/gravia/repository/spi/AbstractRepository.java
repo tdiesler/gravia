@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryMBean;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.resource.Capability;
@@ -47,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author thomas.diesler@jboss.com
  * @since 11-May-2012
  */
-public abstract class AbstractRepository implements Repository, RepositoryMBean {
+public abstract class AbstractRepository implements Repository {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(Repository.class.getPackage().getName());
 

@@ -38,6 +38,8 @@ import org.jboss.gravia.resource.DefaultResource;
  */
 public abstract class AbstractRepositoryResource extends DefaultResource implements RepositoryContent {
 
+    private static final long serialVersionUID = 3826729560161290645L;
+
     @Override
     public InputStream getContent() {
         for (Capability cap : getCapabilities(ContentNamespace.CONTENT_NAMESPACE)) {

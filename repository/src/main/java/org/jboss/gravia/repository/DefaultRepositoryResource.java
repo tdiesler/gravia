@@ -31,4 +31,6 @@ import org.jboss.gravia.repository.spi.AbstractRepositoryResource;
  */
 public class DefaultRepositoryResource extends AbstractRepositoryResource {
 
+    private static final long serialVersionUID = -5979767065160624130L;
+
 }

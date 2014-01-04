@@ -31,6 +31,10 @@ import java.util.List;
  */
 public interface Resource extends Adaptable, Attachable {
 
+    String KEY_CAPABILITY = "capability";
+    String KEY_REQUIREMENT = "requirement";
+    String KEY_IDENTITY = "identity";
+
     ResourceIdentity getIdentity();
 
     Capability getIdentityCapability();

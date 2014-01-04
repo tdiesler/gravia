@@ -32,10 +32,6 @@ import org.jboss.gravia.resource.spi.AbstractRequirementBuilder;
  */
 public class DefaultRequirementBuilder extends AbstractRequirementBuilder {
 
-    public DefaultRequirementBuilder(String namespace) {
-        super(namespace);
-    }
-
     public DefaultRequirementBuilder(String namespace, String nsvalue) {
         super(namespace, nsvalue);
     }

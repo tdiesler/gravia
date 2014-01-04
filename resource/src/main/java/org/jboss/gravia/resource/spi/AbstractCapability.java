@@ -25,7 +25,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Resource;
@@ -117,7 +116,7 @@ public class AbstractCapability implements Capability, Serializable {
             attval = new Version(attval.toString());
             cap.getAttributes().put(attname, attval);
         }
-        return attval != null ? (Version)attval : Version.emptyVersion;
+        return attval != null ? (Version) attval : Version.emptyVersion;
     }
 
     protected void validate() {

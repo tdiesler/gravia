@@ -32,6 +32,7 @@ import org.jboss.gravia.resource.spi.AbstractResource;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
+@SuppressWarnings("serial")
 public class DefaultCapability extends AbstractCapability {
 
     public DefaultCapability(AbstractResource resource, String namespace, Map<String, Object> atts, Map<String, String> dirs) {

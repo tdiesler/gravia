@@ -28,6 +28,7 @@ import java.net.URL;
 import java.util.Map;
 
 import javax.management.MBeanServerConnection;
+import javax.management.openmbean.CompositeData;
 
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.RepositoryMBean;
@@ -70,8 +71,9 @@ public abstract class ContainerSetupTask {
                 RepositoryReader reader = new DefaultRepositoryXMLReader(input);
                 Resource auxres = reader.nextResource();
                 while (auxres != null) {
-                    if (repository.getResource(auxres.getIdentity()) == null) {
-                        repository.addResource(auxres);
+                    String identity = auxres.getIdentity().toString();
+                    if (repository.getResource(identity) == null) {
+                        repository.addResource(auxres.adapt(CompositeData.class));
                     }
                     auxres = reader.nextResource();
                 }
@@ -90,7 +92,8 @@ public abstract class ContainerSetupTask {
                 RepositoryReader reader = new DefaultRepositoryXMLReader(input);
                 Resource auxres = reader.nextResource();
                 while (auxres != null) {
-                    repository.removeResource(auxres.getIdentity());
+                    String identity = auxres.getIdentity().toString();
+                    repository.removeResource(identity);
                     auxres = reader.nextResource();
                 }
             } catch (IOException e) {

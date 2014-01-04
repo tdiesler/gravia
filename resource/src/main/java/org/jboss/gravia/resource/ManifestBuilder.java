@@ -22,6 +22,8 @@
 
 package org.jboss.gravia.resource;
 
+import static org.jboss.gravia.resource.spi.AbstractResource.LOGGER;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,8 +40,6 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.jboss.gravia.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A simple manifest builder.
@@ -48,8 +48,6 @@ import org.slf4j.LoggerFactory;
  * @since 08-Mar-2010
  */
 public final class ManifestBuilder {
-
-    static final Logger LOGGER = LoggerFactory.getLogger(Resource.class.getPackage().getName());
 
     public enum Type {
         String,

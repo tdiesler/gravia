@@ -21,6 +21,8 @@
  */
 package org.jboss.gravia.resource.spi;
 
+import static org.jboss.gravia.resource.spi.AbstractResource.LOGGER;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,8 +39,6 @@ import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.ResourceStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An abstract {@link ResourceStore}
@@ -47,8 +47,6 @@ import org.slf4j.LoggerFactory;
  * @since 02-Jul-2010
  */
 public abstract class AbstractResourceStore implements ResourceStore {
-
-    static final Logger LOGGER = LoggerFactory.getLogger(Resource.class.getPackage().getName());
 
     private final String storeName;
     private final boolean logCapsReqs;

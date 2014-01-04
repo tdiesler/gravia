@@ -40,10 +40,6 @@ public abstract class AbstractRequirementBuilder implements RequirementBuilder {
     private final ResourceBuilder resbuilder;
     private final Requirement requirement;
 
-    public AbstractRequirementBuilder(String namespace) {
-        this(namespace, null);
-    }
-
     public AbstractRequirementBuilder(String namespace, String nsvalue) {
         resbuilder = createResourceBuilder();
         resbuilder.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, "anonymous");

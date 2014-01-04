@@ -27,6 +27,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.OpenDataException;
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.Capability;
@@ -34,8 +36,11 @@ import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.resource.ResourceType;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.Wiring;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An abstract implementation of a {@link Resource}
@@ -45,6 +50,8 @@ import org.jboss.gravia.resource.Wiring;
  */
 public abstract class AbstractResource implements Resource, Serializable {
 
+    public static final Logger LOGGER = LoggerFactory.getLogger(Resource.class.getPackage().getName());
+
     private static final long serialVersionUID = -3787048558260649200L;
 
     private final List<AbstractCapability> capabilities = new ArrayList<AbstractCapability>();
@@ -52,8 +59,10 @@ public abstract class AbstractResource implements Resource, Serializable {
     private final AtomicBoolean mutable = new AtomicBoolean(true);
     private Capability identityCapability;
     private ResourceIdentity identity;
-    private Attachable attachments;
-    private Wiring wiring;
+
+    private transient CompositeData compositeData;
+    private transient Attachable attachments;
+    private transient Wiring wiring;
 
     void addCapability(AbstractCapability cap) {
         synchronized (capabilities) {
@@ -75,8 +84,24 @@ public abstract class AbstractResource implements Resource, Serializable {
         T result = null;
         if (type.isAssignableFrom(getClass())) {
             result = (T) this;
+        } else if (type.isAssignableFrom(CompositeData.class)) {
+            result = (T) getCompositeData();
         }
         return result;
+    }
+
+    private CompositeData getCompositeData() {
+        synchronized (this) {
+            if (compositeData == null) {
+                try {
+                    ResourceType resourceType = new ResourceType(this);
+                    compositeData = resourceType.getCompositeData();
+                } catch (OpenDataException ex) {
+                    throw new IllegalStateException("Cannot construct composite data for: " + this, ex);
+                }
+            }
+        }
+        return compositeData;
     }
 
     @Override

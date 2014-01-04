@@ -21,13 +21,12 @@
  */
 package org.jboss.gravia.repository;
 
-import java.util.Collection;
 import java.util.Map;
 
 import javax.management.ObjectName;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
 
-import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.utils.ObjectNameFactory;
@@ -50,40 +49,24 @@ public interface RepositoryMBean {
     /**
      * Find the capabilities that match the specified requirement.
      *
-     * @param requirement The requirements for which matching capabilities
-     *        should be returned. Must not be {@code null}.
      * @return A collection of matching capabilities for the specified requirements.
      *         If there are no matching capabilities an empty collection is returned.
      *         The returned collection is the property of the caller and can be modified by the caller.
      */
-    Collection<Capability> findProviders(Requirement requirement);
+    TabularData findProviders(String namespace, String nsvalue, Map<String, Object> attributes, Map<String, String> directives);
 
     /**
-     * Find the capabilities that match the specified requirements.
-     *
-     * @param requirements The requirements for which matching capabilities
-     *        should be returned. Must not be {@code null}.
-     * @return A map of matching capabilities for the specified requirements.
-     *         Each specified requirement must appear as a key in the map. If
-     *         there are no matching capabilities for a specified requirement,
-     *         then the value in the map for the specified requirement must be
-     *         an empty collection. The returned map is the property of the
-     *         caller and can be modified by the caller.
+     * Add a {@link Resource} to the {@link Repository}
      */
-    Map<Requirement, Collection<Capability>> findProviders(Collection<Requirement> requirements);
+    void addResource(CompositeData resData);
 
     /**
-     * Add a {@link Resource} to the associated {@link RepositoryStorage}
+     * Remove a {@link Resource} from the {@link Repository}
      */
-    Resource addResource(Resource resource);
-
-    /**
-     * Remove a {@link Resource} grom the associated {@link RepositoryStorage}
-     */
-    Resource removeResource(ResourceIdentity identity);
+    CompositeData removeResource(String identity);
 
     /**
      * Get a a {@link Resource} by {@link ResourceIdentity}
      */
-    Resource getResource(ResourceIdentity identity);
+    CompositeData getResource(String identity);
 }

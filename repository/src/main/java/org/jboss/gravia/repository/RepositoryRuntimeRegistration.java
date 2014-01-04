@@ -2,9 +2,16 @@ package org.jboss.gravia.repository;
 
 import static org.jboss.gravia.repository.spi.AbstractRepository.LOGGER;
 
+import java.util.Map;
+
 import javax.management.MBeanServer;
 import javax.management.StandardMBean;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
 
+import org.jboss.gravia.resource.ManagementResourceBuilder;
+import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceReference;
@@ -57,7 +64,8 @@ public class RepositoryRuntimeRegistration {
         ServiceReference<MBeanServer> sref = syscontext.getServiceReference(MBeanServer.class);
         final MBeanServer mbeanServer = syscontext.getService(sref);
         try {
-            StandardMBean mbean = new StandardMBean((RepositoryMBean) repository, RepositoryMBean.class);
+            RepositoryDelegate delegate = new RepositoryDelegate(repository);
+            StandardMBean mbean = new StandardMBean(delegate, RepositoryMBean.class);
             mbeanServer.registerMBean(mbean, RepositoryMBean.OBJECT_NAME);
         } catch (Exception ex) {
             throw new IllegalStateException("Cannot register repository MBean", ex);
@@ -78,5 +86,44 @@ public class RepositoryRuntimeRegistration {
 
     public interface Registration {
         void unregister();
+    }
+
+    static class RepositoryDelegate implements RepositoryMBean {
+
+        private final Repository repository;
+
+        RepositoryDelegate(Repository repository) {
+            this.repository = repository;
+        }
+
+        @Override
+        public String getName() {
+            return repository.getName();
+        }
+
+        @Override
+        public TabularData findProviders(String namespace, String nsvalue, Map<String, Object> attributes, Map<String, String> directives) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void addResource(CompositeData resData) {
+            Resource resource = new ManagementResourceBuilder(resData).getResource();
+            repository.addResource(resource);
+        }
+
+        @Override
+        public CompositeData removeResource(String identity) {
+            ResourceIdentity resid = ResourceIdentity.fromString(identity);
+            Resource resource = repository.removeResource(resid);
+            return resource != null ? resource.adapt(CompositeData.class) : null;
+        }
+
+        @Override
+        public CompositeData getResource(String identity) {
+            ResourceIdentity resid = ResourceIdentity.fromString(identity);
+            Resource resource = repository.getResource(resid);
+            return resource != null ? resource.adapt(CompositeData.class) : null;
+        }
     }
 }
