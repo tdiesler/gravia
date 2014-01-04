@@ -46,7 +46,6 @@ import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -58,7 +57,6 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Arquillian.class)
 @ContainerSetup(RepositoryServiceTest.Setup.class)
-@Ignore
 public class RepositoryServiceTest {
 
     public static class Setup extends ContainerSetupTask {

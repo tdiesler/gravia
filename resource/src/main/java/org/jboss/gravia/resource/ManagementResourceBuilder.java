@@ -53,15 +53,17 @@ public final class ManagementResourceBuilder extends DefaultResourceBuilder {
             Map<String, String> dirs = getDirectives(dirsData);
             addCapability(namespace, atts, dirs);
         }
-        CompositeData reqsData = (CompositeData) resData.get(ResourceType.ITEM_REQUIREMENTS);
-        for(Object obj : reqsData.values()) {
-            CompositeData reqData = (CompositeData) obj;
-            String namespace = (String) reqData.get(CapabilityType.ITEM_NAMESPACE);
-            TabularData attsData = (TabularData) reqData.get(CapabilityType.ITEM_ATTRIBUTES);
-            Map<String, Object> atts = getAttributes(attsData);
-            TabularData dirsData = (TabularData) reqData.get(CapabilityType.ITEM_DIRECTIVES);
-            Map<String, String> dirs = getDirectives(dirsData);
-            addRequirement(namespace, atts, dirs);
+        if (resData.containsKey(ResourceType.ITEM_REQUIREMENTS)) {
+            CompositeData reqsData = (CompositeData) resData.get(ResourceType.ITEM_REQUIREMENTS);
+            for(Object obj : reqsData.values()) {
+                CompositeData reqData = (CompositeData) obj;
+                String namespace = (String) reqData.get(CapabilityType.ITEM_NAMESPACE);
+                TabularData attsData = (TabularData) reqData.get(CapabilityType.ITEM_ATTRIBUTES);
+                Map<String, Object> atts = getAttributes(attsData);
+                TabularData dirsData = (TabularData) reqData.get(CapabilityType.ITEM_DIRECTIVES);
+                Map<String, String> dirs = getDirectives(dirsData);
+                addRequirement(namespace, atts, dirs);
+            }
         }
     }
 

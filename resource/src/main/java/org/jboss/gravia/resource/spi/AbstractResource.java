@@ -60,7 +60,6 @@ public abstract class AbstractResource implements Resource, Serializable {
     private Capability identityCapability;
     private ResourceIdentity identity;
 
-    private transient CompositeData compositeData;
     private transient Attachable attachments;
     private transient Wiring wiring;
 
@@ -91,15 +90,12 @@ public abstract class AbstractResource implements Resource, Serializable {
     }
 
     private CompositeData getCompositeData() {
-        synchronized (this) {
-            if (compositeData == null) {
-                try {
-                    ResourceType resourceType = new ResourceType(this);
-                    compositeData = resourceType.getCompositeData();
-                } catch (OpenDataException ex) {
-                    throw new IllegalStateException("Cannot construct composite data for: " + this, ex);
-                }
-            }
+        CompositeData compositeData;
+        try {
+            ResourceType resourceType = new ResourceType(this);
+            compositeData = resourceType.getCompositeData(this);
+        } catch (OpenDataException ex) {
+            throw new IllegalStateException("Cannot construct composite data for: " + this, ex);
         }
         return compositeData;
     }

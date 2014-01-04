@@ -22,6 +22,7 @@
 package org.jboss.gravia.resource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,64 +43,94 @@ import javax.management.openmbean.TabularType;
  * @author thomas.diesler@jboss.com
  * @since 03-Jan-2014
  */
-@SuppressWarnings("serial")
-public final class ResourceType extends CompositeType {
+public final class ResourceType {
 
     public static final String TYPE_NAME = "ResourceType";
     public static final String ITEM_IDENTITY = "identity";
     public static final String ITEM_CAPABILITIES = "capabilities";
     public static final String ITEM_REQUIREMENTS = "requirements";
 
-    private final Resource resource;
+    private final CompositeType compositeType;
 
-    public ResourceType(Resource resource) throws OpenDataException {
-        super(TYPE_NAME, TYPE_NAME, getItemNames(), getItemNames(), getItemTypes(resource));
-        this.resource = resource;
+    public ResourceType(Resource res) throws OpenDataException {
+        String[] itemNames = getItemNames(res);
+        compositeType = new CompositeType(TYPE_NAME, TYPE_NAME, itemNames, itemNames, getItemTypes(res));
     }
 
-    public CompositeData getCompositeData() throws OpenDataException {
-        CapabilitiesType capsType = (CapabilitiesType) getType(ITEM_CAPABILITIES);
-        RequirementsType reqsType = (RequirementsType) getType(ITEM_REQUIREMENTS);
-        String identity = resource.getIdentity().toString();
-        CompositeData capsData = capsType.getCompositeData();
-        CompositeData reqsData = reqsType.getCompositeData();
-        Object[] itemValues = new Object[] { identity, capsData, reqsData };
-        return new CompositeDataSupport(this, getItemNames(), itemValues);
+    public CompositeType getCompositeType() {
+        return compositeType;
     }
 
-    private static String[] getItemNames() {
-        return new String[] { ITEM_IDENTITY, ITEM_CAPABILITIES, ITEM_REQUIREMENTS };
-    }
-
-    private static OpenType<?>[] getItemTypes(Resource res) throws OpenDataException {
+    public CompositeData getCompositeData(Resource res) throws OpenDataException {
+        String identity = res.getIdentity().toString();
         List<Capability> caps = res.getCapabilities(null);
         List<Requirement> reqs = res.getRequirements(null);
-        return new OpenType<?>[] { SimpleType.STRING, new CapabilitiesType(caps), new RequirementsType(reqs) };
+        List<Object> items = new ArrayList<Object>();
+        items.add(identity);
+        items.add(new CapabilitiesType(caps).getCompositeData(caps));
+        if (reqs.size() > 0) {
+            items.add(new RequirementsType(reqs).getCompositeData(reqs));
+        }
+        Object[] itemValues = items.toArray(new Object[items.size()]);
+        return new CompositeDataSupport(compositeType, getItemNames(res), itemValues);
     }
 
-    public static final class CapabilitiesType extends CompositeType {
+    public static String[] getItemNames(Resource res) {
+        List<String> itemNames = new ArrayList<String>();
+        itemNames.add(ITEM_IDENTITY);
+        itemNames.add(ITEM_CAPABILITIES);
+        List<Requirement> reqs = res.getRequirements(null);
+        if (reqs.size() > 0) {
+            itemNames.add(ITEM_REQUIREMENTS);
+        }
+        return itemNames.toArray(new String[itemNames.size()]);
+    }
+
+    public static OpenType<?>[] getItemTypes(Resource res) throws OpenDataException {
+        List<OpenType<?>> itemTypes = new ArrayList<OpenType<?>>();
+        itemTypes.add(SimpleType.STRING);
+
+        // Capabilities
+        List<Capability> caps = res.getCapabilities(null);
+        CompositeType capsType = new CapabilitiesType(caps).getCompositeType();
+        itemTypes.add(capsType);
+
+        // Requirements are optional
+        List<Requirement> reqs = res.getRequirements(null);
+        if (reqs.size() > 0) {
+            CompositeType reqsType = new RequirementsType(reqs).getCompositeType();
+            itemTypes.add(reqsType);
+        }
+        return itemTypes.toArray(new OpenType<?>[itemTypes.size()]);
+    }
+
+    public static final class CapabilitiesType {
 
         public static final String TYPE_NAME = "CapabilitiesType";
         public static final String ITEM_NAME = "capabilities";
 
-        private final List<Capability> capabilities;
+        private final CompositeType compositeType;
 
         public CapabilitiesType(List<Capability> caps) throws OpenDataException {
-            super(TYPE_NAME, TYPE_NAME, getItemNames(caps), getItemNames(caps), getItemTypes(caps));
-            this.capabilities = caps;
+            String[] itemNames = getItemNames(caps);
+            compositeType = new CompositeType(TYPE_NAME, TYPE_NAME, itemNames, itemNames, getItemTypes(caps));
         }
 
-        public CompositeData getCompositeData() throws OpenDataException {
-            String[] itemNames = getItemNames(capabilities);
-            Object[] itemValues = new Object[capabilities.size()];
-            for(int index = 0; index < capabilities.size(); index++) {
-                CapabilityType captype = (CapabilityType) getType(itemNames[index]);
-                itemValues[index] = captype.getCompositeData();
+        public CompositeType getCompositeType() {
+            return compositeType;
+        }
+
+        public CompositeData getCompositeData(List<Capability> caps) throws OpenDataException {
+            String[] itemNames = getItemNames(caps);
+            Object[] itemValues = new Object[caps.size()];
+            for(int index = 0; index < caps.size(); index++) {
+                Capability cap = caps.get(index);
+                itemValues[index] = new CapabilityType().getCompositeData(cap);
             }
-            return new CompositeDataSupport(this, itemNames, itemValues);
+            return new CompositeDataSupport(compositeType, itemNames, itemValues);
         }
 
-        private static String[] getItemNames(List<Capability> caps) {
+        public static String[] getItemNames(List<Capability> caps) {
             List<String> itemNames = new ArrayList<String>();
             for(int index = 0; index < caps.size(); index++) {
                 itemNames.add("cap#" + index);
@@ -107,71 +138,77 @@ public final class ResourceType extends CompositeType {
             return itemNames.toArray(new String[itemNames.size()]);
         }
 
-        private static OpenType<?>[] getItemTypes(List<Capability> caps) throws OpenDataException {
-            List<OpenType<?>> itemTypes = new ArrayList<OpenType<?>>();
-            for (Capability cap : caps) {
-                itemTypes.add(new CapabilityType(cap));
-            }
-            return itemTypes.toArray(new OpenType<?>[itemTypes.size()]);
+        public static OpenType<?>[] getItemTypes(List<Capability> caps) throws OpenDataException {
+            OpenType<?>[] itemTypes = new OpenType<?>[caps.size()];
+            Arrays.fill(itemTypes, new CapabilityType().getCompositeType());
+            return itemTypes;
         }
     }
 
-    public static final class CapabilityType extends CompositeType {
+    public static final class CapabilityType {
 
         public static final String TYPE_NAME = "CapabilityType";
         public static final String ITEM_NAMESPACE = "namespace";
         public static final String ITEM_ATTRIBUTES = "attributes";
         public static final String ITEM_DIRECTIVES = "directives";
 
-        private final Capability capability;
+        private final CompositeType compositeType;
 
-        public CapabilityType(Capability capability) throws OpenDataException {
-            super(TYPE_NAME, TYPE_NAME, getItemNames(), getItemNames(), getItemTypes(capability));
-            this.capability = capability;
+        public CapabilityType() throws OpenDataException {
+            String[] itemNames = getItemNames();
+            compositeType = new CompositeType(TYPE_NAME, TYPE_NAME, itemNames, itemNames, getItemTypes());
         }
 
-        public CompositeData getCompositeData() throws OpenDataException {
-            AttributesType attsType = (AttributesType) getType(ITEM_ATTRIBUTES);
-            DirectivesType dirsType = (DirectivesType) getType(ITEM_DIRECTIVES);
-            String namespace = capability.getNamespace();
-            TabularData attsData = attsType.getTabularData();
-            TabularData dirsData = dirsType.getTabularData();
+        public CompositeType getCompositeType() {
+            return compositeType;
+        }
+
+        public CompositeData getCompositeData(Capability cap) throws OpenDataException {
+            String namespace = cap.getNamespace();
+            TabularData attsData = new AttributesType().getTabularData(cap.getAttributes());
+            TabularData dirsData = new DirectivesType().getTabularData(cap.getDirectives());
             Object[] itemValues = new Object[] { namespace, attsData, dirsData };
-            return new CompositeDataSupport(this, getItemNames(), itemValues);
+            return new CompositeDataSupport(compositeType, getItemNames(), itemValues);
         }
 
-        private static String[] getItemNames() {
+        public static String[] getItemNames() {
             return new String[] { ITEM_NAMESPACE, ITEM_ATTRIBUTES, ITEM_DIRECTIVES };
         }
 
-        private static OpenType<?>[] getItemTypes(Capability cap) throws OpenDataException {
-            return new OpenType<?>[] { SimpleType.STRING, new AttributesType(cap.getAttributes()), new DirectivesType(cap.getDirectives()) };
+        public static OpenType<?>[] getItemTypes() throws OpenDataException {
+            TabularType attsType = new AttributesType().getTabularType();
+            TabularType dirsType = new DirectivesType().getTabularType();
+            return new OpenType<?>[] { SimpleType.STRING, attsType, dirsType };
         }
     }
 
-    public static final class RequirementsType extends CompositeType {
+    public static final class RequirementsType {
 
         public static final String TYPE_NAME = "RequirementsType";
         public static final String ITEM_NAME = "requirements";
 
-        private final List<Requirement> requirements;
+        private final CompositeType compositeType;
 
         public RequirementsType(List<Requirement> reqs) throws OpenDataException {
-            super(TYPE_NAME, TYPE_NAME, getItemNames(reqs), getItemNames(reqs), getItemTypes(reqs));
-            this.requirements = reqs;
+            String[] itemNames = getItemNames(reqs);
+            compositeType = new CompositeType(TYPE_NAME, TYPE_NAME, itemNames, itemNames, getItemTypes(reqs));
         }
 
-        public CompositeData getCompositeData() throws OpenDataException {
+        public CompositeType getCompositeType() {
+            return compositeType;
+        }
+
+        public CompositeData getCompositeData(List<Requirement> requirements) throws OpenDataException {
             String[] itemNames = getItemNames(requirements);
             Object[] itemValues = new Object[requirements.size()];
             for(int index = 0; index < requirements.size(); index++) {
-                RequirementType reqtype = (RequirementType) getType(itemNames[index]);
-                itemValues[index] = reqtype.getCompositeData();
+                Requirement req = requirements.get(index);
+                itemValues[index] = new RequirementType().getCompositeData(req);
             }
-            return new CompositeDataSupport(this, itemNames, itemValues);
+            return new CompositeDataSupport(compositeType, itemNames, itemValues);
         }
 
-        private static String[] getItemNames(List<Requirement> reqs) {
+        public static String[] getItemNames(List<Requirement> reqs) {
             List<String> itemNames = new ArrayList<String>();
             for(int index = 0; index < reqs.size(); index++) {
                 itemNames.add("req#" + index);
@@ -179,138 +216,166 @@ public final class ResourceType extends CompositeType {
             return itemNames.toArray(new String[itemNames.size()]);
         }
 
-        private static OpenType<?>[] getItemTypes(List<Requirement> reqs) throws OpenDataException {
-            List<OpenType<?>> itemTypes = new ArrayList<OpenType<?>>();
-            for (Requirement req : reqs) {
-                itemTypes.add(new RequirementType(req));
-            }
-            return itemTypes.toArray(new OpenType<?>[itemTypes.size()]);
+        public static OpenType<?>[] getItemTypes(List<Requirement> reqs) throws OpenDataException {
+            OpenType<?>[] itemTypes = new OpenType<?>[reqs.size()];
+            Arrays.fill(itemTypes, new RequirementType().getCompositeType());
+            return itemTypes;
         }
     }
 
-    public static final class RequirementType extends CompositeType {
+    public static final class RequirementType {
 
         public static final String TYPE_NAME = "RequirementType";
         public static final String ITEM_NAMESPACE = "namespace";
         public static final String ITEM_ATTRIBUTES = "attributes";
         public static final String ITEM_DIRECTIVES = "directives";
 
-        private final Requirement requirement;
+        private final CompositeType compositeType;
 
-        public RequirementType(Requirement req) throws OpenDataException {
-            super(TYPE_NAME, TYPE_NAME, getItemNames(), getItemNames(), getItemTypes(req));
-            this.requirement = req;
+        public RequirementType() throws OpenDataException {
+            String[] itemNames = getItemNames();
+            compositeType = new CompositeType(TYPE_NAME, TYPE_NAME, itemNames, itemNames, getItemTypes());
         }
 
-        public CompositeData getCompositeData() throws OpenDataException {
-            AttributesType attsType = (AttributesType) getType(ITEM_ATTRIBUTES);
-            DirectivesType dirsType = (DirectivesType) getType(ITEM_DIRECTIVES);
-            String namespace = requirement.getNamespace();
-            TabularData attsData = attsType.getTabularData();
-            TabularData dirsData = dirsType.getTabularData();
+        public CompositeType getCompositeType() {
+            return compositeType;
+        }
+
+        public CompositeData getCompositeData(Requirement req) throws OpenDataException {
+            String namespace = req.getNamespace();
+            TabularData attsData = new AttributesType().getTabularData(req.getAttributes());
+            TabularData dirsData = new DirectivesType().getTabularData(req.getDirectives());
             Object[] itemValues = new Object[] { namespace, attsData, dirsData };
-            return new CompositeDataSupport(this, getItemNames(), itemValues);
+            return new CompositeDataSupport(compositeType, getItemNames(), itemValues);
         }
 
-        private static String[] getItemNames() {
+        public static String[] getItemNames() {
             return new String[] { ITEM_NAMESPACE, ITEM_ATTRIBUTES, ITEM_DIRECTIVES };
         }
 
-        private static OpenType<?>[] getItemTypes(Requirement req) throws OpenDataException {
-            return new OpenType<?>[] { SimpleType.STRING, new AttributesType(req.getAttributes()), new DirectivesType(req.getDirectives()) };
+        public static OpenType<?>[] getItemTypes() throws OpenDataException {
+            TabularType attsType = new AttributesType().getTabularType();
+            TabularType dirsType = new DirectivesType().getTabularType();
+            return new OpenType<?>[] { SimpleType.STRING, attsType, dirsType };
         }
     }
 
-    public static final class AttributesType extends TabularType {
+    public static final class AttributesType {
 
         public static final String TYPE_NAME = "AttributesType";
         public static final String ITEM_NAME = "attributes";
 
-        private final Map<String, Object> attributes;
+        private final TabularType tabularType;
 
-        public AttributesType(Map<String, Object> attributes) throws OpenDataException {
-            super(TYPE_NAME, TYPE_NAME, new AttributeType(), getIndexNames(attributes));
-            this.attributes = attributes;
+        public AttributesType() throws OpenDataException {
+            tabularType = new TabularType(TYPE_NAME, TYPE_NAME, getRowType(), getIndexNames());
         }
 
-        public TabularData getTabularData() throws OpenDataException {
-            TabularDataSupport tabularData = new TabularDataSupport(this);
+        public TabularType getTabularType() {
+            return tabularType;
+        }
+
+        public TabularData getTabularData(Map<String, Object> attributes) throws OpenDataException {
+            TabularDataSupport tabularData = new TabularDataSupport(tabularType);
             for (Entry<String, Object> entry : attributes.entrySet()) {
                 String[] itemNames = new String[] { AttributeType.ITEM_KEY, AttributeType.ITEM_VALUE };
                 Object[] itemValues = new Object[] { entry.getKey(), entry.getValue().toString() };
-                CompositeData data = new CompositeDataSupport(new AttributeType(), itemNames, itemValues);
+                CompositeData data = new CompositeDataSupport(new AttributeType().getCompositeType(), itemNames, itemValues);
                 tabularData.put(data);
             }
             return tabularData;
         }
 
-        private static String[] getIndexNames(Map<String, Object> attributes) {
+        public static String[] getIndexNames() {
             return new String[] { AttributeType.ITEM_KEY, AttributeType.ITEM_VALUE };
+        }
+
+        public static CompositeType getRowType() throws OpenDataException {
+            return new AttributeType().getCompositeType();
         }
     }
 
-    public static final class AttributeType extends CompositeType {
+    public static final class AttributeType {
 
         public static final String TYPE_NAME = "AttributeType";
         public static final String ITEM_KEY = "key";
         public static final String ITEM_VALUE = "value";
 
+        private final CompositeType compositeType;
+
         public AttributeType() throws OpenDataException {
-            super(TYPE_NAME, TYPE_NAME, getItemNames(), getItemNames(), getItemTypes());
+            compositeType = new CompositeType(TYPE_NAME, TYPE_NAME, getItemNames(), getItemNames(), getItemTypes());
         }
 
-        private static String[] getItemNames() {
+        public CompositeType getCompositeType() {
+            return compositeType;
+        }
+
+        public static String[] getItemNames() {
             return new String[] { ITEM_KEY, ITEM_VALUE };
         }
 
-        private static OpenType<?>[] getItemTypes() {
+        public static OpenType<?>[] getItemTypes() {
             return new OpenType<?>[] { SimpleType.STRING, SimpleType.STRING };
         }
     }
 
-    public static final class DirectivesType extends TabularType {
+    public static final class DirectivesType {
 
         public static final String TYPE_NAME = "DirectivesType";
         public static final String ITEM_NAME = "directives";
 
-        private final Map<String, String> directives;
+        private final TabularType tabularType;
 
-        public DirectivesType(Map<String, String> directives) throws OpenDataException {
-            super(TYPE_NAME, TYPE_NAME, new DirectiveType(), getIndexNames(directives));
-            this.directives = directives;
+        public DirectivesType() throws OpenDataException {
+            tabularType = new TabularType(TYPE_NAME, TYPE_NAME, getRowType(), getIndexNames());
         }
 
-        public TabularData getTabularData() throws OpenDataException {
-            TabularDataSupport tabularData = new TabularDataSupport(this);
+        public TabularType getTabularType() {
+            return tabularType;
+        }
+
+        public TabularData getTabularData(Map<String, String> directives) throws OpenDataException {
+            TabularDataSupport tabularData = new TabularDataSupport(tabularType);
             for (Entry<String, String> entry : directives.entrySet()) {
-                String[] itemNames = new String[] { DirectiveType.ITEM_KEY, DirectiveType.ITEM_VALUE };
+                String[] itemNames = getIndexNames();
                 Object[] itemValues = new Object[] { entry.getKey(), entry.getValue() };
-                CompositeData data = new CompositeDataSupport(new DirectiveType(), itemNames, itemValues);
+                CompositeData data = new CompositeDataSupport(new DirectiveType().getCompositeType(), itemNames, itemValues);
                 tabularData.put(data);
             }
             return tabularData;
         }
 
-        private static String[] getIndexNames(Map<String, String> directives) {
+        public static String[] getIndexNames() {
             return new String[] { DirectiveType.ITEM_KEY, DirectiveType.ITEM_VALUE };
+        }
+
+        public static CompositeType getRowType() throws OpenDataException {
+            return new DirectiveType().getCompositeType();
         }
     }
 
-    public static final class DirectiveType extends CompositeType {
+    public static final class DirectiveType {
 
         public static final String TYPE_NAME = "DirectiveType";
         public static final String ITEM_KEY = "key";
         public static final String ITEM_VALUE = "value";
 
+        private final CompositeType compositeType;
+
         public DirectiveType() throws OpenDataException {
-            super(TYPE_NAME, TYPE_NAME, getItemNames(), getItemNames(), getItemTypes());
+            compositeType = new CompositeType(TYPE_NAME, TYPE_NAME, getItemNames(), getItemNames(), getItemTypes());
         }
 
-        private static String[] getItemNames() {
+        public CompositeType getCompositeType() {
+            return compositeType;
+        }
+
+        public static String[] getItemNames() {
             return new String[] { ITEM_KEY, ITEM_VALUE };
         }
 
-        private static OpenType<?>[] getItemTypes() {
+        public static OpenType<?>[] getItemTypes() {
             return new OpenType<?>[] { SimpleType.STRING, SimpleType.STRING };
         }
     }
