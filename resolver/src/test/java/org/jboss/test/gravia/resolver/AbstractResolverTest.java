@@ -31,6 +31,7 @@ import org.jboss.gravia.resolver.DefaultResolver;
 import org.jboss.gravia.resolver.ResolutionException;
 import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resolver.Resolver;
+import org.jboss.gravia.resource.DefaultMatchPolicy;
 import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceStore;
@@ -62,7 +63,7 @@ public abstract class AbstractResolverTest {
     public void setUp() throws Exception {
         log.debug("Start: {}.{}", getClass().getSimpleName(), testName.getMethodName());
         resolver = new DefaultResolver();
-        resourceStore = new DefaultResourceStore("testStore", true);
+        resourceStore = new DefaultResourceStore("testStore", new DefaultMatchPolicy(), true);
     }
 
     @After

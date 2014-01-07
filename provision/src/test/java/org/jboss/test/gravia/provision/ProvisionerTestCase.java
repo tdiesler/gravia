@@ -159,7 +159,7 @@ public class ProvisionerTestCase extends AbstractProvisionerTest {
         Requirement req = new MavenIdentityRequirementBuilder(mavenid).getRequirement();
 
         Provisioner provisionService = getProvisioner();
-        ProvisionResult result = provisionService.findResources(getEnvironment(), Collections.singleton(req));
+        ProvisionResult result = provisionService.findResources(Collections.singleton(req));
         Assert.assertEquals("One resource", 1, result.getResources().size());
         Assert.assertTrue("Nothing unsatisfied", result.getUnsatisfiedRequirements().isEmpty());
     }

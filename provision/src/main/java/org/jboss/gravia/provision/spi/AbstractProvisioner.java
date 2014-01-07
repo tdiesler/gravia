@@ -34,10 +34,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jboss.gravia.provision.Environment;
-import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ProvisionResult;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.repository.Repository;
+import org.jboss.gravia.resolver.DefaultPreferencePolicy;
 import org.jboss.gravia.resolver.DefaultResolveContext;
 import org.jboss.gravia.resolver.PreferencePolicy;
 import org.jboss.gravia.resolver.ResolutionException;
@@ -48,6 +48,7 @@ import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.Wire;
+import org.jboss.gravia.utils.NotNullException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,20 +64,26 @@ public abstract class AbstractProvisioner implements Provisioner {
 
     private final Resolver resolver;
     private final Repository repository;
-    private PreferencePolicy preferencePolicy;
-    private Environment environment;
+    private final Environment environment;
+    private final PreferencePolicy preferencePolicy;
 
-    public AbstractProvisioner(Resolver resolver, Repository repository) {
-        this.resolver = resolver;
-        this.repository = repository;
+    public AbstractProvisioner(Environment environment, Resolver resolver, Repository repository) {
+        this(environment, resolver, repository, new DefaultPreferencePolicy(null));
     }
 
-    protected abstract Environment createEnvironment();
+    public AbstractProvisioner(Environment environment, Resolver resolver, Repository repository, PreferencePolicy policy) {
+        NotNullException.assertValue(environment, "environment");
+        NotNullException.assertValue(resolver, "resolver");
+        NotNullException.assertValue(repository, "repository");
+        NotNullException.assertValue(policy, "policy");
+        this.environment = environment;
+        this.resolver = resolver;
+        this.repository = repository;
+        this.preferencePolicy = policy;
+    }
 
-    private Environment getEnvironment() {
-        if (environment == null) {
-            environment = createEnvironment();
-        }
+    @Override
+    public Environment getEnvironment() {
         return environment;
     }
 
@@ -92,12 +99,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         return repository;
     }
 
-    protected abstract PreferencePolicy createPreferencePolicy();
-
     private PreferencePolicy getPreferencePolicyInternal() {
-        if (preferencePolicy == null) {
-            preferencePolicy = createPreferencePolicy();
-        }
         return preferencePolicy;
     }
 
@@ -106,8 +108,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         return findResources(getEnvironment(), reqs);
     }
 
-    @Override
-    public final ProvisionResult findResources(Environment env, Set<Requirement> reqs) {
+    private ProvisionResult findResources(Environment env, Set<Requirement> reqs) {
         if (env == null)
             throw new IllegalArgumentException("Null env");
         if (reqs == null)
@@ -177,11 +178,6 @@ public abstract class AbstractProvisioner implements Provisioner {
             }
             result.add(res);
         }
-    }
-
-    @Override
-    public ResourceHandle installResource(Resource resource, Map<Requirement, Resource> mapping) throws ProvisionException {
-        throw new UnsupportedOperationException();
     }
 
     private boolean isAbstract(Resource res) {

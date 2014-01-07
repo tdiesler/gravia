@@ -26,7 +26,9 @@ package org.wildfly.extension.gravia.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 import org.jboss.as.controller.ModelController;
@@ -39,6 +41,7 @@ import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.DefaultResourceHandle;
 import org.jboss.gravia.provision.Environment;
 import org.jboss.gravia.provision.ProvisionException;
+import org.jboss.gravia.provision.ProvisionResult;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.Provisioner.ResourceHandle;
 import org.jboss.gravia.repository.Repository;
@@ -110,16 +113,22 @@ public class ProvisionerService extends AbstractService<Provisioner> {
 
         Resolver resolver = injectedResolver.getValue();
         Repository repository = injectedRepository.getValue();
-        provisioner = new DefaultProvisioner(resolver, repository) {
+        Environment environment = injectedEnvironment.getValue();
+        provisioner = new DefaultProvisioner(environment, resolver, repository) {
 
             @Override
-            protected Environment createEnvironment() {
-                return injectedEnvironment.getValue();
-            }
-
-            @Override
-            public ResourceHandle installResource(Resource resource, Map<Requirement, Resource> mapping) throws ProvisionException {
-                return installResourceInternal(resource, mapping);
+            public Set<ResourceHandle> provisionResources(Set<Requirement> reqs) throws ProvisionException {
+                ProvisionResult result = findResources(reqs);
+                Set<Requirement> unsatisfied = result.getUnsatisfiedRequirements();
+                if (!unsatisfied.isEmpty()) {
+                    throw new ProvisionException("Cannot resolve unsatisfied requirements: " + unsatisfied);
+                }
+                Map<Requirement, Resource> mapping = result.getMapping();
+                Set<ResourceHandle> handles = new HashSet<ResourceHandle>();
+                for (Resource res : result.getResources()) {
+                    handles.add(installResourceInternal(res, mapping));
+                }
+                return Collections.unmodifiableSet(handles);
             }
         };
 

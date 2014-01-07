@@ -81,13 +81,19 @@ public abstract class AbstractRuntime implements Runtime {
         if (type.isAssignableFrom(RuntimeEventsManager.class)) {
             result = (A) runtimeEvents;
         } else if (type.isAssignableFrom(ModuleContext.class)) {
-            result = (A) getModule(0).getModuleContext();
+            result = (A) getModuleContext();
         }
         return result;
     }
 
     protected final ResourceIdentity getSystemIdentity() {
         return systemIdentity;
+    }
+
+    @Override
+    public ModuleContext getModuleContext() {
+        Module sysmodule = getModule(0);
+        return sysmodule != null ? sysmodule.getModuleContext() : null;
     }
 
     @Override

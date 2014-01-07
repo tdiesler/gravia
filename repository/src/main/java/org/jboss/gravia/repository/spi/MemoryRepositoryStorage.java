@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
+import org.jboss.gravia.resource.DefaultMatchPolicy;
 import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
@@ -47,7 +48,7 @@ public class MemoryRepositoryStorage extends DefaultResourceStore implements Rep
     private final Repository repository;
 
     public MemoryRepositoryStorage(PropertiesProvider propertyProvider, Repository repository) {
-        super(MemoryRepositoryStorage.class.getSimpleName(), true);
+        super(MemoryRepositoryStorage.class.getSimpleName(), new DefaultMatchPolicy(), true);
         this.repository = repository;
     }
 

@@ -33,18 +33,22 @@ import java.util.Map;
  */
 public class IdentityRequirementBuilder extends DefaultRequirementBuilder {
 
-    public IdentityRequirementBuilder(String symbolicName, String version) {
-        this(symbolicName, version != null ? new VersionRange(version) : null, null, null);
+    public IdentityRequirementBuilder(String symbolicName, String range) {
+        this(symbolicName, range != null ? new VersionRange(range) : null, null, null);
     }
 
-    public IdentityRequirementBuilder(String symbolicName, VersionRange version) {
-        this(symbolicName, version, null, null);
+    public IdentityRequirementBuilder(ResourceIdentity identity) {
+        this(identity.getSymbolicName(), identity.getVersion().toString());
     }
 
-    public IdentityRequirementBuilder(String symbolicName, VersionRange version, Map<String, Object> atts, Map<String, String> dirs) {
+    public IdentityRequirementBuilder(String symbolicName, VersionRange range) {
+        this(symbolicName, range, null, null);
+    }
+
+    public IdentityRequirementBuilder(String symbolicName, VersionRange range, Map<String, Object> atts, Map<String, String> dirs) {
         super(IdentityNamespace.IDENTITY_NAMESPACE, symbolicName);
-        if (version != null) {
-            getAttributes().put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
+        if (range != null) {
+            getAttributes().put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, range);
         }
         if (atts != null) {
             getAttributes().putAll(atts);

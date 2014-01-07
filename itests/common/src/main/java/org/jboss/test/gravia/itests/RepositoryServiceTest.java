@@ -95,7 +95,7 @@ public class RepositoryServiceTest {
     @Before
     public void setUp() throws Exception {
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        ModuleContext syscontext = runtime.getModule(0).getModuleContext();
+        ModuleContext syscontext = runtime.getModuleContext();
         ServiceReference<Repository> sref = syscontext.getServiceReference(Repository.class);
         Assert.assertNotNull("Repository reference not null", sref);
         repository = syscontext.getService(sref);

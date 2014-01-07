@@ -57,7 +57,7 @@ public class RepositoryRuntimeRegistration {
         NotNullException.assertValue(repository, "repository");
 
         // Register as runtime service
-        ModuleContext syscontext = runtime.getModule(0).getModuleContext();
+        ModuleContext syscontext = runtime.getModuleContext();
         final ServiceRegistration<Repository> sreg = syscontext.registerService(Repository.class, repository, null);
 
         // Register as MBean

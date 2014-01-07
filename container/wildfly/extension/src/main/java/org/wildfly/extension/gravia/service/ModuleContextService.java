@@ -57,7 +57,8 @@ public class ModuleContextService extends AbstractService<ModuleContext> {
 
     @Override
     public void start(StartContext startContext) throws StartException {
-        syscontext = injectedRuntime.getValue().getModule(0).getModuleContext();
+        Runtime runtime = injectedRuntime.getValue();
+        syscontext = runtime.getModuleContext();
     }
 
     @Override

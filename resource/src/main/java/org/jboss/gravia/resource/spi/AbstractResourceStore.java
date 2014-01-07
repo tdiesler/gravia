@@ -34,11 +34,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.DefaultMatchPolicy;
 import org.jboss.gravia.resource.MatchPolicy;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.ResourceStore;
+import org.jboss.gravia.utils.NotNullException;
 
 /**
  * An abstract {@link ResourceStore}
@@ -52,16 +54,17 @@ public abstract class AbstractResourceStore implements ResourceStore {
     private final boolean logCapsReqs;
     private final Map<ResourceIdentity, Resource> resources = new LinkedHashMap<ResourceIdentity, Resource>();
     private final Map<CacheKey, Set<Capability>> capabilityCache = new ConcurrentHashMap<CacheKey, Set<Capability>>();
-    private MatchPolicy matchPolicy;
+    private final MatchPolicy matchPolicy;
 
     public AbstractResourceStore(String storeName) {
-        this(storeName, false);
+        this(storeName, new DefaultMatchPolicy(), false);
     }
 
-    public AbstractResourceStore(String storeName, boolean logCapsReqs) {
-        if (storeName == null)
-            throw new IllegalArgumentException("Null storeName");
+    public AbstractResourceStore(String storeName, MatchPolicy matchPolicy, boolean logCapsReqs) {
+        NotNullException.assertValue(storeName, "storeName");
+        NotNullException.assertValue(matchPolicy, "matchPolicy");
         this.storeName = storeName;
+        this.matchPolicy = matchPolicy;
         this.logCapsReqs = logCapsReqs;
     }
 
@@ -71,12 +74,7 @@ public abstract class AbstractResourceStore implements ResourceStore {
         return storeName;
     }
 
-    protected abstract MatchPolicy createMatchPolicy();
-
     private MatchPolicy getMatchPolicyInternal() {
-        if (matchPolicy == null) {
-            matchPolicy = createMatchPolicy();
-        }
         return matchPolicy;
     }
 

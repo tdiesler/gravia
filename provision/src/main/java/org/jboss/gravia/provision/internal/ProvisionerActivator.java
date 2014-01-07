@@ -24,6 +24,7 @@ package org.jboss.gravia.provision.internal;
 
 import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.Provisioner;
+import org.jboss.gravia.provision.spi.RuntimeEnvironment;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.runtime.Module;
@@ -58,9 +59,8 @@ public final class ProvisionerActivator implements BundleActivator {
         Resolver resolver = syscontext.getService(resolverRef);
         ServiceReference<Repository> repositoryRef = syscontext.getServiceReference(Repository.class);
         Repository repository = syscontext.getService(repositoryRef);
-        Provisioner provisioner = new DefaultProvisioner(resolver, repository) {
-
-        };
+        RuntimeEnvironment environment = new RuntimeEnvironment(runtime);
+        Provisioner provisioner = new DefaultProvisioner(environment, resolver, repository);
         registration = syscontext.registerService(Provisioner.class, provisioner, null);
     }
 

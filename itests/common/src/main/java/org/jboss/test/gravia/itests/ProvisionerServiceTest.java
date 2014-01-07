@@ -22,11 +22,20 @@
 package org.jboss.test.gravia.itests;
 
 import java.io.InputStream;
+import java.util.Collections;
+
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.gravia.Constants;
+import org.jboss.gravia.arquillian.container.ContainerSetup;
+import org.jboss.gravia.arquillian.container.ContainerSetupTask;
+import org.jboss.gravia.provision.ProvisionResult;
 import org.jboss.gravia.provision.Provisioner;
+import org.jboss.gravia.resource.IdentityRequirementBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.Requirement;
+import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
@@ -48,7 +57,14 @@ import org.junit.runner.RunWith;
  * @since 19-Dec-2013
  */
 @RunWith(Arquillian.class)
+@ContainerSetup(ProvisionerServiceTest.Setup.class)
 public class ProvisionerServiceTest {
+
+    public static class Setup extends ContainerSetupTask {
+        protected String[] getInitialFeatureNames() {
+            return new String[] { "camel.core" };
+        }
+    }
 
     private Provisioner provisioner;
 
@@ -64,7 +80,7 @@ public class ProvisionerServiceTest {
                     builder.addBundleSymbolicName(archive.getName());
                     builder.addBundleVersion("1.0.0");
                     builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
-                    builder.addImportPackages(Runtime.class, Provisioner.class);
+                    builder.addImportPackages(Runtime.class, Provisioner.class, Resource.class);
                     return builder.openStream();
                 } else {
                     ManifestBuilder builder = new ManifestBuilder();
@@ -80,16 +96,19 @@ public class ProvisionerServiceTest {
     @Before
     public void setUp() throws Exception {
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        ModuleContext syscontext = runtime.getModule(0).getModuleContext();
+        ModuleContext syscontext = runtime.getModuleContext();
         ServiceReference<Provisioner> sref = syscontext.getServiceReference(Provisioner.class);
         Assert.assertNotNull("Provisioner reference not null", sref);
         provisioner = syscontext.getService(sref);
     }
 
     @Test
-    public void testProvisioner() throws Exception {
-        Assert.assertNotNull("Provisioner not null", provisioner);
-        Assert.assertNotNull("Repository not null", provisioner.getRepository());
-        Assert.assertNotNull("Resolver not null", provisioner.getResolver());
+    public void testFindResources() throws Exception {
+        ResourceIdentity identity = ResourceIdentity.fromString("camel.core.feature:0.0.0");
+        Requirement req = new IdentityRequirementBuilder(identity).getRequirement();
+        ProvisionResult result = provisioner.findResources(Collections.singleton(req));
+        Assert.assertNotNull("ProvisionResult not null", result);
+        //Assert.assertEquals(1, result.getResources().size());
+        //Assert.assertEquals(0, result.getUnsatisfiedRequirements());
     }
 }

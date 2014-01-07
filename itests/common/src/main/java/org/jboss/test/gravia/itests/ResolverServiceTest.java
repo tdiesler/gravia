@@ -80,7 +80,7 @@ public class ResolverServiceTest {
     @Before
     public void setUp() throws Exception {
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        ModuleContext syscontext = runtime.getModule(0).getModuleContext();
+        ModuleContext syscontext = runtime.getModuleContext();
         ServiceReference<Resolver> sref = syscontext.getServiceReference(Resolver.class);
         Assert.assertNotNull("Resolver reference not null", sref);
         resolver = syscontext.getService(sref);

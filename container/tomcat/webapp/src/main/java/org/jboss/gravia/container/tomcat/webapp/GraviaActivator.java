@@ -33,6 +33,7 @@ import org.jboss.gravia.Constants;
 import org.jboss.gravia.container.tomcat.extension.TomcatRuntimeFactory;
 import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.Provisioner;
+import org.jboss.gravia.provision.spi.RuntimeEnvironment;
 import org.jboss.gravia.repository.DefaultRepository;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryRuntimeRegistration;
@@ -75,7 +76,7 @@ public class GraviaActivator implements ServletContextListener {
         runtime.init();
 
         // HttpService integration
-        ModuleContext moduleContext = runtime.getModule(0).getModuleContext();
+        ModuleContext moduleContext = runtime.getModuleContext();
         BundleContext bundleContext = new BundleContextAdaptor(moduleContext);
         servletContext.setAttribute("org.osgi.framework.BundleContext", bundleContext);
 
@@ -86,17 +87,15 @@ public class GraviaActivator implements ServletContextListener {
     }
 
     private Provisioner registerProvisionerService(Runtime runtime, Repository repository, Resolver resolver) {
-        Provisioner provisioner = new DefaultProvisioner(resolver, repository) {
-
-        };
-        ModuleContext syscontext = runtime.getModule(0).getModuleContext();
+        Provisioner provisioner = new DefaultProvisioner(new RuntimeEnvironment(runtime), resolver, repository);
+        ModuleContext syscontext = runtime.getModuleContext();
         provisionerRegistration = syscontext.registerService(Provisioner.class, provisioner, null);
         return provisioner;
     }
 
     private Resolver registerResolverService(Runtime runtime) {
         Resolver resolver = new DefaultResolver();
-        ModuleContext syscontext = runtime.getModule(0).getModuleContext();
+        ModuleContext syscontext = runtime.getModuleContext();
         resolverRegistration = syscontext.registerService(Resolver.class, resolver, null);
         return resolver;
     }

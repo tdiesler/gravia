@@ -28,6 +28,7 @@ import java.util.Set;
 import org.jboss.gravia.resolver.DefaultResolveContext;
 import org.jboss.gravia.resolver.DefaultResolver;
 import org.jboss.gravia.resolver.ResolveContext;
+import org.jboss.gravia.resource.DefaultMatchPolicy;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.DefaultWiring;
@@ -63,7 +64,7 @@ public abstract class AbstractResolverInternalsTest {
     public void setUp() throws Exception {
         log.debug("Start: {}.{}", getClass().getSimpleName(), testName.getMethodName());
 
-        store = new DefaultResourceStore("testStore", true);
+        store = new DefaultResourceStore("testStore", new DefaultMatchPolicy(), true);
         resolver = new DefaultResolver();
 
         // A-1.0.0 => D-1.0.0, B-1.1.0

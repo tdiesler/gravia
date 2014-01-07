@@ -74,6 +74,11 @@ public interface Runtime {
     Object getProperty(String key, Object defaultValue);
 
     /**
+     * Get the sytem module context.
+     */
+    ModuleContext getModuleContext();
+
+    /**
      * Returns the module with the specified identifier.
      *
      * @param id The identifier of the module to retrieve.

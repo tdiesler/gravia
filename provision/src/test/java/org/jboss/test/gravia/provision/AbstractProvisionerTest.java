@@ -69,7 +69,7 @@ public abstract class AbstractProvisionerTest {
         PropertiesProvider propertyProvider = Mockito.mock(PropertiesProvider.class);
         Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
         repository = new DefaultRepository(propertyProvider);
-        provisioner = new DefaultProvisioner(resolver, repository);
+        provisioner = new DefaultProvisioner(environment, resolver, repository);
     }
 
     Provisioner getProvisioner() {
@@ -85,7 +85,7 @@ public abstract class AbstractProvisionerTest {
     }
 
     ProvisionResult findResources(Set<Requirement> reqs) {
-        return getProvisioner().findResources(getEnvironment(), reqs);
+        return getProvisioner().findResources(reqs);
     }
 
     void installResources(List<Resource> resources) throws ProvisionException {

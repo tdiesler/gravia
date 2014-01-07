@@ -28,13 +28,14 @@ import java.io.InputStream;
 import java.util.Iterator;
 
 import org.jboss.as.controller.ServiceVerificationHandler;
-import org.jboss.gravia.provision.DefaultEnvironment;
 import org.jboss.gravia.provision.Environment;
+import org.jboss.gravia.provision.spi.RuntimeEnvironment;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.Requirement;
+import org.jboss.gravia.runtime.Runtime;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleClassLoader;
 import org.jboss.modules.Resource;
@@ -44,6 +45,7 @@ import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
+import org.jboss.msc.value.InjectedValue;
 import org.wildfly.extension.gravia.GraviaConstants;
 
 /**
@@ -54,10 +56,12 @@ import org.wildfly.extension.gravia.GraviaConstants;
  */
 public class EnvironmentService extends AbstractService<Environment> {
 
+    private final InjectedValue<Runtime> injectedRuntime = new InjectedValue<Runtime>();
     private Environment environment;
 
     public ServiceController<Environment> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<Environment> builder = serviceTarget.addService(GraviaConstants.ENVIRONMENT_SERVICE_NAME, this);
+        builder.addDependency(GraviaConstants.RUNTIME_SERVICE_NAME, Runtime.class, injectedRuntime);
         builder.addListener(verificationHandler);
         return builder.install();
     }
@@ -65,9 +69,10 @@ public class EnvironmentService extends AbstractService<Environment> {
     @Override
     public void start(StartContext startContext) throws StartException {
 
-        environment = new DefaultEnvironment("WildFly Environment");
+        Runtime runtime = injectedRuntime.getValue();
+        environment = new RuntimeEnvironment(runtime);
 
-        // Install gravia features to the repository
+        // Initial runtime content
         ModuleClassLoader classLoader = Module.getCallerModule().getClassLoader();
         Iterator<Resource> itres = classLoader.iterateResources("META-INF/environment-content", false);
         while(itres.hasNext()) {
