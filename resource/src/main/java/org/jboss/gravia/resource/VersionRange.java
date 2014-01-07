@@ -16,7 +16,6 @@
 
 package org.jboss.gravia.resource;
 
-import java.io.Serializable;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
@@ -31,9 +30,7 @@ import java.util.StringTokenizer;
  * <p>
  * {@code VersionRange} objects are immutable.
  */
-public class VersionRange implements Serializable {
-
-    private static final long serialVersionUID = -567290047453522336L;
+public class VersionRange {
 
     /**
      * The left endpoint is open and is excluded from the range.

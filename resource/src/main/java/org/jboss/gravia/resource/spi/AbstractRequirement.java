@@ -21,7 +21,6 @@
  */
 package org.jboss.gravia.resource.spi;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,9 +38,7 @@ import org.jboss.gravia.resource.VersionRange;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public class AbstractRequirement implements Requirement, Serializable {
-
-    private static final long serialVersionUID = 2075218264839332932L;
+public class AbstractRequirement implements Requirement {
 
     private final AbstractResource resource;
     private final String namespace;

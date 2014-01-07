@@ -21,7 +21,6 @@
  */
 package org.jboss.gravia.resource.spi;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,11 +47,9 @@ import org.slf4j.LoggerFactory;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public abstract class AbstractResource implements Resource, Serializable {
+public abstract class AbstractResource implements Resource {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(Resource.class.getPackage().getName());
-
-    private static final long serialVersionUID = -3787048558260649200L;
 
     private final List<AbstractCapability> capabilities = new ArrayList<AbstractCapability>();
     private final List<AbstractRequirement> requirements = new ArrayList<AbstractRequirement>();
