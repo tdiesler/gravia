@@ -2,6 +2,8 @@ package org.jboss.gravia.repository;
 
 import static org.jboss.gravia.repository.spi.AbstractRepository.LOGGER;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Map;
 
 import javax.management.MBeanServer;
@@ -64,7 +66,7 @@ public class RepositoryRuntimeRegistration {
         ServiceReference<MBeanServer> sref = syscontext.getServiceReference(MBeanServer.class);
         final MBeanServer mbeanServer = syscontext.getService(sref);
         try {
-            RepositoryDelegate delegate = new RepositoryDelegate(repository);
+            RepositoryWrapper delegate = new RepositoryWrapper(repository);
             StandardMBean mbean = new StandardMBean(delegate, RepositoryMBean.class);
             mbeanServer.registerMBean(mbean, RepositoryMBean.OBJECT_NAME);
         } catch (Exception ex) {
@@ -88,11 +90,11 @@ public class RepositoryRuntimeRegistration {
         void unregister();
     }
 
-    static class RepositoryDelegate implements RepositoryMBean {
+    static class RepositoryWrapper implements RepositoryMBean {
 
         private final Repository repository;
 
-        RepositoryDelegate(Repository repository) {
+        RepositoryWrapper(Repository repository) {
             this.repository = repository;
         }
 
@@ -107,9 +109,15 @@ public class RepositoryRuntimeRegistration {
         }
 
         @Override
-        public void addResource(CompositeData resData) {
+        public void addResource(CompositeData resData) throws IOException {
             Resource resource = new ManagementResourceBuilder(resData).getResource();
             repository.addResource(resource);
+        }
+
+        @Override
+        public CompositeData addResource(CompositeData resData, URL contentURL) throws IOException {
+            Resource resource = new ManagementResourceBuilder(resData).getResource();
+            return repository.addResource(resource, contentURL).adapt(CompositeData.class);
         }
 
         @Override

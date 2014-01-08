@@ -51,6 +51,28 @@ public class ResourceTypeTestCase  {
         Capability cap = builder.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, "test1");
         cap.getAttributes().put("cfoo", "cbar");
         cap.getDirectives().put("cone", "ctwo");
+        Resource resout = builder.getResource();
+
+        CompositeData resData = resout.adapt(CompositeData.class);
+        String identity = (String) resData.get(ResourceType.ITEM_IDENTITY);
+        Assert.assertEquals("test1:0.0.0", identity);
+
+        Resource resin = new ManagementResourceBuilder(resData).getResource();
+        ResourceIdentity resid = resin.getIdentity();
+        Assert.assertEquals("test1:0.0.0", resid.toString());
+        Capability icap = resin.getIdentityCapability();
+        Assert.assertEquals("cbar", icap.getAttribute("cfoo"));
+        Assert.assertEquals("ctwo", icap.getDirective("cone"));
+        List<Requirement> reqs = resin.getRequirements(null);
+        Assert.assertEquals(0, reqs.size());
+    }
+
+    @Test
+    public void testCompositeDataWithRequirements() throws Exception {
+        ResourceBuilder builder = new DefaultResourceBuilder();
+        Capability cap = builder.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, "test1");
+        cap.getAttributes().put("cfoo", "cbar");
+        cap.getDirectives().put("cone", "ctwo");
         Requirement req = builder.addRequirement(IdentityNamespace.IDENTITY_NAMESPACE, "test2");
         req.getAttributes().put("rfoo", "rbar");
         req.getDirectives().put("rone", "rtwo");

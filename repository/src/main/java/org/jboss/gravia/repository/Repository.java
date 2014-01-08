@@ -74,7 +74,7 @@ public interface Repository extends Adaptable {
     /**
      * Add a {@link Resource} to the associated {@link RepositoryStorage}
      */
-    Resource addResource(Resource resource);
+    Resource addResource(Resource resource) throws IOException;
 
     /**
      * Add a {@link Resource} to the associated {@link RepositoryStorage}

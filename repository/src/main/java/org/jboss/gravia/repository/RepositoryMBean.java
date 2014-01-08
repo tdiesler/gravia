@@ -21,6 +21,8 @@
  */
 package org.jboss.gravia.repository;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Map;
 
 import javax.management.ObjectName;
@@ -58,7 +60,12 @@ public interface RepositoryMBean {
     /**
      * Add a {@link Resource} to the {@link Repository}
      */
-    void addResource(CompositeData resData);
+    void addResource(CompositeData resData) throws IOException;
+
+    /**
+     * Add a {@link Resource} to the {@link Repository}
+     */
+    CompositeData addResource(CompositeData resData, URL contentURL) throws IOException;
 
     /**
      * Remove a {@link Resource} from the {@link Repository}

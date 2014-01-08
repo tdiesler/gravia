@@ -149,21 +149,21 @@ public abstract class AbstractRepository implements Repository {
 
     @Override
     public Resource addResource(Resource res, URL contentURL) {
-        return addResourceFromURL(res, contentURL);
+        return addResourceInternal(res, contentURL);
     }
 
     @Override
     public Resource addResource(Resource res, InputStream content) throws IOException {
         File tempFile = copyResourceContent(content, res.getIdentity());
-        URL contentURL = tempFile.toURI().toURL();
         try {
-            return addResourceFromURL(res, contentURL);
+            URL contentURL = tempFile.toURI().toURL();
+            return addResourceInternal(res, contentURL);
         } finally {
             tempFile.delete();
         }
     }
 
-    private Resource addResourceFromURL(Resource res, URL contentURL) {
+    private Resource addResourceInternal(Resource res, URL contentURL) {
         if (!res.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).isEmpty())
             throw new IllegalArgumentException("Resource already contains a content capability: " + res);
 

@@ -22,12 +22,11 @@
 package org.jboss.test.gravia.provision;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.provision.DefaultEnvironment;
@@ -94,7 +93,7 @@ public abstract class AbstractProvisionerTest {
         }
     }
 
-    void setupRepository(String config) throws XMLStreamException {
+    void setupRepository(String config) throws IOException {
         RepositoryReader reader = getRepositoryReader(config);
         Resource res = reader.nextResource();
         while (res != null) {
@@ -103,7 +102,7 @@ public abstract class AbstractProvisionerTest {
         }
     }
 
-    RepositoryReader getRepositoryReader(String config) throws XMLStreamException {
+    RepositoryReader getRepositoryReader(String config) {
         InputStream input = getClass().getClassLoader().getResourceAsStream(config);
         return new DefaultRepositoryXMLReader(input);
     }

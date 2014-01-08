@@ -62,42 +62,34 @@ public abstract class ContainerSetupTask {
         return new String[0];
     }
 
-    protected void setupRepositoryContent(MBeanServerConnection server, RepositoryMBean repository, Map<String, String> props) {
+    protected void setupRepositoryContent(MBeanServerConnection server, RepositoryMBean repository, Map<String, String> props) throws IOException {
         for (String name : getInitialFeatureNames()) {
             String resname = "META-INF/repository-content/" + name + ".feature.xml";
             URL resurl = getClass().getClassLoader().getResource(resname);
-            try {
-                InputStream input = resurl.openStream();
-                RepositoryReader reader = new DefaultRepositoryXMLReader(input);
-                Resource auxres = reader.nextResource();
-                while (auxres != null) {
-                    String identity = auxres.getIdentity().toString();
-                    if (repository.getResource(identity) == null) {
-                        repository.addResource(auxres.adapt(CompositeData.class));
-                    }
-                    auxres = reader.nextResource();
+            InputStream input = resurl.openStream();
+            RepositoryReader reader = new DefaultRepositoryXMLReader(input);
+            Resource auxres = reader.nextResource();
+            while (auxres != null) {
+                String identity = auxres.getIdentity().toString();
+                if (repository.getResource(identity) == null) {
+                    repository.addResource(auxres.adapt(CompositeData.class));
                 }
-            } catch (IOException e) {
-                throw new IllegalStateException("Cannot install feature to repository: " + resname);
+                auxres = reader.nextResource();
             }
         }
     }
 
-    protected void removeRepositoryContent(MBeanServerConnection server, RepositoryMBean repository, Map<String, String> props) {
+    protected void removeRepositoryContent(MBeanServerConnection server, RepositoryMBean repository, Map<String, String> props) throws IOException {
         for (String name : getInitialFeatureNames()) {
             String resname = "META-INF/repository-content/" + name + ".feature.xml";
             URL resurl = getClass().getClassLoader().getResource(resname);
-            try {
-                InputStream input = resurl.openStream();
-                RepositoryReader reader = new DefaultRepositoryXMLReader(input);
-                Resource auxres = reader.nextResource();
-                while (auxres != null) {
-                    String identity = auxres.getIdentity().toString();
-                    repository.removeResource(identity);
-                    auxres = reader.nextResource();
-                }
-            } catch (IOException e) {
-                throw new IllegalStateException("Cannot remove feature from repository: " + resname);
+            InputStream input = resurl.openStream();
+            RepositoryReader reader = new DefaultRepositoryXMLReader(input);
+            Resource auxres = reader.nextResource();
+            while (auxres != null) {
+                String identity = auxres.getIdentity().toString();
+                repository.removeResource(identity);
+                auxres = reader.nextResource();
             }
         }
     }
