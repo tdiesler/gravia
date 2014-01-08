@@ -23,35 +23,13 @@
 
 package org.wildfly.extension.gravia.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Executors;
-
-import org.jboss.as.controller.ModelController;
 import org.jboss.as.controller.ServiceVerificationHandler;
-import org.jboss.as.controller.client.ModelControllerClient;
-import org.jboss.as.controller.client.helpers.standalone.ServerDeploymentHelper;
-import org.jboss.as.controller.client.helpers.standalone.ServerDeploymentManager;
-import org.jboss.as.server.Services;
 import org.jboss.gravia.provision.DefaultProvisioner;
-import org.jboss.gravia.provision.DefaultResourceHandle;
 import org.jboss.gravia.provision.Environment;
-import org.jboss.gravia.provision.ProvisionException;
-import org.jboss.gravia.provision.ProvisionResult;
 import org.jboss.gravia.provision.Provisioner;
-import org.jboss.gravia.provision.Provisioner.ResourceHandle;
+import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.resolver.Resolver;
-import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.IdentityNamespace;
-import org.jboss.gravia.resource.Requirement;
-import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.msc.service.AbstractService;
@@ -62,13 +40,6 @@ import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.InjectedValue;
-import org.jboss.shrinkwrap.api.ConfigurationBuilder;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.Asset;
-import org.jboss.shrinkwrap.api.asset.StringAsset;
-import org.jboss.shrinkwrap.api.exporter.ZipExporter;
-import org.jboss.shrinkwrap.api.importer.ZipImporter;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extension.gravia.GraviaConstants;
@@ -83,23 +54,21 @@ public class ProvisionerService extends AbstractService<Provisioner> {
 
     static final Logger LOGGER = LoggerFactory.getLogger(GraviaConstants.class.getPackage().getName());
 
-    private final InjectedValue<ModelController> injectedController = new InjectedValue<ModelController>();
     private final InjectedValue<ModuleContext> injectedModuleContext = new InjectedValue<ModuleContext>();
     private final InjectedValue<Environment> injectedEnvironment = new InjectedValue<Environment>();
     private final InjectedValue<Repository> injectedRepository = new InjectedValue<Repository>();
     private final InjectedValue<Resolver> injectedResolver = new InjectedValue<Resolver>();
-    private ServerDeploymentManager serverDeploymentManager;
-    private ModelControllerClient modelControllerClient;
+    private final InjectedValue<ResourceInstaller> injectedResourceInstaller = new InjectedValue<ResourceInstaller>();
     private ServiceRegistration<Provisioner> registration;
     private Provisioner provisioner;
 
     public ServiceController<Provisioner> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<Provisioner> builder = serviceTarget.addService(GraviaConstants.PROVISIONER_SERVICE_NAME, this);
-        builder.addDependency(Services.JBOSS_SERVER_CONTROLLER, ModelController.class, injectedController);
         builder.addDependency(GraviaConstants.ENVIRONMENT_SERVICE_NAME, Environment.class, injectedEnvironment);
         builder.addDependency(GraviaConstants.MODULE_CONTEXT_SERVICE_NAME, ModuleContext.class, injectedModuleContext);
         builder.addDependency(GraviaConstants.REPOSITORY_SERVICE_NAME, Repository.class, injectedRepository);
         builder.addDependency(GraviaConstants.RESOLVER_SERVICE_NAME, Resolver.class, injectedResolver);
+        builder.addDependency(GraviaConstants.RESOURCE_INSTALLER_SERVICE_NAME, ResourceInstaller.class, injectedResourceInstaller);
         builder.addListener(verificationHandler);
         return builder.install();
     }
@@ -107,28 +76,13 @@ public class ProvisionerService extends AbstractService<Provisioner> {
     @Override
     public void start(StartContext startContext) throws StartException {
 
-        ModelController modelController = injectedController.getValue();
-        modelControllerClient = modelController.createClient(Executors.newCachedThreadPool());
-        serverDeploymentManager = ServerDeploymentManager.Factory.create(modelControllerClient);
-
         Resolver resolver = injectedResolver.getValue();
         Repository repository = injectedRepository.getValue();
         Environment environment = injectedEnvironment.getValue();
         provisioner = new DefaultProvisioner(environment, resolver, repository) {
-
             @Override
-            public Set<ResourceHandle> provisionResources(Set<Requirement> reqs) throws ProvisionException {
-                ProvisionResult result = findResources(reqs);
-                Set<Requirement> unsatisfied = result.getUnsatisfiedRequirements();
-                if (!unsatisfied.isEmpty()) {
-                    throw new ProvisionException("Cannot resolve unsatisfied requirements: " + unsatisfied);
-                }
-                Map<Requirement, Resource> mapping = result.getMapping();
-                Set<ResourceHandle> handles = new HashSet<ResourceHandle>();
-                for (Resource res : result.getResources()) {
-                    handles.add(installResourceInternal(res, mapping));
-                }
-                return Collections.unmodifiableSet(handles);
+            public ResourceInstaller getResourceInstaller() {
+                return injectedResourceInstaller.getValue();
             }
         };
 
@@ -142,84 +96,10 @@ public class ProvisionerService extends AbstractService<Provisioner> {
         if (registration != null) {
             registration.unregister();
         }
-        try {
-            modelControllerClient.close();
-        } catch (IOException ex) {
-            // ignore
-        }
     }
 
     @Override
     public Provisioner getValue() throws IllegalStateException {
         return provisioner;
-    }
-
-    private ResourceHandle installResourceInternal(Resource res, Map<Requirement, Resource> mapping) throws ProvisionException {
-
-        RepositoryContent content = res.adapt(RepositoryContent.class);
-        if (content == null) {
-            return new DefaultResourceHandle(res);
-        }
-
-        final String runtimeName = res.getIdentity().getSymbolicName();
-        final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
-        try {
-            InputStream input = getWrappedResourceContent(res, mapping);
-            serverDeployer.deploy(runtimeName, input);
-        } catch (Throwable th) {
-            throw new ProvisionException("Cannot provision resource: " + res, th);
-        }
-
-        return new DefaultResourceHandle(res) {
-
-            @Override
-            public void uninstall() throws ProvisionException {
-                try {
-                    serverDeployer.undeploy(runtimeName);
-                } catch (Throwable th) {
-                    throw new ProvisionException("Cannot uninstall provisioned resource: " + getResource(), th);
-                }
-            }
-        };
-    }
-
-    // Wrap the resource and add a generated jboss-deployment-structure.xml
-    private InputStream getWrappedResourceContent(Resource res, Map<Requirement, Resource> mapping) {
-        ResourceIdentity resid = res.getIdentity();
-        ConfigurationBuilder config = new ConfigurationBuilder().classLoaders(Collections.singleton(ShrinkWrap.class.getClassLoader()));
-        JavaArchive archive = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, "wrapped-resource.jar");
-        archive.as(ZipImporter.class).importFrom(((RepositoryContent) res).getContent());
-        JavaArchive wrapper = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, "wrapped:" + resid.getSymbolicName());
-        wrapper.addAsManifestResource(getDeploymentStructureAsset(res, mapping), "jboss-deployment-structure.xml");
-        wrapper.add(archive, "/", ZipExporter.class);
-        return wrapper.as(ZipExporter.class).exportAsInputStream();
-    }
-
-    private Asset getDeploymentStructureAsset(Resource res, Map<Requirement, Resource> mapping) {
-        LOGGER.info("Generating dependencies for: {}", res);
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("<jboss-deployment-structure xmlns='urn:jboss:deployment-structure:1.2'>");
-        buffer.append(" <deployment>");
-        buffer.append("  <resources>");
-        buffer.append("   <resource-root path='wrapped-resource.jar' use-physical-code-source='true'/>");
-        buffer.append("  </resources>");
-        buffer.append("  <dependencies>");
-        for (Requirement req : res.getRequirements(IdentityNamespace.IDENTITY_NAMESPACE)) {
-            Resource depres = mapping.get(req);
-            if (depres != null) {
-                Capability icap = depres.getIdentityCapability();
-                String type = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE);
-                String modname = depres.getIdentity().getSymbolicName();
-                if (!IdentityNamespace.TYPE_MODULE.equals(type)) {
-                    modname = "deployment." + modname;
-                }
-                buffer.append("<module name='" + modname + "'/>");
-                LOGGER.info("  {}", modname);
-            }
-        }
-        buffer.append("  </dependencies>");
-        buffer.append(" </deployment>");
-        buffer.append("</jboss-deployment-structure>");
-        return new StringAsset(buffer.toString());
     }
 }

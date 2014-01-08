@@ -23,14 +23,17 @@ package org.jboss.test.gravia.itests;
 
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.Set;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.arquillian.container.ContainerSetup;
 import org.jboss.gravia.arquillian.container.ContainerSetupTask;
+import org.jboss.gravia.provision.Environment;
 import org.jboss.gravia.provision.ProvisionResult;
 import org.jboss.gravia.provision.Provisioner;
+import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.resource.IdentityRequirementBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Requirement;
@@ -47,6 +50,7 @@ import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -108,7 +112,24 @@ public class ProvisionerServiceTest {
         Requirement req = new IdentityRequirementBuilder(identity).getRequirement();
         ProvisionResult result = provisioner.findResources(Collections.singleton(req));
         Assert.assertNotNull("ProvisionResult not null", result);
-        //Assert.assertEquals(1, result.getResources().size());
-        //Assert.assertEquals(0, result.getUnsatisfiedRequirements());
+        Assert.assertEquals(1, result.getResources().size());
+        Assert.assertEquals(0, result.getUnsatisfiedRequirements().size());
+    }
+
+    @Test
+    @Ignore
+    public void testProvisionResources() throws Exception {
+        ResourceIdentity identity = ResourceIdentity.fromString("camel.core.feature:0.0.0");
+        Requirement req = new IdentityRequirementBuilder(identity).getRequirement();
+        Set<ResourceHandle> result = provisioner.provisionResources(Collections.singleton(req));
+        Assert.assertEquals(1, result.size());
+        ResourceHandle handle = result.iterator().next();
+        try {
+            Environment env = provisioner.getEnvironment();
+            Resource res = env.getResource(identity);
+            Assert.assertNotNull("Resource not null", res);
+        } finally {
+            handle.uninstall();
+        }
     }
 }

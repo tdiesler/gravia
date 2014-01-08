@@ -22,18 +22,29 @@ package org.jboss.gravia.repository.spi;
  * #L%
  */
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.jboss.gravia.repository.ContentNamespace;
+import org.jboss.gravia.repository.DefaultRepositoryResourceBuilder;
+import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.utils.NotNullException;
@@ -110,8 +121,63 @@ public abstract class AbstractRepository implements Repository {
     }
 
     @Override
-    public Resource addResource(Resource resource) {
-        return getRequiredRepositoryStorage().addResource(resource);
+    public Resource addResource(Resource res) {
+        return getRequiredRepositoryStorage().addResource(res);
+    }
+
+    @Override
+    public Resource addResource(Resource res, MavenCoordinates mavenid) {
+        Capability icap = res.getIdentityCapability();
+        String attkey = IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE;
+        String attval = (String) icap.getAttributes().get(attkey);
+        if (attval != null && !attval.equals(mavenid.toExternalForm()))
+            throw new IllegalArgumentException("Resource already contains a " + attkey + " attribute: " + attval);
+
+        ResourceBuilder builder = new DefaultRepositoryResourceBuilder();
+        for (Capability aux : res.getCapabilities(null)) {
+            Capability cap = builder.addCapability(aux.getNamespace(), aux.getAttributes(), aux.getDirectives());
+            if (IdentityNamespace.IDENTITY_NAMESPACE.equals(cap.getNamespace())) {
+                cap.getAttributes().put(attkey, mavenid.toExternalForm());
+            }
+        }
+        for (Requirement aux : res.getRequirements(null)) {
+            builder.addRequirement(aux.getNamespace(), aux.getAttributes(), aux.getDirectives());
+        }
+        Resource rescopy = builder.getResource();
+        return getRequiredRepositoryStorage().addResource(rescopy);
+    }
+
+    @Override
+    public Resource addResource(Resource res, URL contentURL) {
+        return addResourceFromURL(res, contentURL);
+    }
+
+    @Override
+    public Resource addResource(Resource res, InputStream content) throws IOException {
+        File tempFile = copyResourceContent(content, res.getIdentity());
+        URL contentURL = tempFile.toURI().toURL();
+        try {
+            return addResourceFromURL(res, contentURL);
+        } finally {
+            tempFile.delete();
+        }
+    }
+
+    private Resource addResourceFromURL(Resource res, URL contentURL) {
+        if (!res.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).isEmpty())
+            throw new IllegalArgumentException("Resource already contains a content capability: " + res);
+
+        ResourceBuilder builder = new DefaultRepositoryResourceBuilder();
+        Capability ccap = builder.addCapability(ContentNamespace.CONTENT_NAMESPACE, null);
+        ccap.getAttributes().put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, contentURL.toExternalForm());
+        for (Capability aux : res.getCapabilities(null)) {
+            builder.addCapability(aux.getNamespace(), aux.getAttributes(), aux.getDirectives());
+        }
+        for (Requirement aux : res.getRequirements(null)) {
+            builder.addRequirement(aux.getNamespace(), aux.getAttributes(), aux.getDirectives());
+        }
+        Resource rescopy = builder.getResource();
+        return getRequiredRepositoryStorage().addResource(rescopy);
     }
 
     @Override
@@ -173,4 +239,17 @@ public abstract class AbstractRepository implements Repository {
         return storage;
     }
 
+    private File copyResourceContent(InputStream input, ResourceIdentity identity) throws IOException {
+        String name = identity.getSymbolicName() + "-content";
+        File targetFile = File.createTempFile(name, ".jar");
+        int len = 0;
+        byte[] buf = new byte[4096];
+        OutputStream out = new FileOutputStream(targetFile);
+        while ((len = input.read(buf)) >= 0) {
+            out.write(buf, 0, len);
+        }
+        input.close();
+        out.close();
+        return targetFile;
+    }
 }

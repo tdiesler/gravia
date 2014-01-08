@@ -21,29 +21,17 @@
  */
 package org.jboss.gravia.provision;
 
-import java.util.Set;
-
-import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.resolver.Resolver;
+import java.util.Map;
 import org.jboss.gravia.resource.Requirement;
+import org.jboss.gravia.resource.Resource;
 
 /**
- * The {@link Provisioner}
+ * The container specific {@link ResourceInstaller}.
  *
  * @author thomas.diesler@jboss.com
- * @since 06-May-2013
+ * @since 07-Jan-2014
  */
-public interface Provisioner {
+public interface ResourceInstaller {
 
-    Environment getEnvironment();
-
-    Resolver getResolver();
-
-    Repository getRepository();
-
-    ResourceInstaller getResourceInstaller();
-
-    ProvisionResult findResources(Set<Requirement> reqs);
-
-    Set<ResourceHandle> provisionResources(Set<Requirement> reqs) throws ProvisionException;
+    ResourceHandle installResource(Resource res, Map<Requirement, Resource> mapping) throws ProvisionException;
 }

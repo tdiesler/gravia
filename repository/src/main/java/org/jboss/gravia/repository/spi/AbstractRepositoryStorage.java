@@ -220,9 +220,9 @@ public abstract class AbstractRepositoryStorage extends MemoryRepositoryStorage 
         if (defaultContent == ccap) {
             input = resource.adapt(RepositoryContent.class).getContent();
         } else {
-            String contentURL = ccap.getContentURL();
+            URL contentURL = ccap.getContentURL();
             try {
-                input = new URL(contentURL).openStream();
+                input = contentURL.openStream();
             } catch (IOException ex) {
                 throw new IllegalStateException("Cannot access content URL: " + contentURL, ex);
             }

@@ -42,9 +42,9 @@ public abstract class AbstractRepositoryResource extends DefaultResource impleme
     public InputStream getContent() {
         for (Capability cap : getCapabilities(ContentNamespace.CONTENT_NAMESPACE)) {
             ContentCapability ccap = cap.adapt(ContentCapability.class);
-            String contentURL = ccap.getContentURL();
+            URL contentURL = ccap.getContentURL();
             try {
-                return new URL(contentURL).openStream();
+                return contentURL.openStream();
             } catch (IOException ex) {
                 throw new IllegalStateException("Cannot access content URL: " + contentURL, ex);
             }

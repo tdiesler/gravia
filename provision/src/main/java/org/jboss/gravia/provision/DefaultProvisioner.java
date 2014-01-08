@@ -22,14 +22,11 @@
 package org.jboss.gravia.provision;
 
 import java.util.Iterator;
-import java.util.Set;
-
 import org.jboss.gravia.provision.spi.AbstractProvisioner;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.DefaultPreferencePolicy;
 import org.jboss.gravia.resolver.PreferencePolicy;
 import org.jboss.gravia.resolver.Resolver;
-import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 
 /**
@@ -49,7 +46,7 @@ public class DefaultProvisioner extends AbstractProvisioner {
     }
 
     @Override
-    public Set<ResourceHandle> provisionResources(Set<Requirement> reqs) throws ProvisionException {
+    public ResourceInstaller getResourceInstaller() {
         throw new UnsupportedOperationException();
     }
 

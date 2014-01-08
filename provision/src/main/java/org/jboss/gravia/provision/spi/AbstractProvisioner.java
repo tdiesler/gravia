@@ -34,8 +34,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jboss.gravia.provision.Environment;
+import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ProvisionResult;
 import org.jboss.gravia.provision.Provisioner;
+import org.jboss.gravia.provision.ResourceHandle;
+import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.DefaultPreferencePolicy;
 import org.jboss.gravia.resolver.DefaultResolveContext;
@@ -164,6 +167,22 @@ public abstract class AbstractProvisioner implements Provisioner {
         }
 
         return result;
+    }
+
+    @Override
+    public Set<ResourceHandle> provisionResources(Set<Requirement> reqs) throws ProvisionException {
+        ProvisionResult result = findResources(reqs);
+        Set<Requirement> unsatisfied = result.getUnsatisfiedRequirements();
+        if (!unsatisfied.isEmpty()) {
+            throw new ProvisionException("Cannot resolve unsatisfied requirements: " + unsatisfied);
+        }
+        Map<Requirement, Resource> mapping = result.getMapping();
+        Set<ResourceHandle> handles = new HashSet<ResourceHandle>();
+        for (Resource res : result.getResources()) {
+            ResourceInstaller installer = getResourceInstaller();
+            handles.add(installer.installResource(res, mapping));
+        }
+        return Collections.unmodifiableSet(handles);
     }
 
     // Sort mapping targets higher in the list. This should result in resource installations

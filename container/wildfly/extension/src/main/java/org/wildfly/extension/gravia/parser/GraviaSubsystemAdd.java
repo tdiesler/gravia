@@ -44,6 +44,7 @@ import org.wildfly.extension.gravia.service.ModuleContextService;
 import org.wildfly.extension.gravia.service.ProvisionerService;
 import org.wildfly.extension.gravia.service.RepositoryService;
 import org.wildfly.extension.gravia.service.ResolverService;
+import org.wildfly.extension.gravia.service.ResourceInstallerService;
 import org.wildfly.extension.gravia.service.RuntimeService;
 
 /**
@@ -78,9 +79,10 @@ final class GraviaSubsystemAdd extends AbstractBoottimeAddStepHandler {
                 newControllers.add(new GraviaBootstrapService().install(context.getServiceTarget(), verificationHandler));
                 newControllers.add(new EnvironmentService().install(context.getServiceTarget(), verificationHandler));
                 newControllers.add(new ModuleContextService().install(context.getServiceTarget(), verificationHandler));
-                newControllers.add(new ResolverService().install(context.getServiceTarget(), verificationHandler));
-                newControllers.add(new RepositoryService().install(context.getServiceTarget(), verificationHandler));
                 newControllers.add(new ProvisionerService().install(context.getServiceTarget(), verificationHandler));
+                newControllers.add(new ResolverService().install(context.getServiceTarget(), verificationHandler));
+                newControllers.add(new ResourceInstallerService().install(context.getServiceTarget(), verificationHandler));
+                newControllers.add(new RepositoryService().install(context.getServiceTarget(), verificationHandler));
                 newControllers.add(new RuntimeService().install(context.getServiceTarget(), verificationHandler));
                 context.completeStep(OperationContext.RollbackHandler.NOOP_ROLLBACK_HANDLER);
             }

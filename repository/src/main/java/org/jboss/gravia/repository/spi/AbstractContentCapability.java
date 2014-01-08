@@ -22,6 +22,8 @@
 
 package org.jboss.gravia.repository.spi;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +42,7 @@ public class AbstractContentCapability extends AbstractCapability implements Con
 
     private String mimeType;
     private String digest;
-    private String contentURL;
+    private URL contentURL;
     private Long size;
 
     public AbstractContentCapability(AbstractResource resource, String namespace, Map<String, Object> atts, Map<String, String> dirs) {
@@ -57,7 +59,7 @@ public class AbstractContentCapability extends AbstractCapability implements Con
         Map<String, Object> result = new HashMap<String, Object>(atts);
         Object val = result.get(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE);
         if (val instanceof String) {
-            result.put(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE, Long.parseLong((String)val));
+            result.put(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE, Long.parseLong((String) val));
         }
         return result;
     }
@@ -73,7 +75,7 @@ public class AbstractContentCapability extends AbstractCapability implements Con
     }
 
     @Override
-    public String getContentURL() {
+    public URL getContentURL() {
         return contentURL;
     }
 
@@ -86,15 +88,27 @@ public class AbstractContentCapability extends AbstractCapability implements Con
     public void validate() {
         super.validate();
         if (ContentNamespace.CONTENT_NAMESPACE.equals(getNamespace())) {
+
             digest = (String) getAttribute(ContentNamespace.CONTENT_NAMESPACE);
             if (digest == null)
                 throw illegalStateCannotObtainAttribute(ContentNamespace.CONTENT_NAMESPACE);
+
             mimeType = (String) getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);
             if (mimeType == null)
                 throw illegalStateCannotObtainAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);
-            contentURL = (String) getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+
+            Object attval = getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+            if (attval instanceof String) {
+                try {
+                    attval = new URL((String) attval);
+                } catch (MalformedURLException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+            contentURL = (URL) attval;
             if (contentURL == null)
                 throw illegalStateCannotObtainAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+
             size = (Long) getAttribute(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE);
             if (size == null)
                 throw illegalStateCannotObtainAttribute(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE);

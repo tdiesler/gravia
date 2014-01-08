@@ -136,7 +136,7 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
         Assert.assertEquals(digest, ccap.getDigest());
         Assert.assertEquals("application/java-archive", ccap.getMimeType());
         Assert.assertEquals(new Long(392), ccap.getSize());
-        File contentFile = new File(new URL(ccap.getContentURL()).getPath()).getCanonicalFile();
+        File contentFile = new File(ccap.getContentURL().getPath()).getCanonicalFile();
         Assert.assertTrue("File exists: " + contentFile, contentFile.exists());
         Assert.assertTrue("Path starts with: " + storageDir.getPath(), contentFile.getPath().startsWith(storageDir.getPath()));
 
@@ -144,7 +144,7 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
         Assert.assertFalse(digest.equals(ccap.getDigest()));
         Assert.assertEquals("text/plain", ccap.getMimeType());
         Assert.assertEquals(new Long("some text".length()), ccap.getSize());
-        contentFile = new File(new URL(ccap.getContentURL()).getPath()).getCanonicalFile();
+        contentFile = new File(ccap.getContentURL().getPath()).getCanonicalFile();
         Assert.assertTrue("File exists: " + contentFile, contentFile.exists());
         Assert.assertTrue("Path starts with: " + storageDir.getPath(), contentFile.getPath().startsWith(storageDir.getPath()));
 

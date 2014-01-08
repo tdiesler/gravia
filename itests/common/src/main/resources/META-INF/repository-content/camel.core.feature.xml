@@ -44,6 +44,7 @@
       <attribute name="gravia.identity" value="org.apache.camel.core" />
       <attribute name="maven.identity" value="org.apache.camel:camel-core:jar:${version.apache.camel}" />
       <attribute name="version" value="${version.apache.camel}" />
+      <attribute name="shared" value="true" />
     </capability>
   </resource>
 </repository>
