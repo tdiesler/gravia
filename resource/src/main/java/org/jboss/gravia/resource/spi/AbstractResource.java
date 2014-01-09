@@ -35,7 +35,7 @@ import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.resource.ResourceType;
+import org.jboss.gravia.resource.CompositeDataResourceType;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.Wiring;
 import org.slf4j.Logger;
@@ -89,8 +89,7 @@ public abstract class AbstractResource implements Resource {
     private CompositeData getCompositeData() {
         CompositeData compositeData;
         try {
-            ResourceType resourceType = new ResourceType(this);
-            compositeData = resourceType.getCompositeData(this);
+            compositeData = new CompositeDataResourceType().getCompositeData(this);
         } catch (OpenDataException ex) {
             throw new IllegalStateException("Cannot construct composite data for: " + this, ex);
         }

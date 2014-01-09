@@ -25,11 +25,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.TabularData;
-
-import org.jboss.gravia.resource.ResourceType.AttributeType;
-import org.jboss.gravia.resource.ResourceType.CapabilityType;
-import org.jboss.gravia.resource.ResourceType.DirectiveType;
+import org.jboss.gravia.resource.CompositeDataResourceType.AttributeType;
+import org.jboss.gravia.resource.CompositeDataResourceType.CapabilityType;
+import org.jboss.gravia.resource.CompositeDataResourceType.DirectiveType;
+import org.jboss.gravia.resource.CompositeDataResourceType.RequirementType;
 
 
 /**
@@ -40,37 +39,32 @@ import org.jboss.gravia.resource.ResourceType.DirectiveType;
  *
  * @NotThreadSafe
  */
-public final class ManagementResourceBuilder extends DefaultResourceBuilder {
+public final class CompositeDataResourceBuilder extends DefaultResourceBuilder {
 
-    public ManagementResourceBuilder(CompositeData resData) {
-        CompositeData capsData = (CompositeData) resData.get(ResourceType.ITEM_CAPABILITIES);
-        for(Object obj : capsData.values()) {
-            CompositeData capData = (CompositeData) obj;
+    public CompositeDataResourceBuilder(CompositeData resData) {
+        CompositeData[] capsData = (CompositeData[]) resData.get(CompositeDataResourceType.ITEM_CAPABILITIES);
+        for(CompositeData capData : capsData) {
             String namespace = (String) capData.get(CapabilityType.ITEM_NAMESPACE);
-            TabularData attsData = (TabularData) capData.get(CapabilityType.ITEM_ATTRIBUTES);
+            CompositeData[] attsData = (CompositeData[]) capData.get(CapabilityType.ITEM_ATTRIBUTES);
             Map<String, Object> atts = getAttributes(attsData);
-            TabularData dirsData = (TabularData) capData.get(CapabilityType.ITEM_DIRECTIVES);
+            CompositeData[] dirsData = (CompositeData[]) capData.get(CapabilityType.ITEM_DIRECTIVES);
             Map<String, String> dirs = getDirectives(dirsData);
             addCapability(namespace, atts, dirs);
         }
-        if (resData.containsKey(ResourceType.ITEM_REQUIREMENTS)) {
-            CompositeData reqsData = (CompositeData) resData.get(ResourceType.ITEM_REQUIREMENTS);
-            for(Object obj : reqsData.values()) {
-                CompositeData reqData = (CompositeData) obj;
-                String namespace = (String) reqData.get(CapabilityType.ITEM_NAMESPACE);
-                TabularData attsData = (TabularData) reqData.get(CapabilityType.ITEM_ATTRIBUTES);
-                Map<String, Object> atts = getAttributes(attsData);
-                TabularData dirsData = (TabularData) reqData.get(CapabilityType.ITEM_DIRECTIVES);
-                Map<String, String> dirs = getDirectives(dirsData);
-                addRequirement(namespace, atts, dirs);
-            }
+        CompositeData[] reqsData = (CompositeData[]) resData.get(CompositeDataResourceType.ITEM_REQUIREMENTS);
+        for(CompositeData reqData : reqsData) {
+            String namespace = (String) reqData.get(CapabilityType.ITEM_NAMESPACE);
+            CompositeData[] attsData = (CompositeData[]) reqData.get(RequirementType.ITEM_ATTRIBUTES);
+            Map<String, Object> atts = getAttributes(attsData);
+            CompositeData[] dirsData = (CompositeData[]) reqData.get(RequirementType.ITEM_DIRECTIVES);
+            Map<String, String> dirs = getDirectives(dirsData);
+            addRequirement(namespace, atts, dirs);
         }
     }
 
-    private Map<String, Object> getAttributes(TabularData attsData) {
+    private Map<String, Object> getAttributes(CompositeData[] attsData) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
-        for(Object obj : attsData.values()) {
-            CompositeData attData = (CompositeData) obj;
+        for(CompositeData attData : attsData) {
             String key = (String) attData.get(AttributeType.ITEM_KEY);
             Object value = attData.get(AttributeType.ITEM_VALUE);
             result.put(key, value);
@@ -78,10 +72,9 @@ public final class ManagementResourceBuilder extends DefaultResourceBuilder {
         return result;
     }
 
-    private Map<String, String> getDirectives(TabularData dirsData) {
+    private Map<String, String> getDirectives(CompositeData[] dirsData) {
         Map<String, String> result = new LinkedHashMap<String, String>();
-        for(Object obj : dirsData.values()) {
-            CompositeData dirData = (CompositeData) obj;
+        for(CompositeData dirData : dirsData) {
             String key = (String) dirData.get(DirectiveType.ITEM_KEY);
             String value = (String) dirData.get(DirectiveType.ITEM_VALUE);
             result.put(key, value);

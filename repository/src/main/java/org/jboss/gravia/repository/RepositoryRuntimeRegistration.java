@@ -11,7 +11,7 @@ import javax.management.StandardMBean;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
-import org.jboss.gravia.resource.ManagementResourceBuilder;
+import org.jboss.gravia.resource.CompositeDataResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -110,13 +110,13 @@ public class RepositoryRuntimeRegistration {
 
         @Override
         public void addResource(CompositeData resData) throws IOException {
-            Resource resource = new ManagementResourceBuilder(resData).getResource();
+            Resource resource = new CompositeDataResourceBuilder(resData).getResource();
             repository.addResource(resource);
         }
 
         @Override
         public CompositeData addResource(CompositeData resData, URL contentURL) throws IOException {
-            Resource resource = new ManagementResourceBuilder(resData).getResource();
+            Resource resource = new CompositeDataResourceBuilder(resData).getResource();
             return repository.addResource(resource, contentURL).adapt(CompositeData.class);
         }
 

@@ -29,12 +29,12 @@ import javax.management.openmbean.CompositeData;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
-import org.jboss.gravia.resource.ManagementResourceBuilder;
+import org.jboss.gravia.resource.CompositeDataResourceBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.resource.ResourceType;
+import org.jboss.gravia.resource.CompositeDataResourceType;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -51,13 +51,14 @@ public class ResourceTypeTestCase  {
         Capability cap = builder.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, "test1");
         cap.getAttributes().put("cfoo", "cbar");
         cap.getDirectives().put("cone", "ctwo");
+        builder.addCapability("some.namespace", "some.value");
         Resource resout = builder.getResource();
 
         CompositeData resData = resout.adapt(CompositeData.class);
-        String identity = (String) resData.get(ResourceType.ITEM_IDENTITY);
+        String identity = (String) resData.get(CompositeDataResourceType.ITEM_IDENTITY);
         Assert.assertEquals("test1:0.0.0", identity);
 
-        Resource resin = new ManagementResourceBuilder(resData).getResource();
+        Resource resin = new CompositeDataResourceBuilder(resData).getResource();
         ResourceIdentity resid = resin.getIdentity();
         Assert.assertEquals("test1:0.0.0", resid.toString());
         Capability icap = resin.getIdentityCapability();
@@ -73,16 +74,17 @@ public class ResourceTypeTestCase  {
         Capability cap = builder.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, "test1");
         cap.getAttributes().put("cfoo", "cbar");
         cap.getDirectives().put("cone", "ctwo");
+        builder.addCapability("some.namespace", "some.value");
         Requirement req = builder.addRequirement(IdentityNamespace.IDENTITY_NAMESPACE, "test2");
         req.getAttributes().put("rfoo", "rbar");
         req.getDirectives().put("rone", "rtwo");
         Resource resout = builder.getResource();
 
         CompositeData resData = resout.adapt(CompositeData.class);
-        String identity = (String) resData.get(ResourceType.ITEM_IDENTITY);
+        String identity = (String) resData.get(CompositeDataResourceType.ITEM_IDENTITY);
         Assert.assertEquals("test1:0.0.0", identity);
 
-        Resource resin = new ManagementResourceBuilder(resData).getResource();
+        Resource resin = new CompositeDataResourceBuilder(resData).getResource();
         ResourceIdentity resid = resin.getIdentity();
         Assert.assertEquals("test1:0.0.0", resid.toString());
         Capability icap = resin.getIdentityCapability();
