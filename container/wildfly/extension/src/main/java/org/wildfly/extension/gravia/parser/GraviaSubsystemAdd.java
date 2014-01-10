@@ -36,6 +36,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceController;
 import org.wildfly.extension.gravia.deployment.GraviaServicesProcessor;
 import org.wildfly.extension.gravia.deployment.ManifestResourceProcessor;
+import org.wildfly.extension.gravia.deployment.ModuleDependenciesProcessor;
 import org.wildfly.extension.gravia.deployment.ModuleInstallProcessor;
 import org.wildfly.extension.gravia.deployment.ModuleStartProcessor;
 import org.wildfly.extension.gravia.service.EnvironmentService;
@@ -57,6 +58,7 @@ final class GraviaSubsystemAdd extends AbstractBoottimeAddStepHandler {
 
     public static final int PARSE_GRAVIA_SERVICES_PROVIDER = Phase.PARSE_OSGI_SUBSYSTEM_ACTIVATOR + 0x01;
     public static final int PARSE_GRAVIA_RESOURCE = Phase.PARSE_OSGI_DEPLOYMENT + 0x01;
+    public static final int DEPENDENCIES_GRAVIA_RESOURCE = Phase.DEPENDENCIES_BATCH + 0x01;
     public static final int POST_MODULE_GRAVIA_MODULE_INSTALL = Phase.POST_MODULE_REFLECTION_INDEX + 0x01;
     public static final int INSTALL_GRAVIA_MODULE_START = Phase.INSTALL_DEPLOYMENT_COMPLETE_SERVICE - 0x01;
 
@@ -94,6 +96,7 @@ final class GraviaSubsystemAdd extends AbstractBoottimeAddStepHandler {
             public void execute(DeploymentProcessorTarget processorTarget) {
                 processorTarget.addDeploymentProcessor(GraviaExtension.SUBSYSTEM_NAME, Phase.PARSE, PARSE_GRAVIA_SERVICES_PROVIDER, new GraviaServicesProcessor());
                 processorTarget.addDeploymentProcessor(GraviaExtension.SUBSYSTEM_NAME, Phase.PARSE, PARSE_GRAVIA_RESOURCE, new ManifestResourceProcessor());
+                processorTarget.addDeploymentProcessor(GraviaExtension.SUBSYSTEM_NAME, Phase.DEPENDENCIES, DEPENDENCIES_GRAVIA_RESOURCE, new ModuleDependenciesProcessor());
                 processorTarget.addDeploymentProcessor(GraviaExtension.SUBSYSTEM_NAME, Phase.POST_MODULE, POST_MODULE_GRAVIA_MODULE_INSTALL, new ModuleInstallProcessor());
                 processorTarget.addDeploymentProcessor(GraviaExtension.SUBSYSTEM_NAME, Phase.INSTALL, INSTALL_GRAVIA_MODULE_START, new ModuleStartProcessor());
             }
