@@ -31,7 +31,6 @@ import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Executors;
-
 import org.jboss.as.controller.ModelController;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.client.ModelControllerClient;
@@ -169,14 +168,10 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
 
     private ResourceHandle deployResource(Resource res, Map<Requirement, Resource> mapping) throws Exception {
         LOGGER.info("Deploying resource: {}", res);
-
-        Capability icap = res.getIdentityCapability();
-        String rtnameAtt = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE);
-        final String runtimeName = rtnameAtt != null ? rtnameAtt : res.getIdentity().getSymbolicName();
         final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
-        InputStream input = res.adapt(ResourceContent.class).getContent();
-        //InputStream input = getWrappedResourceContent(res, mapping);
-        serverDeployer.deploy(runtimeName, input);
+        final ResourceWrapper wrapper = getWrappedResourceContent(res, mapping);
+        final String runtimeName = wrapper.getRuntimeName();
+        serverDeployer.deploy(runtimeName, wrapper.getInputStream());
         return new DefaultResourceHandle(res) {
             @Override
             public void uninstall() {
@@ -190,16 +185,40 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
     }
 
     // Wrap the resource and add a generated jboss-deployment-structure.xml
-    private InputStream getWrappedResourceContent(Resource res, Map<Requirement, Resource> mapping) {
-        ResourceIdentity resid = res.getIdentity();
+    private ResourceWrapper getWrappedResourceContent(Resource res, Map<Requirement, Resource> mapping) {
+
+        Capability icap = res.getIdentityCapability();
+        String rtnameAtt = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE);
+        String runtimeName = rtnameAtt != null ? rtnameAtt : res.getIdentity().getSymbolicName() + ".jar";
+
+        // Do nothing if there is no mapping
+        if (mapping == null) {
+            InputStream content = res.adapt(ResourceContent.class).getContent();
+            return new ResourceWrapper(runtimeName, content);
+        }
+
+        // Create content archive
         ConfigurationBuilder config = new ConfigurationBuilder().classLoaders(Collections.singleton(ShrinkWrap.class.getClassLoader()));
-        JavaArchive archive = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, "wrapped-resource.jar");
-        archive.as(ZipImporter.class).importFrom(((ResourceContent) res).getContent());
-        JavaArchive wrapper = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, "wrapped:" + resid.getSymbolicName());
-        Asset structureAsset = new StringAsset(generateDeploymentStructure(res, mapping));
+        JavaArchive archive = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, runtimeName);
+        archive.as(ZipImporter.class).importFrom(res.adapt(ResourceContent.class).getContent());
+
+        boolean wrapAsSubdeployment = runtimeName.endsWith(".war");
+
+        // Create wrapper archive
+        JavaArchive wrapper;
+        Asset structureAsset;
+        if (wrapAsSubdeployment) {
+            wrapper = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, "wrapped-" + runtimeName + ".ear");
+            structureAsset = new StringAsset(generateSubdeploymentDeploymentStructure(res, runtimeName, mapping));
+        } else {
+            wrapper = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, "wrapped-" + runtimeName);
+            structureAsset = new StringAsset(generateDeploymentStructure(res, runtimeName, mapping));
+        }
         wrapper.addAsManifestResource(structureAsset, "jboss-deployment-structure.xml");
         wrapper.add(archive, "/", ZipExporter.class);
-        return wrapper.as(ZipExporter.class).exportAsInputStream();
+
+        InputStream content = wrapper.as(ZipExporter.class).exportAsInputStream();
+        return new ResourceWrapper(wrapper.getName(), content);
     }
 
     private String generateModuleXML(File resFile, Resource res, Map<Requirement, Resource> mapping) throws IOException {
@@ -209,9 +228,43 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
         buffer.append(" <resources>");
         buffer.append("  <resource-root path='" + resFile.getName() + "'/>");
         buffer.append(" </resources>");
+        addModuleDependencies(res, mapping, buffer);
+        buffer.append("</module>");
+        return buffer.toString();
+    }
+
+    private String generateDeploymentStructure(Resource res, String runtimeName, Map<Requirement, Resource> mapping) {
+        LOGGER.info("Generating dependencies for: {}", res);
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("<jboss-deployment-structure xmlns='urn:jboss:deployment-structure:1.2'>");
+        buffer.append(" <deployment>");
+        buffer.append("  <resources>");
+        buffer.append("   <resource-root path='" + runtimeName + "' use-physical-code-source='true'/>");
+        buffer.append("  </resources>");
+        addModuleDependencies(res, mapping, buffer);
+        buffer.append(" </deployment>");
+        buffer.append("</jboss-deployment-structure>");
+        return buffer.toString();
+    }
+
+    private String generateSubdeploymentDeploymentStructure(Resource res, String runtimeName, Map<Requirement, Resource> mapping) {
+        LOGGER.info("Generating dependencies for: {}", res);
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("<jboss-deployment-structure xmlns='urn:jboss:deployment-structure:1.2'>");
+        buffer.append(" <sub-deployment name='" + runtimeName + "'>");
+        buffer.append("  <resources>");
+        buffer.append("   <resource-root path='" + runtimeName + "' use-physical-code-source='true'/>");
+        buffer.append("  </resources>");
+        addModuleDependencies(res, mapping, buffer);
+        buffer.append(" </sub-deployment>");
+        buffer.append("</jboss-deployment-structure>");
+        return buffer.toString();
+    }
+
+    private void addModuleDependencies(Resource res, Map<Requirement, Resource> mapping, StringBuffer buffer) {
         buffer.append(" <dependencies>");
         for (Requirement req : res.getRequirements(IdentityNamespace.IDENTITY_NAMESPACE)) {
-            Resource depres = mapping.get(req);
+            Resource depres = mapping != null ? mapping.get(req) : null;
             if (depres != null) {
                 String modname = depres.getIdentity().getSymbolicName();
                 buffer.append("<module name='" + modname + "'/>");
@@ -219,31 +272,6 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
             }
         }
         buffer.append(" </dependencies>");
-        buffer.append("</module>");
-        return buffer.toString();
-    }
-
-    private String generateDeploymentStructure(Resource res, Map<Requirement, Resource> mapping) {
-        LOGGER.info("Generating dependencies for: {}", res);
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("<jboss-deployment-structure xmlns='urn:jboss:deployment-structure:1.2'>");
-        buffer.append(" <deployment>");
-        buffer.append("  <resources>");
-        buffer.append("   <resource-root path='wrapped-resource.jar' use-physical-code-source='true'/>");
-        buffer.append("  </resources>");
-        buffer.append("  <dependencies>");
-        for (Requirement req : res.getRequirements(IdentityNamespace.IDENTITY_NAMESPACE)) {
-            Resource depres = mapping.get(req);
-            if (depres != null) {
-                String modname = depres.getIdentity().getSymbolicName();
-                buffer.append("<module name='" + modname + "'/>");
-                LOGGER.info("  {}", modname);
-            }
-        }
-        buffer.append("  </dependencies>");
-        buffer.append(" </deployment>");
-        buffer.append("</jboss-deployment-structure>");
-        return buffer.toString();
     }
 
     private long copyResourceContent(InputStream input, File targetFile) throws IOException {
@@ -259,5 +287,20 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
         input.close();
         out.close();
         return total;
+    }
+
+    static class ResourceWrapper {
+        private final String runtimeName;
+        private final InputStream inputStream;
+        ResourceWrapper(String runtimeName, InputStream inputStream) {
+            this.runtimeName = runtimeName;
+            this.inputStream = inputStream;
+        }
+        String getRuntimeName() {
+            return runtimeName;
+        }
+        InputStream getInputStream() {
+            return inputStream;
+        }
     }
 }

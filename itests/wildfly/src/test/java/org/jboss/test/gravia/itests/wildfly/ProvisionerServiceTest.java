@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +57,7 @@ import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
+import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
@@ -78,7 +78,6 @@ import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.jboss.test.gravia.itests.support.HttpRequest;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.service.http.HttpService;
@@ -187,32 +186,38 @@ public class ProvisionerServiceTest {
     }
 
     @Test
-    @Ignore
     public void testProvisionResources() throws Exception {
 
         // Add a resource to the repository that has a dependency on camel.core
         DefaultResourceBuilder builder = new DefaultResourceBuilder();
-        builder.addIdentityCapability(RESOURCE_A, Version.emptyVersion);
+        Capability icap = builder.addIdentityCapability(RESOURCE_A, Version.emptyVersion);
+        icap.getAttributes().put(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, RESOURCE_A + ".war");
         builder.addContentCapability(deployer.getDeployment(RESOURCE_A));
+        builder.addIdentityRequirement("org.apache.camel.core", new VersionRange("[2.11,3.0)"));
         Resource res = builder.getResource();
 
         Repository repository = provisioner.getRepository();
         Resource resA = repository.addResource(res);
         Assert.assertEquals(RESOURCE_A + ":0.0.0", resA.getIdentity().toString());
+
         try {
             // Provision that resource, which should first install camel.core and then deploy deploymentA
             // The {@link ModuleActivator} of deploymentA should register an http service that accesses camel
             Requirement req = new IdentityRequirementBuilder(resA.getIdentity()).getRequirement();
             Set<ResourceHandle> result = provisioner.provisionResources(Collections.singleton(req));
-            Assert.assertEquals(2, result.size());
+            Assert.assertFalse(result.isEmpty());
+
+            List<ResourceHandle> handles = new ArrayList<ResourceHandle>();
+            for (ResourceHandle handle : result) {
+                handles.add(handle);
+            }
+
             try {
                 String reqspec = "/service?test=Kermit";
                 String context = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "" : "/" + RESOURCE_A;
                 Assert.assertEquals("Hello Kermit", performCall(context, reqspec));
             } finally {
-                Iterator<ResourceHandle> itres = result.iterator();
-                while(itres.hasNext()) {
-                    ResourceHandle handle = itres.next();
+                for (ResourceHandle handle : handles) {
                     handle.uninstall();
                 }
             }
@@ -275,16 +280,13 @@ public class ProvisionerServiceTest {
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(RESOURCE_A);
                     builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
-                    builder.addManifestHeader(Constants.GRAVIA_IDENTITY_REQUIREMENT, "org.apache.camel.core");
                     builder.addManifestHeader(Constants.MODULE_ACTIVATOR, CamelTransformActivator.class.getName());
                     builder.addImportPackages(Runtime.class, Servlet.class, HttpServlet.class, HttpService.class, CamelContext.class);
                     builder.addBundleClasspath("WEB-INF/classes");
                     return builder.openStream();
                 } else {
                     ManifestBuilder builder = new ManifestBuilder();
-                    Map<String, String> idatts = Collections.singletonMap(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, archive.getName());
-                    builder.addIdentityCapability(RESOURCE_A, Version.emptyVersion, idatts, null);
-                    builder.addManifestHeader(Constants.GRAVIA_IDENTITY_REQUIREMENT, "org.apache.camel.core");
+                    builder.addIdentityCapability(RESOURCE_A, Version.emptyVersion);
                     builder.addManifestHeader(Constants.MODULE_ACTIVATOR, CamelTransformActivator.class.getName());
                     return builder.openStream();
                 }
