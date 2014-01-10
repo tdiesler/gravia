@@ -19,10 +19,9 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.test.gravia.itests.wildfly;
+package org.jboss.test.gravia.itests;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import javax.management.MBeanServerConnection;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 
@@ -47,7 +45,6 @@ import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryMBean;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
@@ -99,16 +96,6 @@ public class ProvisionerServiceTest {
         protected String[] getInitialFeatureNames() {
             return new String[] { "camel.core" };
         }
-
-        @Override
-        protected void setupRepositoryContent(MBeanServerConnection server, RepositoryMBean repository, Map<String, String> props) throws IOException {
-            super.setupRepositoryContent(server, repository, props);
-        }
-
-        @Override
-        protected void removeRepositoryContent(MBeanServerConnection server, RepositoryMBean repository, Map<String, String> props) throws IOException {
-            super.removeRepositoryContent(server, repository, props);
-        }
     }
 
     @ArquillianResource
@@ -154,6 +141,9 @@ public class ProvisionerServiceTest {
     @Test
     public void testDeploymentWithDependency() throws Exception {
 
+        if (RuntimeType.getRuntimeType() != RuntimeType.WILDFLY)
+            return;
+
         // Provision the camel.core feature
         ResourceIdentity identity = ResourceIdentity.fromString("camel.core.feature:0.0.0");
         Requirement req = new IdentityRequirementBuilder(identity).getRequirement();
@@ -187,6 +177,9 @@ public class ProvisionerServiceTest {
 
     @Test
     public void testProvisionResources() throws Exception {
+
+        if (RuntimeType.getRuntimeType() != RuntimeType.WILDFLY)
+            return;
 
         // Add a resource to the repository that has a dependency on camel.core
         DefaultResourceBuilder builder = new DefaultResourceBuilder();
@@ -235,7 +228,7 @@ public class ProvisionerServiceTest {
     }
 
     @Deployment(name = DEPLOYMENT_A, managed = false, testable = false)
-    private static Archive<?> getDeployment() {
+    public static Archive<?> getDeployment() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, DEPLOYMENT_A + ".war");
         archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
         archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
@@ -267,7 +260,7 @@ public class ProvisionerServiceTest {
     }
 
     @Deployment(name = RESOURCE_A, managed = false, testable = false)
-    private static Archive<?> getRepositoryResource() {
+    public static Archive<?> getRepositoryResource() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, RESOURCE_A + ".war");
         archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
         archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
