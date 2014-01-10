@@ -86,7 +86,6 @@ public class ConfigurationAdminTest  {
                     ManifestBuilder builder = new ManifestBuilder();
                     builder.addIdentityCapability(archive.getName(), "1.0.0");
                     builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml,OSGI-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");
-                    builder.addManifestHeader("Dependencies", "org.jboss.gravia");
                     return builder.openStream();
                 }
             }

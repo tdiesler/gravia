@@ -121,7 +121,6 @@ public class ProvisionerServiceTest {
                 } else {
                     ManifestBuilder builder = new ManifestBuilder();
                     builder.addIdentityCapability(archive.getName(), "1.0.0");
-                    builder.addManifestHeader("Dependencies", "org.jboss.gravia");
                     return builder.openStream();
                 }
             }

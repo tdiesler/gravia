@@ -55,7 +55,6 @@ public class WebappModuleLifecycleTest {
             public InputStream openStream() {
                 ManifestBuilder builder = new ManifestBuilder();
                 builder.addIdentityCapability(archive.getName(), "1.0.0");
-                builder.addManifestHeader("Dependencies", "org.jboss.gravia,org.jboss.shrinkwrap.core");
                 return builder.openStream();
             }
         });

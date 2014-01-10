@@ -108,7 +108,6 @@ public class HttpServiceSecureTestCase {
                 } else {
                     ManifestBuilder builder = new ManifestBuilder();
                     builder.addIdentityCapability("http-service-secure", "1.0.0");
-                    builder.addManifestHeader("Dependencies", "org.jboss.gravia");
                     return builder.openStream();
                 }
             }
