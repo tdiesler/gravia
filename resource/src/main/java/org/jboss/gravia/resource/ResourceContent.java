@@ -1,6 +1,6 @@
 /*
  * #%L
- * JBossOSGi Resolver API
+ * Gravia Repository
  * %%
  * Copyright (C) 2012 - 2013 JBoss by Red Hat
  * %%
@@ -19,42 +19,23 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
+package org.jboss.gravia.resource;
 
-package org.jboss.gravia.repository;
-
-import java.net.URL;
-
-import org.jboss.gravia.resource.Capability;
+import java.io.InputStream;
 
 /**
- * A content capability
+ * An accessor for the default content of a resource.
+ *
+ * A {@link Resource} may be adaptable to this type.
  *
  * @author thomas.diesler@jboss.com
- * @since 05-Jul-2012
+ * @since 31-May-2012
  */
-public interface ContentCapability extends Capability {
-
-    String DEFAULT_DIGEST = "default-digest";
-    String DEFAULT_MIME_TYPE = "application/octet-stream";
-    Long DEFAULT_SIZE = new Long(-1);
+public interface ResourceContent {
 
     /**
-     * An IANA defined MIME type for the format of this content
+     * Returns a new input stream to the default content of this resource.
+     * @return An input stream for the default content or null if the resource does not contain a content capability
      */
-    String getMimeType();
-
-    /**
-     * The SHA-256 hex encoded digest for this resource
-     */
-    String getDigest();
-
-    /**
-     * The URL to the bytes. This must be an absolute URL
-     */
-    URL getContentURL();
-
-    /**
-     * The size of the resource in bytes as it will be read from the URL
-     */
-    Long getSize();
+    InputStream getContent();
 }

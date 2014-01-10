@@ -22,6 +22,8 @@
 
 package org.jboss.gravia.resource;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Map;
 
 /**
@@ -34,36 +36,43 @@ public interface ResourceBuilder {
 
     /**
      * Add the identity {@link Capability}.
-     *
-     * @param identity The identity
      */
     Capability addIdentityCapability(ResourceIdentity identity);
 
     /**
      * Add the identity {@link Capability}.
-     *
-     * @param symbolicName The symbolic name
-     * @param version The version
      */
     Capability addIdentityCapability(String symbolicName, String version);
 
     /**
      * Add the identity {@link Capability}.
-     *
-     * @param symbolicName The symbolic name
-     * @param version The version
      */
     Capability addIdentityCapability(String symbolicName, Version version);
 
     /**
      * Add the identity {@link Capability}.
-     *
-     * @param symbolicName The symbolic name
-     * @param version The version
-     * @param atts The attributes
-     * @param dirs The directives
      */
     Capability addIdentityCapability(String symbolicName, Version version, Map<String, Object> atts, Map<String, String> dirs);
+
+    /**
+     * Add a content capability
+     */
+    Capability addContentCapability(InputStream content);
+
+    /**
+     * Add a content capability
+     */
+    Capability addContentCapability(InputStream content, Map<String, Object> atts, Map<String, String> dirs);
+
+    /**
+     * Add a content capability
+     */
+    Capability addContentCapability(URL contentURL);
+
+    /**
+     * Add a content capability
+     */
+    Capability addContentCapability(URL contentURL, Map<String, Object> atts, Map<String, String> dirs);
 
     /**
      * Add a {@link Capability}
@@ -75,36 +84,21 @@ public interface ResourceBuilder {
 
     /**
      * Add a {@link Capability}
-     *
-     * @param namespace The namespace
-     * @param atts The attributes
-     * @param dirs The directives
      */
     Capability addCapability(String namespace, Map<String, Object> atts, Map<String, String> dirs);
 
     /**
      * Add an identity {@link Requirement}
-     *
-     * @param symbolicName The symbolic name
-     * @param version The version range
      */
     Requirement addIdentityRequirement(String symbolicName, String version);
 
     /**
      * Add an identity {@link Requirement}
-     *
-     * @param symbolicName The symbolic name
-     * @param version The version range
      */
     Requirement addIdentityRequirement(String symbolicName, VersionRange version);
 
     /**
      * Add an identity {@link Requirement}
-     *
-     * @param symbolicName The symbolic name
-     * @param version The version range
-     * @param atts The attributes
-     * @param dirs The directives
      */
     Requirement addIdentityRequirement(String symbolicName, VersionRange version, Map<String, Object> atts, Map<String, String> dirs);
 
@@ -118,10 +112,6 @@ public interface ResourceBuilder {
 
     /**
      * Add a {@link Requirement}
-     *
-     * @param namespace The namespace
-     * @param atts The attributes
-     * @param dirs The directives
      */
     Requirement addRequirement(String namespace, Map<String, Object> atts, Map<String, String> dirs);
 

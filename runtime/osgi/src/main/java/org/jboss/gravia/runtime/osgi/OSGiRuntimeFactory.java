@@ -34,7 +34,7 @@ import org.osgi.framework.BundleContext;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public final class OSGiRuntimeFactory implements RuntimeFactory {
+final class OSGiRuntimeFactory implements RuntimeFactory {
 
     private final BundleContext syscontext;
 

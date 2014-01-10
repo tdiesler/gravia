@@ -35,6 +35,8 @@ import java.util.Map;
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.repository.spi.AbstractRepositoryStorage;
 import org.jboss.gravia.repository.spi.RepositoryContentHelper;
+import org.jboss.gravia.resource.ContentNamespace;
+import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
@@ -87,7 +89,7 @@ public class DefaultRepositoryStorage extends AbstractRepositoryStorage {
 
     @Override
     public ResourceBuilder createResourceBuilder() {
-        return new DefaultRepositoryResourceBuilder();
+        return new DefaultResourceBuilder();
     }
 
     @Override
@@ -112,7 +114,7 @@ public class DefaultRepositoryStorage extends AbstractRepositoryStorage {
             targetFile.getParentFile().mkdirs();
             tempFile.renameTo(targetFile);
             URL url = targetFile.toURI().toURL();
-            atts.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, url.toExternalForm());
+            atts.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, url);
         } catch (IOException ex) {
             throw new RepositoryStorageException(ex);
         }

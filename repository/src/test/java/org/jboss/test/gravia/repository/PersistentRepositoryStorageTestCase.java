@@ -32,21 +32,21 @@ import java.util.Collection;
 import java.util.List;
 
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.repository.ContentCapability;
-import org.jboss.gravia.repository.ContentNamespace;
 import org.jboss.gravia.repository.DefaultRepositoryStorage;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.repository.spi.RepositoryContentHelper;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.ContentCapability;
+import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.DefaultRequirementBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.IdentityRequirementBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -125,7 +125,7 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
         Resource resource = cap.getResource();
         verifyDefaultContent(resource);
 
-        InputStream input = resource.adapt(RepositoryContent.class).getContent();
+        InputStream input = resource.adapt(ResourceContent.class).getContent();
         String digest = RepositoryContentHelper.getDigest(input);
         Assert.assertNotNull("RepositoryContent not null", input);
         input.close();
@@ -193,7 +193,7 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
     }
 
     private void verifyDefaultContent(Resource resource) throws Exception {
-        InputStream input = resource.adapt(RepositoryContent.class).getContent();
+        InputStream input = resource.adapt(ResourceContent.class).getContent();
         String digest = RepositoryContentHelper.getDigest(input);
         Assert.assertNotNull("RepositoryContent not null", input);
         input.close();
@@ -206,8 +206,8 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
         Assert.assertEquals("application/java-archive", cap.getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE));
         Assert.assertEquals(new Long(392), ccap.getSize());
         Assert.assertEquals(new Long(392), cap.getAttribute(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE));
-        String contentURL = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
-        File contentFile = new File(new URL(contentURL).getPath()).getCanonicalFile();
+        URL contentURL = (URL) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+        File contentFile = new File(contentURL.getPath()).getCanonicalFile();
         Assert.assertTrue("File exists: " + contentFile, contentFile.exists());
         Assert.assertTrue("Path starts with: " + storageDir.getPath(), contentFile.getPath().startsWith(storageDir.getPath()));
     }

@@ -25,12 +25,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.gravia.repository.Namespace100;
-import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
@@ -61,8 +61,7 @@ public class AbstractResourcesReaderTestCase extends AbstractRepositoryTest {
         Assert.assertEquals(2, resources.size());
 
         Resource res = resources.get(0);
-        Assert.assertTrue(res instanceof RepositoryContent);
-        Assert.assertNull(((RepositoryContent)res).getContent());
+        Assert.assertNull(res.adapt(ResourceContent.class).getContent());
 
         ResourceIdentity resid = res.getIdentity();
         Assert.assertEquals("org.acme.foo.feature", resid.getSymbolicName());
@@ -80,8 +79,7 @@ public class AbstractResourcesReaderTestCase extends AbstractRepositoryTest {
         Assert.assertEquals(new VersionRange("[1.0,2.0)"), req.getAttribute(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE));
 
         res = resources.get(1);
-        Assert.assertTrue(res instanceof RepositoryContent);
-        Assert.assertNull(((RepositoryContent)res).getContent());
+        Assert.assertNull(res.adapt(ResourceContent.class).getContent());
 
         resid = res.getIdentity();
         Assert.assertEquals("org.acme.foo", resid.getSymbolicName());

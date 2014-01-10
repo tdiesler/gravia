@@ -46,12 +46,15 @@ public class DefaultResourceBuilder extends AbstractResourceBuilder {
 
     @Override
     protected AbstractCapability createCapability(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives) {
-        return new DefaultCapability(resource, namespace, attributes, directives);
+        if (ContentNamespace.CONTENT_NAMESPACE.equals(namespace)) {
+            return new DefaultContentCapability(resource, namespace, attributes, directives);
+        } else {
+            return new DefaultCapability(resource, namespace, attributes, directives);
+        }
     }
 
     @Override
     protected AbstractRequirement createRequirement(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives) {
         return new DefaultRequirement(resource, namespace, attributes, directives);
     }
-
 }

@@ -52,6 +52,18 @@ public interface IdentityNamespace extends Namespace {
     String CAPABILITY_VERSION_ATTRIBUTE = "version";
 
     /**
+     * The capability attribute defining this resource is to shared.
+     * The default is 'false'.
+     */
+    String CAPABILITY_SHARED_ATTRIBUTE = "shared";
+
+    /**
+     * The capability attribute defining the runtime name durint deployment.
+     * The default is the identity symbolic name.
+     */
+    String CAPABILITY_RUNTIME_NAME_ATTRIBUTE = "runtime.name";
+
+    /**
      * The capability attribute identifying the resource type. If the resource
      * has no type then the value {@link #TYPE_UNKNOWN unknown} must be used for
      * the attribute.

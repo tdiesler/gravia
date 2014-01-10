@@ -55,8 +55,8 @@ import org.wildfly.extension.gravia.GraviaConstants;
  */
 public class RepositoryService extends AbstractService<Repository> {
 
-    private final InjectedValue<Runtime> injectedRuntime = new InjectedValue<Runtime>();
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
+    private final InjectedValue<Runtime> injectedRuntime = new InjectedValue<Runtime>();
     private Registration registration;
     private Repository repository;
 

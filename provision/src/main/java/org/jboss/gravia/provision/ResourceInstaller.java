@@ -22,6 +22,7 @@
 package org.jboss.gravia.provision;
 
 import java.util.Map;
+
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 

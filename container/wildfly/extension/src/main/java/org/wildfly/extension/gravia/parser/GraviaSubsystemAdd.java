@@ -58,7 +58,7 @@ final class GraviaSubsystemAdd extends AbstractBoottimeAddStepHandler {
     public static final int PARSE_GRAVIA_SERVICES_PROVIDER = Phase.PARSE_OSGI_SUBSYSTEM_ACTIVATOR + 0x01;
     public static final int PARSE_GRAVIA_RESOURCE = Phase.PARSE_OSGI_DEPLOYMENT + 0x01;
     public static final int POST_MODULE_GRAVIA_MODULE_INSTALL = Phase.POST_MODULE_REFLECTION_INDEX + 0x01;
-    public static final int INSTALL_GRAVIA_MODULE_START = Phase.INSTALL_PERSISTENCE_SERVICES + 0x01;
+    public static final int INSTALL_GRAVIA_MODULE_START = Phase.INSTALL_DEPLOYMENT_COMPLETE_SERVICE - 0x01;
 
     public GraviaSubsystemAdd(SubsystemState subsystemState) {
     }

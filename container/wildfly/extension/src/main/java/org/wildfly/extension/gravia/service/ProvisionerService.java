@@ -23,13 +23,22 @@
 
 package org.wildfly.extension.gravia.service;
 
+import java.util.Iterator;
+import java.util.Set;
+
 import org.jboss.as.controller.ServiceVerificationHandler;
+import org.jboss.gravia.provision.DefaultEnvironment;
 import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.Environment;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.Resolver;
+import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.Requirement;
+import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.msc.service.AbstractService;
@@ -83,6 +92,34 @@ public class ProvisionerService extends AbstractService<Provisioner> {
             @Override
             public ResourceInstaller getResourceInstaller() {
                 return injectedResourceInstaller.getValue();
+            }
+
+            @Override
+            protected Environment cloneEnvironment(Environment env) {
+                Environment clone = new DefaultEnvironment("Cloned " + env.getName()) {
+                    @Override
+                    public Set<Capability> findProviders(Requirement req) {
+                        Set<Capability> providers = super.findProviders(req);
+                        if (providers.isEmpty() && req.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE)) {
+                            providers = EnvironmentService.findModuleProviders(req);
+                        }
+                        return providers;
+                    }
+
+                    @Override
+                    public Resource getResource(ResourceIdentity resid) {
+                        Resource resource = super.getResource(resid);
+                        if (resource == null) {
+                            resource = EnvironmentService.getModuleResource(resid);
+                        }
+                        return resource;
+                    }
+                };
+                Iterator<Resource> itres = env.getResources();
+                while (itres.hasNext()) {
+                    clone.addResource(itres.next());
+                }
+                return clone;
             }
         };
 

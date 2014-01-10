@@ -20,17 +20,16 @@
  * #L%
  */
 
-package org.jboss.gravia.repository.spi;
+package org.jboss.gravia.resource.spi;
 
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jboss.gravia.repository.ContentCapability;
-import org.jboss.gravia.repository.ContentNamespace;
-import org.jboss.gravia.resource.spi.AbstractCapability;
-import org.jboss.gravia.resource.spi.AbstractResource;
+import org.jboss.gravia.resource.ContentCapability;
+import org.jboss.gravia.resource.ContentNamespace;
 
 /**
  * The abstract implementation of a {@link ContentCapability}.
@@ -42,6 +41,7 @@ public class AbstractContentCapability extends AbstractCapability implements Con
 
     private String mimeType;
     private String digest;
+    private InputStream contentStream;
     private URL contentURL;
     private Long size;
 
@@ -61,6 +61,10 @@ public class AbstractContentCapability extends AbstractCapability implements Con
         if (val instanceof String) {
             result.put(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE, Long.parseLong((String) val));
         }
+        val = result.get(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+        if (val instanceof String) {
+            result.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, toURL((String) val));
+        }
         return result;
     }
 
@@ -72,6 +76,11 @@ public class AbstractContentCapability extends AbstractCapability implements Con
     @Override
     public String getDigest() {
         return digest;
+    }
+
+    @Override
+    public InputStream getContentStream() {
+        return contentStream;
     }
 
     @Override
@@ -97,16 +106,9 @@ public class AbstractContentCapability extends AbstractCapability implements Con
             if (mimeType == null)
                 throw illegalStateCannotObtainAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);
 
-            Object attval = getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
-            if (attval instanceof String) {
-                try {
-                    attval = new URL((String) attval);
-                } catch (MalformedURLException ex) {
-                    throw new IllegalStateException(ex);
-                }
-            }
-            contentURL = (URL) attval;
-            if (contentURL == null)
+            contentURL = (URL) getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+            contentStream = (InputStream) getAttribute(ContentNamespace.CAPABILITY_STREAM_ATTRIBUTE);
+            if (contentURL == null && contentStream == null)
                 throw illegalStateCannotObtainAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
 
             size = (Long) getAttribute(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE);
@@ -117,5 +119,13 @@ public class AbstractContentCapability extends AbstractCapability implements Con
 
     private IllegalStateException illegalStateCannotObtainAttribute(String attrName) {
         return new IllegalStateException("Cannot obtain attribute: " + attrName);
+    }
+
+    private static URL toURL(String urlspec) {
+        try {
+            return new URL(urlspec);
+        } catch (MalformedURLException ex) {
+            throw new IllegalArgumentException(ex);
+        }
     }
 }

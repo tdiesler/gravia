@@ -21,11 +21,14 @@
  */
 package org.jboss.gravia.resource.spi;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
@@ -34,6 +37,7 @@ import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.resource.spi.AttributeValueHandler.AttributeValue;
+import org.jboss.gravia.utils.NotNullException;
 
 /**
  * An abstract {@link Resource} builder.
@@ -55,21 +59,25 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
 
     @Override
     public Capability addIdentityCapability(ResourceIdentity identity) {
+        NotNullException.assertValue(identity, "identity");
         return addIdentityCapability(identity.getSymbolicName(), identity.getVersion());
     }
 
     @Override
     public Capability addIdentityCapability(String symbolicName, String version) {
+        NotNullException.assertValue(symbolicName, "symbolicName");
         return addIdentityCapability(symbolicName, version != null ? Version.parseVersion(version) : null, null, null);
     }
 
     @Override
     public Capability addIdentityCapability(String symbolicName, Version version) {
+        NotNullException.assertValue(symbolicName, "symbolicName");
         return addIdentityCapability(symbolicName, version, null, null);
     }
 
     @Override
     public Capability addIdentityCapability(String symbolicName, Version version, Map<String, Object> atts, Map<String, String> dirs) {
+        NotNullException.assertValue(symbolicName, "symbolicName");
         Capability icap = addCapability(IdentityNamespace.IDENTITY_NAMESPACE, symbolicName);
         if (version != null) {
             icap.getAttributes().put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
@@ -84,12 +92,51 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
     }
 
     @Override
+    public Capability addContentCapability(InputStream content) {
+        NotNullException.assertValue(content, "content");
+        Map<String, Object> atts = Collections.singletonMap(ContentNamespace.CAPABILITY_STREAM_ATTRIBUTE, (Object)content);
+        return addCapability(ContentNamespace.CONTENT_NAMESPACE, atts, null);
+    }
+
+    @Override
+    public Capability addContentCapability(InputStream content, Map<String, Object> atts, Map<String, String> dirs) {
+        NotNullException.assertValue(content, "content");
+        Map<String, Object> exatts = new LinkedHashMap<String, Object>();
+        if (atts != null) {
+            exatts.putAll(atts);
+        }
+        exatts.put(ContentNamespace.CAPABILITY_STREAM_ATTRIBUTE, content);
+        return addCapability(ContentNamespace.CONTENT_NAMESPACE, exatts, dirs);
+    }
+
+    @Override
+    public Capability addContentCapability(URL contentURL) {
+        NotNullException.assertValue(contentURL, "contentURL");
+        Map<String, Object> atts = Collections.singletonMap(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, (Object)contentURL);
+        return addCapability(ContentNamespace.CONTENT_NAMESPACE, atts, null);
+    }
+
+    @Override
+    public Capability addContentCapability(URL contentURL, Map<String, Object> atts, Map<String, String> dirs) {
+        NotNullException.assertValue(contentURL, "contentURL");
+        Map<String, Object> exatts = new LinkedHashMap<String, Object>();
+        if (atts != null) {
+            exatts.putAll(atts);
+        }
+        exatts.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, contentURL);
+        return addCapability(ContentNamespace.CONTENT_NAMESPACE, exatts, dirs);
+    }
+
+    @Override
     public Capability addCapability(String namespace, String nsvalue) {
+        NotNullException.assertValue(namespace, "namespace");
+        NotNullException.assertValue(nsvalue, "nsvalue");
         return addCapability(namespace, Collections.singletonMap(namespace, (Object)nsvalue), null);
     }
 
     @Override
     public Capability addCapability(String namespace, Map<String, Object> atts, Map<String, String> dirs) {
+        NotNullException.assertValue(namespace, "namespace");
         AbstractResource resource = getResourceInternal();
         AbstractCapability cap = createCapability(resource, namespace, mutableAttributes(atts), mutableDirectives(dirs));
         resource.addCapability(cap);
@@ -98,16 +145,19 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
 
     @Override
     public Requirement addIdentityRequirement(String symbolicName, String version) {
+        NotNullException.assertValue(symbolicName, "symbolicName");
         return addIdentityRequirement(symbolicName, new VersionRange(version), null,  null);
     }
 
     @Override
     public Requirement addIdentityRequirement(String symbolicName, VersionRange version) {
+        NotNullException.assertValue(symbolicName, "symbolicName");
         return addIdentityRequirement(symbolicName, version, null,  null);
     }
 
     @Override
     public Requirement addIdentityRequirement(String symbolicName, VersionRange version, Map<String, Object> atts, Map<String, String> dirs) {
+        NotNullException.assertValue(symbolicName, "symbolicName");
         Requirement ireq = addRequirement(IdentityNamespace.IDENTITY_NAMESPACE, symbolicName);
         if (version != null) {
             ireq.getAttributes().put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
@@ -123,11 +173,14 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
 
     @Override
     public Requirement addRequirement(String namespace, String nsvalue) {
+        NotNullException.assertValue(namespace, "namespace");
+        NotNullException.assertValue(nsvalue, "nsvalue");
         return addRequirement(namespace, Collections.singletonMap(namespace, (Object)nsvalue), null);
     }
 
     @Override
     public Requirement addRequirement(String namespace, Map<String, Object> atts, Map<String, String> dirs) {
+        NotNullException.assertValue(namespace, "namespace");
         AbstractResource resource = getResourceInternal();
         AbstractRequirement req = createRequirement(resource, namespace, mutableAttributes(atts), mutableDirectives(dirs));
         resource.addRequirement(req);
@@ -149,6 +202,7 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
     }
 
     protected String parseParameterizedValue(String line, Map<String, Object> atts, Map<String, String> dirs) {
+        NotNullException.assertValue(line, "line");
         String mainvalue = null;
         for (String part : ElementParser.parseDelimitedString(line, ';', true)) {
             if (part.indexOf(":=") > 0) {

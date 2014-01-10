@@ -21,6 +21,9 @@
  */
 package org.jboss.gravia.resource.spi;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,12 +31,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
+
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.ContentCapability;
+import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.CompositeDataResourceType;
 import org.jboss.gravia.resource.Version;
@@ -82,6 +89,8 @@ public abstract class AbstractResource implements Resource {
             result = (T) this;
         } else if (type.isAssignableFrom(CompositeData.class)) {
             result = (T) getCompositeData();
+        } else if (type.isAssignableFrom(ResourceContent.class)) {
+            result = (T) getResourceContent();
         }
         return result;
     }
@@ -94,6 +103,32 @@ public abstract class AbstractResource implements Resource {
             throw new IllegalStateException("Cannot construct composite data for: " + this, ex);
         }
         return compositeData;
+    }
+
+    private ResourceContent getResourceContent() {
+        final InputStream result;
+        List<Capability> ccaps = getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
+        if (ccaps.isEmpty()) {
+            result = null;
+        } else {
+            ContentCapability ccap = ccaps.get(0).adapt(ContentCapability.class);
+            InputStream contentStream = ccap.getContentStream();
+            if (contentStream == null) {
+                URL contentURL = ccap.getContentURL();
+                try {
+                    contentStream = contentURL.openStream();
+                } catch (IOException ex) {
+                    throw new IllegalStateException("Cannot access content URL: " + contentURL, ex);
+                }
+            }
+            result = contentStream;
+        }
+        return new ResourceContent() {
+            @Override
+            public InputStream getContent() {
+                return result;
+            }
+        };
     }
 
     @Override

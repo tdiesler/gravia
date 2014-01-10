@@ -33,21 +33,21 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.repository.ContentCapability;
-import org.jboss.gravia.repository.ContentNamespace;
 import org.jboss.gravia.repository.DefaultRepository;
-import org.jboss.gravia.repository.DefaultRepositoryResourceBuilder;
 import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.MavenIdentityRequirementBuilder;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.ContentCapability;
+import org.jboss.gravia.resource.ContentNamespace;
+import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityRequirementBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
+import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -116,7 +116,7 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
     @Test
     public void testAddResourceWithMavenId() throws Exception {
 
-        ResourceBuilder builder = new DefaultRepositoryResourceBuilder();
+        ResourceBuilder builder = new DefaultResourceBuilder();
         builder.addIdentityCapability("org.jboss.logging", "3.1.3.GA");
         Resource res = builder.getResource();
 
@@ -143,11 +143,12 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
     @Test
     public void testAddResourceFromURL() throws Exception {
 
-        ResourceBuilder builder = new DefaultRepositoryResourceBuilder();
+        ResourceBuilder builder = new DefaultResourceBuilder();
         builder.addIdentityCapability("resA", "1.0.0");
+        builder.addContentCapability(resAjar.toURI().toURL());
         Resource res = builder.getResource();
 
-        res = repository.addResource(res, resAjar.toURI().toURL());
+        res = repository.addResource(res);
 
         Requirement req = new IdentityRequirementBuilder("resA", "[1.0,2.0)").getRequirement();
         Collection<Capability> providers = repository.findProviders(req);
@@ -169,12 +170,12 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
     @Test
     public void testAddResourceFromInputStream() throws Exception {
 
-        ResourceBuilder builder = new DefaultRepositoryResourceBuilder();
+        ResourceBuilder builder = new DefaultResourceBuilder();
         builder.addIdentityCapability("resA", "1.0.0");
+        builder.addContentCapability(getResourceA().as(ZipExporter.class).exportAsInputStream());
         Resource res = builder.getResource();
 
-        InputStream inputStream = getResourceA().as(ZipExporter.class).exportAsInputStream();
-        res = repository.addResource(res, inputStream);
+        res = repository.addResource(res);
 
         Requirement req = new IdentityRequirementBuilder("resA", "[1.0,2.0)").getRequirement();
         Collection<Capability> providers = repository.findProviders(req);
@@ -203,7 +204,7 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
         URL baseURL = storageDir.toURI().toURL();
         Assert.assertTrue("Local path: " + contentURL, contentURL.getPath().startsWith(baseURL.getPath()));
 
-        RepositoryContent content = (RepositoryContent) res;
+        ResourceContent content = res.adapt(ResourceContent.class);
         JarInputStream jarstream = new JarInputStream(content.getContent());
         try {
             Manifest manifest = jarstream.getManifest();

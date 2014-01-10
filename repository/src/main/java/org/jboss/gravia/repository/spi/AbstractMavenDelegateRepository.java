@@ -31,12 +31,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.repository.ContentNamespace;
 import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.MavenDelegateRepository;
 import org.jboss.gravia.repository.MavenResourceBuilder;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
@@ -143,7 +143,7 @@ public abstract class AbstractMavenDelegateRepository extends AbstractRepository
             MavenResourceBuilder builder = new MavenResourceBuilder();
             builder.addIdentityCapability(mavenid);
             Capability ccap = builder.addCapability(ContentNamespace.CONTENT_NAMESPACE, null, null);
-            ccap.getAttributes().put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, contentURL.toExternalForm());
+            ccap.getAttributes().put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, contentURL);
             LOGGER.debug("Found maven resource: {}", result = builder.getResource());
         }
 

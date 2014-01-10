@@ -25,6 +25,8 @@ import java.util.Hashtable;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.jboss.gravia.utils.NotNullException;
+
 /**
  * A manifest {@link Resource} builder.
  *
@@ -36,6 +38,7 @@ import java.util.jar.Manifest;
 public class ManifestResourceBuilder extends DictionaryResourceBuilder {
 
     public ManifestResourceBuilder load(Manifest manifest) {
+        NotNullException.assertValue(manifest, "manifest");
         Hashtable<String, String> headers = new Hashtable<String, String>();
         Attributes mainatts = manifest.getMainAttributes();
         for (Object key : mainatts.keySet()) {

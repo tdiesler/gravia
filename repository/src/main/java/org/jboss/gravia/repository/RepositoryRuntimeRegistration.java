@@ -3,7 +3,6 @@ package org.jboss.gravia.repository;
 import static org.jboss.gravia.repository.spi.AbstractRepository.LOGGER;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Map;
 
 import javax.management.MBeanServer;
@@ -109,15 +108,9 @@ public class RepositoryRuntimeRegistration {
         }
 
         @Override
-        public void addResource(CompositeData resData) throws IOException {
+        public CompositeData addResource(CompositeData resData) throws IOException {
             Resource resource = new CompositeDataResourceBuilder(resData).getResource();
-            repository.addResource(resource);
-        }
-
-        @Override
-        public CompositeData addResource(CompositeData resData, URL contentURL) throws IOException {
-            Resource resource = new CompositeDataResourceBuilder(resData).getResource();
-            return repository.addResource(resource, contentURL).adapt(CompositeData.class);
+            return repository.addResource(resource).adapt(CompositeData.class);
         }
 
         @Override

@@ -30,23 +30,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.jboss.gravia.repository.ContentCapability;
-import org.jboss.gravia.repository.ContentNamespace;
 import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.MavenDelegateRepository;
 import org.jboss.gravia.repository.Namespace100.Attribute;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryAggregator;
-import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.repository.RepositoryStorageException;
 import org.jboss.gravia.repository.RepositoryWriter;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.ContentCapability;
+import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
+import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
@@ -136,14 +136,9 @@ public abstract class AbstractRepositoryStorage extends MemoryRepositoryStorage 
 
     private Resource addContentResource(Resource res, List<Capability> ccaps, boolean writeXML) throws RepositoryStorageException {
 
-        String urlspec = (String) ccaps.get(0).getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
-        if (urlspec == null)
-            throw new IllegalArgumentException("Cannot obtain content URL from: " + res);
-
-        Resource result;
-
         // Copy the resource to this storage, if the content URL does not match
-        if (urlspec.startsWith(getBaseURL().toExternalForm()) == false) {
+        URL urlatt = (URL) ccaps.get(0).getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+        if (urlatt == null || urlatt.toExternalForm().startsWith(getBaseURL().toExternalForm()) == false) {
             ResourceBuilder builder = createResourceBuilder();
             for (Capability cap : res.getCapabilities(null)) {
                 if (!ContentNamespace.CONTENT_NAMESPACE.equals(cap.getNamespace())) {
@@ -169,12 +164,10 @@ public abstract class AbstractRepositoryStorage extends MemoryRepositoryStorage 
                 String namespace = req.getNamespace();
                 builder.addRequirement(namespace, req.getAttributes(), req.getDirectives());
             }
-            result = builder.getResource();
-        } else {
-            result = res;
+            res = builder.getResource();
         }
 
-        result = super.addResource(result);
+        Resource result = super.addResource(res);
         if (writeXML == true) {
             writeRepositoryXML();
         }
@@ -200,8 +193,8 @@ public abstract class AbstractRepositoryStorage extends MemoryRepositoryStorage 
         List<Capability> ccaps = res.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
         if (!ccaps.isEmpty()) {
             Capability ccap = ccaps.iterator().next();
-            String fileURL = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
-            File contentFile = new File(fileURL.substring("file:".length()));
+            URL fileURL = (URL) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+            File contentFile = new File(fileURL.toExternalForm().substring("file:".length()));
             if (contentFile.exists()) {
                 deleteRecursive(contentFile.getParentFile());
             }
@@ -218,7 +211,7 @@ public abstract class AbstractRepositoryStorage extends MemoryRepositoryStorage 
         Resource resource = ccap.getResource();
         Capability defaultContent = resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).get(0);
         if (defaultContent == ccap) {
-            input = resource.adapt(RepositoryContent.class).getContent();
+            input = resource.adapt(ResourceContent.class).getContent();
         } else {
             URL contentURL = ccap.getContentURL();
             try {

@@ -176,11 +176,13 @@ public abstract class AbstractProvisioner implements Provisioner {
         if (!unsatisfied.isEmpty()) {
             throw new ProvisionException("Cannot resolve unsatisfied requirements: " + unsatisfied);
         }
+        ResourceInstaller installer = getResourceInstaller();
         Map<Requirement, Resource> mapping = result.getMapping();
         Set<ResourceHandle> handles = new HashSet<ResourceHandle>();
         for (Resource res : result.getResources()) {
-            ResourceInstaller installer = getResourceInstaller();
-            handles.add(installer.installResource(res, mapping));
+            if (!isAbstract(res)) {
+                handles.add(installer.installResource(res, mapping));
+            }
         }
         return Collections.unmodifiableSet(handles);
     }

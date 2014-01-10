@@ -96,7 +96,7 @@ public class HttpServiceTestCase {
                 } else {
                     ManifestBuilder builder = new ManifestBuilder();
                     builder.addIdentityCapability("http-service", "1.0.0");
-                    builder.addManifestHeader("Dependencies", "org.jboss.gravia,org.jboss.shrinkwrap.core");
+                    builder.addManifestHeader("Dependencies", "org.jboss.gravia");
                     return builder.openStream();
                 }
             }

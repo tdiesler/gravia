@@ -46,5 +46,11 @@
       <attribute name="version" value="${version.apache.camel}" />
       <attribute name="shared" value="true" />
     </capability>
+    <requirement namespace="gravia.identity">
+      <attribute name="gravia.identity" value="javax.api" />
+    </requirement>
+    <requirement namespace="gravia.identity">
+      <attribute name="gravia.identity" value="org.slf4j" />
+    </requirement>
   </resource>
 </repository>

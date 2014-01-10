@@ -49,7 +49,7 @@ public class DefaultResourceHandle implements ResourceHandle {
     }
 
     @Override
-    public void uninstall() throws ProvisionException {
+    public void uninstall() {
         // do nothing
     }
 }

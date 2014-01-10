@@ -22,8 +22,6 @@
 package org.jboss.gravia.repository;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
 
@@ -80,16 +78,6 @@ public interface Repository extends Adaptable {
      * Add a {@link Resource} to the associated {@link RepositoryStorage}
      */
     Resource addResource(Resource resource, MavenCoordinates mavenid) throws IOException;
-
-    /**
-     * Add a {@link Resource} to the associated {@link RepositoryStorage}
-     */
-    Resource addResource(Resource resource, URL content) throws IOException;
-
-    /**
-     * Add a {@link Resource} to the associated {@link RepositoryStorage}
-     */
-    Resource addResource(Resource resource, InputStream content) throws IOException;
 
     /**
      * Remove a {@link Resource} grom the associated {@link RepositoryStorage}

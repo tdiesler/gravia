@@ -5,16 +5,16 @@
  * Copyright (C) 2012 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -25,6 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.Version;
@@ -35,7 +36,7 @@ import org.jboss.gravia.resource.Version;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public class MavenResourceBuilder extends DefaultRepositoryResourceBuilder {
+public class MavenResourceBuilder extends DefaultResourceBuilder {
 
     public Capability addIdentityCapability(MavenCoordinates mavenid) {
         Capability icap = addIdentityCapability(getSymbolicName(mavenid), getVersion(mavenid), null, null);
@@ -55,7 +56,7 @@ public class MavenResourceBuilder extends DefaultRepositoryResourceBuilder {
      * Clean up version parameters. Other builders use more fuzzy definitions of
      * the version syntax. This method cleans up such a version to match an OSGi
      * version.
-     * 
+     *
      * https://github.com/apache/felix/blob/trunk/bundleplugin/src/main/java/org/apache/maven/shared/osgi/DefaultMaven2OsgiConverter.java
      * https://github.com/apache/felix/commit/39cc9ac8cbb3e5d8a76793b81b7cb9b04bca85b0
      *

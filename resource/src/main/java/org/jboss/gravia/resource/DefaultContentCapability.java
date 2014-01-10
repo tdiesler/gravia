@@ -20,11 +20,11 @@
  * #L%
  */
 
-package org.jboss.gravia.repository;
+package org.jboss.gravia.resource;
 
 import java.util.Map;
 
-import org.jboss.gravia.repository.spi.AbstractContentCapability;
+import org.jboss.gravia.resource.spi.AbstractContentCapability;
 import org.jboss.gravia.resource.spi.AbstractResource;
 
 /**

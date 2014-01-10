@@ -20,11 +20,14 @@
  * #L%
  */
 
-
 package org.wildfly.extension.gravia.service;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -34,16 +37,18 @@ import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.helpers.standalone.ServerDeploymentHelper;
 import org.jboss.as.controller.client.helpers.standalone.ServerDeploymentManager;
+import org.jboss.as.server.ServerEnvironment;
+import org.jboss.as.server.ServerEnvironmentService;
 import org.jboss.as.server.Services;
 import org.jboss.gravia.provision.DefaultResourceHandle;
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
-import org.jboss.gravia.repository.RepositoryContent;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.msc.service.AbstractService;
 import org.jboss.msc.service.ServiceBuilder;
@@ -74,12 +79,14 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
 
     static final Logger LOGGER = LoggerFactory.getLogger(GraviaConstants.class.getPackage().getName());
 
+    private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
     private final InjectedValue<ModelController> injectedController = new InjectedValue<ModelController>();
     private ServerDeploymentManager serverDeploymentManager;
     private ModelControllerClient modelControllerClient;
 
     public ServiceController<ResourceInstaller> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<ResourceInstaller> builder = serviceTarget.addService(GraviaConstants.RESOURCE_INSTALLER_SERVICE_NAME, this);
+        builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, injectedServerEnvironment);
         builder.addDependency(Services.JBOSS_SERVER_CONTROLLER, ModelController.class, injectedController);
         builder.addListener(verificationHandler);
         return builder.install();
@@ -107,31 +114,76 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
     }
 
     @Override
-    public ResourceHandle installResource(Resource res, Map<Requirement, Resource> mapping) throws ProvisionException {
-
-        RepositoryContent content = res.adapt(RepositoryContent.class);
-        if (content == null) {
-            return new DefaultResourceHandle(res);
-        }
-
-        res.getIdentityCapability().getAttributes().get("");
-        final String runtimeName = res.getIdentity().getSymbolicName();
-        final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
+    public synchronized ResourceHandle installResource(Resource res, Map<Requirement, Resource> mapping) throws ProvisionException {
+        Capability icap = res.getIdentityCapability();
+        boolean shared = Boolean.parseBoolean((String) icap.getAttributes().get(IdentityNamespace.CAPABILITY_SHARED_ATTRIBUTE));
         try {
-            InputStream input = getWrappedResourceContent(res, mapping);
-            serverDeployer.deploy(runtimeName, input);
-        } catch (Throwable th) {
-            throw new ProvisionException("Cannot provision resource: " + res, th);
+            if (shared) {
+                return installSharedResource(res, mapping);
+            } else {
+                return deployResource(res, mapping);
+            }
+        } catch (RuntimeException rte) {
+            throw rte;
+        } catch (ProvisionException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new ProvisionException("Cannot provision resource: " + res, ex);
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    private ResourceHandle installSharedResource(Resource res, Map<Requirement, Resource> mapping) throws Exception {
+        LOGGER.info("Installing shared resource: {}", res);
+
+        ResourceIdentity resid = res.getIdentity();
+        File modulesDir = injectedServerEnvironment.getValue().getModulesDir();
+        File moduleDir = new File(modulesDir, resid.getSymbolicName().replace(".", File.separator) + File.separator + "main");
+        if (moduleDir.exists())
+            throw new IllegalStateException("Module dir already exists: " + moduleDir);
+
+        ResourceContent content = res.adapt(ResourceContent.class);
+        if (content == null)
+            throw new IllegalStateException("Cannot obtain repository content from: " + res);
+
+        // copy resource content
+        moduleDir.mkdirs();
+        File resFile = new File(moduleDir, resid.getSymbolicName() + "-" + resid.getVersion() + ".jar");
+        copyResourceContent(content.getContent(), resFile);
+
+        // generate module.xml
+        File xmlFile = new File(moduleDir, "module.xml");
+        String moduleXML = generateModuleXML(resFile, res, mapping);
+        FileOutputStream fos = new FileOutputStream(xmlFile);
+        OutputStreamWriter osw = new OutputStreamWriter(fos);
+        osw.write(moduleXML);
+        osw.close();
 
         return new DefaultResourceHandle(res) {
-
             @Override
-            public void uninstall() throws ProvisionException {
+            public void uninstall() {
+                // cannot uninstall shared resource
+            }
+        };
+    }
+
+    private ResourceHandle deployResource(Resource res, Map<Requirement, Resource> mapping) throws Exception {
+        LOGGER.info("Deploying resource: {}", res);
+
+        Capability icap = res.getIdentityCapability();
+        String rtnameAtt = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE);
+        final String runtimeName = rtnameAtt != null ? rtnameAtt : res.getIdentity().getSymbolicName();
+        final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
+        InputStream input = res.adapt(ResourceContent.class).getContent();
+        //InputStream input = getWrappedResourceContent(res, mapping);
+        serverDeployer.deploy(runtimeName, input);
+        return new DefaultResourceHandle(res) {
+            @Override
+            public void uninstall() {
                 try {
                     serverDeployer.undeploy(runtimeName);
                 } catch (Throwable th) {
-                    throw new ProvisionException("Cannot uninstall provisioned resource: " + getResource(), th);
+                    LOGGER.warn("Cannot uninstall provisioned resource: " + getResource(), th);
                 }
             }
         };
@@ -142,14 +194,36 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
         ResourceIdentity resid = res.getIdentity();
         ConfigurationBuilder config = new ConfigurationBuilder().classLoaders(Collections.singleton(ShrinkWrap.class.getClassLoader()));
         JavaArchive archive = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, "wrapped-resource.jar");
-        archive.as(ZipImporter.class).importFrom(((RepositoryContent) res).getContent());
+        archive.as(ZipImporter.class).importFrom(((ResourceContent) res).getContent());
         JavaArchive wrapper = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, "wrapped:" + resid.getSymbolicName());
-        wrapper.addAsManifestResource(getDeploymentStructureAsset(res, mapping), "jboss-deployment-structure.xml");
+        Asset structureAsset = new StringAsset(generateDeploymentStructure(res, mapping));
+        wrapper.addAsManifestResource(structureAsset, "jboss-deployment-structure.xml");
         wrapper.add(archive, "/", ZipExporter.class);
         return wrapper.as(ZipExporter.class).exportAsInputStream();
     }
 
-    private Asset getDeploymentStructureAsset(Resource res, Map<Requirement, Resource> mapping) {
+    private String generateModuleXML(File resFile, Resource res, Map<Requirement, Resource> mapping) throws IOException {
+        LOGGER.info("Generating dependencies for: {}", res);
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("<module xmlns='urn:jboss:module:1.1' name='" + res.getIdentity().getSymbolicName() + "'>");
+        buffer.append(" <resources>");
+        buffer.append("  <resource-root path='" + resFile.getName() + "'/>");
+        buffer.append(" </resources>");
+        buffer.append(" <dependencies>");
+        for (Requirement req : res.getRequirements(IdentityNamespace.IDENTITY_NAMESPACE)) {
+            Resource depres = mapping.get(req);
+            if (depres != null) {
+                String modname = depres.getIdentity().getSymbolicName();
+                buffer.append("<module name='" + modname + "'/>");
+                LOGGER.info("  {}", modname);
+            }
+        }
+        buffer.append(" </dependencies>");
+        buffer.append("</module>");
+        return buffer.toString();
+    }
+
+    private String generateDeploymentStructure(Resource res, Map<Requirement, Resource> mapping) {
         LOGGER.info("Generating dependencies for: {}", res);
         StringBuffer buffer = new StringBuffer();
         buffer.append("<jboss-deployment-structure xmlns='urn:jboss:deployment-structure:1.2'>");
@@ -161,12 +235,7 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
         for (Requirement req : res.getRequirements(IdentityNamespace.IDENTITY_NAMESPACE)) {
             Resource depres = mapping.get(req);
             if (depres != null) {
-                Capability icap = depres.getIdentityCapability();
-                String type = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE);
                 String modname = depres.getIdentity().getSymbolicName();
-                if (!IdentityNamespace.TYPE_MODULE.equals(type)) {
-                    modname = "deployment." + modname;
-                }
                 buffer.append("<module name='" + modname + "'/>");
                 LOGGER.info("  {}", modname);
             }
@@ -174,6 +243,21 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
         buffer.append("  </dependencies>");
         buffer.append(" </deployment>");
         buffer.append("</jboss-deployment-structure>");
-        return new StringAsset(buffer.toString());
+        return buffer.toString();
+    }
+
+    private long copyResourceContent(InputStream input, File targetFile) throws IOException {
+        int len = 0;
+        long total = 0;
+        byte[] buf = new byte[4096];
+        targetFile.getParentFile().mkdirs();
+        OutputStream out = new FileOutputStream(targetFile);
+        while ((len = input.read(buf)) >= 0) {
+            out.write(buf, 0, len);
+            total += len;
+        }
+        input.close();
+        out.close();
+        return total;
     }
 }

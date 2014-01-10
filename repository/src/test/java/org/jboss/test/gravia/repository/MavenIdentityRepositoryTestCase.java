@@ -26,13 +26,13 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import org.jboss.gravia.repository.ContentCapability;
-import org.jboss.gravia.repository.ContentNamespace;
 import org.jboss.gravia.repository.DefaultMavenDelegateRepository;
 import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.MavenIdentityRequirementBuilder;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.ContentCapability;
+import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;

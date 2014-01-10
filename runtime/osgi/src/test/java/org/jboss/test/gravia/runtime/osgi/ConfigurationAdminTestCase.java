@@ -37,6 +37,7 @@ import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.osgi.OSGiRuntimeLocator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
@@ -97,7 +98,7 @@ public class ConfigurationAdminTestCase  {
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
                 builder.addImportPackages(Module.class, ConfigurationAdmin.class);
-                builder.addDynamicImportPackages(ServiceD.class, ServiceD1.class, OSGiRuntimeLocator.class);
+                builder.addDynamicImportPackages(ServiceD.class, ServiceD1.class, Runtime.class);
                 return builder.openStream();
             }
         });
@@ -113,8 +114,9 @@ public class ConfigurationAdminTestCase  {
         bundleD.start();
         bundleD1.start();
 
-        Module modD = OSGiRuntimeLocator.getRuntime().getModule(bundleD.getBundleId());
-        Module modD1 = OSGiRuntimeLocator.getRuntime().getModule(bundleD1.getBundleId());
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Module modD = runtime.getModule(bundleD.getBundleId());
+        Module modD1 = runtime.getModule(bundleD1.getBundleId());
 
         ModuleContext ctxD = modD.getModuleContext();
         ServiceReference<ServiceD> srefA = ctxD.getServiceReference(ServiceD.class);
@@ -156,7 +158,7 @@ public class ConfigurationAdminTestCase  {
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
                 builder.addExportPackages(ServiceD.class);
-                builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
+                builder.addImportPackages(BundleActivator.class, ModuleActivator.class, Runtime.class, ComponentContext.class);
                 builder.addImportPackages(ServiceD1.class);
                 builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_D + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.d.ServiceD.xml");
@@ -178,7 +180,7 @@ public class ConfigurationAdminTestCase  {
                 builder.addBundleManifestVersion(2);
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
-                builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
+                builder.addImportPackages(BundleActivator.class, ModuleActivator.class, Runtime.class, ComponentContext.class);
                 builder.addExportPackages(ServiceD1.class);
                 builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_D1 + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.d1.ServiceD1.xml");
