@@ -36,6 +36,7 @@
 
     <!-- Properties -->
     <properties>
+        <version.apache.ant>1.7.0</version.apache.ant>
         <version.apache.camel>2.11.0</version.apache.camel>
         <version.apache.felix.configadmin>1.6.0</version.apache.felix.configadmin>
         <version.apache.felix.eventadmin>1.3.0</version.apache.felix.eventadmin>
@@ -79,61 +80,17 @@
     <dependencyManagement>
         <dependencies>
 
-            <!-- Arquillian -->
+            <!-- Apache -->
             <dependency>
-                <groupId>org.jboss.arquillian.container</groupId>
-                <artifactId>arquillian-container-spi</artifactId>
-                <version>${version.jboss.arquillian.core}</version>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant</artifactId>
+                <version>${version.apache.ant}</version>
             </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.container</groupId>
-                <artifactId>arquillian-container-test-spi</artifactId>
-                <version>${version.jboss.arquillian.core}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.test</groupId>
-                <artifactId>arquillian-test-spi</artifactId>
-                <version>${version.jboss.arquillian.core}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.junit</groupId>
-                <artifactId>arquillian-junit-container</artifactId>
-                <version>${version.jboss.arquillian.core}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.osgi</groupId>
-                <artifactId>arquillian-osgi-bundle</artifactId>
-                <version>${version.jboss.arquillian.osgi}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.testenricher</groupId>
-                <artifactId>arquillian-testenricher-osgi</artifactId>
-                <version>${version.jboss.arquillian.osgi}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.container</groupId>
-                <artifactId>arquillian-container-jbosgi-embedded</artifactId>
-                <version>${version.jboss.arquillian.osgi}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.container</groupId>
-                <artifactId>arquillian-container-karaf-managed</artifactId>
-                <version>${version.jboss.arquillian.osgi}</version>
-            </dependency>
-			<dependency>
-			  <groupId>org.jboss.arquillian.container</groupId>
-			  <artifactId>arquillian-tomcat-managed-7</artifactId>
-			  <version>${version.jboss.arquillian.tomcat}</version>
-			</dependency>
-
-            <!-- Camel -->
             <dependency>
                <groupId>org.apache.camel</groupId>
                <artifactId>camel-core</artifactId>
                <version>${version.apache.camel}</version>
             </dependency>
-            
-            <!-- Felix -->
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.configadmin</artifactId>
@@ -198,6 +155,51 @@
             
             <!-- JBoss -->
             <dependency>
+                <groupId>org.jboss.arquillian.container</groupId>
+                <artifactId>arquillian-container-spi</artifactId>
+                <version>${version.jboss.arquillian.core}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.container</groupId>
+                <artifactId>arquillian-container-test-spi</artifactId>
+                <version>${version.jboss.arquillian.core}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.test</groupId>
+                <artifactId>arquillian-test-spi</artifactId>
+                <version>${version.jboss.arquillian.core}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.junit</groupId>
+                <artifactId>arquillian-junit-container</artifactId>
+                <version>${version.jboss.arquillian.core}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.osgi</groupId>
+                <artifactId>arquillian-osgi-bundle</artifactId>
+                <version>${version.jboss.arquillian.osgi}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.testenricher</groupId>
+                <artifactId>arquillian-testenricher-osgi</artifactId>
+                <version>${version.jboss.arquillian.osgi}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.container</groupId>
+                <artifactId>arquillian-container-jbosgi-embedded</artifactId>
+                <version>${version.jboss.arquillian.osgi}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.container</groupId>
+                <artifactId>arquillian-container-karaf-managed</artifactId>
+                <version>${version.jboss.arquillian.osgi}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.jboss.arquillian.container</groupId>
+              <artifactId>arquillian-tomcat-managed-7</artifactId>
+              <version>${version.jboss.arquillian.tomcat}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.jboss.osgi.metadata</groupId>
                 <artifactId>jbosgi-metadata</artifactId>
                 <version>${version.jboss.osgi.metadata}</version>
@@ -247,6 +249,11 @@
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
                 <artifactId>tomcat-catalina</artifactId>
+                <version>${version.apache.tomcat}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-catalina-ant</artifactId>
                 <version>${version.apache.tomcat}</version>
             </dependency>
             

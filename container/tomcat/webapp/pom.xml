@@ -22,11 +22,6 @@
     <dependencies>
         <dependency>
             <groupId>org.jboss.gravia</groupId>
-            <artifactId>gravia-container-tomcat-extension</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-runtime-embedded</artifactId>
             <exclusions>
                 <exclusion>
@@ -46,6 +41,12 @@
         </dependency>
 
         <!-- Provided Depdendencies -->
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-container-tomcat-extension</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-resource</artifactId>

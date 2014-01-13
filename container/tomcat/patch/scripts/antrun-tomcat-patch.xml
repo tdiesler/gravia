@@ -33,9 +33,16 @@
 	<!-- ================================================================== -->
 	<target name="build" depends="init">
 
+		<!-- Copy to conf -->
+		<copy todir="${tomcat.patch.dir}/conf" overwrite="true">
+	        <fileset dir="${etc.dir}/tomcat/conf"/>
+		</copy>
+		
 		<!-- Copy to libs -->
 		<copy todir="${tomcat.patch.dir}/lib" overwrite="true">
 	        <fileset dir="${deploy.artifacts.lib}">
+				<include name="ant-*.jar" />
+				<include name="gravia-container-tomcat-extension-*.jar" />
 				<include name="gravia-provision-*.jar" />
 				<include name="gravia-resolver-*.jar" />
 				<include name="gravia-resource-*.jar" />

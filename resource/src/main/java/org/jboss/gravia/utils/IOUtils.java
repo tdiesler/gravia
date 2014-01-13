@@ -1,6 +1,6 @@
 /*
  * #%L
- * JBossOSGi Provision: Core
+ * Gravia :: Runtime :: API
  * %%
  * Copyright (C) 2013 JBoss by Red Hat
  * %%
@@ -19,25 +19,34 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.provision;
+package org.jboss.gravia.utils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.jboss.gravia.resource.Requirement;
-import org.jboss.gravia.resource.Resource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * The container specific {@link ResourceInstaller}.
+ * A utility class for IO operations.
  *
- * @author thomas.diesler@jboss.com
- * @since 07-Jan-2014
+ * @author Thomas.Diesler@jboss.com
+ * @since 16-Sep-2010
  */
-public interface ResourceInstaller {
+public final class IOUtils {
 
-    Set<ResourceHandle> installResources(List<Resource> resources, Map<Requirement, Resource> mapping) throws ProvisionException;
+    // Hide ctor
+    private IOUtils() {
+    }
 
-    ResourceHandle installResource(Resource res, Map<Requirement, Resource> mapping) throws ProvisionException;
-
+    public static long copyStream(InputStream input, OutputStream output) throws IOException {
+        int len = 0;
+        long total = 0;
+        byte[] buf = new byte[4096];
+        while ((len = input.read(buf)) >= 0) {
+            output.write(buf, 0, len);
+            total += len;
+        }
+        input.close();
+        output.close();
+        return total;
+    }
 }

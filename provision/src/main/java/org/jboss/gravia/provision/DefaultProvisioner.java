@@ -21,13 +21,11 @@
  */
 package org.jboss.gravia.provision;
 
-import java.util.Iterator;
 import org.jboss.gravia.provision.spi.AbstractProvisioner;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.DefaultPreferencePolicy;
 import org.jboss.gravia.resolver.PreferencePolicy;
 import org.jboss.gravia.resolver.Resolver;
-import org.jboss.gravia.resource.Resource;
 
 /**
  * The default {@link Provisioner}
@@ -37,26 +35,11 @@ import org.jboss.gravia.resource.Resource;
  */
 public class DefaultProvisioner extends AbstractProvisioner {
 
-    public DefaultProvisioner(Environment environment, Resolver resolver, Repository repository) {
-        super(environment, resolver, repository, new DefaultPreferencePolicy(null));
+    public DefaultProvisioner(Environment environment, Resolver resolver, Repository repository, ResourceInstaller installer) {
+        super(environment, resolver, repository, installer, new DefaultPreferencePolicy(null));
     }
 
-    public DefaultProvisioner(Environment environment, Resolver resolver, Repository repository, PreferencePolicy policy) {
-        super(environment, resolver, repository, policy);
-    }
-
-    @Override
-    public ResourceInstaller getResourceInstaller() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected Environment cloneEnvironment(Environment env) {
-        Environment clone = new DefaultEnvironment("Cloned " + env.getName());
-        Iterator<Resource> itres = env.getResources();
-        while (itres.hasNext()) {
-            clone.addResource(itres.next());
-        }
-        return clone;
+    public DefaultProvisioner(Environment environment, Resolver resolver, Repository repository, ResourceInstaller installer, PreferencePolicy policy) {
+        super(environment, resolver, repository, installer, policy);
     }
 }

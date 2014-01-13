@@ -66,7 +66,7 @@ public final class RuntimeEventsManager {
     private final ExecutorService executorService;
 
     /** The moduleState listeners */
-    private final Map<Module, List<BundleListenerRegistration>> moduleListeners = new ConcurrentHashMap<Module, List<BundleListenerRegistration>>();
+    private final Map<Module, List<ModuleListenerRegistration>> moduleListeners = new ConcurrentHashMap<Module, List<ModuleListenerRegistration>>();
     /** The service listeners */
     private final Map<Module, List<ServiceListenerRegistration>> serviceListeners = new ConcurrentHashMap<Module, List<ServiceListenerRegistration>>();
 
@@ -103,12 +103,12 @@ public final class RuntimeEventsManager {
     public void addModuleListener(final Module module, final ModuleListener listener) {
         assert listener != null : "Null listener";
         synchronized (moduleListeners) {
-            List<BundleListenerRegistration> registrations = moduleListeners.get(module);
+            List<ModuleListenerRegistration> registrations = moduleListeners.get(module);
             if (registrations == null) {
-                registrations = new CopyOnWriteArrayList<BundleListenerRegistration>();
+                registrations = new CopyOnWriteArrayList<ModuleListenerRegistration>();
                 moduleListeners.put(module, registrations);
             }
-            BundleListenerRegistration registration = new BundleListenerRegistration(module, listener);
+            ModuleListenerRegistration registration = new ModuleListenerRegistration(module, listener);
             if (registrations.contains(registration) == false) {
                 registrations.add(registration);
             }
@@ -118,12 +118,12 @@ public final class RuntimeEventsManager {
 
     public void removeModuleListener(final Module module, final ModuleListener listener) {
         assert listener != null : "Null listener";
-        List<BundleListenerRegistration> registrations = moduleListeners.get(module);
+        List<ModuleListenerRegistration> registrations = moduleListeners.get(module);
         if (registrations != null) {
             if (registrations.size() > 1) {
-                Iterator<BundleListenerRegistration> iterator = registrations.iterator();
+                Iterator<ModuleListenerRegistration> iterator = registrations.iterator();
                 while(iterator.hasNext()) {
-                    BundleListenerRegistration registration = iterator.next();
+                    ModuleListenerRegistration registration = iterator.next();
                     if (registration.getListener() == listener) {
                         iterator.remove();
                         break;
@@ -227,9 +227,9 @@ public final class RuntimeEventsManager {
         //    return;
 
         // Get a snapshot of the current listeners
-        final List<BundleListenerRegistration> registrations = new ArrayList<BundleListenerRegistration>();
-        for (Entry<Module, List<BundleListenerRegistration>> entry : moduleListeners.entrySet()) {
-            for (BundleListenerRegistration blreg : entry.getValue()) {
+        final List<ModuleListenerRegistration> registrations = new ArrayList<ModuleListenerRegistration>();
+        for (Entry<Module, List<ModuleListenerRegistration>> entry : moduleListeners.entrySet()) {
+            for (ModuleListenerRegistration blreg : entry.getValue()) {
                 registrations.add(blreg);
             }
         }
@@ -239,14 +239,14 @@ public final class RuntimeEventsManager {
         final String typeName = ConstantsHelper.moduleEvent(event.getType());
 
         // Nobody is interested
-        Iterator<BundleListenerRegistration> iterator = registrations.iterator();
+        Iterator<ModuleListenerRegistration> iterator = registrations.iterator();
         if (registrations.isEmpty())
             return;
 
         // Synchronous listeners first
         iterator = registrations.iterator();
         while (iterator.hasNext()) {
-            BundleListenerRegistration blreg = iterator.next();
+            ModuleListenerRegistration blreg = iterator.next();
             ModuleListener listener = blreg.listener;
             try {
                 if (listener instanceof SynchronousModuleListener) {
@@ -266,7 +266,7 @@ public final class RuntimeEventsManager {
                     // BundleListeners are called with a BundleEvent object when a moduleState has been
                     // installed, resolved, started, stopped, updated, unresolved, or uninstalled
                     if (asyncBundleEvents.contains(type)) {
-                        for (BundleListenerRegistration blreg : registrations) {
+                        for (ModuleListenerRegistration blreg : registrations) {
                             ModuleListener listener = blreg.listener;
                             try {
                                 if (!(listener instanceof SynchronousModuleListener)) {
@@ -434,11 +434,11 @@ public final class RuntimeEventsManager {
         }
     }
 
-    private static class BundleListenerRegistration {
+    private static class ModuleListenerRegistration {
         private final ModuleListener listener;
         private final Module module;
 
-        BundleListenerRegistration(Module module, ModuleListener listener) {
+        ModuleListenerRegistration(Module module, ModuleListener listener) {
             this.listener = listener;
             this.module = module;
         }
@@ -455,11 +455,11 @@ public final class RuntimeEventsManager {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof BundleListenerRegistration == false)
+            if (obj instanceof ModuleListenerRegistration == false)
                 return false;
 
             // Only the BundleListener instance determins equality
-            BundleListenerRegistration other = (BundleListenerRegistration) obj;
+            ModuleListenerRegistration other = (ModuleListenerRegistration) obj;
             return other.listener.equals(listener);
         }
 

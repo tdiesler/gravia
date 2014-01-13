@@ -34,7 +34,8 @@
     </parent>
 
     <artifactId>gravia-container-tomcat-patch</artifactId>
-
+    <packaging>pom</packaging>
+    
     <name>Gravia :: Container :: Tomcat :: Patch</name>
     
     <!-- Properties -->    
@@ -45,6 +46,12 @@
 	<!-- Dependencies -->
     <dependencies>
         <!-- Provided Dependencies -->
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-container-tomcat-extension</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-container-tomcat-webapp</artifactId>
@@ -80,6 +87,11 @@
 	        <groupId>org.jboss.gravia</groupId>
 	        <artifactId>gravia-runtime-api</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -30,6 +30,7 @@
     </parent>
 
     <artifactId>gravia-container-karaf-patch</artifactId>
+    <packaging>pom</packaging>
 
     <name>Gravia :: Container :: Karaf :: Patch</name>
     

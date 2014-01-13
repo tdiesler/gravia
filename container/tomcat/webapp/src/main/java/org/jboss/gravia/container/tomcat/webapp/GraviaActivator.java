@@ -22,6 +22,8 @@
 package org.jboss.gravia.container.tomcat.webapp;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -30,16 +32,19 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.container.tomcat.extension.TomcatRuntimeFactory;
 import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;
 import org.jboss.gravia.repository.DefaultRepository;
+import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
+import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryRuntimeRegistration;
 import org.jboss.gravia.repository.RepositoryRuntimeRegistration.Registration;
 import org.jboss.gravia.resolver.DefaultResolver;
 import org.jboss.gravia.resolver.Resolver;
+import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceStore;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
@@ -78,19 +83,42 @@ public class GraviaActivator implements ServletContextListener {
         // HttpService integration
         ModuleContext moduleContext = runtime.getModuleContext();
         BundleContext bundleContext = new BundleContextAdaptor(moduleContext);
-        servletContext.setAttribute("org.osgi.framework.BundleContext", bundleContext);
+        servletContext.setAttribute(BundleContext.class.getName(), bundleContext);
 
         // Register the {@link Repository}, {@link Resolver}, {@link Provisioner} services
         Repository repository = registerRepositoryService(runtime);
         Resolver resolver = registerResolverService(runtime);
-        registerProvisionerService(runtime, repository, resolver);
+        registerProvisionerService(servletContext, runtime, repository, resolver);
     }
 
-    private Provisioner registerProvisionerService(Runtime runtime, Repository repository, Resolver resolver) {
-        Provisioner provisioner = new DefaultProvisioner(new RuntimeEnvironment(runtime), resolver, repository);
+    private Provisioner registerProvisionerService(ServletContext servletContext, Runtime runtime, Repository repository, Resolver resolver) {
+        RuntimeEnvironment environment = createEnvironment(servletContext, runtime);
+        TomcatResourceInstaller installer = new TomcatResourceInstaller(environment);
+        Provisioner provisioner = new DefaultProvisioner(environment, resolver, repository, installer);
         ModuleContext syscontext = runtime.getModuleContext();
         provisionerRegistration = syscontext.registerService(Provisioner.class, provisioner, null);
         return provisioner;
+    }
+
+    private RuntimeEnvironment createEnvironment(ServletContext servletContext, Runtime runtime) {
+        RuntimeEnvironment environment = new RuntimeEnvironment(runtime);
+        ResourceStore systemStore = environment.getSystemStore();
+        InputStream input = servletContext.getResourceAsStream("META-INF/system-resources.xml");
+        try {
+            RepositoryReader reader = new DefaultRepositoryXMLReader(input);
+            Resource xmlres = reader.nextResource();
+            while (xmlres != null) {
+                systemStore.addResource(xmlres);
+                xmlres = reader.nextResource();
+            }
+        } finally {
+            try {
+                input.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+        return environment;
     }
 
     private Resolver registerResolverService(Runtime runtime) {

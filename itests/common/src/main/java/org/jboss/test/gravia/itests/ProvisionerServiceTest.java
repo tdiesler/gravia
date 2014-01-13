@@ -140,7 +140,7 @@ public class ProvisionerServiceTest {
     @Test
     public void testDeploymentWithDependency() throws Exception {
 
-        if (RuntimeType.getRuntimeType() != RuntimeType.WILDFLY)
+        if (RuntimeType.getRuntimeType() == RuntimeType.KARAF)
             return;
 
         // Provision the camel.core feature
@@ -177,7 +177,7 @@ public class ProvisionerServiceTest {
     @Test
     public void testProvisionResources() throws Exception {
 
-        if (RuntimeType.getRuntimeType() != RuntimeType.WILDFLY)
+        if (RuntimeType.getRuntimeType() == RuntimeType.KARAF)
             return;
 
         // Add a resource to the repository that has a dependency on camel.core

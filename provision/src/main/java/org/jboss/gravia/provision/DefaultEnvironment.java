@@ -21,7 +21,10 @@
  */
 package org.jboss.gravia.provision;
 
+import java.util.Iterator;
+
 import org.jboss.gravia.provision.spi.AbstractEnvironment;
+import org.jboss.gravia.resource.Resource;
 
 /**
  * The default {@link Environment}
@@ -33,5 +36,15 @@ public class DefaultEnvironment extends AbstractEnvironment {
 
     public DefaultEnvironment(String envname) {
         super(envname);
+    }
+
+    @Override
+    public Environment cloneEnvironment() {
+        DefaultEnvironment result = new DefaultEnvironment("Cloned " + getName());
+        Iterator<Resource> itres = getResources();
+        while (itres.hasNext()) {
+            result.addResource(itres.next());
+        }
+        return result;
     }
 }

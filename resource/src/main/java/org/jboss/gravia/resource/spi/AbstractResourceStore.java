@@ -82,7 +82,8 @@ public abstract class AbstractResourceStore implements ResourceStore {
     public Iterator<Resource> getResources() {
         final Iterator<Resource> itres;
         synchronized (resources) {
-            itres = resources.values().iterator();
+            Set<Resource> snapshot = new LinkedHashSet<Resource>(resources.values());
+            itres = snapshot.iterator();
         }
         return new Iterator<Resource>() {
 

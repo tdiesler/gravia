@@ -1,8 +1,8 @@
 /*
  * #%L
- * JBossOSGi Provision: Core
+ * Wildfly Gravia Subsystem
  * %%
- * Copyright (C) 2013 JBoss by Red Hat
+ * Copyright (C) 2010 - 2013 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -19,25 +19,20 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.provision;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+package org.jboss.gravia.container.tomcat.extension;
 
-import org.jboss.gravia.resource.Requirement;
-import org.jboss.gravia.resource.Resource;
+import org.apache.catalina.loader.WebappClassLoader;
 
 /**
- * The container specific {@link ResourceInstaller}.
+ * The shared module aware {@link WebappClassLoader}.
  *
- * @author thomas.diesler@jboss.com
- * @since 07-Jan-2014
+ * @author Thomas.Diesler@jboss.com
+ * @since 13-Jan-2014
  */
-public interface ResourceInstaller {
+public class SharedModuleAwareWebappClassLoader extends WebappClassLoader {
 
-    Set<ResourceHandle> installResources(List<Resource> resources, Map<Requirement, Resource> mapping) throws ProvisionException;
-
-    ResourceHandle installResource(Resource res, Map<Requirement, Resource> mapping) throws ProvisionException;
-
+    public SharedModuleAwareWebappClassLoader(ClassLoader parent) {
+        super(new SharedModuleClassLoader(parent));
+    }
 }

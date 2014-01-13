@@ -68,20 +68,23 @@ public abstract class AbstractProvisioner implements Provisioner {
     private final Resolver resolver;
     private final Repository repository;
     private final Environment environment;
+    private final ResourceInstaller installer;
     private final PreferencePolicy preferencePolicy;
 
-    public AbstractProvisioner(Environment environment, Resolver resolver, Repository repository) {
-        this(environment, resolver, repository, new DefaultPreferencePolicy(null));
+    public AbstractProvisioner(Environment environment, Resolver resolver, Repository repository, ResourceInstaller installer) {
+        this(environment, resolver, repository, installer, new DefaultPreferencePolicy(null));
     }
 
-    public AbstractProvisioner(Environment environment, Resolver resolver, Repository repository, PreferencePolicy policy) {
+    public AbstractProvisioner(Environment environment, Resolver resolver, Repository repository, ResourceInstaller installer, PreferencePolicy policy) {
         NotNullException.assertValue(environment, "environment");
         NotNullException.assertValue(resolver, "resolver");
         NotNullException.assertValue(repository, "repository");
+        NotNullException.assertValue(installer, "installer");
         NotNullException.assertValue(policy, "policy");
         this.environment = environment;
         this.resolver = resolver;
         this.repository = repository;
+        this.installer = installer;
         this.preferencePolicy = policy;
     }
 
@@ -89,8 +92,6 @@ public abstract class AbstractProvisioner implements Provisioner {
     public Environment getEnvironment() {
         return environment;
     }
-
-    protected abstract Environment cloneEnvironment(Environment env);
 
     @Override
     public final Resolver getResolver() {
@@ -102,8 +103,9 @@ public abstract class AbstractProvisioner implements Provisioner {
         return repository;
     }
 
-    private PreferencePolicy getPreferencePolicyInternal() {
-        return preferencePolicy;
+    @Override
+    public ResourceInstaller getResourceInstaller() {
+        return installer;
     }
 
     @Override
@@ -121,7 +123,7 @@ public abstract class AbstractProvisioner implements Provisioner {
 
         // Install the unresolved resources into the cloned environment
         List<Resource> unresolved = new ArrayList<Resource>();
-        Environment envclone = cloneEnvironment(env);
+        Environment envclone = env.cloneEnvironment();
         for (Requirement req : reqs) {
             Resource res = req.getResource();
             if (env.getResource(res.getIdentity()) == null) {
@@ -176,15 +178,9 @@ public abstract class AbstractProvisioner implements Provisioner {
         if (!unsatisfied.isEmpty()) {
             throw new ProvisionException("Cannot resolve unsatisfied requirements: " + unsatisfied);
         }
-        ResourceInstaller installer = getResourceInstaller();
+        List<Resource> resources = result.getResources();
         Map<Requirement, Resource> mapping = result.getMapping();
-        Set<ResourceHandle> handles = new HashSet<ResourceHandle>();
-        for (Resource res : result.getResources()) {
-            if (!isAbstract(res)) {
-                handles.add(installer.installResource(res, mapping));
-            }
-        }
-        return Collections.unmodifiableSet(handles);
+        return installer.installResources(resources, mapping);
     }
 
     // Sort mapping targets higher in the list. This should result in resource installations
@@ -278,7 +274,7 @@ public abstract class AbstractProvisioner implements Provisioner {
             LOGGER.debug(" Found one: {}", cap);
         } else if (providers.size() > 1) {
             List<Capability> sorted = new ArrayList<Capability>(providers);
-            getPreferencePolicyInternal().sort(sorted);
+            preferencePolicy.sort(sorted);
             LOGGER.debug(" Found multiple: {}", sorted);
             cap = sorted.get(0);
         } else {

@@ -35,6 +35,7 @@ import org.jboss.gravia.provision.Environment;
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ProvisionResult;
 import org.jboss.gravia.provision.Provisioner;
+import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.repository.DefaultRepository;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
@@ -68,7 +69,8 @@ public abstract class AbstractProvisionerTest {
         PropertiesProvider propertyProvider = Mockito.mock(PropertiesProvider.class);
         Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
         repository = new DefaultRepository(propertyProvider);
-        provisioner = new DefaultProvisioner(environment, resolver, repository);
+        ResourceInstaller installer = Mockito.mock(ResourceInstaller.class);
+        provisioner = new DefaultProvisioner(environment, resolver, repository, installer);
     }
 
     Provisioner getProvisioner() {

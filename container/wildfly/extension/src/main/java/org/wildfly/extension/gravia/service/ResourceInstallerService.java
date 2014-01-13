@@ -26,11 +26,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Executors;
+
 import org.jboss.as.controller.ModelController;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.client.ModelControllerClient;
@@ -40,16 +40,18 @@ import org.jboss.as.server.ServerEnvironment;
 import org.jboss.as.server.ServerEnvironmentService;
 import org.jboss.as.server.Services;
 import org.jboss.gravia.provision.DefaultResourceHandle;
-import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
+import org.jboss.gravia.provision.spi.AbstractResourceInstaller;
+import org.jboss.gravia.provision.spi.RuntimeEnvironment;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.msc.service.AbstractService;
+import org.jboss.gravia.utils.IOUtils;
+import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceTarget;
@@ -74,18 +76,20 @@ import org.wildfly.extension.gravia.GraviaConstants;
  * @author Thomas.Diesler@jboss.com
  * @since 27-Jun-2013
  */
-public class ResourceInstallerService extends AbstractService<ResourceInstaller> implements ResourceInstaller {
+public class ResourceInstallerService extends AbstractResourceInstaller implements Service<ResourceInstaller> {
 
     static final Logger LOGGER = LoggerFactory.getLogger(GraviaConstants.class.getPackage().getName());
 
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
     private final InjectedValue<ModelController> injectedController = new InjectedValue<ModelController>();
+    private final InjectedValue<RuntimeEnvironment> injectedEnvironment = new InjectedValue<RuntimeEnvironment>();
     private ServerDeploymentManager serverDeploymentManager;
     private ModelControllerClient modelControllerClient;
 
     public ServiceController<ResourceInstaller> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<ResourceInstaller> builder = serviceTarget.addService(GraviaConstants.RESOURCE_INSTALLER_SERVICE_NAME, this);
         builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, injectedServerEnvironment);
+        builder.addDependency(GraviaConstants.ENVIRONMENT_SERVICE_NAME, RuntimeEnvironment.class, injectedEnvironment);
         builder.addDependency(Services.JBOSS_SERVER_CONTROLLER, ModelController.class, injectedController);
         builder.addListener(verificationHandler);
         return builder.install();
@@ -113,26 +117,13 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
     }
 
     @Override
-    public synchronized ResourceHandle installResource(Resource res, Map<Requirement, Resource> mapping) throws ProvisionException {
-        Capability icap = res.getIdentityCapability();
-        boolean shared = Boolean.parseBoolean((String) icap.getAttributes().get(IdentityNamespace.CAPABILITY_SHARED_ATTRIBUTE));
-        try {
-            if (shared) {
-                return installSharedResource(res, mapping);
-            } else {
-                return deployResource(res, mapping);
-            }
-        } catch (RuntimeException rte) {
-            throw rte;
-        } catch (ProvisionException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new ProvisionException("Cannot provision resource: " + res, ex);
-        }
+    public RuntimeEnvironment getEnvironment() {
+        return injectedEnvironment.getValue();
     }
 
+    @Override
     @SuppressWarnings("deprecation")
-    private ResourceHandle installSharedResource(Resource res, Map<Requirement, Resource> mapping) throws Exception {
+    public ResourceHandle installSharedResource(Resource res, Map<Requirement, Resource> mapping) throws Exception {
         LOGGER.info("Installing shared resource: {}", res);
 
         ResourceIdentity resid = res.getIdentity();
@@ -148,7 +139,7 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
         // copy resource content
         moduleDir.mkdirs();
         File resFile = new File(moduleDir, resid.getSymbolicName() + "-" + resid.getVersion() + ".jar");
-        copyResourceContent(content.getContent(), resFile);
+        IOUtils.copyStream(content.getContent(), new FileOutputStream(resFile));
 
         // generate module.xml
         File xmlFile = new File(moduleDir, "module.xml");
@@ -166,8 +157,10 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
         };
     }
 
-    private ResourceHandle deployResource(Resource res, Map<Requirement, Resource> mapping) throws Exception {
-        LOGGER.info("Deploying resource: {}", res);
+    @Override
+    public ResourceHandle installUnsharedResource(Resource res, Map<Requirement, Resource> mapping) throws Exception {
+        LOGGER.info("Installing unshared resource: {}", res);
+
         final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
         final ResourceWrapper wrapper = getWrappedResourceContent(res, mapping);
         final String runtimeName = wrapper.getRuntimeName();
@@ -272,21 +265,6 @@ public class ResourceInstallerService extends AbstractService<ResourceInstaller>
             }
         }
         buffer.append(" </dependencies>");
-    }
-
-    private long copyResourceContent(InputStream input, File targetFile) throws IOException {
-        int len = 0;
-        long total = 0;
-        byte[] buf = new byte[4096];
-        targetFile.getParentFile().mkdirs();
-        OutputStream out = new FileOutputStream(targetFile);
-        while ((len = input.read(buf)) >= 0) {
-            out.write(buf, 0, len);
-            total += len;
-        }
-        input.close();
-        out.close();
-        return total;
     }
 
     static class ResourceWrapper {

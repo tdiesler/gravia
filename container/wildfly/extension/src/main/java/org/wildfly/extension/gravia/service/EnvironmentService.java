@@ -23,6 +23,7 @@
 package org.wildfly.extension.gravia.service;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.jboss.as.controller.ServiceVerificationHandler;
@@ -34,6 +35,7 @@ import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.resource.ResourceStore;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.modules.Module;
@@ -69,27 +71,8 @@ public class EnvironmentService extends AbstractService<Environment> {
 
     @Override
     public void start(StartContext startContext) throws StartException {
-
         Runtime runtime = injectedRuntime.getValue();
-        environment = new RuntimeEnvironment(runtime){
-            @Override
-            public Set<Capability> findProviders(Requirement req) {
-                Set<Capability> providers = super.findProviders(req);
-                if (providers.isEmpty() && req.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE)) {
-                    providers = findModuleProviders(req);
-                }
-                return providers;
-            }
-
-            @Override
-            public Resource getResource(ResourceIdentity resid) {
-                Resource resource = super.getResource(resid);
-                if (resource == null) {
-                    resource = getModuleResource(resid);
-                }
-                return resource;
-            }
-        };
+        environment = new RuntimeEnvironment(runtime, new SystemResourceStore());
     }
 
     @Override
@@ -97,42 +80,65 @@ public class EnvironmentService extends AbstractService<Environment> {
         return environment;
     }
 
-    static Set<Capability> findModuleProviders(Requirement req) {
+    static class SystemResourceStore implements ResourceStore {
 
-        String sname = (String) req.getAttribute(IdentityNamespace.IDENTITY_NAMESPACE);
-        ModuleIdentifier modid = ModuleIdentifier.fromString(sname);
-        try {
-            ModuleLoader moduleLoader = Module.getBootModuleLoader();
-            moduleLoader.loadModule(modid);
-        } catch (ModuleLoadException ex) {
-            return Collections.emptySet();
+        @Override
+        public String getName() {
+            return getClass().getSimpleName();
         }
 
-        DefaultResourceBuilder builder = new DefaultResourceBuilder();
-        Capability icap = builder.addIdentityCapability(sname, Version.emptyVersion);
-        icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
-        builder.getResource();
-
-        return Collections.singleton(icap);
-    }
-
-    static Resource getModuleResource(ResourceIdentity resid) {
-
-        String sname = resid.getSymbolicName();
-        if (!Version.emptyVersion.equals(resid.getVersion()))
-            return null;
-
-        ModuleIdentifier modid = ModuleIdentifier.fromString(sname);
-        try {
-            ModuleLoader moduleLoader = Module.getBootModuleLoader();
-            moduleLoader.loadModule(modid);
-        } catch (ModuleLoadException ex) {
-            return null;
+        @Override
+        public Iterator<Resource> getResources() {
+            return Collections.<Resource>emptySet().iterator();
         }
 
-        DefaultResourceBuilder builder = new DefaultResourceBuilder();
-        Capability icap = builder.addIdentityCapability(sname, Version.emptyVersion);
-        icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
-        return builder.getResource();
+        @Override
+        public Resource addResource(Resource resource) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Resource removeResource(ResourceIdentity identity) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Resource getResource(ResourceIdentity identity) {
+            String sname = identity.getSymbolicName();
+            if (!Version.emptyVersion.equals(identity.getVersion()))
+                return null;
+
+            ModuleIdentifier modid = ModuleIdentifier.fromString(sname);
+            try {
+                ModuleLoader moduleLoader = Module.getBootModuleLoader();
+                moduleLoader.loadModule(modid);
+            } catch (ModuleLoadException ex) {
+                return null;
+            }
+
+            DefaultResourceBuilder builder = new DefaultResourceBuilder();
+            Capability icap = builder.addIdentityCapability(sname, Version.emptyVersion);
+            icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
+            return builder.getResource();
+        }
+
+        @Override
+        public Set<Capability> findProviders(Requirement requirement) {
+            String sname = (String) requirement.getAttribute(IdentityNamespace.IDENTITY_NAMESPACE);
+            ModuleIdentifier modid = ModuleIdentifier.fromString(sname);
+            try {
+                ModuleLoader moduleLoader = Module.getBootModuleLoader();
+                moduleLoader.loadModule(modid);
+            } catch (ModuleLoadException ex) {
+                return Collections.emptySet();
+            }
+
+            DefaultResourceBuilder builder = new DefaultResourceBuilder();
+            Capability icap = builder.addIdentityCapability(sname, Version.emptyVersion);
+            icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
+            builder.getResource();
+
+            return Collections.singleton(icap);
+        }
     }
 }
