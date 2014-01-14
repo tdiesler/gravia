@@ -48,7 +48,7 @@
     </copy>
   	
   	<!-- Copy module resources-->
-    <copy todir="${wildfly.patch.dir}/modules/system/layers/base/org/jboss/gravia/main" overwrite="true">
+    <copy todir="${wildfly.patch.dir}/modules/org/jboss/gravia/main" overwrite="true">
         <fileset dir="${deploy.artifacts.lib}">
 			<include name="org.apache.felix.configadmin-*.jar" />
 			<include name="org.apache.felix.http.bridge-*.jar" />
@@ -63,10 +63,10 @@
 			<include name="gravia-runtime-embedded-*.jar" />
        	</fileset>
     </copy>
-    <copy todir="${wildfly.patch.dir}/modules/system/layers/base/org/osgi/enterprise/main" overwrite="true">
+    <copy todir="${wildfly.patch.dir}/modules/org/osgi/enterprise/main" overwrite="true">
         <fileset file="${deploy.artifacts.lib}/org.osgi.enterprise-*.jar" />
     </copy>
-    <copy todir="${wildfly.patch.dir}/modules/system/layers/base/org/wildfly/extension/gravia/main" overwrite="true">
+    <copy todir="${wildfly.patch.dir}/modules/org/wildfly/extension/gravia/main" overwrite="true">
         <fileset dir="${deploy.artifacts.lib}">
 			<include name="gravia-container-wildfly-extension-*.jar" />
        	</fileset>

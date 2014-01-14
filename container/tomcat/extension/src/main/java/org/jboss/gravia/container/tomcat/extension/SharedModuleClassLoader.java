@@ -21,13 +21,17 @@ public final class SharedModuleClassLoader extends ClassLoader {
     private final static List<URL> urls = new ArrayList<URL>();
 
     SharedModuleClassLoader(ClassLoader parent) {
-        super(parent instanceof URLClassLoader ? getExtendedParent((URLClassLoader) parent) : parent);
+        super(getExtendedParent(parent));
     }
 
-    private static ClassLoader getExtendedParent(URLClassLoader parent) {
+    private static ClassLoader getExtendedParent(ClassLoader parent) {
         synchronized (urls) {
-            URL[] urlarr = urls.toArray(new URL[urls.size()]);
-            return new URLClassLoader(urlarr, parent);
+            if (urls.isEmpty()) {
+                return parent;
+            } else {
+                URL[] urlarr = urls.toArray(new URL[urls.size()]);
+                return new URLClassLoader(urlarr, parent);
+            }
         }
     }
 

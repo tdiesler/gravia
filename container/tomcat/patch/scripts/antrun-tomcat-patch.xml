@@ -34,16 +34,11 @@
 	<target name="build" depends="init">
 
 		<!-- Copy to conf -->
-		<copy todir="${tomcat.patch.dir}/conf" overwrite="true">
-	        <fileset dir="${etc.dir}/tomcat/conf"/>
+		<copy todir="${tomcat.patch.dir}" overwrite="true">
+	        <fileset dir="${etc.dir}/tomcat"/>
 		</copy>
 		
-		<!-- Copy to work -->
-		<copy todir="${tomcat.patch.dir}/work" overwrite="true">
-	        <fileset dir="${etc.dir}/tomcat/work"/>
-		</copy>
-		
-		<!-- Copy to libs -->
+		<!-- Copy to lib -->
 		<copy todir="${tomcat.patch.dir}/lib" overwrite="true">
 	        <fileset dir="${deploy.artifacts.lib}">
 				<include name="ant-*.jar" />

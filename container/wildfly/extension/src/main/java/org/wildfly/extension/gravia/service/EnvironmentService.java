@@ -22,11 +22,14 @@
 
 package org.wildfly.extension.gravia.service;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.jboss.as.controller.ServiceVerificationHandler;
+import org.jboss.as.server.ServerEnvironment;
+import org.jboss.as.server.ServerEnvironmentService;
 import org.jboss.gravia.provision.Environment;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;
 import org.jboss.gravia.resource.Capability;
@@ -37,6 +40,7 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.ResourceStore;
 import org.jboss.gravia.resource.Version;
+import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleIdentifier;
@@ -59,20 +63,24 @@ import org.wildfly.extension.gravia.GraviaConstants;
  */
 public class EnvironmentService extends AbstractService<Environment> {
 
+    private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
     private final InjectedValue<Runtime> injectedRuntime = new InjectedValue<Runtime>();
     private Environment environment;
 
     public ServiceController<Environment> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<Environment> builder = serviceTarget.addService(GraviaConstants.ENVIRONMENT_SERVICE_NAME, this);
+        builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, injectedServerEnvironment);
         builder.addDependency(GraviaConstants.RUNTIME_SERVICE_NAME, Runtime.class, injectedRuntime);
         builder.addListener(verificationHandler);
         return builder.install();
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void start(StartContext startContext) throws StartException {
         Runtime runtime = injectedRuntime.getValue();
-        environment = new RuntimeEnvironment(runtime, new SystemResourceStore());
+        File modulesDir = injectedServerEnvironment.getValue().getModulesDir();
+        environment = new RuntimeEnvironment(runtime, new SystemResourceStore(modulesDir));
     }
 
     @Override
@@ -82,6 +90,12 @@ public class EnvironmentService extends AbstractService<Environment> {
 
     static class SystemResourceStore implements ResourceStore {
 
+        private final File modulesDir;
+
+        SystemResourceStore(File modulesDir) {
+            this.modulesDir = modulesDir;
+        }
+
         @Override
         public String getName() {
             return getClass().getSimpleName();
@@ -89,7 +103,7 @@ public class EnvironmentService extends AbstractService<Environment> {
 
         @Override
         public Iterator<Resource> getResources() {
-            return Collections.<Resource>emptySet().iterator();
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -104,40 +118,57 @@ public class EnvironmentService extends AbstractService<Environment> {
 
         @Override
         public Resource getResource(ResourceIdentity identity) {
-            String sname = identity.getSymbolicName();
-            if (!Version.emptyVersion.equals(identity.getVersion()))
-                return null;
-
-            ModuleIdentifier modid = ModuleIdentifier.fromString(sname);
+            String symbolicName = identity.getSymbolicName();
+            Version version = identity.getVersion();
+            String modname = symbolicName + (version != Version.emptyVersion ? ":" + version : "");
+            ModuleIdentifier modid = ModuleIdentifier.fromString(modname);
             try {
                 ModuleLoader moduleLoader = Module.getBootModuleLoader();
                 moduleLoader.loadModule(modid);
             } catch (ModuleLoadException ex) {
                 return null;
             }
-
             DefaultResourceBuilder builder = new DefaultResourceBuilder();
-            Capability icap = builder.addIdentityCapability(sname, Version.emptyVersion);
+            Capability icap = builder.addIdentityCapability(symbolicName, version);
             icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
             return builder.getResource();
         }
 
         @Override
         public Set<Capability> findProviders(Requirement requirement) {
-            String sname = (String) requirement.getAttribute(IdentityNamespace.IDENTITY_NAMESPACE);
-            ModuleIdentifier modid = ModuleIdentifier.fromString(sname);
+            String symbolicName = (String) requirement.getAttribute(IdentityNamespace.IDENTITY_NAMESPACE);
+            VersionRange versionRange = (VersionRange) requirement.getAttribute(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+
+            // Find the higest module version that matches
+            Version highest = Version.emptyVersion;
+            File moduleDir = new File(modulesDir, symbolicName.replace(".", File.separator));
+            if (versionRange != null && moduleDir.isDirectory()) {
+                for (File file : moduleDir.listFiles()) {
+                    if (file.isDirectory() && !file.getName().equals("main")) {
+                        Version version;
+                        try {
+                            version = new Version(file.getName());
+                        } catch (Throwable th) {
+                            continue;
+                        }
+                        if (versionRange.includes(version) && highest.compareTo(version) < 0) {
+                            highest = version;
+                        }
+                    }
+                }
+            }
+            String modname = symbolicName + (highest != Version.emptyVersion ? ":" + highest : "");
+            ModuleIdentifier modid = ModuleIdentifier.fromString(modname);
             try {
                 ModuleLoader moduleLoader = Module.getBootModuleLoader();
                 moduleLoader.loadModule(modid);
             } catch (ModuleLoadException ex) {
                 return Collections.emptySet();
             }
-
             DefaultResourceBuilder builder = new DefaultResourceBuilder();
-            Capability icap = builder.addIdentityCapability(sname, Version.emptyVersion);
+            Capability icap = builder.addIdentityCapability(symbolicName, highest);
             icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
             builder.getResource();
-
             return Collections.singleton(icap);
         }
     }

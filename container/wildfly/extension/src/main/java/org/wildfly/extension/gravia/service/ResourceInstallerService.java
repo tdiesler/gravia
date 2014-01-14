@@ -50,6 +50,7 @@ import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.utils.IOUtils;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceBuilder;
@@ -123,33 +124,45 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
 
     @Override
     @SuppressWarnings("deprecation")
-    public ResourceHandle installSharedResource(Resource res, Map<Requirement, Resource> mapping) throws Exception {
-        LOGGER.info("Installing shared resource: {}", res);
+    public ResourceHandle installSharedResource(Resource resource, Map<Requirement, Resource> mapping) throws Exception {
+        LOGGER.info("Installing shared resource: {}", resource);
 
-        ResourceIdentity resid = res.getIdentity();
+        ResourceIdentity identity = resource.getIdentity();
+        String symbolicName = identity.getSymbolicName();
+        String version = identity.getVersion().toString();
         File modulesDir = injectedServerEnvironment.getValue().getModulesDir();
-        File moduleDir = new File(modulesDir, resid.getSymbolicName().replace(".", File.separator) + File.separator + "main");
+        File moduleDir = new File(modulesDir, symbolicName.replace(".", File.separator) + File.separator + version);
         if (moduleDir.exists())
             throw new IllegalStateException("Module dir already exists: " + moduleDir);
 
-        ResourceContent content = res.adapt(ResourceContent.class);
+        ResourceContent content = resource.adapt(ResourceContent.class);
         if (content == null)
-            throw new IllegalStateException("Cannot obtain repository content from: " + res);
+            throw new IllegalStateException("Cannot obtain repository content from: " + resource);
 
         // copy resource content
         moduleDir.mkdirs();
-        File resFile = new File(moduleDir, resid.getSymbolicName() + "-" + resid.getVersion() + ".jar");
+        File resFile = new File(moduleDir, symbolicName + "-" + version + ".jar");
         IOUtils.copyStream(content.getContent(), new FileOutputStream(resFile));
 
         // generate module.xml
         File xmlFile = new File(moduleDir, "module.xml");
-        String moduleXML = generateModuleXML(resFile, res, mapping);
-        FileOutputStream fos = new FileOutputStream(xmlFile);
-        OutputStreamWriter osw = new OutputStreamWriter(fos);
+        String moduleXML = generateModuleXML(resFile, resource, mapping);
+        OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(xmlFile));
         osw.write(moduleXML);
         osw.close();
 
-        return new DefaultResourceHandle(res) {
+        // generate the main slot
+        File mainDir = new File(moduleDir.getParentFile(), "main");
+        if (!mainDir.exists()) {
+            mainDir.mkdirs();
+            File mainFile = new File(mainDir, "module.xml");
+            moduleXML = generateModuleAliasXML(resource);
+            osw = new OutputStreamWriter(new FileOutputStream(mainFile));
+            osw.write(moduleXML);
+            osw.close();
+        }
+
+        return new DefaultResourceHandle(resource) {
             @Override
             public void uninstall() {
                 // cannot uninstall shared resource
@@ -158,14 +171,14 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
     }
 
     @Override
-    public ResourceHandle installUnsharedResource(Resource res, Map<Requirement, Resource> mapping) throws Exception {
-        LOGGER.info("Installing unshared resource: {}", res);
+    public ResourceHandle installUnsharedResource(Resource resource, Map<Requirement, Resource> mapping) throws Exception {
+        LOGGER.info("Installing unshared resource: {}", resource);
 
         final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
-        final ResourceWrapper wrapper = getWrappedResourceContent(res, mapping);
+        final ResourceWrapper wrapper = getWrappedResourceContent(resource, mapping);
         final String runtimeName = wrapper.getRuntimeName();
         serverDeployer.deploy(runtimeName, wrapper.getInputStream());
-        return new DefaultResourceHandle(res) {
+        return new DefaultResourceHandle(resource) {
             @Override
             public void uninstall() {
                 try {
@@ -178,22 +191,22 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
     }
 
     // Wrap the resource and add a generated jboss-deployment-structure.xml
-    private ResourceWrapper getWrappedResourceContent(Resource res, Map<Requirement, Resource> mapping) {
+    private ResourceWrapper getWrappedResourceContent(Resource resource, Map<Requirement, Resource> mapping) {
 
-        Capability icap = res.getIdentityCapability();
+        Capability icap = resource.getIdentityCapability();
         String rtnameAtt = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE);
-        String runtimeName = rtnameAtt != null ? rtnameAtt : res.getIdentity().getSymbolicName() + ".jar";
+        String runtimeName = rtnameAtt != null ? rtnameAtt : resource.getIdentity().getSymbolicName() + ".jar";
 
         // Do nothing if there is no mapping
         if (mapping == null) {
-            InputStream content = res.adapt(ResourceContent.class).getContent();
+            InputStream content = resource.adapt(ResourceContent.class).getContent();
             return new ResourceWrapper(runtimeName, content);
         }
 
         // Create content archive
         ConfigurationBuilder config = new ConfigurationBuilder().classLoaders(Collections.singleton(ShrinkWrap.class.getClassLoader()));
         JavaArchive archive = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, runtimeName);
-        archive.as(ZipImporter.class).importFrom(res.adapt(ResourceContent.class).getContent());
+        archive.as(ZipImporter.class).importFrom(resource.adapt(ResourceContent.class).getContent());
 
         boolean wrapAsSubdeployment = runtimeName.endsWith(".war");
 
@@ -202,10 +215,10 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         Asset structureAsset;
         if (wrapAsSubdeployment) {
             wrapper = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, "wrapped-" + runtimeName + ".ear");
-            structureAsset = new StringAsset(generateSubdeploymentDeploymentStructure(res, runtimeName, mapping));
+            structureAsset = new StringAsset(generateSubdeploymentDeploymentStructure(resource, runtimeName, mapping));
         } else {
             wrapper = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, "wrapped-" + runtimeName);
-            structureAsset = new StringAsset(generateDeploymentStructure(res, runtimeName, mapping));
+            structureAsset = new StringAsset(generateDeploymentStructure(resource, runtimeName, mapping));
         }
         wrapper.addAsManifestResource(structureAsset, "jboss-deployment-structure.xml");
         wrapper.add(archive, "/", ZipExporter.class);
@@ -214,15 +227,30 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         return new ResourceWrapper(wrapper.getName(), content);
     }
 
-    private String generateModuleXML(File resFile, Resource res, Map<Requirement, Resource> mapping) throws IOException {
-        LOGGER.info("Generating dependencies for: {}", res);
+    private String generateModuleXML(File resFile, Resource resource, Map<Requirement, Resource> mapping) throws IOException {
+        LOGGER.info("Generating dependencies for: {}", resource);
         StringBuffer buffer = new StringBuffer();
-        buffer.append("<module xmlns='urn:jboss:module:1.1' name='" + res.getIdentity().getSymbolicName() + "'>");
+        ResourceIdentity identity = resource.getIdentity();
+        String symbolicName = identity.getSymbolicName();
+        Version version = identity.getVersion();
+        String slot = version != Version.emptyVersion ? "slot='" + version + "'" : "";
+        buffer.append("<module xmlns='urn:jboss:module:1.3' name='" + symbolicName + "' " + slot + ">");
         buffer.append(" <resources>");
         buffer.append("  <resource-root path='" + resFile.getName() + "'/>");
         buffer.append(" </resources>");
-        addModuleDependencies(res, mapping, buffer);
+        addModuleDependencies(resource, mapping, buffer);
         buffer.append("</module>");
+        return buffer.toString();
+    }
+
+    private String generateModuleAliasXML(Resource resource) throws IOException {
+        LOGGER.info("Generating main alias for: {}", resource);
+        StringBuffer buffer = new StringBuffer();
+        ResourceIdentity identity = resource.getIdentity();
+        String symbolicName = identity.getSymbolicName();
+        Version version = identity.getVersion();
+        String slot = version != Version.emptyVersion ? "target-slot='" + version + "'" : "";
+        buffer.append("<module-alias xmlns='urn:jboss:module:1.3' name='" + symbolicName + "' target-name='" + symbolicName + "' " + slot + "/>");
         return buffer.toString();
     }
 
@@ -240,28 +268,31 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         return buffer.toString();
     }
 
-    private String generateSubdeploymentDeploymentStructure(Resource res, String runtimeName, Map<Requirement, Resource> mapping) {
-        LOGGER.info("Generating dependencies for: {}", res);
+    private String generateSubdeploymentDeploymentStructure(Resource resource, String runtimeName, Map<Requirement, Resource> mapping) {
+        LOGGER.info("Generating dependencies for: {}", resource);
         StringBuffer buffer = new StringBuffer();
         buffer.append("<jboss-deployment-structure xmlns='urn:jboss:deployment-structure:1.2'>");
         buffer.append(" <sub-deployment name='" + runtimeName + "'>");
         buffer.append("  <resources>");
         buffer.append("   <resource-root path='" + runtimeName + "' use-physical-code-source='true'/>");
         buffer.append("  </resources>");
-        addModuleDependencies(res, mapping, buffer);
+        addModuleDependencies(resource, mapping, buffer);
         buffer.append(" </sub-deployment>");
         buffer.append("</jboss-deployment-structure>");
         return buffer.toString();
     }
 
-    private void addModuleDependencies(Resource res, Map<Requirement, Resource> mapping, StringBuffer buffer) {
+    private void addModuleDependencies(Resource resource, Map<Requirement, Resource> mapping, StringBuffer buffer) {
         buffer.append(" <dependencies>");
-        for (Requirement req : res.getRequirements(IdentityNamespace.IDENTITY_NAMESPACE)) {
+        for (Requirement req : resource.getRequirements(IdentityNamespace.IDENTITY_NAMESPACE)) {
             Resource depres = mapping != null ? mapping.get(req) : null;
             if (depres != null) {
-                String modname = depres.getIdentity().getSymbolicName();
-                buffer.append("<module name='" + modname + "'/>");
-                LOGGER.info("  {}", modname);
+                ResourceIdentity identity = depres.getIdentity();
+                String modname = identity.getSymbolicName();
+                Version version = identity.getVersion();
+                String slot = version != Version.emptyVersion ? "slot='" + version + "'" : "";
+                buffer.append("<module name='" + modname + "' " + slot + "/>");
+                LOGGER.info("  {}", identity);
             }
         }
         buffer.append(" </dependencies>");
