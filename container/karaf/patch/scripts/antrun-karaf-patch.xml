@@ -34,6 +34,11 @@
   <!-- ================================================================== -->
   <target name="build" depends="init">
 
+	<!-- Copy to data -->
+	<copy todir="${karaf.patch.dir}/data" overwrite="true">
+        <fileset dir="${etc.dir}/karaf/data"/>
+	</copy>
+  	
   	<!-- Copy to system -->
     <copy todir="${karaf.patch.dir}/system/org/apache/felix/org.apache.felix.eventadmin/${version.apache.felix.eventadmin}" overwrite="true">
         <fileset file="${deploy.artifacts.lib}/org.apache.felix.eventadmin-*.jar" />
@@ -89,7 +94,8 @@ org.osgi.framework.storage.clean=onFirstInit
 # Enable Jetty HttpService
 org.apache.felix.http.jettyEnabled=true
     	
-# The Runtime type
+# Gravia properties
+org.jboss.gravia.repository.storage.dir=${karaf.data}/repository
 org.jboss.gravia.runtime.type=karaf
     	
 # The Felix Framewok log level 

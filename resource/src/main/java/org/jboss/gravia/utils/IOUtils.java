@@ -21,6 +21,7 @@
  */
 package org.jboss.gravia.utils;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,8 +46,18 @@ public final class IOUtils {
             output.write(buf, 0, len);
             total += len;
         }
-        input.close();
-        output.close();
+        safeClose(input);
+        safeClose(output);
         return total;
+    }
+
+    public static void safeClose(Closeable closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        } catch (IOException ex) {
+            // ignore
+        }
     }
 }

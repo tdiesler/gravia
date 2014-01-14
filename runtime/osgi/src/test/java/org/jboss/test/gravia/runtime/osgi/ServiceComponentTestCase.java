@@ -29,7 +29,6 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
@@ -47,7 +46,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -128,7 +126,7 @@ public class ServiceComponentTestCase  {
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
                 builder.addExportPackages(ServiceA.class);
-                builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
+                builder.addImportPackages(OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addImportPackages(ServiceA1.class);
                 builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_A + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.a.ServiceA.xml");
@@ -150,7 +148,7 @@ public class ServiceComponentTestCase  {
                 builder.addBundleManifestVersion(2);
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
-                builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, ComponentContext.class);
+                builder.addImportPackages(OSGiRuntimeLocator.class, ComponentContext.class);
                 builder.addExportPackages(ServiceA1.class);
                 builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_A1 + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.a1.ServiceA1.xml");

@@ -22,8 +22,6 @@
 package org.jboss.gravia.container.tomcat.webapp;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -36,15 +34,11 @@ import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;
 import org.jboss.gravia.repository.DefaultRepository;
-import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryRuntimeRegistration;
 import org.jboss.gravia.repository.RepositoryRuntimeRegistration.Registration;
 import org.jboss.gravia.resolver.DefaultResolver;
 import org.jboss.gravia.resolver.Resolver;
-import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.ResourceStore;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
@@ -52,7 +46,10 @@ import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.embedded.spi.BundleContextAdaptor;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
+import org.jboss.gravia.runtime.util.RuntimePropertiesProvider;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Activates the {@link Runtime} as part of the web app lifecycle.
@@ -62,6 +59,8 @@ import org.osgi.framework.BundleContext;
  */
 @WebListener
 public class GraviaActivator implements ServletContextListener {
+
+    static final Logger LOGGER = LoggerFactory.getLogger(GraviaActivator.class);
 
     private final static File catalinaHome = new File(SecurityActions.getSystemProperty("catalina.home", null));
     private final static File catalinaWork = new File(catalinaHome.getPath() + File.separator + "work");
@@ -101,24 +100,7 @@ public class GraviaActivator implements ServletContextListener {
     }
 
     private RuntimeEnvironment createEnvironment(ServletContext servletContext, Runtime runtime) {
-        RuntimeEnvironment environment = new RuntimeEnvironment(runtime);
-        ResourceStore systemStore = environment.getSystemStore();
-        InputStream input = servletContext.getResourceAsStream("META-INF/system-resources.xml");
-        try {
-            RepositoryReader reader = new DefaultRepositoryXMLReader(input);
-            Resource xmlres = reader.nextResource();
-            while (xmlres != null) {
-                systemStore.addResource(xmlres);
-                xmlres = reader.nextResource();
-            }
-        } finally {
-            try {
-                input.close();
-            } catch (IOException e) {
-                // ignore
-            }
-        }
-        return environment;
+        return new RuntimeEnvironment(runtime).initDefaultContent();
     }
 
     private Resolver registerResolverService(Runtime runtime) {
@@ -129,16 +111,7 @@ public class GraviaActivator implements ServletContextListener {
     }
 
     private Repository registerRepositoryService(final Runtime runtime) {
-        PropertiesProvider propertyProvider = new DefaultPropertiesProvider() {
-            @Override
-            public Object getProperty(String key, Object defaultValue) {
-                Object value = runtime.getProperty(key);
-                if (value == null && Constants.PROPERTY_REPOSITORY_STORAGE_DIR.equals(key)) {
-                    value = new File(catalinaWork.getPath() + File.separator + "repository").getAbsolutePath();
-                }
-                return value != null ? value : defaultValue;
-            }
-        };
+        PropertiesProvider propertyProvider = new RuntimePropertiesProvider(runtime);
         Repository repository = new DefaultRepository(propertyProvider);
 
         // Register the repository as a service
@@ -173,6 +146,12 @@ public class GraviaActivator implements ServletContextListener {
             storageDir = new File(catalinaWork.getPath() + File.separator + Constants.RUNTIME_STORAGE_DEFAULT).getAbsolutePath();
         }
         properties.setProperty(Constants.RUNTIME_STORAGE, storageDir);
+
+        storageDir = servletContext.getInitParameter(Constants.PROPERTY_REPOSITORY_STORAGE_DIR);
+        if (storageDir == null) {
+            storageDir = new File(catalinaWork.getPath() + File.separator + "repository").getAbsolutePath();
+        }
+        properties.setProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, storageDir);
 
         return properties;
     }

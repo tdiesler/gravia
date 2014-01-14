@@ -52,7 +52,7 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
         for (Resource res : resources) {
             ResourceIdentity identity = res.getIdentity();
             if (!isAbstract(res) && getEnvironment().getResource(identity) == null) {
-                handles.add(installResource(res, mapping));
+                handles.add(installResourceInternal(res, mapping));
             }
         }
         return Collections.unmodifiableSet(handles);
@@ -60,6 +60,10 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
 
     @Override
     public synchronized ResourceHandle installResource(Resource res, Map<Requirement, Resource> mapping) throws ProvisionException {
+        return installResourceInternal(res, mapping);
+    }
+
+    private synchronized ResourceHandle installResourceInternal(Resource res, Map<Requirement, Resource> mapping) throws ProvisionException {
         try {
             if (isShared(res)) {
                 return installSharedResource(res, mapping);

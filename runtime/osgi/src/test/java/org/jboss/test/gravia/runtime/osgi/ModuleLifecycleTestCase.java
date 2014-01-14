@@ -31,7 +31,7 @@ import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
-import org.jboss.gravia.runtime.ModuleActivator;
+import org.jboss.gravia.runtime.ModuleActivatorBridge;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
@@ -42,14 +42,13 @@ import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.jboss.test.gravia.runtime.osgi.sub.a.SimpleBundleActivator;
+import org.jboss.test.gravia.runtime.osgi.sub.a.SimpleModuleActivator;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -79,16 +78,17 @@ public class ModuleLifecycleTestCase {
     @StartLevelAware(autostart = true)
     public static JavaArchive deployment() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example-bundle");
-        archive.addClasses(SimpleBundleActivator.class);
+        archive.addClasses(ModuleActivatorBridge.class, SimpleModuleActivator.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
-                builder.addBundleActivator(SimpleBundleActivator.class);
-                builder.addImportPackages(BundleActivator.class, ModuleActivator.class, OSGiRuntimeLocator.class, Resource.class);
-                builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, archive.getName() + ";version=0.0.0");
+                builder.addBundleActivator(ModuleActivatorBridge.class);
+                builder.addImportPackages(Module.class, OSGiRuntimeLocator.class, Resource.class);
+                builder.addManifestHeader(Constants.MODULE_ACTIVATOR, SimpleModuleActivator.class.getName());
+                builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
                 return builder.openStream();
             }
         });

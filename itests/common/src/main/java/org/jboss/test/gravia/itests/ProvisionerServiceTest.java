@@ -34,6 +34,9 @@ import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.model.RouteDefinition;
 import org.jboss.arquillian.container.test.api.Deployer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -55,6 +58,7 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
+import org.jboss.gravia.runtime.ModuleActivatorBridge;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
@@ -140,9 +144,6 @@ public class ProvisionerServiceTest {
     @Test
     public void testDeploymentWithDependency() throws Exception {
 
-        if (RuntimeType.getRuntimeType() == RuntimeType.KARAF)
-            return;
-
         // Provision the camel.core feature
         ResourceIdentity identity = ResourceIdentity.fromString("camel.core.feature:0.0.0");
         Requirement req = new IdentityRequirementBuilder(identity).getRequirement();
@@ -176,9 +177,6 @@ public class ProvisionerServiceTest {
 
     @Test
     public void testProvisionResources() throws Exception {
-
-        if (RuntimeType.getRuntimeType() == RuntimeType.KARAF)
-            return;
 
         // Add a resource to the repository that has a dependency on camel.core
         DefaultResourceBuilder builder = new DefaultResourceBuilder();
@@ -231,7 +229,7 @@ public class ProvisionerServiceTest {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, DEPLOYMENT_A + ".war");
         archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
         archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
-        archive.addClasses(CamelTransformActivator.class);
+        archive.addClasses(CamelTransformActivator.class, ModuleActivatorBridge.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
@@ -239,9 +237,11 @@ public class ProvisionerServiceTest {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(DEPLOYMENT_A);
+                    builder.addBundleActivator(ModuleActivatorBridge.class);
                     builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
                     builder.addManifestHeader(Constants.MODULE_ACTIVATOR, CamelTransformActivator.class.getName());
-                    builder.addImportPackages(Runtime.class, Servlet.class, HttpServlet.class, HttpService.class, CamelContext.class);
+                    builder.addImportPackages(ModuleActivatorBridge.class, Runtime.class, Servlet.class, HttpServlet.class, HttpService.class);
+                    builder.addImportPackages(CamelContext.class, DefaultCamelContext.class, RouteBuilder.class, RouteDefinition.class);
                     builder.addBundleClasspath("WEB-INF/classes");
                     return builder.openStream();
                 } else {
@@ -263,7 +263,7 @@ public class ProvisionerServiceTest {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, RESOURCE_A + ".war");
         archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
         archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
-        archive.addClasses(CamelTransformActivator.class);
+        archive.addClasses(CamelTransformActivator.class, ModuleActivatorBridge.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
@@ -271,9 +271,11 @@ public class ProvisionerServiceTest {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(RESOURCE_A);
+                    builder.addBundleActivator(ModuleActivatorBridge.class);
                     builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
                     builder.addManifestHeader(Constants.MODULE_ACTIVATOR, CamelTransformActivator.class.getName());
-                    builder.addImportPackages(Runtime.class, Servlet.class, HttpServlet.class, HttpService.class, CamelContext.class);
+                    builder.addImportPackages(ModuleActivatorBridge.class, Runtime.class, Servlet.class, HttpServlet.class, HttpService.class);
+                    builder.addImportPackages(CamelContext.class, DefaultCamelContext.class, RouteBuilder.class, RouteDefinition.class);
                     builder.addBundleClasspath("WEB-INF/classes");
                     return builder.openStream();
                 } else {

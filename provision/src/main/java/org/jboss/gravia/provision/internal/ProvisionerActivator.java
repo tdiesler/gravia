@@ -59,8 +59,8 @@ public final class ProvisionerActivator implements BundleActivator {
         Resolver resolver = syscontext.getService(resolverRef);
         ServiceReference<Repository> repositoryRef = syscontext.getServiceReference(Repository.class);
         Repository repository = syscontext.getService(repositoryRef);
-        RuntimeEnvironment environment = new RuntimeEnvironment(runtime);
-        DefaultResourceInstaller installer = new DefaultResourceInstaller(environment);
+        RuntimeEnvironment environment = new RuntimeEnvironment(runtime).initDefaultContent();
+        BundleContextResourceInstaller installer = new BundleContextResourceInstaller(context, environment);
         Provisioner provisioner = new DefaultProvisioner(environment, resolver, repository, installer);
         registration = syscontext.registerService(Provisioner.class, provisioner, null);
     }

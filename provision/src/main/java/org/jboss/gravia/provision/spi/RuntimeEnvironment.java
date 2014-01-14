@@ -21,12 +21,19 @@
  */
 package org.jboss.gravia.provision.spi;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.provision.Environment;
+import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
+import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.Requirement;
@@ -39,7 +46,9 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.SynchronousModuleListener;
+import org.jboss.gravia.utils.IOUtils;
 import org.jboss.gravia.utils.NotNullException;
 
 /**
@@ -54,7 +63,7 @@ public class RuntimeEnvironment implements Environment {
     private final ResourceStore systemStore;
 
     public RuntimeEnvironment(Runtime runtime) {
-        this(runtime, new DefaultResourceStore("SystemResourceStore"));
+        this(runtime, new DefaultResourceStore("SystemResources"));
     }
 
     public RuntimeEnvironment(Runtime runtime, ResourceStore systemStore) {
@@ -75,6 +84,34 @@ public class RuntimeEnvironment implements Environment {
 
     public RuntimeStore getRuntimeStore() {
         return runtimeStore;
+    }
+
+    public RuntimeEnvironment initDefaultContent() {
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        File repositoryDir = new File((String) runtime.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR));
+        File environmentXML = new File(repositoryDir, "environment.xml");
+        try {
+            InputStream content = new FileInputStream(environmentXML);
+            initDefaultContent(content);
+        } catch (FileNotFoundException ex) {
+            // ignore
+        }
+        return this;
+    }
+
+    public RuntimeEnvironment initDefaultContent(InputStream content) {
+        NotNullException.assertValue(content, "content");
+        try {
+            RepositoryReader reader = new DefaultRepositoryXMLReader(content);
+            Resource xmlres = reader.nextResource();
+            while (xmlres != null) {
+                systemStore.addResource(xmlres);
+                xmlres = reader.nextResource();
+            }
+        } finally {
+            IOUtils.safeClose(content);
+        }
+        return this;
     }
 
     @Override

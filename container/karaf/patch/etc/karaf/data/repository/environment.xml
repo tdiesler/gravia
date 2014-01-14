@@ -21,7 +21,7 @@
   #L%
   -->
 
-<repository xmlns="http://www.osgi.org/xmlns/repository/v1.0.0" name="PersistentRepository">
+<repository xmlns="http://www.osgi.org/xmlns/repository/v1.0.0" name="EnvironmentContent">
 
   <resource>
     <capability namespace="gravia.identity">

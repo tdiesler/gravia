@@ -168,7 +168,7 @@ final class EmbeddedModule extends AbstractModule {
                 setState(State.STOPPING);
 
                 // A module event of type {@link BundleEvent#STOPPING} is fired.
-                eventHandler.fireModuleEvent(this, ModuleEvent.STARTING);
+                eventHandler.fireModuleEvent(this, ModuleEvent.STOPPING);
 
                 // [TODO] Any services registered by this module must be unregistered.
                 // [TODO] Any services used by this module must be released.

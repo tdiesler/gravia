@@ -37,6 +37,7 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
+import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
@@ -49,7 +50,7 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.util.tracker.BundleTracker;
 
 /**
- * [TODO]
+ * The OSGi {@link Runtime}
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
@@ -169,6 +170,5 @@ public final class OSGiRuntime extends AbstractRuntime {
             }
             return Collections.unmodifiableList(result);
         }
-
     }
 }

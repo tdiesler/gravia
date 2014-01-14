@@ -14,5 +14,5 @@ public interface ResourceHandle {
 
     <T> T adapt(Class<T> type);
 
-    void uninstall() throws ProvisionException;
+    void uninstall();
 }
