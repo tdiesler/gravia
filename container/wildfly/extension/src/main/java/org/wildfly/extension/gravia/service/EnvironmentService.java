@@ -24,6 +24,7 @@ package org.wildfly.extension.gravia.service;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -139,37 +140,55 @@ public class EnvironmentService extends AbstractService<Environment> {
             String symbolicName = (String) requirement.getAttribute(IdentityNamespace.IDENTITY_NAMESPACE);
             VersionRange versionRange = (VersionRange) requirement.getAttribute(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 
-            // Find the higest module version that matches
-            Version highest = Version.emptyVersion;
+            Set<Capability> result = new HashSet<Capability>();
+
+            // Find the module versions that match
             File moduleDir = new File(modulesDir, symbolicName.replace(".", File.separator));
             if (versionRange != null && moduleDir.isDirectory()) {
                 for (File file : moduleDir.listFiles()) {
-                    if (file.isDirectory() && !file.getName().equals("main")) {
-                        Version version;
-                        try {
-                            version = new Version(file.getName());
-                        } catch (Throwable th) {
-                            continue;
-                        }
-                        if (versionRange.includes(version) && highest.compareTo(version) < 0) {
-                            highest = version;
-                        }
+                    if (!file.isDirectory() || file.getName().equals("main")) {
+                        continue;
                     }
+                    Version version;
+                    try {
+                        version = new Version(file.getName());
+                    } catch (Throwable th) {
+                        continue;
+                    }
+                    if (!versionRange.includes(version)) {
+                        continue;
+                    }
+                    String modname = symbolicName + ":" + version;
+                    ModuleIdentifier modid = ModuleIdentifier.fromString(modname);
+                    try {
+                        ModuleLoader moduleLoader = Module.getBootModuleLoader();
+                        moduleLoader.loadModule(modid);
+                    } catch (ModuleLoadException ex) {
+                        continue;
+                    }
+                    DefaultResourceBuilder builder = new DefaultResourceBuilder();
+                    Capability icap = builder.addIdentityCapability(symbolicName, version);
+                    icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
+                    result.add(builder.getResource().getIdentityCapability());
                 }
             }
-            String modname = symbolicName + (highest != Version.emptyVersion ? ":" + highest : "");
-            ModuleIdentifier modid = ModuleIdentifier.fromString(modname);
-            try {
-                ModuleLoader moduleLoader = Module.getBootModuleLoader();
-                moduleLoader.loadModule(modid);
-            } catch (ModuleLoadException ex) {
-                return Collections.emptySet();
+
+            // Add the main module
+            if (result.isEmpty()) {
+                ModuleIdentifier modid = ModuleIdentifier.fromString(symbolicName);
+                try {
+                    ModuleLoader moduleLoader = Module.getBootModuleLoader();
+                    moduleLoader.loadModule(modid);
+
+                    DefaultResourceBuilder builder = new DefaultResourceBuilder();
+                    Capability icap = builder.addIdentityCapability(symbolicName, Version.emptyVersion);
+                    icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
+                    result.add(builder.getResource().getIdentityCapability());
+                } catch (ModuleLoadException ex) {
+                    // ignore
+                }
             }
-            DefaultResourceBuilder builder = new DefaultResourceBuilder();
-            Capability icap = builder.addIdentityCapability(symbolicName, highest);
-            icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
-            builder.getResource();
-            return Collections.singleton(icap);
+            return Collections.unmodifiableSet(result);
         }
     }
 }
