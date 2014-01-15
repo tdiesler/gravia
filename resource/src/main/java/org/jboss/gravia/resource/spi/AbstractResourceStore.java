@@ -51,21 +51,19 @@ import org.jboss.gravia.utils.NotNullException;
 public abstract class AbstractResourceStore implements ResourceStore {
 
     private final String storeName;
-    private final boolean logCapsReqs;
     private final Map<ResourceIdentity, Resource> resources = new LinkedHashMap<ResourceIdentity, Resource>();
     private final Map<CacheKey, Set<Capability>> capabilityCache = new ConcurrentHashMap<CacheKey, Set<Capability>>();
     private final MatchPolicy matchPolicy;
 
     public AbstractResourceStore(String storeName) {
-        this(storeName, new DefaultMatchPolicy(), false);
+        this(storeName, new DefaultMatchPolicy());
     }
 
-    public AbstractResourceStore(String storeName, MatchPolicy matchPolicy, boolean logCapsReqs) {
+    public AbstractResourceStore(String storeName, MatchPolicy matchPolicy) {
         NotNullException.assertValue(storeName, "storeName");
         NotNullException.assertValue(matchPolicy, "matchPolicy");
         this.storeName = storeName;
         this.matchPolicy = matchPolicy;
-        this.logCapsReqs = logCapsReqs;
     }
 
 
@@ -124,7 +122,7 @@ public abstract class AbstractResourceStore implements ResourceStore {
             }
 
             // Log cap/req details
-            if (logCapsReqs) {
+            if (LOGGER.isDebugEnabled()) {
                 for (Capability cap : res.getCapabilities(null)) {
                     LOGGER.debug("   {}", cap);
                 }

@@ -25,10 +25,10 @@ package org.wildfly.extension.gravia.service;
 
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.gravia.provision.DefaultProvisioner;
-import org.jboss.gravia.provision.Environment;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.repository.Repository;
+import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceRegistration;

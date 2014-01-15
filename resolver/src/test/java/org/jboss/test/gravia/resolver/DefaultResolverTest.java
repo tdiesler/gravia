@@ -89,7 +89,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(resB, wireA.getProvider());
         Assert.assertEquals(capB, wireA.getCapability());
 
-        Wiring wiringA = resA.getWiring();
+        Wiring wiringA = getWiring(resA);
         Assert.assertEquals(resA, wiringA.getResource());
         Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
         Assert.assertEquals(1, wiringA.getRequiredResourceWires(null).size());
@@ -98,7 +98,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(1, wiringA.getResourceRequirements(null).size());
         Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
 
-        Wiring wiringB = resB.getWiring();
+        Wiring wiringB = getWiring(resB);
         Assert.assertEquals(resB, wiringB.getResource());
         Assert.assertEquals(1, wiringB.getProvidedResourceWires(null).size());
         Assert.assertEquals(0, wiringB.getRequiredResourceWires(null).size());
@@ -148,7 +148,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(resB, wireA.getProvider());
         Assert.assertEquals(capB, wireA.getCapability());
 
-        Wiring wiringA = resA.getWiring();
+        Wiring wiringA = getWiring(resA);
         Assert.assertEquals(resA, wiringA.getResource());
         Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
         Assert.assertEquals(1, wiringA.getRequiredResourceWires(null).size());
@@ -157,7 +157,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(1, wiringA.getResourceRequirements(null).size());
         Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
 
-        Wiring wiringB = resB.getWiring();
+        Wiring wiringB = getWiring(resB);
         Assert.assertEquals(resB, wiringB.getResource());
         Assert.assertEquals(1, wiringB.getProvidedResourceWires(null).size());
         Assert.assertEquals(0, wiringB.getRequiredResourceWires(null).size());
@@ -188,7 +188,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         List<Wire> wiresB = wiremap.get(resB);
         Assert.assertEquals(0, wiresB.size());
 
-        Wiring wiringB = resB.getWiring();
+        Wiring wiringB = getWiring(resB);
         Assert.assertEquals(resB, wiringB.getResource());
         Assert.assertEquals(0, wiringB.getProvidedResourceWires(null).size());
         Assert.assertEquals(0, wiringB.getRequiredResourceWires(null).size());
@@ -209,7 +209,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(resB, wireA.getProvider());
         Assert.assertEquals(capB, wireA.getCapability());
 
-        Wiring wiringA = resA.getWiring();
+        Wiring wiringA = getWiring(resA);
         Assert.assertEquals(resA, wiringA.getResource());
         Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
         Assert.assertEquals(1, wiringA.getRequiredResourceWires(null).size());
@@ -218,7 +218,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(1, wiringA.getResourceRequirements(null).size());
         Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
 
-        Assert.assertSame(wiringB, resB.getWiring());
+        Assert.assertSame(wiringB, getWiring(resB));
         Assert.assertEquals(resB, wiringB.getResource());
         Assert.assertEquals(1, wiringB.getProvidedResourceWires(null).size());
         Assert.assertEquals(0, wiringB.getRequiredResourceWires(null).size());
@@ -285,7 +285,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         List<Wire> wiresA = wiremap.get(resA);
         Assert.assertEquals(0, wiresA.size());
 
-        Wiring wiringA = resA.getWiring();
+        Wiring wiringA = getWiring(resA);
         Assert.assertEquals(resA, wiringA.getResource());
         Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
         Assert.assertEquals(0, wiringA.getRequiredResourceWires(null).size());
@@ -326,7 +326,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         List<Wire> wiresB2 = wiremap.get(resB2);
         Assert.assertEquals(0, wiresB2.size());
 
-        Wiring wiringA = resA.getWiring();
+        Wiring wiringA = getWiring(resA);
         Assert.assertEquals(resA, wiringA.getResource());
         Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
         Assert.assertEquals(1, wiringA.getRequiredResourceWires(null).size());
@@ -335,10 +335,10 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(1, wiringA.getResourceRequirements(null).size());
         Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
 
-        Wiring wiringB1 = resB1.getWiring();
+        Wiring wiringB1 = getWiring(resB1);
         Assert.assertNull(wiringB1);
 
-        Wiring wiringB2 = resB2.getWiring();
+        Wiring wiringB2 = getWiring(resB2);
         Assert.assertEquals(resB2, wiringB2.getResource());
         Assert.assertEquals(1, wiringB2.getProvidedResourceWires(null).size());
         Assert.assertEquals(0, wiringB2.getRequiredResourceWires(null).size());
@@ -383,7 +383,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(resB1, wireA.getProvider());
         Assert.assertEquals(capB1, wireA.getCapability());
 
-        Wiring wiringA = resA.getWiring();
+        Wiring wiringA = getWiring(resA);
         Assert.assertEquals(resA, wiringA.getResource());
         Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
         Assert.assertEquals(1, wiringA.getRequiredResourceWires(null).size());
@@ -443,7 +443,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(resB, wireA.getProvider());
         Assert.assertEquals(capB, wireA.getCapability());
 
-        Wiring wiringA = resA.getWiring();
+        Wiring wiringA = getWiring(resA);
         Assert.assertEquals(resA, wiringA.getResource());
         Assert.assertEquals(0, wiringA.getProvidedResourceWires(null).size());
         Assert.assertEquals(1, wiringA.getRequiredResourceWires(null).size());
@@ -452,7 +452,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(1, wiringA.getResourceRequirements(null).size());
         Assert.assertEquals(reqA, wiringA.getResourceRequirements(null).get(0));
 
-        Wiring wiringB = resB.getWiring();
+        Wiring wiringB = getWiring(resB);
         Assert.assertEquals(resB, wiringB.getResource());
         Assert.assertEquals(1, wiringB.getProvidedResourceWires(null).size());
         Assert.assertEquals(1, wiringB.getRequiredResourceWires(null).size());
@@ -463,7 +463,7 @@ public class DefaultResolverTest extends AbstractResolverTest {
         Assert.assertEquals(capB, wiringB.getResourceCapabilities(null).get(0));
         Assert.assertEquals(reqB, wiringB.getResourceRequirements(null).get(0));
 
-        Wiring wiringC = resC.getWiring();
+        Wiring wiringC = getWiring(resC);
         Assert.assertEquals(resC, wiringC.getResource());
         Assert.assertEquals(1, wiringC.getProvidedResourceWires(null).size());
         Assert.assertEquals(0, wiringC.getRequiredResourceWires(null).size());

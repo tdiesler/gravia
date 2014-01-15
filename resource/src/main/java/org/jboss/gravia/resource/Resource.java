@@ -42,6 +42,4 @@ public interface Resource extends Adaptable, Attachable {
     List<Capability> getCapabilities(String namespace);
 
     List<Requirement> getRequirements(String namespace);
-
-    Wiring getWiring();
 }

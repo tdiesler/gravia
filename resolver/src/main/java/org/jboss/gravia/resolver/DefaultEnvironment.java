@@ -19,17 +19,32 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.provision;
+package org.jboss.gravia.resolver;
 
-import org.jboss.gravia.resource.ResourceStore;
+import java.util.Iterator;
+
+import org.jboss.gravia.resolver.spi.AbstractEnvironment;
+import org.jboss.gravia.resource.Resource;
 
 /**
- * The Provision environment
+ * The default {@link Environment}
  *
  * @author thomas.diesler@jboss.com
  * @since 06-May-2013
  */
-public interface Environment extends ResourceStore {
+public class DefaultEnvironment extends AbstractEnvironment {
 
-    Environment cloneEnvironment();
+    public DefaultEnvironment(String envname) {
+        super(envname);
+    }
+
+    @Override
+    public Environment cloneEnvironment() {
+        DefaultEnvironment result = new DefaultEnvironment("Cloned " + getName());
+        Iterator<Resource> itres = getResources();
+        while (itres.hasNext()) {
+            result.addResource(itres.next());
+        }
+        return result;
+    }
 }

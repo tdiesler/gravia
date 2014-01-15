@@ -25,19 +25,18 @@ package org.jboss.gravia.resolver.spi;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.PreferencePolicy;
 import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.Namespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.ResourceStore;
 import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.utils.NotNullException;
 
@@ -49,25 +48,25 @@ import org.jboss.gravia.utils.NotNullException;
  */
 public abstract class AbstractResolveContext implements ResolveContext {
 
-    private final ResourceStore resourceStore;
+    private final Environment environment;
     private final List<Resource> mandatory;
     private final List<Resource> optional;
     private PreferencePolicy preferencePolicy;
 
-    public AbstractResolveContext(ResourceStore resourceStore, Set<Resource> manres, Set<Resource> optres) {
-        NotNullException.assertValue(resourceStore, "resourceStore");
+    public AbstractResolveContext(Environment environment, Set<Resource> manres, Set<Resource> optres) {
+        NotNullException.assertValue(environment, "environment");
 
-        this.resourceStore = resourceStore;
+        this.environment = environment;
         this.mandatory = new ArrayList<Resource>(manres != null ? manres : Collections.<Resource> emptyList());
         this.optional = new ArrayList<Resource>(optres != null ? optres : Collections.<Resource> emptyList());
 
         // Verify that all resources are in the store
         for (Resource res : mandatory) {
-            if (resourceStore.getResource(res.getIdentity()) == null)
+            if (environment.getResource(res.getIdentity()) == null)
                 throw new IllegalArgumentException("Resource not in provided store: " + res);
         }
         for (Resource res : optional) {
-            if (resourceStore.getResource(res.getIdentity()) == null)
+            if (environment.getResource(res.getIdentity()) == null)
                 throw new IllegalArgumentException("Resource not in provided store: " + res);
         }
 
@@ -117,22 +116,13 @@ public abstract class AbstractResolveContext implements ResolveContext {
 
     @Override
     public Map<Resource, Wiring> getWirings() {
-        Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
-        Iterator<Resource> itres = resourceStore.getResources();
-        while (itres.hasNext()) {
-            Resource res = itres.next();
-            Wiring wiring = res.getWiring();
-            if (wiring != null) {
-                wirings.put(res, wiring);
-            }
-        }
-        return Collections.unmodifiableMap(wirings);
+        return environment.getWirings();
     }
 
     @Override
     public List<Capability> findProviders(Requirement req) {
         List<Capability> result = new ArrayList<Capability>();
-        result.addAll(resourceStore.findProviders(req));
+        result.addAll(environment.findProviders(req));
         getPreferencePolicyInternal().sort(result);
         return result;
     }

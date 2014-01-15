@@ -48,7 +48,7 @@ public class MemoryRepositoryStorage extends DefaultResourceStore implements Rep
     private final Repository repository;
 
     public MemoryRepositoryStorage(PropertiesProvider propertyProvider, Repository repository) {
-        super(MemoryRepositoryStorage.class.getSimpleName(), new DefaultMatchPolicy(), true);
+        super(MemoryRepositoryStorage.class.getSimpleName(), new DefaultMatchPolicy());
         this.repository = repository;
     }
 

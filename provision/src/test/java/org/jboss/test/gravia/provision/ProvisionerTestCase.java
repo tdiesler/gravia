@@ -24,13 +24,13 @@ package org.jboss.test.gravia.provision;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.jboss.gravia.provision.Environment;
 import org.jboss.gravia.provision.ProvisionResult;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.MavenIdentityRequirementBuilder;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryStorage;
+import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resource.DefaultRequirementBuilder;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;

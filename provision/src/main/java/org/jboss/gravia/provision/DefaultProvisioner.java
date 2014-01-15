@@ -24,6 +24,7 @@ package org.jboss.gravia.provision;
 import org.jboss.gravia.provision.spi.AbstractProvisioner;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.DefaultPreferencePolicy;
+import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.PreferencePolicy;
 import org.jboss.gravia.resolver.Resolver;
 

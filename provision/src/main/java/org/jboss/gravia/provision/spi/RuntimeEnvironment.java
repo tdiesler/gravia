@@ -26,20 +26,23 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.provision.Environment;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.RepositoryReader;
+import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.ResourceStore;
+import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.resource.spi.AbstractResourceStore;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -61,6 +64,7 @@ public class RuntimeEnvironment implements Environment {
 
     private final RuntimeStore runtimeStore;
     private final ResourceStore systemStore;
+    private final Map<Resource, Wiring> wirings;
 
     public RuntimeEnvironment(Runtime runtime) {
         this(runtime, new DefaultResourceStore("SystemResources"));
@@ -71,6 +75,7 @@ public class RuntimeEnvironment implements Environment {
         NotNullException.assertValue(systemStore, "systemStore");
         this.systemStore = systemStore;
         this.runtimeStore = new RuntimeStore(runtime);
+        this.wirings = new HashMap<Resource, Wiring>();
     }
 
     @Override
@@ -84,6 +89,11 @@ public class RuntimeEnvironment implements Environment {
 
     public RuntimeStore getRuntimeStore() {
         return runtimeStore;
+    }
+
+    @Override
+    public Map<Resource, Wiring> getWirings() {
+        return wirings;
     }
 
     public RuntimeEnvironment initDefaultContent() {
@@ -133,7 +143,7 @@ public class RuntimeEnvironment implements Environment {
 
     @Override
     public Environment cloneEnvironment() {
-        return new ClonedRuntimeEnvironment("Cloned " + getName(), runtimeStore, systemStore);
+        return new ClonedRuntimeEnvironment("Cloned " + getName(), runtimeStore, systemStore, wirings);
     }
 
     @Override
@@ -191,11 +201,13 @@ public class RuntimeEnvironment implements Environment {
         private final String name;
         private final ResourceStore snapshotStore;
         private final ResourceStore systemStore;
+        private final Map<Resource, Wiring> wirings;
 
-        ClonedRuntimeEnvironment(String name, ResourceStore runtimeStore, ResourceStore systemStore) {
+        ClonedRuntimeEnvironment(String name, ResourceStore runtimeStore, ResourceStore systemStore, Map<Resource, Wiring> wirings) {
             this.name = name;
             this.systemStore = systemStore;
             this.snapshotStore = new DefaultResourceStore("Cloned " + runtimeStore.getName());
+            this.wirings = new HashMap<Resource, Wiring>(wirings);
             Iterator<Resource> itres = runtimeStore.getResources();
             while (itres.hasNext()) {
                 snapshotStore.addResource(itres.next());
@@ -220,6 +232,11 @@ public class RuntimeEnvironment implements Environment {
         @Override
         public Resource removeResource(ResourceIdentity identity) {
             return snapshotStore.removeResource(identity);
+        }
+
+        @Override
+        public Map<Resource, Wiring> getWirings() {
+            return wirings;
         }
 
         @Override

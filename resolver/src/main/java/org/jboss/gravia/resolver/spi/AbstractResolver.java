@@ -110,13 +110,14 @@ public abstract class AbstractResolver implements Resolver {
 
         // Apply resolver results
         if (apply) {
+            Map<Resource, Wiring> wirings = context.getWirings();
             for (Entry<Resource, List<Wire>> entry : resourceWires.entrySet()) {
                 AbstractResource requirer = (AbstractResource) entry.getKey();
                 List<Wire> reqwires = entry.getValue();
-                AbstractWiring reqwiring = (AbstractWiring) requirer.getWiring();
+                AbstractWiring reqwiring = (AbstractWiring) wirings.get(requirer);
                 if (reqwiring == null) {
                     reqwiring = createWiring(requirer, reqwires, null);
-                    requirer.setWiring(reqwiring);
+                    wirings.put(requirer, reqwiring);
                 } else {
                     for (Wire wire : reqwires) {
                         reqwiring.addRequiredWire(wire);
@@ -124,10 +125,10 @@ public abstract class AbstractResolver implements Resolver {
                 }
                 for (Wire wire : reqwires) {
                     AbstractResource provider = (AbstractResource) wire.getProvider();
-                    AbstractWiring provwiring = (AbstractWiring) provider.getWiring();
+                    AbstractWiring provwiring = (AbstractWiring) wirings.get(provider);
                     if (provwiring == null) {
                         provwiring = createWiring(provider, null, null);
-                        provider.setWiring(provwiring);
+                        wirings.put(provider, provwiring);
                     }
                     provwiring.addProvidedWire(wire);
                 }
@@ -146,10 +147,12 @@ public abstract class AbstractResolver implements Resolver {
             return resspace;
 
         // A resource can resolve when the spaces of all its immediate dependencies can be added
+        ResolveContext context = state.getResolveContext();
         ResourceCandidates rescan = new ResourceCandidates(res);
-        Iterator<List<Wire>> itres = rescan.iterator(state.getResolveContext());
+        Iterator<List<Wire>> itres = rescan.iterator(context);
         while (itres.hasNext()) {
-            ResourceSpace space = new ResourceSpace(res);
+            Wiring wiring = context.getWirings().get(res);
+            ResourceSpace space = new ResourceSpace(res, wiring);
             List<Wire> wires = itres.next();
             boolean allgood = true;
             for (Wire wire : wires) {
@@ -215,8 +218,10 @@ public abstract class AbstractResolver implements Resolver {
 
         // Initially contain spaces for all wired resources
         ResourceSpaces(ResolveContext context) {
-            for (Resource res : context.getWirings().keySet()) {
-                spacemap.put(res, new ResourceSpace(res));
+            Map<Resource, Wiring> wirings = context.getWirings();
+            for (Resource res : wirings.keySet()) {
+                Wiring wiring = wirings.get(res);
+                spacemap.put(res, new ResourceSpace(res, wiring));
             }
         }
 
@@ -248,13 +253,12 @@ public abstract class AbstractResolver implements Resolver {
         private final Resource primary;
         private final Map<String, Resource> resources = new LinkedHashMap<String, Resource>();
 
-        ResourceSpace(Resource primary) {
+        ResourceSpace(Resource primary, Wiring wiring) {
             this.primary = primary;
 
             String uniquekey = primary.getIdentity().getSymbolicName();
             resources.put(uniquekey, primary);
 
-            Wiring wiring = primary.getWiring();
             if (wiring != null) {
                 for (Wire wire : wiring.getRequiredResourceWires(null)) {
                     Resource provider = wire.getProvider();

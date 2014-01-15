@@ -35,7 +35,7 @@ public class DefaultResourceStore extends AbstractResourceStore {
         super(storeName);
     }
 
-    public DefaultResourceStore(String storeName, MatchPolicy matchPolicy, boolean logCapsReqs) {
-        super(storeName, matchPolicy, logCapsReqs);
+    public DefaultResourceStore(String storeName, MatchPolicy matchPolicy) {
+        super(storeName, matchPolicy);
     }
 }

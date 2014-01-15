@@ -26,16 +26,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.gravia.resolver.DefaultEnvironment;
 import org.jboss.gravia.resolver.DefaultResolveContext;
 import org.jboss.gravia.resolver.DefaultResolver;
+import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.ResolutionException;
 import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resolver.Resolver;
-import org.jboss.gravia.resource.DefaultMatchPolicy;
-import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceStore;
 import org.jboss.gravia.resource.Wire;
+import org.jboss.gravia.resource.Wiring;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -57,13 +58,13 @@ public abstract class AbstractResolverTest {
     @Rule public TestName testName = new TestName();
 
     Resolver resolver;
-    ResourceStore resourceStore;
+    Environment environment;
 
     @Before
     public void setUp() throws Exception {
         log.debug("Start: {}.{}", getClass().getSimpleName(), testName.getMethodName());
         resolver = new DefaultResolver();
-        resourceStore = new DefaultResourceStore("testStore", new DefaultMatchPolicy(), true);
+        environment = new DefaultEnvironment("testStore");
     }
 
     @After
@@ -73,15 +74,15 @@ public abstract class AbstractResolverTest {
 
     ResourceStore installResources(Resource... resources) {
         for (Resource res : resources) {
-            resourceStore.addResource(res);
+            environment.addResource(res);
         }
-        return resourceStore;
+        return environment;
     }
 
     ResolveContext getResolveContext(List<Resource> mandatory, List<Resource> optional) {
         Set<Resource> manres = mandatory != null ? new HashSet<Resource>(mandatory) : null;
         Set<Resource> optres = optional != null ? new HashSet<Resource>(optional) : null;
-        return new DefaultResolveContext(resourceStore, manres, optres);
+        return new DefaultResolveContext(environment, manres, optres);
     }
 
     Map<Resource, List<Wire>> resolve(ResolveContext context) throws ResolutionException {
@@ -90,5 +91,9 @@ public abstract class AbstractResolverTest {
 
     Map<Resource, List<Wire>> resolveAndApply(ResolveContext context) throws ResolutionException {
         return resolver.resolveAndApply(context);
+    }
+
+    Wiring getWiring(Resource resource) {
+        return environment.getWirings().get(resource);
     }
 }

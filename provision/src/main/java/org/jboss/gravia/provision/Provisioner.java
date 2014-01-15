@@ -24,6 +24,7 @@ package org.jboss.gravia.provision;
 import java.util.Set;
 
 import org.jboss.gravia.repository.Repository;
+import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.Requirement;
 

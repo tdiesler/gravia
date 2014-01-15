@@ -44,7 +44,6 @@ import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.CompositeDataResourceType;
 import org.jboss.gravia.resource.Version;
-import org.jboss.gravia.resource.Wiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,6 @@ public abstract class AbstractResource implements Resource {
     private ResourceIdentity identity;
 
     private transient Attachable attachments;
-    private transient Wiring wiring;
 
     void addCapability(AbstractCapability cap) {
         synchronized (capabilities) {
@@ -203,15 +201,6 @@ public abstract class AbstractResource implements Resource {
             }
         }
         return Collections.unmodifiableList(result);
-    }
-
-    @Override
-    public Wiring getWiring() {
-        return wiring;
-    }
-
-    public void setWiring(Wiring wiring) {
-        this.wiring = wiring;
     }
 
     @Override
