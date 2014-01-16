@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.gravia.container.tomcat.webapp;
+package org.jboss.gravia.container.tomcat.support;
 
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -30,6 +30,8 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 import org.jboss.gravia.Constants;
+import org.jboss.gravia.container.tomcat.support.TomcatResourceInstaller;
+import org.jboss.gravia.container.tomcat.support.TomcatRuntimeFactory;
 import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;

@@ -20,7 +20,7 @@
  * #L%
  */
 
-package org.jboss.gravia.container.tomcat.webapp;
+package org.jboss.gravia.container.tomcat.support;
 
 import java.io.File;
 import java.io.FileOutputStream;
