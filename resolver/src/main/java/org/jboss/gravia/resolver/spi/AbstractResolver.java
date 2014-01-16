@@ -66,12 +66,12 @@ public abstract class AbstractResolver implements Resolver {
 
     @Override
     public Map<Resource, List<Wire>> resolve(ResolveContext context) throws ResolutionException {
-        return resolveInternal(context, false);
+        return resolveInternal((AbstractResolveContext) context, false);
     }
 
     @Override
     public Map<Resource, List<Wire>> resolveAndApply(ResolveContext context) throws ResolutionException {
-        return resolveInternal(context, true);
+        return resolveInternal((AbstractResolveContext) context, true);
     }
 
     ResourceSpaces createResourceSpaces(ResolveContext context) {
@@ -82,7 +82,7 @@ public abstract class AbstractResolver implements Resolver {
         return new ResourceCandidates(res);
     }
 
-    private Map<Resource, List<Wire>> resolveInternal(ResolveContext context, boolean apply) throws ResolutionException {
+    private Map<Resource, List<Wire>> resolveInternal(AbstractResolveContext context, boolean apply) throws ResolutionException {
 
         LOGGER.debug("Resolve: mandatory{} optional{}", context.getMandatoryResources(), context.getOptionalResources());
 
@@ -117,7 +117,7 @@ public abstract class AbstractResolver implements Resolver {
                 AbstractWiring reqwiring = (AbstractWiring) wirings.get(requirer);
                 if (reqwiring == null) {
                     reqwiring = createWiring(requirer, reqwires, null);
-                    wirings.put(requirer, reqwiring);
+                    context.putWiring(requirer, reqwiring);
                 } else {
                     for (Wire wire : reqwires) {
                         reqwiring.addRequiredWire(wire);
@@ -128,7 +128,7 @@ public abstract class AbstractResolver implements Resolver {
                     AbstractWiring provwiring = (AbstractWiring) wirings.get(provider);
                     if (provwiring == null) {
                         provwiring = createWiring(provider, null, null);
-                        wirings.put(provider, provwiring);
+                        context.putWiring(provider, provwiring);
                     }
                     provwiring.addProvidedWire(wire);
                 }

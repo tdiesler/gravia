@@ -23,6 +23,8 @@ package org.jboss.gravia.provision;
 
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.utils.NotNullException;
 
 /**
  * An default {@link ResourceHandle}
@@ -33,19 +35,22 @@ import org.jboss.gravia.resource.Resource;
 public class DefaultResourceHandle implements ResourceHandle {
 
     private final Resource resource;
+    private final Module module;
 
-    public DefaultResourceHandle(Resource resource) {
+    public DefaultResourceHandle(Resource resource, Module module) {
+        NotNullException.assertValue(resource, "resource");
         this.resource = resource;
+        this.module = module;
+    }
+
+    @Override
+    public Module getModule() {
+        return module;
     }
 
     @Override
     public Resource getResource() {
         return resource;
-    }
-
-    @Override
-    public <T> T adapt(Class<T> type) {
-        return null;
     }
 
     @Override

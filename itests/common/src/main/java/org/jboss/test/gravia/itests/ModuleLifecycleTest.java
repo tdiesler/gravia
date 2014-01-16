@@ -30,6 +30,7 @@ import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceRegistration;
@@ -81,7 +82,8 @@ public class ModuleLifecycleTest {
     @Test
     public void testModuleLifecycle() throws Exception {
 
-        Module modA = RuntimeLocator.getRuntime().getModule(getClass().getClassLoader());
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Module modA = runtime.getModule(getClass().getClassLoader());
         Assert.assertEquals(Module.State.ACTIVE, modA.getState());
 
         ModuleContext context = modA.getModuleContext();

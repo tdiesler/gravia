@@ -392,7 +392,7 @@ public final class BundleContextAdaptor implements BundleContext {
         private Module mappedModule(Bundle bundle) {
             Module result = null;
             if (bundle != null) {
-                Runtime runtime = RuntimeLocator.getRuntime();
+                Runtime runtime = RuntimeLocator.getRequiredRuntime();
                 result = runtime.getModule(bundle.getBundleId());
             }
             return result;

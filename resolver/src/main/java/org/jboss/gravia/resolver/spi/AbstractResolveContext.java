@@ -119,6 +119,11 @@ public abstract class AbstractResolveContext implements ResolveContext {
         return environment.getWirings();
     }
 
+    void putWiring(Resource resource, Wiring wiring) {
+        AbstractEnvironment absenv = AbstractEnvironment.assertAbstractEnvironment(environment);
+        absenv.putWiring(resource, wiring);
+    }
+
     @Override
     public List<Capability> findProviders(Requirement req) {
         List<Capability> result = new ArrayList<Capability>();

@@ -24,6 +24,7 @@ package org.jboss.gravia.resolver;
 import java.util.Iterator;
 
 import org.jboss.gravia.resolver.spi.AbstractEnvironment;
+import org.jboss.gravia.resource.DefaultMatchPolicy;
 import org.jboss.gravia.resource.Resource;
 
 /**
@@ -35,7 +36,7 @@ import org.jboss.gravia.resource.Resource;
 public class DefaultEnvironment extends AbstractEnvironment {
 
     public DefaultEnvironment(String envname) {
-        super(envname);
+        super(envname, new DefaultMatchPolicy());
     }
 
     @Override

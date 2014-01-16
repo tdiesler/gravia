@@ -26,24 +26,23 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.resolver.Environment;
+import org.jboss.gravia.resolver.spi.AbstractEnvironment;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.DefaultMatchPolicy;
 import org.jboss.gravia.resource.DefaultResourceStore;
+import org.jboss.gravia.resource.MatchPolicy;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.ResourceStore;
-import org.jboss.gravia.resource.Wiring;
-import org.jboss.gravia.resource.spi.AbstractResourceStore;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
@@ -60,40 +59,62 @@ import org.jboss.gravia.utils.NotNullException;
  * @author thomas.diesler@jboss.com
  * @since 07-Jan-2014
  */
-public class RuntimeEnvironment implements Environment {
+public class RuntimeEnvironment extends AbstractEnvironment {
 
-    private final RuntimeStore runtimeStore;
     private final ResourceStore systemStore;
-    private final Map<Resource, Wiring> wirings;
 
     public RuntimeEnvironment(Runtime runtime) {
-        this(runtime, new DefaultResourceStore("SystemResources"));
+        this(runtime, new DefaultResourceStore("SystemResources"), new DefaultMatchPolicy());
     }
 
-    public RuntimeEnvironment(Runtime runtime, ResourceStore systemStore) {
+    public RuntimeEnvironment(Runtime runtime, ResourceStore systemStore, MatchPolicy matchPolicy) {
+        super(RuntimeEnvironment.class.getSimpleName(), matchPolicy);
         NotNullException.assertValue(runtime, "runtime");
         NotNullException.assertValue(systemStore, "systemStore");
+        NotNullException.assertValue(matchPolicy, "matchPolicy");
         this.systemStore = systemStore;
-        this.runtimeStore = new RuntimeStore(runtime);
-        this.wirings = new HashMap<Resource, Wiring>();
+
+        // Add the initial set of modules
+        for (Module module : runtime.getModules()) {
+            addRuntimeResource(module.adapt(Resource.class));
+        }
+
+        // Track installed/uninstalled modules
+        ModuleListener listener = new SynchronousModuleListener() {
+            @Override
+            public void moduleChanged(ModuleEvent event) {
+                Module module = event.getModule();
+                if (event.getType() == ModuleEvent.INSTALLED) {
+                    addRuntimeResource(module.adapt(Resource.class));
+                } else if (event.getType() == ModuleEvent.UNINSTALLED) {
+                    removeRuntimeResource(module.getIdentity());
+                }
+            }
+        };
+        ModuleContext syscontext = runtime.getModuleContext();
+        syscontext.addModuleListener(listener);
     }
 
-    @Override
-    public String getName() {
-        return getClass().getSimpleName();
+    public static RuntimeEnvironment assertRuntimeEnvironment(Environment env) {
+        if (!(env instanceof RuntimeEnvironment))
+            throw new IllegalArgumentException("Not an RuntimeEnvironment: " + env);
+        return (RuntimeEnvironment) env;
+    }
+
+    public Iterator<Resource> getRuntimeResources() {
+        return super.getResources();
+    }
+
+    public Resource addRuntimeResource(Resource resource) {
+        return super.addResource(resource);
+    }
+
+    public Resource removeRuntimeResource(ResourceIdentity identity) {
+        return super.removeResource(identity);
     }
 
     public ResourceStore getSystemStore() {
         return systemStore;
-    }
-
-    public RuntimeStore getRuntimeStore() {
-        return runtimeStore;
-    }
-
-    @Override
-    public Map<Resource, Wiring> getWirings() {
-        return wirings;
     }
 
     public RuntimeEnvironment initDefaultContent() {
@@ -126,9 +147,9 @@ public class RuntimeEnvironment implements Environment {
 
     @Override
     public Resource getResource(ResourceIdentity identity) {
-        Resource resource = systemStore.getResource(identity);
+        Resource resource = super.getResource(identity);
         if (resource == null) {
-            resource = runtimeStore.getResource(identity);
+            resource = systemStore.getResource(identity);
         }
         return resource;
     }
@@ -136,14 +157,14 @@ public class RuntimeEnvironment implements Environment {
     @Override
     public Set<Capability> findProviders(Requirement requirement) {
         Set<Capability> result = new LinkedHashSet<Capability>();
+        result.addAll(super.findProviders(requirement));
         result.addAll(systemStore.findProviders(requirement));
-        result.addAll(runtimeStore.findProviders(requirement));
         return Collections.unmodifiableSet(result);
     }
 
     @Override
     public Environment cloneEnvironment() {
-        return new ClonedRuntimeEnvironment("Cloned " + getName(), runtimeStore, systemStore, wirings);
+        return new ClonedRuntimeEnvironment(this);
     }
 
     @Override
@@ -153,90 +174,25 @@ public class RuntimeEnvironment implements Environment {
 
     @Override
     public Resource addResource(Resource resource) {
-        throw new UnsupportedOperationException();
+        return systemStore.addResource(resource);
     }
 
     @Override
     public Resource removeResource(ResourceIdentity identity) {
-        throw new UnsupportedOperationException();
+        return systemStore.removeResource(identity);
     }
 
-    static class RuntimeStore extends AbstractResourceStore {
+    static class ClonedRuntimeEnvironment extends AbstractEnvironment {
 
-        public RuntimeStore(Runtime runtime) {
-            super(RuntimeStore.class.getSimpleName());
-
-            // Add the initial set of modules
-            for (Module module : runtime.getModules()) {
-                addModuleResource(module.adapt(Resource.class));
-            }
-
-            // Track installed/uninstalled modules
-            ModuleListener listener = new SynchronousModuleListener() {
-                @Override
-                public void moduleChanged(ModuleEvent event) {
-                    Module module = event.getModule();
-                    if (event.getType() == ModuleEvent.INSTALLED) {
-                        addModuleResource(module.adapt(Resource.class));
-                    } else if (event.getType() == ModuleEvent.UNINSTALLED) {
-                        removeModuleResource(module.getIdentity());
-                    }
-                }
-            };
-            ModuleContext syscontext = runtime.getModuleContext();
-            syscontext.addModuleListener(listener);
-        }
-
-        private Resource addModuleResource(Resource resource) {
-            return super.addResource(resource);
-        }
-
-        private Resource removeModuleResource(ResourceIdentity identity) {
-            return super.removeResource(identity);
-        }
-    }
-
-    static class ClonedRuntimeEnvironment implements Environment {
-
-        private final String name;
-        private final ResourceStore snapshotStore;
         private final ResourceStore systemStore;
-        private final Map<Resource, Wiring> wirings;
 
-        ClonedRuntimeEnvironment(String name, ResourceStore runtimeStore, ResourceStore systemStore, Map<Resource, Wiring> wirings) {
-            this.name = name;
-            this.systemStore = systemStore;
-            this.snapshotStore = new DefaultResourceStore("Cloned " + runtimeStore.getName());
-            this.wirings = new HashMap<Resource, Wiring>(wirings);
-            Iterator<Resource> itres = runtimeStore.getResources();
+        ClonedRuntimeEnvironment(RuntimeEnvironment environment) {
+            super(ClonedRuntimeEnvironment.class.getSimpleName(), environment.getMatchPolicy());
+            this.systemStore = environment.getSystemStore();
+            Iterator<Resource> itres = environment.getRuntimeResources();
             while (itres.hasNext()) {
-                snapshotStore.addResource(itres.next());
+                addResource(itres.next());
             }
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public Iterator<Resource> getResources() {
-            return snapshotStore.getResources();
-        }
-
-        @Override
-        public Resource addResource(Resource resource) {
-            return snapshotStore.addResource(resource);
-        }
-
-        @Override
-        public Resource removeResource(ResourceIdentity identity) {
-            return snapshotStore.removeResource(identity);
-        }
-
-        @Override
-        public Map<Resource, Wiring> getWirings() {
-            return wirings;
         }
 
         @Override
@@ -246,9 +202,9 @@ public class RuntimeEnvironment implements Environment {
 
         @Override
         public Resource getResource(ResourceIdentity identity) {
-            Resource resource = systemStore.getResource(identity);
+            Resource resource = super.getResource(identity);
             if (resource == null) {
-                resource = snapshotStore.getResource(identity);
+                resource = systemStore.getResource(identity);
             }
             return resource;
         }
@@ -256,8 +212,8 @@ public class RuntimeEnvironment implements Environment {
         @Override
         public Set<Capability> findProviders(Requirement requirement) {
             Set<Capability> result = new LinkedHashSet<Capability>();
+            result.addAll(super.findProviders(requirement));
             result.addAll(systemStore.findProviders(requirement));
-            result.addAll(snapshotStore.findProviders(requirement));
             return Collections.unmodifiableSet(result);
         }
     }

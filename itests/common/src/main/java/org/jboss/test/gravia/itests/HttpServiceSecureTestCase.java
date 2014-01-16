@@ -119,7 +119,7 @@ public class HttpServiceSecureTestCase {
 
     @Test
     public void testServletAccess() throws Exception {
-        Runtime runtime = RuntimeLocator.getRuntime();
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Module module = runtime.getModule(getClass().getClassLoader());
         ModuleContext context = module.getModuleContext();
         ServiceReference<HttpService> sref = context.getServiceReference(HttpService.class);
@@ -152,7 +152,7 @@ public class HttpServiceSecureTestCase {
 
     @Test
     public void testResourceAccess() throws Exception {
-        Runtime runtime = RuntimeLocator.getRuntime();
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Module module = runtime.getModule(getClass().getClassLoader());
         ModuleContext context = module.getModuleContext();
         ServiceReference<HttpService> sref = context.getServiceReference(HttpService.class);

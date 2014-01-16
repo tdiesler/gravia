@@ -21,8 +21,9 @@
  */
 package org.jboss.gravia.resolver.spi;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resource.MatchPolicy;
@@ -38,18 +39,25 @@ import org.jboss.gravia.resource.spi.AbstractResourceStore;
  */
 public abstract class AbstractEnvironment extends AbstractResourceStore implements Environment {
 
-    private final Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
-
-    public AbstractEnvironment(String envname) {
-        super(envname);
-    }
+    private final Map<Resource, Wiring> wirings;
 
     public AbstractEnvironment(String storeName, MatchPolicy matchPolicy) {
         super(storeName, matchPolicy);
+        this.wirings = new ConcurrentHashMap<Resource, Wiring>();
+    }
+
+    public static AbstractEnvironment assertAbstractEnvironment(Environment env) {
+        if (!(env instanceof AbstractEnvironment))
+            throw new IllegalArgumentException("Not an AbstractEnvironment: " + env);
+        return (AbstractEnvironment) env;
     }
 
     @Override
     public Map<Resource, Wiring> getWirings() {
-        return wirings;
+        return Collections.unmodifiableMap(wirings);
+    }
+
+    public void putWiring(Resource resource, Wiring wiring) {
+        wirings.put(resource, wiring);
     }
 }

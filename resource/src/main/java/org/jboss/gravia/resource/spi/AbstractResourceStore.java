@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.DefaultMatchPolicy;
 import org.jboss.gravia.resource.MatchPolicy;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
@@ -55,10 +54,6 @@ public abstract class AbstractResourceStore implements ResourceStore {
     private final Map<CacheKey, Set<Capability>> capabilityCache = new ConcurrentHashMap<CacheKey, Set<Capability>>();
     private final MatchPolicy matchPolicy;
 
-    public AbstractResourceStore(String storeName) {
-        this(storeName, new DefaultMatchPolicy());
-    }
-
     public AbstractResourceStore(String storeName, MatchPolicy matchPolicy) {
         NotNullException.assertValue(storeName, "storeName");
         NotNullException.assertValue(matchPolicy, "matchPolicy");
@@ -72,7 +67,8 @@ public abstract class AbstractResourceStore implements ResourceStore {
         return storeName;
     }
 
-    private MatchPolicy getMatchPolicyInternal() {
+    @Override
+    public MatchPolicy getMatchPolicy() {
         return matchPolicy;
     }
 
@@ -110,7 +106,7 @@ public abstract class AbstractResourceStore implements ResourceStore {
     public Resource addResource(Resource res) {
         synchronized (resources) {
 
-            if (getResource(res.getIdentity()) != null)
+            if (getResourceInternal(res.getIdentity()) != null)
                 throw new IllegalArgumentException("Resource already added: " + res);
 
             LOGGER.debug("Add to {}: {}", storeName, res);
@@ -160,6 +156,10 @@ public abstract class AbstractResourceStore implements ResourceStore {
 
     @Override
     public Resource getResource(ResourceIdentity resid) {
+        return getResourceInternal(resid);
+    }
+
+    private Resource getResourceInternal(ResourceIdentity resid) {
         synchronized (resources) {
             return resources.get(resid);
         }
@@ -170,7 +170,7 @@ public abstract class AbstractResourceStore implements ResourceStore {
         CacheKey cachekey = CacheKey.create(req);
         Set<Capability> result = new HashSet<Capability>();
         for (Capability cap : findCachedCapabilities(cachekey)) {
-            if (getMatchPolicyInternal().match(cap, req)) {
+            if (matchPolicy.match(cap, req)) {
                 result.add(cap);
             }
         }

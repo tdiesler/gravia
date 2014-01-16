@@ -34,8 +34,10 @@ import org.jboss.as.server.ServerEnvironmentService;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;
 import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.DefaultMatchPolicy;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.MatchPolicy;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
@@ -80,8 +82,9 @@ public class EnvironmentService extends AbstractService<Environment> {
     @SuppressWarnings("deprecation")
     public void start(StartContext startContext) throws StartException {
         Runtime runtime = injectedRuntime.getValue();
+        MatchPolicy matchPolicy = new DefaultMatchPolicy();
         File modulesDir = injectedServerEnvironment.getValue().getModulesDir();
-        environment = new RuntimeEnvironment(runtime, new SystemResourceStore(modulesDir));
+        environment = new RuntimeEnvironment(runtime, new SystemResourceStore(modulesDir), matchPolicy);
     }
 
     @Override
@@ -100,6 +103,11 @@ public class EnvironmentService extends AbstractService<Environment> {
         @Override
         public String getName() {
             return getClass().getSimpleName();
+        }
+
+        @Override
+        public MatchPolicy getMatchPolicy() {
+            throw new UnsupportedOperationException();
         }
 
         @Override

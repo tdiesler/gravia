@@ -1,6 +1,7 @@
 package org.jboss.gravia.provision;
 
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.Module;
 
 /**
  * The container specific handle to an installed resource.
@@ -12,7 +13,7 @@ public interface ResourceHandle {
 
     Resource getResource();
 
-    <T> T adapt(Class<T> type);
+    Module getModule();
 
     void uninstall();
 }

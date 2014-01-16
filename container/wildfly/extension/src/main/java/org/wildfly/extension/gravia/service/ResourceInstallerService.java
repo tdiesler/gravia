@@ -39,6 +39,7 @@ import org.jboss.as.controller.client.helpers.standalone.ServerDeploymentManager
 import org.jboss.as.server.ServerEnvironment;
 import org.jboss.as.server.ServerEnvironmentService;
 import org.jboss.as.server.Services;
+import org.jboss.as.server.moduleservice.ServiceModuleLoader;
 import org.jboss.gravia.provision.DefaultResourceHandle;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
@@ -51,7 +52,13 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
+import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.utils.IOUtils;
+import org.jboss.modules.ModuleClassLoader;
+import org.jboss.modules.ModuleIdentifier;
+import org.jboss.modules.ModuleLoader;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
@@ -82,6 +89,7 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
     static final Logger LOGGER = LoggerFactory.getLogger(GraviaConstants.class.getPackage().getName());
 
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
+    private final InjectedValue<ServiceModuleLoader> injectedServiceModuleLoader = new InjectedValue<ServiceModuleLoader>();
     private final InjectedValue<ModelController> injectedController = new InjectedValue<ModelController>();
     private final InjectedValue<RuntimeEnvironment> injectedEnvironment = new InjectedValue<RuntimeEnvironment>();
     private ServerDeploymentManager serverDeploymentManager;
@@ -91,6 +99,7 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         ServiceBuilder<ResourceInstaller> builder = serviceTarget.addService(GraviaConstants.RESOURCE_INSTALLER_SERVICE_NAME, this);
         builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, injectedServerEnvironment);
         builder.addDependency(GraviaConstants.ENVIRONMENT_SERVICE_NAME, RuntimeEnvironment.class, injectedEnvironment);
+        builder.addDependency(Services.JBOSS_SERVICE_MODULE_LOADER, ServiceModuleLoader.class, injectedServiceModuleLoader);
         builder.addDependency(Services.JBOSS_SERVER_CONTROLLER, ModelController.class, injectedController);
         builder.addListener(verificationHandler);
         return builder.install();
@@ -129,7 +138,7 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
 
         ResourceIdentity identity = resource.getIdentity();
         String symbolicName = identity.getSymbolicName();
-        String version = identity.getVersion().toString();
+        Version version = identity.getVersion();
         File modulesDir = injectedServerEnvironment.getValue().getModulesDir();
         File moduleDir = new File(modulesDir, symbolicName.replace(".", File.separator) + File.separator + version);
         if (moduleDir.exists())
@@ -144,9 +153,12 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         File resFile = new File(moduleDir, symbolicName + "-" + version + ".jar");
         IOUtils.copyStream(content.getContent(), new FileOutputStream(resFile));
 
+        String slot = version != Version.emptyVersion ? version.toString() : "main";
+        ModuleIdentifier modid = ModuleIdentifier.create(symbolicName, slot);
+
         // generate module.xml
         File xmlFile = new File(moduleDir, "module.xml");
-        String moduleXML = generateModuleXML(resFile, resource, mapping);
+        String moduleXML = generateModuleXML(resFile, resource, modid, mapping);
         OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(xmlFile));
         osw.write(moduleXML);
         osw.close();
@@ -156,13 +168,19 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         if (!mainDir.exists()) {
             mainDir.mkdirs();
             File mainFile = new File(mainDir, "module.xml");
-            moduleXML = generateModuleAliasXML(resource);
+            moduleXML = generateModuleAliasXML(resource, modid);
             osw = new OutputStreamWriter(new FileOutputStream(mainFile));
             osw.write(moduleXML);
             osw.close();
         }
 
-        return new DefaultResourceHandle(resource) {
+        // Install the resource as module
+        ModuleLoader moduleLoader = org.jboss.modules.Module.getBootModuleLoader();
+        ModuleClassLoader classLoader = moduleLoader.loadModule(modid).getClassLoader();
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Module module = runtime.installModule(classLoader, resource, null);
+
+        return new DefaultResourceHandle(resource, module) {
             @Override
             public void uninstall() {
                 // cannot uninstall shared resource
@@ -177,8 +195,21 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
         final ResourceWrapper wrapper = getWrappedResourceContent(resource, mapping);
         final String runtimeName = wrapper.getRuntimeName();
+
         serverDeployer.deploy(runtimeName, wrapper.getInputStream());
-        return new DefaultResourceHandle(resource) {
+
+        // Install the resource as module if it has not happend already
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Module module = runtime.getModule(resource.getIdentity());
+        if (module == null) {
+            ModuleLoader moduleLoader = injectedServiceModuleLoader.getValue();
+            ModuleIdentifier modid = ModuleIdentifier.create(ServiceModuleLoader.MODULE_PREFIX + runtimeName);
+            ClassLoader classLoader = moduleLoader.loadModule(modid).getClassLoader();
+            module = runtime.installModule(classLoader, resource, null);
+        }
+
+        Resource modres = module != null ? module.adapt(Resource.class) : resource;
+        return new DefaultResourceHandle(modres, module) {
             @Override
             public void uninstall() {
                 try {
@@ -227,14 +258,10 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         return new ResourceWrapper(wrapper.getName(), content);
     }
 
-    private String generateModuleXML(File resFile, Resource resource, Map<Requirement, Resource> mapping) throws IOException {
+    private String generateModuleXML(File resFile, Resource resource, ModuleIdentifier modid, Map<Requirement, Resource> mapping) throws IOException {
         LOGGER.info("Generating dependencies for: {}", resource);
         StringBuffer buffer = new StringBuffer();
-        ResourceIdentity identity = resource.getIdentity();
-        String symbolicName = identity.getSymbolicName();
-        Version version = identity.getVersion();
-        String slot = version != Version.emptyVersion ? "slot='" + version + "'" : "";
-        buffer.append("<module xmlns='urn:jboss:module:1.3' name='" + symbolicName + "' " + slot + ">");
+        buffer.append("<module xmlns='urn:jboss:module:1.3' name='" + modid.getName() + "' slot='" + modid.getSlot() + "'>");
         buffer.append(" <resources>");
         buffer.append("  <resource-root path='" + resFile.getName() + "'/>");
         buffer.append(" </resources>");
@@ -243,14 +270,10 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         return buffer.toString();
     }
 
-    private String generateModuleAliasXML(Resource resource) throws IOException {
+    private String generateModuleAliasXML(Resource resource, ModuleIdentifier modid) throws IOException {
         LOGGER.info("Generating main alias for: {}", resource);
         StringBuffer buffer = new StringBuffer();
-        ResourceIdentity identity = resource.getIdentity();
-        String symbolicName = identity.getSymbolicName();
-        Version version = identity.getVersion();
-        String slot = version != Version.emptyVersion ? "target-slot='" + version + "'" : "";
-        buffer.append("<module-alias xmlns='urn:jboss:module:1.3' name='" + symbolicName + "' target-name='" + symbolicName + "' " + slot + "/>");
+        buffer.append("<module-alias xmlns='urn:jboss:module:1.3' name='" + modid.getName() + "' target-name='" + modid.getName() + "' target-slot='" + modid.getSlot() + "'/>");
         return buffer.toString();
     }
 

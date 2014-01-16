@@ -1,9 +1,7 @@
 package org.jboss.gravia.provision.internal;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jboss.gravia.provision.DefaultResourceHandle;
 import org.jboss.gravia.provision.ProvisionException;
@@ -14,9 +12,14 @@ import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleException;
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,48 +38,6 @@ class BundleContextResourceInstaller extends AbstractResourceInstaller {
     @Override
     public RuntimeEnvironment getEnvironment() {
         return environment;
-    }
-
-    @Override
-    public synchronized Set<ResourceHandle> installResources(List<Resource> resources, Map<Requirement, Resource> mapping) throws ProvisionException {
-
-        // Install the resources
-        Set<ResourceHandle> handles = super.installResources(resources, mapping);
-
-        // Start the installed bundles
-        BundleException startException = null;
-        for (ResourceHandle handle : handles) {
-            Bundle bundle = ((BundleResourceHandle) handle).getBundle();
-            try {
-                bundle.start();
-            } catch (BundleException ex) {
-                startException = ex;
-                break;
-            }
-        }
-
-        // Uninstall resources and throw the start exception
-        if (startException != null) {
-            for (ResourceHandle handle : handles) {
-                handle.uninstall();
-            }
-            throw new ProvisionException(startException);
-        }
-
-        return handles;
-    }
-
-    @Override
-    public synchronized ResourceHandle installResource(Resource res, Map<Requirement, Resource> mapping) throws ProvisionException {
-        ResourceHandle handle = super.installResource(res, mapping);
-        Bundle bundle = ((BundleResourceHandle) handle).getBundle();
-        try {
-            bundle.start();
-        } catch (BundleException ex) {
-            handle.uninstall();
-            throw new ProvisionException(ex);
-        }
-        return handle;
     }
 
     @Override
@@ -100,15 +61,47 @@ class BundleContextResourceInstaller extends AbstractResourceInstaller {
         } catch (BundleException ex) {
             throw new ProvisionException(ex);
         }
-        return new BundleResourceHandle(resource, bundle);
+
+        // Attempt to start the bundle. This relies on provision ordering.
+        try {
+            bundle.start();
+        } catch (BundleException ex) {
+            // ignore
+        }
+
+        // Install the bundle as module if it has not already happened
+        // A bundle that could not get resolved will have no associated module
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Module module = runtime.getModule(identity);
+        BundleWiring wiring = bundle.adapt(BundleWiring.class);
+        if (module == null && wiring != null) {
+            try {
+                ClassLoader classLoader = wiring.getClassLoader();
+                module = runtime.installModule(classLoader, resource, null);
+            } catch (ModuleException ex) {
+                throw new ProvisionException(ex);
+            }
+        }
+
+        // Installing a bundle does not trigger a {@link ModuleEvent#INSTALLED}
+        // event because the Bundle's class loader is not (yet) available
+        // We manually add the resource to the {@link RuntimeEnvironment}
+        // [TODO] Revisit {@link ModuleListener} handling for OSGi
+        Resource envres = environment.getResource(identity);
+        if (envres == null && module != null) {
+            RuntimeEnvironment runtimeEnv = RuntimeEnvironment.assertRuntimeEnvironment(environment);
+            runtimeEnv.addRuntimeResource(resource);
+        }
+
+        return new BundleResourceHandle(resource, module, bundle);
     }
 
     static class BundleResourceHandle extends DefaultResourceHandle {
 
         private final Bundle bundle;
 
-        BundleResourceHandle(Resource resource, Bundle bundle) {
-            super(resource);
+        BundleResourceHandle(Resource resource, Module module, Bundle bundle) {
+            super(resource, module);
             this.bundle = bundle;
         }
 

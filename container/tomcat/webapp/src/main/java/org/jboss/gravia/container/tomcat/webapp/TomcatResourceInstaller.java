@@ -47,6 +47,7 @@ import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.utils.IOUtils;
@@ -105,9 +106,10 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
 
         IOUtils.copyStream(content.getContent(), new FileOutputStream(targetFile));
 
-        installSharedResource(resource, targetFile);
+        Module module = installSharedResource(resource, targetFile);
+        Resource modres = module.adapt(Resource.class);
 
-        return new DefaultResourceHandle(resource) {
+        return new DefaultResourceHandle(modres, module) {
             @Override
             public void uninstall() {
                 // cannot uninstall shared resource
@@ -116,22 +118,22 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public ResourceHandle installUnsharedResource(Resource res, Map<Requirement, Resource> mapping) throws Exception {
-        LOGGER.info("Installing unshared resource: {}", res);
+    public ResourceHandle installUnsharedResource(Resource resource, Map<Requirement, Resource> mapping) throws Exception {
+        LOGGER.info("Installing unshared resource: {}", resource);
 
         File tempfile = null;
-        ResourceIdentity identity = res.getIdentity();
-        ContentCapability ccap = (ContentCapability) res.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).get(0);
+        ResourceIdentity identity = resource.getIdentity();
+        ContentCapability ccap = (ContentCapability) resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).get(0);
         URL contentURL = ccap.getContentURL();
         if (contentURL == null) {
-            InputStream content = res.adapt(ResourceContent.class).getContent();
+            InputStream content = resource.adapt(ResourceContent.class).getContent();
             tempfile = new File(catalinaTemp, identity.getSymbolicName() + "-" + identity.getVersion() + ".war");
             IOUtils.copyStream(content, new FileOutputStream(tempfile));
             contentURL = tempfile.toURI().toURL();
         }
 
         // Get contextPath, username, password
-        final String contextPath = getContextPath(res);
+        final String contextPath = getContextPath(resource);
         final User user = userDatabase.findUser(TOMCAT_USER);
         final String password = user.getPassword();
 
@@ -148,7 +150,11 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
             }
         }
 
-        return new DefaultResourceHandle(res) {
+        // Get the resource as module (may be null)
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Module module = runtime.getModule(identity);
+
+        return new DefaultResourceHandle(resource, module) {
             @Override
             public void uninstall() {
                 UndeployTask task = new UndeployTask();
@@ -160,7 +166,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         };
     }
 
-    private Resource installSharedResource(Resource resource, File targetFile) throws Exception {
+    private Module installSharedResource(Resource resource, File targetFile) throws Exception {
 
         // Get a resource copy with updated content capability
         DefaultResourceBuilder builder = new DefaultResourceBuilder();
@@ -181,9 +187,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
 
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
         ClassLoader classLoader = SharedModuleClassLoader.class.getClassLoader();
-        runtime.installModule(classLoader, resource, null);
-
-        return resource;
+        return runtime.installModule(classLoader, resource, null);
     }
 
     private String getContextPath(Resource res) {

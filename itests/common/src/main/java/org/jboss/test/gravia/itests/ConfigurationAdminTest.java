@@ -96,7 +96,7 @@ public class ConfigurationAdminTest  {
     @Test
     public void testBasicModule() throws Exception {
 
-        Runtime runtime = RuntimeLocator.getRuntime();
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Module module = runtime.getModule(getClass().getClassLoader());
 
         ModuleContext ctxA = module.getModuleContext();

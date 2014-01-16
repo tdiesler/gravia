@@ -91,7 +91,7 @@ public class ServiceComponentTest  {
     @Test
     public void testBasicModule() throws Exception {
 
-        Runtime runtime = RuntimeLocator.getRuntime();
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Module modA = runtime.getModule(getClass().getClassLoader());
 
         ModuleContext ctxA = modA.getModuleContext();

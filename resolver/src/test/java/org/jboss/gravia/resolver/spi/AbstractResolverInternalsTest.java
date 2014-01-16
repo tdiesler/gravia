@@ -23,13 +23,11 @@ package org.jboss.gravia.resolver.spi;
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.jboss.gravia.resolver.DefaultEnvironment;
 import org.jboss.gravia.resolver.DefaultResolveContext;
 import org.jboss.gravia.resolver.DefaultResolver;
-import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.DefaultWiring;
@@ -37,7 +35,6 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
-import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.resource.spi.AbstractResource;
 import org.junit.After;
 import org.junit.Before;
@@ -59,13 +56,13 @@ public abstract class AbstractResolverInternalsTest {
     @Rule public TestName testName = new TestName();
 
     AbstractResolver resolver;
-    Environment environemnt;
+    AbstractEnvironment environment;
 
     @Before
     public void setUp() throws Exception {
         log.debug("Start: {}.{}", getClass().getSimpleName(), testName.getMethodName());
 
-        environemnt = new DefaultEnvironment("testStore");
+        environment = new DefaultEnvironment("testStore");
         resolver = new DefaultResolver();
 
         // A-1.0.0 => D-1.0.0, B-1.1.0
@@ -73,50 +70,49 @@ public abstract class AbstractResolverInternalsTest {
         builder.addIdentityCapability("resA", new Version("1.0.0"));
         builder.addIdentityRequirement("resB", new VersionRange("[1.0,2.0)"));
         builder.addIdentityRequirement("resD", new VersionRange("[1.0,2.0)"));
-        environemnt.addResource(builder.getResource());
+        environment.addResource(builder.getResource());
 
         // D-1.0.0 => C-1.0.0
         builder = new DefaultResourceBuilder();
         builder.addIdentityCapability("resD", new Version("1.0.0"));
         builder.addIdentityRequirement("resC", new VersionRange("[1.0,2.0)"));
-        environemnt.addResource(builder.getResource());
+        environment.addResource(builder.getResource());
 
         // B-1.1.0 => C-1.0.0, E-1.1.0
         builder = new DefaultResourceBuilder();
         builder.addIdentityCapability("resB", new Version("1.1.0"));
         builder.addIdentityRequirement("resC", new VersionRange("[1.0,2.0)"));
         builder.addIdentityRequirement("resE", new VersionRange("[1.0,2.0)"));
-        environemnt.addResource(builder.getResource());
+        environment.addResource(builder.getResource());
 
         // B-1.0.0
         builder = new DefaultResourceBuilder();
         builder.addIdentityCapability("resB", new Version("1.0.0"));
         builder.addIdentityRequirement("resC", new VersionRange("[1.0,2.0)"));
         builder.addIdentityRequirement("resE", new VersionRange("[1.0,2.0)"));
-        environemnt.addResource(builder.getResource());
+        environment.addResource(builder.getResource());
 
         // C-1.1.0
         builder = new DefaultResourceBuilder();
         builder.addIdentityCapability("resC", new Version("1.1.0"));
-        environemnt.addResource(builder.getResource());
+        environment.addResource(builder.getResource());
 
         // C-1.0.0 (resolved)
         builder = new DefaultResourceBuilder();
         builder.addIdentityCapability("resC", new Version("1.0.0"));
         AbstractResource resC10 = (AbstractResource) builder.getResource();
-        Map<Resource, Wiring> wirings = environemnt.getWirings();
-        wirings.put(resC10, new DefaultWiring(resC10, null, null));
-        environemnt.addResource(resC10);
+        environment.putWiring(resC10, new DefaultWiring(resC10, null, null));
+        environment.addResource(resC10);
 
         // E-1.1.0
         builder = new DefaultResourceBuilder();
         builder.addIdentityCapability("resE", new Version("1.1.0"));
-        environemnt.addResource(builder.getResource());
+        environment.addResource(builder.getResource());
 
         // E-1.0.0
         builder = new DefaultResourceBuilder();
         builder.addIdentityCapability("resE", new Version("1.0.0"));
-        environemnt.addResource(builder.getResource());
+        environment.addResource(builder.getResource());
     }
 
     @After
@@ -127,6 +123,6 @@ public abstract class AbstractResolverInternalsTest {
     ResolveContext getResolveContext(List<Resource> mandatory, List<Resource> optional) {
         Set<Resource> manres = mandatory != null ? new LinkedHashSet<Resource>(mandatory) : null;
         Set<Resource> optres = optional != null ? new LinkedHashSet<Resource>(optional) : null;
-        return new DefaultResolveContext(environemnt, manres, optres);
+        return new DefaultResolveContext(environment, manres, optres);
     }
 }

@@ -32,7 +32,7 @@ import org.jboss.gravia.resource.spi.AbstractResourceStore;
 public class DefaultResourceStore extends AbstractResourceStore {
 
     public DefaultResourceStore(String storeName) {
-        super(storeName);
+        super(storeName, new DefaultMatchPolicy());
     }
 
     public DefaultResourceStore(String storeName, MatchPolicy matchPolicy) {

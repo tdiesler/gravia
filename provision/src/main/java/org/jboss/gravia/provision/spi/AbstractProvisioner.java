@@ -46,11 +46,15 @@ import org.jboss.gravia.resolver.PreferencePolicy;
 import org.jboss.gravia.resolver.ResolutionException;
 import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resolver.Resolver;
+import org.jboss.gravia.resolver.spi.AbstractEnvironment;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.DefaultWire;
+import org.jboss.gravia.resource.DefaultWiring;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.Wire;
+import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.utils.NotNullException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,7 +157,7 @@ public abstract class AbstractProvisioner implements Provisioner {
             sortResultResources(res, mapping, sorted);
         }
 
-        AbstractProvisionResult result = new AbstractProvisionResult(mapping, unstatisfied, sorted);
+        ProvisionResult result = new DefaultProvisionResult(sorted, mapping, envclone.getWirings(), unstatisfied);
         LOGGER.debug("END findResources");
         LOGGER.debug("  resources: {}", result.getResources());
         LOGGER.debug("  unsatisfied: {}", result.getUnsatisfiedRequirements());
@@ -163,7 +167,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         mandatory.addAll(result.getResources());
         try {
             ResolveContext context = new DefaultResolveContext(envclone, mandatory, null);
-            resolver.resolve(context).entrySet();
+            resolver.resolveAndApply(context).entrySet();
         } catch (ResolutionException ex) {
             LOGGER.warn("Cannot resolve provisioner result", ex);
         }
@@ -173,14 +177,77 @@ public abstract class AbstractProvisioner implements Provisioner {
 
     @Override
     public Set<ResourceHandle> provisionResources(Set<Requirement> reqs) throws ProvisionException {
+
+        // Find resources
         ProvisionResult result = findResources(reqs);
         Set<Requirement> unsatisfied = result.getUnsatisfiedRequirements();
         if (!unsatisfied.isEmpty()) {
             throw new ProvisionException("Cannot resolve unsatisfied requirements: " + unsatisfied);
         }
+
+        // NOTE: installing resources and updating the wiring is not an atomic operation
+
+        // Install resources
         List<Resource> resources = result.getResources();
         Map<Requirement, Resource> mapping = result.getMapping();
-        return installer.installResources(resources, mapping);
+        Set<ResourceHandle> handles = installer.installResources(resources, mapping);
+
+        // Update the wirings
+        Map<Resource, Wiring> auxwirings = result.getWirings();
+        for (Entry<Resource, Wiring> entry : auxwirings.entrySet()) {
+            Resource auxres = entry.getKey();
+            Resource envres = environment.getResource(auxres.getIdentity());
+            DefaultWiring envwiring = new DefaultWiring(envres, null, null);
+            Wiring auxwiring = entry.getValue();
+            for (Wire auxwire : auxwiring.getProvidedResourceWires(null)) {
+                Capability auxcap = auxwire.getCapability();
+                Capability envcap = findTargetCapability(auxcap);
+                Requirement auxreq = auxwire.getRequirement();
+                Requirement envreq = findTargetRequirement(auxreq);
+                envwiring.addProvidedWire(new DefaultWire(envreq, envcap));
+            }
+            for (Wire auxwire : auxwiring.getRequiredResourceWires(null)) {
+                Capability auxcap = auxwire.getCapability();
+                Capability envcap = findTargetCapability(auxcap);
+                Requirement auxreq = auxwire.getRequirement();
+                Requirement envreq = findTargetRequirement(auxreq);
+                envwiring.addRequiredWire(new DefaultWire(envreq, envcap));
+            }
+            AbstractEnvironment absenv = AbstractEnvironment.assertAbstractEnvironment(environment);
+            absenv.putWiring(envres, envwiring);
+        }
+
+        return handles;
+    }
+
+    private Capability findTargetCapability(Capability auxcap) {
+        Resource auxres = auxcap.getResource();
+        Resource envres = environment.getResource(auxres.getIdentity());
+        if (auxres == envres)
+            return auxcap;
+        for (Capability cap : envres.getCapabilities(null)) {
+            boolean nsmatch = cap.getNamespace().equals(auxcap.getNamespace());
+            boolean attsmatch = cap.getAttributes().equals(auxcap.getAttributes());
+            boolean dirsmatch = cap.getDirectives().equals(auxcap.getDirectives());
+            if (nsmatch && attsmatch && dirsmatch)
+                return cap;
+        }
+        throw new IllegalStateException("Cannot find target capability for: " + auxcap);
+    }
+
+    private Requirement findTargetRequirement(Requirement auxreq) {
+        Resource auxres = auxreq.getResource();
+        Resource envres = environment.getResource(auxres.getIdentity());
+        if (auxres == envres)
+            return auxreq;
+        for (Requirement req : envres.getRequirements(null)) {
+            boolean nsmatch = req.getNamespace().equals(auxreq.getNamespace());
+            boolean attsmatch = req.getAttributes().equals(auxreq.getAttributes());
+            boolean dirsmatch = req.getDirectives().equals(auxreq.getDirectives());
+            if (nsmatch && attsmatch && dirsmatch)
+                return req;
+        }
+        throw new IllegalStateException("Cannot find target requirement for: " + auxreq);
     }
 
     // Sort mapping targets higher in the list. This should result in resource installations
@@ -305,16 +372,23 @@ public abstract class AbstractProvisioner implements Provisioner {
         }
     }
 
-    static class AbstractProvisionResult implements ProvisionResult {
+    static class DefaultProvisionResult implements ProvisionResult {
 
+        private final Map<Resource, Wiring> wirings;
         private final Map<Requirement, Resource> mapping;
         private final Set<Requirement> unsatisfied;
         private final List<Resource> resources;
 
-        public AbstractProvisionResult(Map<Requirement, Resource> mapping, Set<Requirement> unstatisfied, List<Resource> resources) {
-            this.mapping = mapping;
-            this.unsatisfied = unstatisfied;
+        DefaultProvisionResult(List<Resource> resources, Map<Requirement, Resource> mapping, Map<Resource, Wiring> wirings, Set<Requirement> unstatisfied) {
             this.resources = resources;
+            this.mapping = mapping;
+            this.wirings = wirings;
+            this.unsatisfied = unstatisfied;
+        }
+
+        @Override
+        public List<Resource> getResources() {
+            return Collections.unmodifiableList(resources);
         }
 
         @Override
@@ -323,8 +397,8 @@ public abstract class AbstractProvisioner implements Provisioner {
         }
 
         @Override
-        public List<Resource> getResources() {
-            return Collections.unmodifiableList(resources);
+        public Map<Resource, Wiring> getWirings() {
+            return Collections.unmodifiableMap(wirings);
         }
 
         @Override

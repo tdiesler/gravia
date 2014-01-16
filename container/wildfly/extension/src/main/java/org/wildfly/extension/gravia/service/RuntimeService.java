@@ -68,7 +68,7 @@ public class RuntimeService extends AbstractService<Runtime> {
 
     @Override
     public Runtime getValue() throws IllegalStateException {
-        return RuntimeLocator.getRuntime();
+        return RuntimeLocator.getRequiredRuntime();
     }
 
     protected ServerEnvironment getServerEnvironment() {

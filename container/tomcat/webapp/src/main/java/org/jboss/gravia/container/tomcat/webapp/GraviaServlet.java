@@ -42,7 +42,7 @@ public class GraviaServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        Runtime runtime = RuntimeLocator.getRuntime();
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
         ModuleContext moduleContext = runtime.getModuleContext();
         ServiceReference<HttpService> sref = moduleContext.getServiceReference(HttpService.class);
         HttpService httpService = moduleContext.getService(sref);

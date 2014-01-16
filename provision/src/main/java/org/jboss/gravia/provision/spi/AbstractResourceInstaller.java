@@ -35,6 +35,7 @@ import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.runtime.ResourceAssociation;
 
 /**
  * An abstract {@link ResourceInstaller}.
@@ -63,33 +64,36 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
         return installResourceInternal(res, mapping);
     }
 
-    private synchronized ResourceHandle installResourceInternal(Resource res, Map<Requirement, Resource> mapping) throws ProvisionException {
+    private synchronized ResourceHandle installResourceInternal(Resource resource, Map<Requirement, Resource> mapping) throws ProvisionException {
+        ResourceAssociation.putResource(resource);
         try {
-            if (isShared(res)) {
-                return installSharedResource(res, mapping);
+            if (isShared(resource)) {
+                return installSharedResource(resource, mapping);
             } else {
-                return installUnsharedResource(res, mapping);
+                return installUnsharedResource(resource, mapping);
             }
         } catch (RuntimeException rte) {
             throw rte;
         } catch (ProvisionException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new ProvisionException("Cannot provision resource: " + res, ex);
+            throw new ProvisionException("Cannot provision resource: " + resource, ex);
+        } finally {
+            ResourceAssociation.removeResource(resource.getIdentity());
         }
     }
 
-    public abstract ResourceHandle installSharedResource(Resource res, Map<Requirement, Resource> mapping) throws Exception;
+    public abstract ResourceHandle installSharedResource(Resource resource, Map<Requirement, Resource> mapping) throws Exception;
 
-    public abstract ResourceHandle installUnsharedResource(Resource res, Map<Requirement, Resource> mapping) throws Exception;
+    public abstract ResourceHandle installUnsharedResource(Resource resource, Map<Requirement, Resource> mapping) throws Exception;
 
     private boolean isAbstract(Resource res) {
         Object attval = res.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE);
         return IdentityNamespace.TYPE_ABSTRACT.equals(attval);
     }
 
-    private boolean isShared(Resource res) {
-        Object attval = res.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_SHARED_ATTRIBUTE);
+    private boolean isShared(Resource resource) {
+        Object attval = resource.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_SHARED_ATTRIBUTE);
         return Boolean.parseBoolean((String) attval);
     }
 }

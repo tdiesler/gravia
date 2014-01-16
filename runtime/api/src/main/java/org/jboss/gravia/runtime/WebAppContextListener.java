@@ -34,6 +34,7 @@ import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.osgi.framework.Bundle;
@@ -93,21 +94,26 @@ public class WebAppContextListener implements ServletContextListener {
     }
 
     public Module installWebappModule(Runtime runtime, ServletContext servletContext) {
+
         ClassLoader classLoader = servletContext.getClassLoader();
         Manifest manifest = getWebappManifest(servletContext);
         if (manifest == null)
             return null;
 
         ResourceBuilder resbuilder = new ManifestResourceBuilder().load(manifest);
-        if (resbuilder.isValid() == false)
+        if (!resbuilder.isValid())
             return null;
+
+        Resource resource = resbuilder.getResource();
+        ResourceIdentity identity = resource.getIdentity();
+        Resource association = ResourceAssociation.getResource(identity);
+        resource = association != null ? association : resource;
 
         AttachableSupport context = new AttachableSupport();
         context.putAttachment(SERVLET_CONTEXT_KEY, servletContext);
 
         Module module;
         try {
-            Resource resource = resbuilder.getResource();
             ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(manifest);
             module = runtime.installModule(classLoader, resource, headersProvider.getHeaders(), context);
         } catch (RuntimeException rte) {

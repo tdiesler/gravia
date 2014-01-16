@@ -49,7 +49,7 @@ public class ResolverInternalsTest extends AbstractResolverInternalsTest {
 
     @Test
     public void testInitialResourceSpaces() throws Exception {
-        Resource resC10 = environemnt.getResource(ResourceIdentity.fromString("resC:1.0.0"));
+        Resource resC10 = environment.getResource(ResourceIdentity.fromString("resC:1.0.0"));
 
         ResolveContext context = getResolveContext(null, null);
         ResourceSpaces spaces = resolver.createResourceSpaces(context);
@@ -63,14 +63,14 @@ public class ResolverInternalsTest extends AbstractResolverInternalsTest {
 
     @Test
     public void testResourceCandidates() throws Exception {
-        Resource resA10 = environemnt.getResource(ResourceIdentity.fromString("resA:1.0.0"));
-        Resource resB10 = environemnt.getResource(ResourceIdentity.fromString("resB:1.0.0"));
-        Resource resB11 = environemnt.getResource(ResourceIdentity.fromString("resB:1.1.0"));
-        Resource resC10 = environemnt.getResource(ResourceIdentity.fromString("resC:1.0.0"));
-        Resource resC11 = environemnt.getResource(ResourceIdentity.fromString("resC:1.1.0"));
-        Resource resD10 = environemnt.getResource(ResourceIdentity.fromString("resD:1.0.0"));
-        Resource resE10 = environemnt.getResource(ResourceIdentity.fromString("resE:1.0.0"));
-        Resource resE11 = environemnt.getResource(ResourceIdentity.fromString("resE:1.1.0"));
+        Resource resA10 = environment.getResource(ResourceIdentity.fromString("resA:1.0.0"));
+        Resource resB10 = environment.getResource(ResourceIdentity.fromString("resB:1.0.0"));
+        Resource resB11 = environment.getResource(ResourceIdentity.fromString("resB:1.1.0"));
+        Resource resC10 = environment.getResource(ResourceIdentity.fromString("resC:1.0.0"));
+        Resource resC11 = environment.getResource(ResourceIdentity.fromString("resC:1.1.0"));
+        Resource resD10 = environment.getResource(ResourceIdentity.fromString("resD:1.0.0"));
+        Resource resE10 = environment.getResource(ResourceIdentity.fromString("resE:1.0.0"));
+        Resource resE11 = environment.getResource(ResourceIdentity.fromString("resE:1.1.0"));
 
         ResolveContext context = getResolveContext(null, null);
 
@@ -195,11 +195,11 @@ public class ResolverInternalsTest extends AbstractResolverInternalsTest {
 
     @Test
     public void testResolveResources() throws Exception {
-        Resource resA10 = environemnt.getResource(ResourceIdentity.fromString("resA:1.0.0"));
-        Resource resB11 = environemnt.getResource(ResourceIdentity.fromString("resB:1.1.0"));
-        Resource resC10 = environemnt.getResource(ResourceIdentity.fromString("resC:1.0.0"));
-        Resource resD10 = environemnt.getResource(ResourceIdentity.fromString("resD:1.0.0"));
-        Resource resE11 = environemnt.getResource(ResourceIdentity.fromString("resE:1.1.0"));
+        Resource resA10 = environment.getResource(ResourceIdentity.fromString("resA:1.0.0"));
+        Resource resB11 = environment.getResource(ResourceIdentity.fromString("resB:1.1.0"));
+        Resource resC10 = environment.getResource(ResourceIdentity.fromString("resC:1.0.0"));
+        Resource resD10 = environment.getResource(ResourceIdentity.fromString("resD:1.0.0"));
+        Resource resE11 = environment.getResource(ResourceIdentity.fromString("resE:1.1.0"));
 
         ResolveContext context = getResolveContext(Arrays.asList(resA10), null);
         Map<Resource, List<Wire>> wiremap = resolver.resolve(context);

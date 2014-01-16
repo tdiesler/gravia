@@ -33,9 +33,11 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.module.ResourceRoot;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
+import org.jboss.gravia.runtime.ResourceAssociation;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
@@ -59,6 +61,14 @@ public class ModuleInstallProcessor implements DeploymentUnitProcessor {
         if (resource == null)
             return;
 
+        // Use the associated resource if we have one
+        ResourceIdentity identity = resource.getIdentity();
+        Resource association = ResourceAssociation.getResource(identity);
+        if (association != null) {
+            depUnit.putAttachment(GraviaConstants.RESOURCE_KEY, association);
+            resource = association;
+        }
+
         // Get the headers from the manifest
         Dictionary<String, String> headers = null;
         ResourceRoot deploymentRoot = depUnit.getAttachment(Attachments.DEPLOYMENT_ROOT);
@@ -74,7 +84,7 @@ public class ModuleInstallProcessor implements DeploymentUnitProcessor {
         // Install the module
         ModuleClassLoader classLoader = depUnit.getAttachment(Attachments.MODULE).getClassLoader();
         try {
-            Runtime runtime = RuntimeLocator.getRuntime();
+            Runtime runtime = RuntimeLocator.getRequiredRuntime();
             Module module = runtime.installModule(classLoader, resource, headers, context);
             depUnit.putAttachment(GraviaConstants.MODULE_KEY, module);
         } catch (ModuleException ex) {
