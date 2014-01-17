@@ -21,14 +21,11 @@
  */
 package org.wildfly.extension.gravia.service;
 
-import java.util.Dictionary;
-
 import org.jboss.as.server.deployment.module.ResourceRoot;
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.AttachmentKey;
-import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.embedded.internal.EmbeddedRuntime;
-import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
@@ -47,13 +44,8 @@ public class WildflyRuntime extends EmbeddedRuntime {
     }
 
     @Override
-    public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) {
-        AbstractModule module = super.createModule(classLoader, resource, headers, context);
+    protected ModuleEntriesProvider getDefaultEntriesProvider(Module module, Attachable context) {
         ResourceRoot resourceRoot = context.getAttachment(WildflyRuntime.DEPLOYMENT_ROOT_KEY);
-        if (resourceRoot != null) {
-            ModuleEntriesProvider entriesProvider = new VirtualFileEntriesProvider(resourceRoot);
-            module.putAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY, entriesProvider);
-        }
-        return module;
+        return resourceRoot != null ? new VirtualFileEntriesProvider(resourceRoot) : null;
     }
 }

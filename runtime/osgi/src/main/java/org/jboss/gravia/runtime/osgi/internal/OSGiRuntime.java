@@ -118,10 +118,13 @@ public final class OSGiRuntime extends AbstractRuntime {
     }
 
     @Override
-    public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) {
-        ModuleAdaptor module = new ModuleAdaptor(this, classLoader, resource, headers);
-        module.putAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY, new OSGiModuleEntriesProvider(module));
-        return module;
+    protected AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) {
+        return new ModuleAdaptor(this, classLoader, resource, headers);
+    }
+
+    @Override
+    protected ModuleEntriesProvider getDefaultEntriesProvider(Module module, Attachable context) {
+        return new OSGiModuleEntriesProvider(module);
     }
 
     @Override

@@ -109,18 +109,19 @@ public class EmbeddedRuntime extends AbstractRuntime {
     }
 
     @Override
-    public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) {
+    protected AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) {
         AbstractModule module;
         if (resource != null && resource.getIdentity().equals(getSystemIdentity())) {
             module = new SystemModule(this, classLoader, resource);
         } else {
             module = new EmbeddedModule(this, classLoader, resource, headers);
         }
-        ModuleEntriesProvider entriesProvider = context.getAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY);
-        if (entriesProvider != null) {
-            module.putAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY, entriesProvider);
-        }
         return module;
+    }
+
+    @Override
+    protected ModuleEntriesProvider getDefaultEntriesProvider(Module module, Attachable context) {
+        return null;
     }
 
     @Override

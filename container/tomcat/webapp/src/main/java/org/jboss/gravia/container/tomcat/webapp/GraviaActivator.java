@@ -21,15 +21,12 @@
  */
 package org.jboss.gravia.container.tomcat.webapp;
 
-import java.io.File;
-import java.util.Properties;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-import org.jboss.gravia.Constants;
+import org.jboss.gravia.container.tomcat.support.TomcatPropertiesProvider;
 import org.jboss.gravia.container.tomcat.support.TomcatResourceInstaller;
 import org.jboss.gravia.container.tomcat.support.TomcatRuntimeFactory;
 import org.jboss.gravia.provision.DefaultProvisioner;
@@ -47,7 +44,6 @@ import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.embedded.spi.BundleContextAdaptor;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
-import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.jboss.gravia.runtime.util.RuntimePropertiesProvider;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -64,9 +60,6 @@ public class GraviaActivator implements ServletContextListener {
 
     static final Logger LOGGER = LoggerFactory.getLogger(GraviaActivator.class);
 
-    private final static File catalinaHome = new File(SecurityActions.getSystemProperty("catalina.home", null));
-    private final static File catalinaWork = new File(catalinaHome.getPath() + File.separator + "work");
-
     private Registration repositoryRegistration;
     private ServiceRegistration<Provisioner> provisionerRegistration;
     private ServiceRegistration<Resolver> resolverRegistration;
@@ -76,8 +69,7 @@ public class GraviaActivator implements ServletContextListener {
 
         // Create the runtime
         ServletContext servletContext = event.getServletContext();
-        Properties sysprops = getRuntimeProperties(servletContext);
-        DefaultPropertiesProvider propsProvider = new DefaultPropertiesProvider(sysprops, true);
+        PropertiesProvider propsProvider = new TomcatPropertiesProvider(servletContext);
         Runtime runtime = RuntimeLocator.createRuntime(new TomcatRuntimeFactory(servletContext), propsProvider);
         runtime.init();
 
@@ -115,10 +107,7 @@ public class GraviaActivator implements ServletContextListener {
     private Repository registerRepositoryService(final Runtime runtime) {
         PropertiesProvider propertyProvider = new RuntimePropertiesProvider(runtime);
         Repository repository = new DefaultRepository(propertyProvider);
-
-        // Register the repository as a service
         repositoryRegistration =  RepositoryRuntimeRegistration.registerRepository(runtime, repository);
-
         return repository;
     }
 
@@ -130,31 +119,5 @@ public class GraviaActivator implements ServletContextListener {
             repositoryRegistration.unregister();
         if (resolverRegistration != null)
             resolverRegistration.unregister();
-    }
-
-    private Properties getRuntimeProperties(ServletContext servletContext) {
-
-        Properties properties = new Properties();
-        properties.setProperty(Constants.RUNTIME_TYPE, "tomcat");
-
-        String storageClean = servletContext.getInitParameter(Constants.RUNTIME_STORAGE_CLEAN);
-        if (storageClean == null) {
-            storageClean = Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT;
-        }
-        properties.setProperty(Constants.RUNTIME_STORAGE_CLEAN, storageClean);
-
-        String storageDir = servletContext.getInitParameter(Constants.RUNTIME_STORAGE);
-        if (storageDir == null) {
-            storageDir = new File(catalinaWork.getPath() + File.separator + Constants.RUNTIME_STORAGE_DEFAULT).getAbsolutePath();
-        }
-        properties.setProperty(Constants.RUNTIME_STORAGE, storageDir);
-
-        storageDir = servletContext.getInitParameter(Constants.PROPERTY_REPOSITORY_STORAGE_DIR);
-        if (storageDir == null) {
-            storageDir = new File(catalinaWork.getPath() + File.separator + "repository").getAbsolutePath();
-        }
-        properties.setProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, storageDir);
-
-        return properties;
     }
 }

@@ -22,6 +22,12 @@ package org.jboss.gravia.provision.internal;
  * #L%
  */
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;
@@ -31,6 +37,8 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.ServiceEvent;
+import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.osgi.framework.Bundle;
@@ -50,18 +58,60 @@ public final class ProvisionerActivator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
 
-        Bundle bundle = context.getBundle();
-        Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        Module module = runtime.getModule(bundle.getBundleId());
-        ModuleContext syscontext = module.getModuleContext();
+        final Bundle bundle = context.getBundle();
+        final Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        final Module module = runtime.getModule(bundle.getBundleId());
+        final ModuleContext syscontext = module.getModuleContext();
 
-        ServiceReference<Resolver> resolverRef = syscontext.getServiceReference(Resolver.class);
-        Resolver resolver = syscontext.getService(resolverRef);
-        ServiceReference<Repository> repositoryRef = syscontext.getServiceReference(Repository.class);
-        Repository repository = syscontext.getService(repositoryRef);
+        // Add a listener that tracks {@link Resolver} and {@link Repository}
+        final CountDownLatch latch = new CountDownLatch(2);
+        final AtomicReference<Resolver> resolverRef = new AtomicReference<Resolver>();
+        final AtomicReference<Repository> repositoryRef = new AtomicReference<Repository>();
+        ServiceListener listener = new ServiceListener() {
+            @Override
+            public void serviceChanged(ServiceEvent event) {
+                if (event.getType() == ServiceEvent.REGISTERED) {
+                    ServiceReference<?> sref = event.getServiceReference();
+                    String[] objectClass = (String[]) sref.getProperty(Constants.OBJECTCLASS);
+                    if (Resolver.class.getName().equals(objectClass[0])) {
+                        resolverRef.set((Resolver) syscontext.getService(sref));
+                        latch.countDown();
+                    }
+                    if (Repository.class.getName().equals(objectClass[0])) {
+                        repositoryRef.set((Repository) syscontext.getService(sref));
+                        latch.countDown();
+                    }
+                }
+            }
+        };
+        syscontext.addServiceListener(listener);
+
+        // Double check instead we already missed the event
+        ServiceReference<Resolver> resref = syscontext.getServiceReference(Resolver.class);
+        if (resref != null) {
+            resolverRef.set(syscontext.getService(resref));
+            latch.countDown();
+        }
+        ServiceReference<Repository> repref = syscontext.getServiceReference(Repository.class);
+        if (repref != null) {
+            repositoryRef.set(syscontext.getService(repref));
+            latch.countDown();
+        }
+
+        // Await the availability of {@link Resolver} and {@link Repository}
+        try {
+            if (!latch.await(10, TimeUnit.SECONDS)) {
+                String name = resolverRef.get() == null ? Resolver.class.getName() : Repository.class.getName();
+                throw new TimeoutException("Cannot obtain " + name + " service");
+            }
+        } finally {
+            syscontext.removeServiceListener(listener);
+        }
+
+        // Setup and register the {@link Provisioner} service
         RuntimeEnvironment environment = new RuntimeEnvironment(runtime).initDefaultContent();
         BundleContextResourceInstaller installer = new BundleContextResourceInstaller(context, environment);
-        Provisioner provisioner = new DefaultProvisioner(environment, resolver, repository, installer);
+        Provisioner provisioner = new DefaultProvisioner(environment, resolverRef.get(), repositoryRef.get(), installer);
         registration = syscontext.registerService(Provisioner.class, provisioner, null);
     }
 

@@ -63,7 +63,9 @@ public abstract class AbstractRuntime implements Runtime {
         properties = propertiesProvider;
     }
 
-    public abstract AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context);
+    protected abstract AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context);
+
+    protected abstract ModuleEntriesProvider getDefaultEntriesProvider(Module module, Attachable context);
 
     @Override
     public final Object getProperty(String key) {
@@ -163,7 +165,16 @@ public abstract class AbstractRuntime implements Runtime {
     @Override
     public final Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) throws ModuleException {
 
-        AbstractModule module = createModule(classLoader, resource, headers, context != null ? context : new AttachableSupport());
+        context = context != null ? context : new AttachableSupport();
+        AbstractModule module = createModule(classLoader, resource, headers, context);
+
+        // Attach the {@link ModuleEntriesProvider}
+        ModuleEntriesProvider entriesProvider = context.getAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY);
+        entriesProvider = entriesProvider != null ? entriesProvider : getDefaultEntriesProvider(module, context);
+        if (entriesProvider != null) {
+            module.putAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY, entriesProvider);
+        }
+
         if (getModule(module.getIdentity()) != null)
             throw new ModuleException("Module already installed: " + module);
 

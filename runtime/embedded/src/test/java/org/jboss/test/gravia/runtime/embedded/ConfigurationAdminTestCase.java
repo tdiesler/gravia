@@ -32,7 +32,7 @@ import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.jboss.test.gravia.runtime.embedded.sub.d.ServiceD;
 import org.jboss.test.gravia.runtime.embedded.sub.d1.ServiceD1;
-import org.jboss.test.gravia.runtime.embedded.support.AbstractRuntimeTest;
+import org.jboss.test.gravia.runtime.embedded.support.AbstractEmbeddedRuntimeTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.service.cm.Configuration;
@@ -44,7 +44,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author thomas.diesler@jboss.com
  * @since 11-Sep-2013
  */
-public class ConfigurationAdminTestCase extends AbstractRuntimeTest {
+public class ConfigurationAdminTestCase extends AbstractEmbeddedRuntimeTest {
 
     static final String MODULE_D = "moduleD";
     static final String MODULE_D1 = "moduleD1";

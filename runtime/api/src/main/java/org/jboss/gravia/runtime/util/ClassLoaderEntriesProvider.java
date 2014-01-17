@@ -19,7 +19,7 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-package org.jboss.test.gravia.runtime.embedded.support;
+package org.jboss.gravia.runtime.util;
 
 import java.net.URL;
 import java.util.Collections;
@@ -35,18 +35,18 @@ import org.jboss.gravia.utils.NotNullException;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-class ClassLoaderEntriesProvider implements ModuleEntriesProvider {
+public class ClassLoaderEntriesProvider implements ModuleEntriesProvider {
 
     private final ClassLoader classLoader;
 
-    ClassLoaderEntriesProvider(Module module) {
+    public ClassLoaderEntriesProvider(Module module) {
         NotNullException.assertValue(module, "module");
         classLoader = module.adapt(ClassLoader.class);
     }
 
     @Override
     public URL getEntry(String path) {
-        // [TODO] flawed because of parent first access
+        // flawed because of parent first access
         return classLoader.getResource(path);
     }
 
@@ -60,7 +60,7 @@ class ClassLoaderEntriesProvider implements ModuleEntriesProvider {
         if (filePattern.contains("*") || recurse == true)
             throw new UnsupportedOperationException("Bundle.getEntryPaths(String,String,boolean)");
 
-        // [TODO] flawed because of parent first access
+        // flawed because of parent first access
         URL result = classLoader.getResource(path + "/" + filePattern);
 
         return result != null ? Collections.singletonList(result) : Collections.<URL>emptyList();

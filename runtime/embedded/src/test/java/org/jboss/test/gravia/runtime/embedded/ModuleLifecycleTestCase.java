@@ -30,7 +30,7 @@ import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.jboss.test.gravia.runtime.embedded.sub.a.SimpleModuleActivator;
-import org.jboss.test.gravia.runtime.embedded.support.AbstractRuntimeTest;
+import org.jboss.test.gravia.runtime.embedded.support.AbstractEmbeddedRuntimeTest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -40,7 +40,7 @@ import org.junit.Test;
  * @author thomas.diesler@jbos.com
  * @since 27-Jan-2012
  */
-public class ModuleLifecycleTestCase extends AbstractRuntimeTest {
+public class ModuleLifecycleTestCase extends AbstractEmbeddedRuntimeTest {
 
     @Test
     public void testBasicModule() throws Exception {

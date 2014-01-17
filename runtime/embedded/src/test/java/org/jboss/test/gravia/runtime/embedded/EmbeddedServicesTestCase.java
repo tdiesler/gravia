@@ -29,7 +29,7 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.jboss.test.gravia.runtime.embedded.sub.a.EmbeddedServices;
-import org.jboss.test.gravia.runtime.embedded.support.AbstractRuntimeTest;
+import org.jboss.test.gravia.runtime.embedded.support.AbstractEmbeddedRuntimeTest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -39,7 +39,7 @@ import org.junit.Test;
  * @author thomas.diesler@jbos.com
  * @since 27-Jan-2012
  */
-public class EmbeddedServicesTestCase extends AbstractRuntimeTest {
+public class EmbeddedServicesTestCase extends AbstractEmbeddedRuntimeTest {
 
     static final String MODULE_A = "moduleA";
 

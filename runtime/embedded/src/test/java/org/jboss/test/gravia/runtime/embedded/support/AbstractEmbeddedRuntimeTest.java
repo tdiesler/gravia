@@ -21,18 +21,16 @@
  */
 package org.jboss.test.gravia.runtime.embedded.support;
 
-import java.util.Dictionary;
-
 import org.jboss.gravia.resource.Attachable;
-import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.embedded.internal.EmbeddedRuntime;
-import org.jboss.gravia.runtime.spi.AbstractModule;
+import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeFactory;
+import org.jboss.gravia.runtime.util.ClassLoaderEntriesProvider;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.junit.After;
 import org.junit.Before;
@@ -44,7 +42,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author thomas.diesler@jbos.com
  * @since 27-Sep-2013
  */
-public abstract class AbstractRuntimeTest {
+public abstract class AbstractEmbeddedRuntimeTest {
 
     private Runtime runtime;
 
@@ -56,10 +54,8 @@ public abstract class AbstractRuntimeTest {
             public Runtime createRuntime(PropertiesProvider propertiesProvider) {
                 return new EmbeddedRuntime(propertiesProvider, null) {
                     @Override
-                    public AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) {
-                        AbstractModule module = super.createModule(classLoader, resource, headers, context);
-                        module.putAttachment(AbstractModule.MODULE_ENTRIES_PROVIDER_KEY, new ClassLoaderEntriesProvider(module));
-                        return module;
+                    protected ModuleEntriesProvider getDefaultEntriesProvider(Module module, Attachable context) {
+                        return new ClassLoaderEntriesProvider(module);
                     }
                 };
             }

@@ -40,37 +40,33 @@ public class AttachableSupport implements Attachable {
     private Map<AttachmentKey<?>, Object> attachments;
 
     @Override
+    @SuppressWarnings("unchecked")
     public synchronized <T> T putAttachment(AttachmentKey<T> key, T value) {
         NotNullException.assertValue(key, "key");
         NotNullException.assertValue(value, "value");
-        if (attachments == null)
+        if (attachments == null) {
             attachments = new HashMap<AttachmentKey<?>, Object>();
-
-        @SuppressWarnings("unchecked")
-        T result = (T) attachments.get(key);
-        attachments.put(key, value);
-        return result;
+        }
+        return (T) attachments.put(key, value);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public synchronized <T> T getAttachment(AttachmentKey<T> key) {
         NotNullException.assertValue(key, "key");
-        if (attachments == null)
-            return null;
-
-        @SuppressWarnings("unchecked")
-        T result = (T) attachments.get(key);
-        return result;
+        return attachments != null ? (T) attachments.get(key) : null;
     }
 
     @Override
+    public synchronized <T> boolean hasAttachment(AttachmentKey<T> key) {
+        NotNullException.assertValue(key, "key");
+        return attachments != null ? attachments.containsKey(key) : false;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public synchronized <T> T removeAttachment(AttachmentKey<T> key) {
         NotNullException.assertValue(key, "key");
-        if (attachments == null)
-            return null;
-
-        @SuppressWarnings("unchecked")
-        T result = (T) attachments.remove(key);
-        return result;
+        return attachments != null ? (T) attachments.remove(key) : null;
     }
 }

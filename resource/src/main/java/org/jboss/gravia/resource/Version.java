@@ -128,7 +128,14 @@ public class Version implements Comparable<Version> {
 
                 if (st.hasMoreTokens()) { // micro
                     st.nextToken(); // consume delimiter
-                    mic = parseInt(st.nextToken(), version);
+                    String micval = st.nextToken();
+                    if (micval.endsWith("-SNAPSHOT")) {
+                        micval = micval.substring(0, micval.indexOf('-'));
+                        mic = parseInt(micval, version);
+                        qual = "SNAPSHOT";
+                    } else {
+                        mic = parseInt(micval, version);
+                    }
 
                     if (st.hasMoreTokens()) { // qualifier separator
                         st.nextToken(); // consume delimiter

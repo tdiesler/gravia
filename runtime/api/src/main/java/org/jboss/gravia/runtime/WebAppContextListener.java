@@ -23,6 +23,7 @@ package org.jboss.gravia.runtime;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Dictionary;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
@@ -62,7 +63,7 @@ public class WebAppContextListener implements ServletContextListener {
 
         // Install the module
         if (module == null) {
-            module = installWebappModule(runtime, servletContext);
+            module = installWebappModule(servletContext);
         }
 
         // Start the module
@@ -93,9 +94,8 @@ public class WebAppContextListener implements ServletContextListener {
         }
     }
 
-    public Module installWebappModule(Runtime runtime, ServletContext servletContext) {
+    public Module installWebappModule(ServletContext servletContext) {
 
-        ClassLoader classLoader = servletContext.getClassLoader();
         Manifest manifest = getWebappManifest(servletContext);
         if (manifest == null)
             return null;
@@ -105,6 +105,13 @@ public class WebAppContextListener implements ServletContextListener {
             return null;
 
         Resource resource = resbuilder.getResource();
+
+        Dictionary<String, String> headers = new ManifestHeadersProvider(manifest).getHeaders();
+        return installWebappModule(servletContext, resource, headers);
+    }
+
+    public Module installWebappModule(ServletContext servletContext, Resource resource, Dictionary<String, String> headers) {
+
         ResourceIdentity identity = resource.getIdentity();
         Resource association = ResourceAssociation.getResource(identity);
         resource = association != null ? association : resource;
@@ -114,8 +121,9 @@ public class WebAppContextListener implements ServletContextListener {
 
         Module module;
         try {
-            ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(manifest);
-            module = runtime.installModule(classLoader, resource, headersProvider.getHeaders(), context);
+            Runtime runtime = RuntimeLocator.getRequiredRuntime();
+            ClassLoader classLoader = servletContext.getClassLoader();
+            module = runtime.installModule(classLoader, resource, headers, context);
         } catch (RuntimeException rte) {
             throw rte;
         } catch (ModuleException ex) {

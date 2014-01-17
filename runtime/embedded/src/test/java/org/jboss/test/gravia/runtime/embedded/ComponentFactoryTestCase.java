@@ -32,7 +32,7 @@ import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.jboss.test.gravia.runtime.embedded.sub.a.ServiceB;
 import org.jboss.test.gravia.runtime.embedded.sub.a.ServiceFactoryB;
-import org.jboss.test.gravia.runtime.embedded.support.AbstractRuntimeTest;
+import org.jboss.test.gravia.runtime.embedded.support.AbstractEmbeddedRuntimeTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.service.component.ComponentFactory;
@@ -43,7 +43,7 @@ import org.osgi.service.component.ComponentFactory;
  * @author thomas.diesler@jboss.com
  * @since 06-Nov-2013
  */
-public class ComponentFactoryTestCase extends AbstractRuntimeTest {
+public class ComponentFactoryTestCase extends AbstractEmbeddedRuntimeTest {
 
     static final String MODULE_A = "moduleA";
 

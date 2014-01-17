@@ -87,25 +87,31 @@ public abstract class AbstractModule implements Module, Attachable {
 
         // Build the headers
         ResourceIdentity resourceIdentity = resource.getIdentity();
-        Hashtable<String, String> coloned = new Hashtable<String, String>();
+        Hashtable<String, String> clonedHeaders = new Hashtable<String, String>();
         if (headers != null) {
             Enumeration<String> keys = headers.keys();
             while(keys.hasMoreElements()) {
                 String key = keys.nextElement();
                 String value = headers.get(key);
-                coloned.put(key, value);
+                clonedHeaders.put(key, value);
             }
         }
-        if (coloned.get(Constants.GRAVIA_IDENTITY_CAPABILITY) == null) {
+        if (clonedHeaders.get(Constants.GRAVIA_IDENTITY_CAPABILITY) == null) {
             String identityHeader = getIdentityHeader(resourceIdentity);
-            coloned.put(Constants.GRAVIA_IDENTITY_CAPABILITY, identityHeader);
+            clonedHeaders.put(Constants.GRAVIA_IDENTITY_CAPABILITY, identityHeader);
         }
-        this.headers = new UnmodifiableDictionary<String, String>(new CaseInsensitiveDictionary<String>(coloned));
+        this.headers = new UnmodifiableDictionary<String, String>(new CaseInsensitiveDictionary<String>(clonedHeaders));
 
         // Verify the resource & headers identity
-        ResourceIdentity headersIdentity = new DictionaryResourceBuilder().load(coloned).getResource().getIdentity();
+        ResourceIdentity headersIdentity = new DictionaryResourceBuilder().load(clonedHeaders).getResource().getIdentity();
         if (!resourceIdentity.equals(headersIdentity))
             throw new IllegalArgumentException("Resource and header identity does not match: " + resourceIdentity);
+    }
+
+    public static AbstractModule assertAbstractModule(Module module) {
+        if (!(module instanceof AbstractModule))
+            throw new IllegalArgumentException("Not an AbstractModule: " + module);
+        return (AbstractModule) module;
     }
 
     private String getIdentityHeader(ResourceIdentity identity) {
@@ -163,6 +169,11 @@ public abstract class AbstractModule implements Module, Attachable {
     @Override
     public <T> T getAttachment(AttachmentKey<T> key) {
         return attachments.getAttachment(key);
+    }
+
+    @Override
+    public <T> boolean hasAttachment(AttachmentKey<T> key) {
+        return attachments.hasAttachment(key);
     }
 
     @Override

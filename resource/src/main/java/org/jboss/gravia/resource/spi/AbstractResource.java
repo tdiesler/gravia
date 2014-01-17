@@ -214,6 +214,11 @@ public abstract class AbstractResource implements Resource {
     }
 
     @Override
+    public <T> boolean hasAttachment(AttachmentKey<T> key) {
+        return getAttachmentsInternal().hasAttachment(key);
+    }
+
+    @Override
     public <T> T removeAttachment(AttachmentKey<T> key) {
         return getAttachmentsInternal().getAttachment(key);
     }

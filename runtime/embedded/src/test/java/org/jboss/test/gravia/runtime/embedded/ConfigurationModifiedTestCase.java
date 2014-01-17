@@ -35,7 +35,7 @@ import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.jboss.test.gravia.runtime.embedded.sub.a.ServiceC;
-import org.jboss.test.gravia.runtime.embedded.support.AbstractRuntimeTest;
+import org.jboss.test.gravia.runtime.embedded.support.AbstractEmbeddedRuntimeTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.service.cm.Configuration;
@@ -47,7 +47,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author thomas.diesler@jboss.com
  * @since 06-Nov-2013
  */
-public class ConfigurationModifiedTestCase extends AbstractRuntimeTest {
+public class ConfigurationModifiedTestCase extends AbstractEmbeddedRuntimeTest {
 
     static final String MODULE_C = "moduleC";
 
