@@ -68,6 +68,8 @@ public interface GraviaConstants {
 
     /** The {@link Repository} attachment key */
     AttachmentKey<Repository> REPOSITORY_KEY = AttachmentKey.create(Repository.class);
+    /** The {@link Runtime} attachment key */
+    AttachmentKey<Runtime> RUNTIME_KEY = AttachmentKey.create(Runtime.class);
     /** The {@link Resource} attachment key */
     AttachmentKey<Resource> RESOURCE_KEY = AttachmentKey.create(Resource.class);
     /** The {@link Module} attachment key */

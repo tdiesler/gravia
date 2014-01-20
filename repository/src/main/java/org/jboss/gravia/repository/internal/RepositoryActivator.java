@@ -22,19 +22,15 @@ package org.jboss.gravia.repository.internal;
  * #L%
  */
 
-import java.io.File;
-
-import org.jboss.gravia.Constants;
 import org.jboss.gravia.repository.DefaultRepository;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryRuntimeRegistration;
 import org.jboss.gravia.repository.RepositoryRuntimeRegistration.Registration;
+import org.jboss.gravia.runtime.ModuleActivator;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.util.RuntimePropertiesProvider;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 
 /**
  * Activate the {@link Repository} in the runtime.
@@ -42,33 +38,19 @@ import org.osgi.framework.BundleContext;
  * @author thomas.diesler@jboss.com
  * @since 20-Dec-2012
  */
-public final class RepositoryActivator implements BundleActivator {
+public final class RepositoryActivator implements ModuleActivator {
 
     private Registration registration;
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-
-        // Create the {@link PropertiesProvider}
+    public void start(ModuleContext context) throws Exception {
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        PropertiesProvider propertyProvider = new RuntimePropertiesProvider(runtime) {
-            @Override
-            public Object getProperty(String key, Object defaultValue) {
-                Object value = super.getProperty(key, defaultValue);
-                if (value == null && Constants.PROPERTY_REPOSITORY_STORAGE_DIR.equals(key)) {
-                    File dirname = context.getBundle().getDataFile("repository");
-                    value = dirname.getAbsolutePath();
-                }
-                return value != null ? (String) value : null;
-            }
-        };
-
-        DefaultRepository repository = new DefaultRepository(propertyProvider);
-        registration =  RepositoryRuntimeRegistration.registerRepository(runtime, repository);
+        DefaultRepository repository = new DefaultRepository(new RuntimePropertiesProvider(runtime));
+        registration =  RepositoryRuntimeRegistration.registerRepository(context, repository);
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(ModuleContext context) throws Exception {
         if (registration != null) {
             registration.unregister();
         }

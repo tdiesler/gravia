@@ -317,7 +317,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         Class<?> targetClass;
         try {
             targetClass = moduleClassLoader.loadClass(className);
-        } catch (ClassNotFoundException ex) {
+        } catch (Throwable th) {
             // If the requesting module does not have a wire to the
             // service package it cannot be constraint on that package.
             LOGGER.trace("Requesting module [{}] cannot load class: {}", module, className);

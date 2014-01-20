@@ -107,7 +107,8 @@ public class GraviaActivator implements ServletContextListener {
     private Repository registerRepositoryService(final Runtime runtime) {
         PropertiesProvider propertyProvider = new RuntimePropertiesProvider(runtime);
         Repository repository = new DefaultRepository(propertyProvider);
-        repositoryRegistration =  RepositoryRuntimeRegistration.registerRepository(runtime, repository);
+        ModuleContext syscontext = runtime.getModuleContext();
+        repositoryRegistration =  RepositoryRuntimeRegistration.registerRepository(syscontext, repository);
         return repository;
     }
 

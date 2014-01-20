@@ -61,7 +61,8 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Activator>org.jboss.gravia.resolver.internal.ResolverActivator</Bundle-Activator>
+                        <Bundle-Activator>org.jboss.gravia.runtime.ModuleActivatorBridge</Bundle-Activator>
+                        <Module-Activator>org.jboss.gravia.resolver.internal.ResolverActivator</Module-Activator>
                         <Gravia-Enabled>true</Gravia-Enabled>
                     </instructions>
                 </configuration>

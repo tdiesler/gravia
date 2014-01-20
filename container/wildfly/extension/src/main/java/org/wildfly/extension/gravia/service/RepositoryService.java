@@ -34,7 +34,7 @@ import org.jboss.gravia.repository.DefaultRepository;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryRuntimeRegistration;
 import org.jboss.gravia.repository.RepositoryRuntimeRegistration.Registration;
-import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.jboss.msc.service.AbstractService;
@@ -56,14 +56,14 @@ import org.wildfly.extension.gravia.GraviaConstants;
 public class RepositoryService extends AbstractService<Repository> {
 
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
-    private final InjectedValue<Runtime> injectedRuntime = new InjectedValue<Runtime>();
+    private final InjectedValue<ModuleContext> injectedModuleContext = new InjectedValue<ModuleContext>();
     private Registration registration;
     private Repository repository;
 
     public ServiceController<Repository> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<Repository> builder = serviceTarget.addService(GraviaConstants.REPOSITORY_SERVICE_NAME, this);
         builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, injectedServerEnvironment);
-        builder.addDependency(GraviaConstants.RUNTIME_SERVICE_NAME, Runtime.class, injectedRuntime);
+        builder.addDependency(GraviaConstants.MODULE_CONTEXT_SERVICE_NAME, ModuleContext.class, injectedModuleContext);
         builder.addListener(verificationHandler);
         return builder.install();
     }
@@ -91,8 +91,8 @@ public class RepositoryService extends AbstractService<Repository> {
         repository = new DefaultRepository(propertyProvider);
 
         // Register the repository as a service
-        Runtime runtime = injectedRuntime.getValue();
-        registration =  RepositoryRuntimeRegistration.registerRepository(runtime, repository);
+        ModuleContext syscontext = injectedModuleContext.getValue();
+        registration =  RepositoryRuntimeRegistration.registerRepository(syscontext, repository);
     }
 
     @Override

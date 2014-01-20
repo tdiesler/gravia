@@ -14,7 +14,6 @@ import org.jboss.gravia.resource.CompositeDataResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.ModuleContext;
-import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.utils.NotNullException;
@@ -53,17 +52,16 @@ public class RepositoryRuntimeRegistration {
     private RepositoryRuntimeRegistration() {
     }
 
-    public static Registration registerRepository(Runtime runtime, Repository repository) {
-        NotNullException.assertValue(runtime, "runtime");
+    public static Registration registerRepository(ModuleContext context, Repository repository) {
+        NotNullException.assertValue(context, "context");
         NotNullException.assertValue(repository, "repository");
 
         // Register as runtime service
-        ModuleContext syscontext = runtime.getModuleContext();
-        final ServiceRegistration<Repository> sreg = syscontext.registerService(Repository.class, repository, null);
+        final ServiceRegistration<Repository> sreg = context.registerService(Repository.class, repository, null);
 
         // Register as MBean
-        ServiceReference<MBeanServer> sref = syscontext.getServiceReference(MBeanServer.class);
-        final MBeanServer mbeanServer = syscontext.getService(sref);
+        ServiceReference<MBeanServer> sref = context.getServiceReference(MBeanServer.class);
+        final MBeanServer mbeanServer = context.getService(sref);
         try {
             RepositoryWrapper delegate = new RepositoryWrapper(repository);
             StandardMBean mbean = new StandardMBean(delegate, RepositoryMBean.class);

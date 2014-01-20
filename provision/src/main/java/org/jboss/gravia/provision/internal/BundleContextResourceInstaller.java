@@ -13,6 +13,7 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
@@ -30,8 +31,8 @@ class BundleContextResourceInstaller extends AbstractResourceInstaller {
     private final RuntimeEnvironment environment;
     private final BundleContext bundleContext;
 
-    BundleContextResourceInstaller(BundleContext bundleContext, RuntimeEnvironment environment) {
-        this.bundleContext = bundleContext;
+    BundleContextResourceInstaller(ModuleContext context, RuntimeEnvironment environment) {
+        this.bundleContext = context.getModule().adapt(Bundle.class).getBundleContext();
         this.environment = environment;
     }
 
