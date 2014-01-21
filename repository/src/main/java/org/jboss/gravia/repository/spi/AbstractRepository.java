@@ -9,9 +9,9 @@ package org.jboss.gravia.repository.spi;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,8 +39,6 @@ import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.utils.NotNullException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An abstract  {@link Repository} that does nothing.
@@ -49,8 +47,6 @@ import org.slf4j.LoggerFactory;
  * @since 11-May-2012
  */
 public abstract class AbstractRepository implements Repository {
-
-    public static final Logger LOGGER = LoggerFactory.getLogger(Repository.class.getPackage().getName());
 
     private final PropertiesProvider propertiesProvider;
     private RepositoryStorage storage;

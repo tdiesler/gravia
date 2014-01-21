@@ -47,7 +47,6 @@ import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.SynchronousModuleListener;
-import org.jboss.gravia.runtime.util.NoFilter;
 import org.jboss.gravia.utils.RemoveOnlyCollection;
 import org.jboss.gravia.utils.RemoveOnlyMap;
 

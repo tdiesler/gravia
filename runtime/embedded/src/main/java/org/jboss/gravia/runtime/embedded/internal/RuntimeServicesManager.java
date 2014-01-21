@@ -39,8 +39,8 @@ import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.spi.AbstractModule;
+import org.jboss.gravia.runtime.spi.NoFilter;
 import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
-import org.jboss.gravia.runtime.util.NoFilter;
 import org.osgi.framework.Bundle;
 
 /**

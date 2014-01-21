@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.spi.AttachableSupport;
-import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
+import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -47,6 +47,7 @@ import org.osgi.framework.BundleContext;
  */
 public class WebAppContextListener implements ServletContextListener {
 
+    /** The attachment key for the ServletContext */
     public static final AttachmentKey<ServletContext> SERVLET_CONTEXT_KEY = AttachmentKey.create(ServletContext.class);
 
     /**
@@ -92,7 +93,7 @@ public class WebAppContextListener implements ServletContextListener {
         }
     }
 
-    public Module installWebappModule(ServletContext servletContext) {
+    private Module installWebappModule(ServletContext servletContext) {
 
         Manifest manifest = getWebappManifest(servletContext);
         if (manifest == null)
@@ -108,7 +109,7 @@ public class WebAppContextListener implements ServletContextListener {
         return installWebappModule(servletContext, resource, headers);
     }
 
-    public Module installWebappModule(ServletContext servletContext, Resource resource, Dictionary<String, String> headers) {
+    private Module installWebappModule(ServletContext servletContext, Resource resource, Dictionary<String, String> headers) {
 
         ResourceIdentity identity = resource.getIdentity();
         Resource association = ResourceAssociation.getResource(identity);

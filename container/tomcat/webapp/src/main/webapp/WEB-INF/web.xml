@@ -42,7 +42,7 @@
 <web-app>
 
     <listener>
-        <listener-class>org.jboss.gravia.container.tomcat.webapp.GraviaActivator</listener-class>
+        <listener-class>org.jboss.gravia.container.tomcat.webapp.GraviaTomcatActivator</listener-class>
     </listener>
     <listener>
         <listener-class>org.apache.felix.http.proxy.ProxyListener</listener-class>

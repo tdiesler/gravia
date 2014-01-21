@@ -17,13 +17,13 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.runtime.util;
+package org.jboss.gravia.runtime.spi;
 
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.utils.NotNullException;
 
 /**

@@ -34,7 +34,7 @@ import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
+import org.jboss.gravia.runtime.spi.DefaultPropertiesProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

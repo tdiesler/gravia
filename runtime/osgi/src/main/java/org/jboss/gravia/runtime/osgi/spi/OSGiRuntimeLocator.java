@@ -17,32 +17,33 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.runtime.osgi;
+package org.jboss.gravia.runtime.osgi.spi;
 
 import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.osgi.internal.OSGiRuntime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
-import org.jboss.gravia.runtime.spi.RuntimeFactory;
-import org.jboss.gravia.utils.NotNullException;
 import org.osgi.framework.BundleContext;
 
 /**
- * The factory for the OSGi {@link Runtime}.
+ * Locates the an OSGi Runtime instance
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
+ *
+ * @ThreadSafe
  */
-final class OSGiRuntimeFactory implements RuntimeFactory {
+public final class OSGiRuntimeLocator {
 
-    private final BundleContext syscontext;
-
-    public OSGiRuntimeFactory(BundleContext syscontext) {
-        NotNullException.assertValue(syscontext, "syscontext");
-        this.syscontext = syscontext;
+    public static Runtime getRuntime() {
+        return RuntimeLocator.getRuntime();
     }
 
-    @Override
-    public Runtime createRuntime(PropertiesProvider props) {
-        return new OSGiRuntime(syscontext, props);
+    public static Runtime createRuntime(BundleContext syscontext) {
+        PropertiesProvider propsProvider = new BundleContextPropertiesProvider(syscontext);
+        return RuntimeLocator.createRuntime(new OSGiRuntimeFactory(syscontext), propsProvider);
+    }
+
+    public static void releaseRuntime() {
+        RuntimeLocator.releaseRuntime();
     }
 }

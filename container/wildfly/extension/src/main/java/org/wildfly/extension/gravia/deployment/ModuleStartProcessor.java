@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,14 +21,14 @@
 
 package org.wildfly.extension.gravia.deployment;
 
+import static org.wildfly.extension.gravia.GraviaExtensionLogger.LOGGER;
+
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
 import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wildfly.extension.gravia.GraviaConstants;
 
 /**
@@ -38,8 +38,6 @@ import org.wildfly.extension.gravia.GraviaConstants;
  * @since 08-Oct-2013
  */
 public class ModuleStartProcessor implements DeploymentUnitProcessor {
-
-    static final Logger LOGGER = LoggerFactory.getLogger(GraviaConstants.class.getPackage().getName());
 
     @Override
     public void deploy(final DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {

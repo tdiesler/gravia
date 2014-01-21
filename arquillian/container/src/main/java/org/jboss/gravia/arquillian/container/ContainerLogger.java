@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,38 +17,23 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.runtime.util;
+package org.jboss.gravia.arquillian.container;
 
-import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * A properties provider that delegates to the runtime.
+ * The logger provider
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
- *
- * @ThreadSafe
  */
-public class RuntimePropertiesProvider implements PropertiesProvider {
+public final class ContainerLogger {
 
-    private final Runtime runtime;
+    public static final Logger LOGGER = LoggerFactory.getLogger("org.jboss.gravia.arquillian.container");
 
-    public RuntimePropertiesProvider(Runtime runtime) {
-        this.runtime = runtime;
+    // Hide ctor
+    private ContainerLogger() {
     }
 
-    public Runtime getRuntime() {
-        return runtime;
-    }
-
-    @Override
-    public Object getProperty(String key) {
-        return getProperty(key, null);
-    }
-
-    @Override
-    public Object getProperty(String key, Object defaultValue) {
-        return runtime.getProperty(key, defaultValue);
-    }
 }

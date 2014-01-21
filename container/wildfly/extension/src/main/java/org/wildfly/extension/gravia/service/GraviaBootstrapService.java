@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,8 @@
 
 package org.wildfly.extension.gravia.service;
 
+import static org.wildfly.extension.gravia.GraviaExtensionLogger.LOGGER;
+
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.msc.service.AbstractService;
 import org.jboss.msc.service.ServiceBuilder;
@@ -28,8 +30,6 @@ import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wildfly.extension.gravia.GraviaConstants;
 
 /**
@@ -39,8 +39,6 @@ import org.wildfly.extension.gravia.GraviaConstants;
  * @since 19-Apr-2013
  */
 public class GraviaBootstrapService extends AbstractService<Void> {
-
-    static final Logger LOGGER = LoggerFactory.getLogger(GraviaConstants.class.getPackage().getName());
 
     public ServiceController<Void> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<Void> builder = serviceTarget.addService(GraviaConstants.GRAVIA_SUBSYSTEM_SERVICE_NAME, this);

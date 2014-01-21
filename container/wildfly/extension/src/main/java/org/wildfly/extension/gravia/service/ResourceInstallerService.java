@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,8 @@
  */
 
 package org.wildfly.extension.gravia.service;
+
+import static org.wildfly.extension.gravia.GraviaExtensionLogger.LOGGER;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -72,8 +74,6 @@ import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.importer.ZipImporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wildfly.extension.gravia.GraviaConstants;
 
 /**
@@ -83,8 +83,6 @@ import org.wildfly.extension.gravia.GraviaConstants;
  * @since 27-Jun-2013
  */
 public class ResourceInstallerService extends AbstractResourceInstaller implements Service<ResourceInstaller> {
-
-    static final Logger LOGGER = LoggerFactory.getLogger(GraviaConstants.class.getPackage().getName());
 
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
     private final InjectedValue<ServiceModuleLoader> injectedServiceModuleLoader = new InjectedValue<ServiceModuleLoader>();

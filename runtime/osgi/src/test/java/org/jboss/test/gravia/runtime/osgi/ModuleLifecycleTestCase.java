@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,13 +29,13 @@ import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
+import org.jboss.gravia.runtime.osgi.spi.OSGiRuntimeLocator;
 import org.jboss.gravia.runtime.ModuleActivatorBridge;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.osgi.OSGiRuntimeLocator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -84,7 +84,7 @@ public class ModuleLifecycleTestCase {
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
                 builder.addBundleActivator(ModuleActivatorBridge.class);
-                builder.addImportPackages(Module.class, OSGiRuntimeLocator.class, Resource.class);
+                builder.addImportPackages(OSGiRuntimeLocator.class, Module.class, OSGiRuntimeLocator.class, Resource.class);
                 builder.addManifestHeader(Constants.MODULE_ACTIVATOR, SimpleModuleActivator.class.getName());
                 builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
                 return builder.openStream();

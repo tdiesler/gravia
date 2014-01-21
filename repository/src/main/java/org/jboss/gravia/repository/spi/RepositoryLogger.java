@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.runtime.spi;
+package org.jboss.gravia.repository.spi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +28,12 @@ import org.slf4j.LoggerFactory;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public final class RuntimeLogger {
+public final class RepositoryLogger {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("org.jboss.gravia.runtime");
+    public static final Logger LOGGER = LoggerFactory.getLogger("org.jboss.gravia.repository");
 
     // Hide ctor
-    private RuntimeLogger() {
+    private RepositoryLogger() {
     }
 
 }

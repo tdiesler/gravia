@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.runtime.util;
+package org.jboss.gravia.runtime.spi;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -28,7 +28,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.utils.NotNullException;
 
 /**

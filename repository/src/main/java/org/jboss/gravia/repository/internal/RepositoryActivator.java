@@ -28,7 +28,7 @@ import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.util.RuntimePropertiesProvider;
+import org.jboss.gravia.runtime.spi.RuntimePropertiesProvider;
 
 /**
  * Activate the {@link Repository} in the runtime.

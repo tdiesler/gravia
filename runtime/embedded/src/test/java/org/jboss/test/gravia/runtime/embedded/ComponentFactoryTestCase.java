@@ -27,7 +27,7 @@ import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
+import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
 import org.jboss.test.gravia.runtime.embedded.sub.a.ServiceB;
 import org.jboss.test.gravia.runtime.embedded.sub.a.ServiceFactoryB;
 import org.jboss.test.gravia.runtime.embedded.support.AbstractEmbeddedRuntimeTest;

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,11 +34,9 @@ import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.resource.spi.AbstractResource;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
-import org.slf4j.Logger;
 
 
 /**
@@ -49,8 +47,6 @@ import org.slf4j.Logger;
  */
 public abstract class AbstractResolverInternalsTest {
 
-    final Logger log = AbstractResolver.LOGGER;
-
     @Rule public TestName testName = new TestName();
 
     AbstractResolver resolver;
@@ -58,7 +54,6 @@ public abstract class AbstractResolverInternalsTest {
 
     @Before
     public void setUp() throws Exception {
-        log.debug("Start: {}.{}", getClass().getSimpleName(), testName.getMethodName());
 
         environment = new DefaultEnvironment("testStore");
         resolver = new DefaultResolver();
@@ -111,11 +106,6 @@ public abstract class AbstractResolverInternalsTest {
         builder = new DefaultResourceBuilder();
         builder.addIdentityCapability("resE", new Version("1.0.0"));
         environment.addResource(builder.getResource());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        log.debug("End: {}.{}", getClass().getSimpleName(), testName.getMethodName());
     }
 
     ResolveContext getResolveContext(List<Resource> mandatory, List<Resource> optional) {

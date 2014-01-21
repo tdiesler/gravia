@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.runtime.util;
+package org.jboss.gravia.runtime.spi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;

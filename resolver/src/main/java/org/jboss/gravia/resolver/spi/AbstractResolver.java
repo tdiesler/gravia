@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,8 @@
  * #L%
  */
 package org.jboss.gravia.resolver.spi;
+
+import static org.jboss.gravia.resolver.spi.ResolverLogger.LOGGER;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,8 +44,6 @@ import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.resource.spi.AbstractResource;
 import org.jboss.gravia.resource.spi.AbstractWire;
 import org.jboss.gravia.resource.spi.AbstractWiring;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An abstract resolver {@link Resolver}.
@@ -55,8 +55,6 @@ import org.slf4j.LoggerFactory;
  * @since 31-May-2010
  */
 public abstract class AbstractResolver implements Resolver {
-
-    static final Logger LOGGER = LoggerFactory.getLogger(Resolver.class.getPackage().getName());
 
     protected abstract AbstractWire createWire(Requirement req, Capability cap);
 

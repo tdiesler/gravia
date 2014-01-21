@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,6 +33,7 @@ import javax.management.openmbean.OpenDataException;
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.CompositeDataResourceType;
 import org.jboss.gravia.resource.ContentCapability;
 import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.IdentityNamespace;
@@ -40,10 +41,7 @@ import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.resource.CompositeDataResourceType;
 import org.jboss.gravia.resource.Version;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An abstract implementation of a {@link Resource}
@@ -52,8 +50,6 @@ import org.slf4j.LoggerFactory;
  * @since 02-Jul-2010
  */
 public abstract class AbstractResource implements Resource {
-
-    public static final Logger LOGGER = LoggerFactory.getLogger(Resource.class.getPackage().getName());
 
     private final List<AbstractCapability> capabilities = new ArrayList<AbstractCapability>();
     private final List<AbstractRequirement> requirements = new ArrayList<AbstractRequirement>();

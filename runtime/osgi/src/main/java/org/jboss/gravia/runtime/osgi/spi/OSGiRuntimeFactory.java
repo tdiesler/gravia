@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,34 +17,32 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.runtime.osgi;
+package org.jboss.gravia.runtime.osgi.spi;
 
 import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.osgi.spi.BundleContextPropertiesProvider;
+import org.jboss.gravia.runtime.osgi.internal.OSGiRuntime;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.runtime.spi.RuntimeFactory;
+import org.jboss.gravia.utils.NotNullException;
 import org.osgi.framework.BundleContext;
 
 /**
- * Locates the an OSGi Runtime instance
+ * The factory for the OSGi {@link Runtime}.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
- *
- * @ThreadSafe
  */
-public final class OSGiRuntimeLocator {
+public final class OSGiRuntimeFactory implements RuntimeFactory {
 
-    public static Runtime getRuntime() {
-        return RuntimeLocator.getRuntime();
+    private final BundleContext syscontext;
+
+    public OSGiRuntimeFactory(BundleContext syscontext) {
+        NotNullException.assertValue(syscontext, "syscontext");
+        this.syscontext = syscontext;
     }
 
-    public static Runtime createRuntime(BundleContext syscontext) {
-        PropertiesProvider propsProvider = new BundleContextPropertiesProvider(syscontext);
-        return RuntimeLocator.createRuntime(new OSGiRuntimeFactory(syscontext), propsProvider);
-    }
-
-    public static void releaseRuntime() {
-        RuntimeLocator.releaseRuntime();
+    @Override
+    public Runtime createRuntime(PropertiesProvider props) {
+        return new OSGiRuntime(syscontext, props);
     }
 }

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,21 +19,35 @@
  */
 package org.jboss.gravia.runtime.spi;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.gravia.runtime.Runtime;
 
 /**
- * The logger provider
+ * A properties provider that delegates to the runtime.
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
+ *
+ * @ThreadSafe
  */
-public final class RuntimeLogger {
+public class RuntimePropertiesProvider implements PropertiesProvider {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("org.jboss.gravia.runtime");
+    private final Runtime runtime;
 
-    // Hide ctor
-    private RuntimeLogger() {
+    public RuntimePropertiesProvider(Runtime runtime) {
+        this.runtime = runtime;
     }
 
+    public Runtime getRuntime() {
+        return runtime;
+    }
+
+    @Override
+    public Object getProperty(String key) {
+        return getProperty(key, null);
+    }
+
+    @Override
+    public Object getProperty(String key, Object defaultValue) {
+        return runtime.getProperty(key, defaultValue);
+    }
 }

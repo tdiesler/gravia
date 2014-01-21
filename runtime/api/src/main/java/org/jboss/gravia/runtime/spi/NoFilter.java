@@ -1,4 +1,4 @@
-package org.jboss.gravia.runtime.util;
+package org.jboss.gravia.runtime.spi;
 /*
  * #%L
  * Gravia :: Runtime :: API

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,10 +42,8 @@ import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.embedded.spi.BundleContextAdaptor;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
-import org.jboss.gravia.runtime.util.RuntimePropertiesProvider;
+import org.jboss.gravia.runtime.spi.RuntimePropertiesProvider;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Activates the {@link Runtime} as part of the web app lifecycle.
@@ -54,9 +52,7 @@ import org.slf4j.LoggerFactory;
  * @since 27-Nov-2013
  */
 @WebListener
-public class GraviaActivator implements ServletContextListener {
-
-    static final Logger LOGGER = LoggerFactory.getLogger(GraviaActivator.class);
+public class GraviaTomcatActivator implements ServletContextListener {
 
     private Registration repositoryRegistration;
     private ServiceRegistration<Provisioner> provisionerRegistration;

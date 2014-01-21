@@ -25,8 +25,8 @@ import java.util.Properties;
 import javax.servlet.ServletContext;
 
 import org.jboss.gravia.Constants;
+import org.jboss.gravia.runtime.spi.DefaultPropertiesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
-import org.jboss.gravia.runtime.util.DefaultPropertiesProvider;
 import org.jboss.gravia.utils.NotNullException;
 
 /**

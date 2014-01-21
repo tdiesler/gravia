@@ -29,8 +29,8 @@ import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.spi.RuntimePlugin;
-import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.Constants;
 

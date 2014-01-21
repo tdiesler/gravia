@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,8 @@
  * #L%
  */
 package org.jboss.gravia.provision.spi;
+
+import static org.jboss.gravia.provision.spi.ProvisionLogger.LOGGER;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,8 +56,6 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.Wire;
 import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.utils.NotNullException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An abstract {@link Provisioner}
@@ -64,8 +64,6 @@ import org.slf4j.LoggerFactory;
  * @since 06-May-2013
  */
 public abstract class AbstractProvisioner implements Provisioner {
-
-    static final Logger LOGGER = LoggerFactory.getLogger(Provisioner.class.getPackage().getName());
 
     private final Resolver resolver;
     private final Repository repository;

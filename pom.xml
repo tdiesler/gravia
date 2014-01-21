@@ -320,33 +320,64 @@
         </dependencies>
     </dependencyManagement>
     
-    <!-- Build -->
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <configuration>
-                    <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
-                    <canUpdateCopyright>true</canUpdateCopyright>
-                    <canUpdateDescription>true</canUpdateDescription>
-                    <licenseName>apache_v2</licenseName>
-                    <roots>
-                        <root>etc</root>
-                        <root>src</root>
-                        <root>scripts</root>
-                    </roots>
-                    <!--  
-                    <roots>
-                        <root>${basedir}</root>
-                    </roots>
-                    <includes>
-                        <include>pom.xml</include>
-                    </includes>
-                    -->
-                </configuration>
-            </plugin>
-        </plugins>
+        <!-- Plugin Management -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <configuration>
+                        <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+                        <canUpdateCopyright>true</canUpdateCopyright>
+                        <canUpdateDescription>true</canUpdateDescription>
+                        <licenseName>apache_v2</licenseName>
+                        <roots>
+                            <root>etc</root>
+                            <root>src</root>
+                            <root>scripts</root>
+                        </roots>
+                        <!--  
+                        <roots>
+                            <root>${basedir}</root>
+                        </roots>
+                        <includes>
+                            <include>pom.xml</include>
+                        </includes>
+                        -->
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <!-- Default configuration for all reports -->
+                        <excludePackageNames>*.gravia.container.*:*.extension.gravia:*.internal:*.embedded.osgi:*.test</excludePackageNames>
+                        <links>
+                            <link>http://www.osgi.org/javadoc/r5/core</link>
+                        </links>
+                        <tags>
+                            <tag>
+                                <name>Immutable</name>
+                                <placement>t</placement>
+                                <head>Thread Safety: Immutable</head>
+                            </tag>
+                            <tag>
+                                <name>ThreadSafe</name>
+                                <placement>t</placement>
+                                <head>Thread Safety: Thread Safe</head>
+                            </tag>
+                            <tag>
+                                <name>NotThreadSafe</name>
+                                <placement>t</placement>
+                                <head>Thread Safety: Not Thread Safe</head>
+                            </tag>
+                        </tags>
+                        <quiet>true</quiet>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
     
     <!-- Repositories -->
@@ -372,34 +403,10 @@
         <profile>
             <id>distro</id>
             <build>
-            	<plugins>
+                <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>
-                            <!-- Default configuration for all reports -->
-                            <excludePackageNames>*.extension.gravia:*.internal:*.embedded.osgi:*.test</excludePackageNames>
-                            <links>
-                                <link>http://www.osgi.org/javadoc/r5/core</link>
-                            </links>
-                            <tags>
-                                <tag>
-                                    <name>Immutable</name>
-                                    <placement>t</placement>
-                                    <head>Thread Safety: Immutable</head>
-                                </tag>
-                                <tag>
-                                    <name>ThreadSafe</name>
-                                    <placement>t</placement>
-                                    <head>Thread Safety: Thread Safe</head>
-                                </tag>
-                                <tag>
-                                    <name>NotThreadSafe</name>
-                                    <placement>t</placement>
-                                    <head>Thread Safety: Not Thread Safe</head>
-                                </tag>
-                            </tags>
-                            <quiet>true</quiet>
-                        </configuration>
                         <executions>
                             <execution>
                                 <id>aggregate</id>
@@ -407,13 +414,10 @@
                                     <goal>aggregate</goal>
                                 </goals>
                                 <phase>install</phase>
-                                <configuration>
-                                    <!-- Specific configuration for the aggregate report -->
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
-                  	</plugins>
+                </plugins>
             </build>
         </profile>
     </profiles>

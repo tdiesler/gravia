@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,8 @@
  * #L%
  */
 package org.jboss.gravia.arquillian.container;
+
+import static org.jboss.gravia.arquillian.container.ContainerLogger.LOGGER;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,8 +47,6 @@ import org.jboss.arquillian.core.api.annotation.Observes;
 import org.jboss.arquillian.test.spi.context.ClassContext;
 import org.jboss.gravia.repository.RepositoryMBean;
 import org.jboss.gravia.utils.MBeanProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An Arquillian container setup observer.
@@ -59,8 +59,6 @@ public class ContainerSetupObserver {
     public static final String PROPERTY_JMX_SERVICE_URL = "jmxServiceURL";
     public static final String PROPERTY_JMX_USERNAME = "jmxUsername";
     public static final String PROPERTY_JMX_PASSWORD = "jmxPassword";
-
-    static final Logger LOGGER = LoggerFactory.getLogger(ContainerSetupObserver.class);
 
     @Inject
     private Instance<ClassContext> classContextInstance;

@@ -38,7 +38,7 @@ import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.ResourceAssociation;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.util.ManifestHeadersProvider;
+import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
 import org.jboss.modules.ModuleClassLoader;
 import org.wildfly.extension.gravia.GraviaConstants;
 import org.wildfly.extension.gravia.service.WildflyRuntime;
