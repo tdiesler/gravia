@@ -1,8 +1,5 @@
 org.jboss.gravia
 org.jboss.gravia.arquillian.container
-org.jboss.gravia.container.tomcat.extension
-org.jboss.gravia.container.tomcat.support
-org.jboss.gravia.container.tomcat.webapp
 org.jboss.gravia.provision
 org.jboss.gravia.provision.spi
 org.jboss.gravia.repository
@@ -13,8 +10,6 @@ org.jboss.gravia.resource
 org.jboss.gravia.resource.spi
 org.jboss.gravia.runtime
 org.jboss.gravia.runtime.embedded.spi
-org.jboss.gravia.runtime.osgi
 org.jboss.gravia.runtime.osgi.spi
 org.jboss.gravia.runtime.spi
-org.jboss.gravia.runtime.util
 org.jboss.gravia.utils
