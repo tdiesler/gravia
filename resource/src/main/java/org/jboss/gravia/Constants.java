@@ -69,7 +69,7 @@ public interface Constants  {
      *
      * <p>
      * The header value may be retrieved from the {@code Dictionary} object
-     * returned by the {@link Module#getHeaders()} method.
+     * returned by the {@code Module.getHeaders()} method.
      */
     String MODULE_ACTIVATOR = "Module-Activator";
 
@@ -174,10 +174,10 @@ public interface Constants  {
      *
      * <p>
      * The service ranking is used by the Runtime to determine the <i>natural
-     * order</i> of services, see {@link ServiceReference#compareTo(Object)},
+     * order</i> of services, see {code ServiceReference#compareTo(Object)},
      * and the <i>default</i> service to be returned from a call to the
-     * {@link ModuleContext#getServiceReference(Class)} or
-     * {@link ModuleContext#getServiceReference(String)} method.
+     * {@code ModuleContext#getServiceReference(Class)} or
+     * {@code ModuleContext#getServiceReference(String)} method.
      *
      * <p>
      * The default ranking is zero (0). A service with a ranking of

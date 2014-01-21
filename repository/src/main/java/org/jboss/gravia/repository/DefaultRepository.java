@@ -26,7 +26,7 @@ import org.jboss.gravia.repository.spi.AbstractRepository;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 /**
- * The default {@link PersistentRepository}.
+ * The default {@link Repository}.
  *
  * @author thomas.diesler@jboss.com
  * @since 11-May-2012

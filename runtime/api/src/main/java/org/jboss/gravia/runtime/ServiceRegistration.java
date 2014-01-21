@@ -23,6 +23,8 @@ package org.jboss.gravia.runtime;
 
 import java.util.Dictionary;
 
+import org.jboss.gravia.Constants;
+
 
 /**
  * A registered service.

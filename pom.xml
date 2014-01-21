@@ -375,7 +375,25 @@
             <id>distro</id>
             <build>
             	<plugins>
-            	</plugins>
+                    <plugin>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <!-- Default configuration for all reports -->
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>aggregate</id>
+                                <goals>
+                                    <goal>aggregate</goal>
+                                </goals>
+                                <phase>install</phase>
+                                <configuration>
+                                    <!-- Specific configuration for the aggregate report -->
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                  	</plugins>
             </build>
         </profile>
     </profiles>

@@ -24,6 +24,7 @@ package org.jboss.gravia.runtime;
 import java.util.Collection;
 import java.util.Dictionary;
 
+import org.jboss.gravia.Constants;
 
 /**
  * A module's execution context within the Runtime. The context is used to
