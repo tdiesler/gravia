@@ -32,7 +32,7 @@ import org.jboss.gravia.resolver.spi.AbstractResolver.ResourceSpace;
 import org.jboss.gravia.resolver.spi.AbstractResolver.ResourceSpaces;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.resource.Wire;
+import org.jboss.gravia.runtime.Wire;
 import org.junit.Assert;
 import org.junit.Test;
 

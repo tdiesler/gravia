@@ -17,23 +17,22 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.resource;
+package org.jboss.gravia.runtime;
 
-
-import java.util.List;
-
-import org.jboss.gravia.resource.spi.AbstractWiring;
-
+import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.Requirement;
+import org.jboss.gravia.runtime.spi.AbstractWire;
 
 /**
- * The default {@link Wiring}.
+ * The default {@link Wire}.
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public class DefaultWiring extends AbstractWiring {
+public class DefaultWire extends AbstractWire {
 
-    public DefaultWiring(Resource resource, List<Wire> reqwires, List<Wire> provwires) {
-        super(resource, reqwires, provwires);
+    public DefaultWire(Requirement requirement, Capability capability) {
+        super(capability, requirement);
     }
+
 }

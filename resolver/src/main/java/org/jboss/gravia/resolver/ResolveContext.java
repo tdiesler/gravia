@@ -28,7 +28,7 @@ import javax.naming.spi.Resolver;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.Wiring;
+import org.jboss.gravia.runtime.Wiring;
 
 /**
  * A resolve context provides resources, options and constraints to the

@@ -17,20 +17,30 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.resource;
+package org.jboss.gravia.runtime;
 
-import org.jboss.gravia.resource.spi.AbstractWire;
+import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.Requirement;
+import org.jboss.gravia.resource.Resource;
 
 /**
- * The default {@link Wire}.
+ * A wire connecting a {@link Capability} to a {@link Requirement}.
+ *
+ * <p>
+ * Instances of this type must be <i>effectively immutable</i>. That is, for a
+ * given instance of this interface, the methods defined by this interface must
+ * always return the same result.
  *
  * @author thomas.diesler@jboss.com
- * @since 02-Jul-2010
+ * @since 18-Feb-2013
  */
-public class DefaultWire extends AbstractWire {
+public interface Wire {
 
-    public DefaultWire(Requirement requirement, Capability capability) {
-        super(capability, requirement);
-    }
+    Capability getCapability();
 
+    Requirement getRequirement();
+
+    Resource getProvider();
+
+    Resource getRequirer();
 }

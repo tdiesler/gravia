@@ -23,13 +23,13 @@ import java.util.List;
 
 import org.jboss.gravia.resolver.spi.AbstractResolver;
 import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.DefaultWire;
-import org.jboss.gravia.resource.DefaultWiring;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.Wire;
-import org.jboss.gravia.resource.spi.AbstractWire;
-import org.jboss.gravia.resource.spi.AbstractWiring;
+import org.jboss.gravia.runtime.DefaultWire;
+import org.jboss.gravia.runtime.DefaultWiring;
+import org.jboss.gravia.runtime.Wire;
+import org.jboss.gravia.runtime.spi.AbstractWire;
+import org.jboss.gravia.runtime.spi.AbstractWiring;
 
 /**
  * The default {@link Resolver}.

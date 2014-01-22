@@ -35,7 +35,7 @@ import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.Namespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.Wiring;
+import org.jboss.gravia.runtime.Wiring;
 import org.jboss.gravia.utils.NotNullException;
 
 /**

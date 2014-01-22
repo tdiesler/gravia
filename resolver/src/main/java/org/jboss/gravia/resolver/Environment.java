@@ -23,7 +23,7 @@ import java.util.Map;
 
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceStore;
-import org.jboss.gravia.resource.Wiring;
+import org.jboss.gravia.runtime.Wiring;
 
 /**
  * The Provision environment

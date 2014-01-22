@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.Wiring;
-import org.jboss.gravia.resource.Wire;
+import org.jboss.gravia.runtime.Wire;
+import org.jboss.gravia.runtime.Wiring;
 
 /**
  * An extension of the {@link Resolver}

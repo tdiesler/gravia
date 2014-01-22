@@ -25,7 +25,7 @@ import java.util.Set;
 
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.Wiring;
+import org.jboss.gravia.runtime.Wiring;
 
 /**
  * The Provision result

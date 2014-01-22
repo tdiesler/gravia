@@ -17,9 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.resource;
+package org.jboss.gravia.runtime;
 
 import java.util.List;
+
+import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.Namespace;
+import org.jboss.gravia.resource.Requirement;
+import org.jboss.gravia.resource.Resource;
 
 /**
  * A wiring for a resource. A wiring is associated with a resource and

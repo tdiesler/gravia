@@ -39,11 +39,11 @@ import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.Wire;
-import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.resource.spi.AbstractResource;
-import org.jboss.gravia.resource.spi.AbstractWire;
-import org.jboss.gravia.resource.spi.AbstractWiring;
+import org.jboss.gravia.runtime.Wire;
+import org.jboss.gravia.runtime.Wiring;
+import org.jboss.gravia.runtime.spi.AbstractWire;
+import org.jboss.gravia.runtime.spi.AbstractWiring;
 
 /**
  * An abstract resolver {@link Resolver}.

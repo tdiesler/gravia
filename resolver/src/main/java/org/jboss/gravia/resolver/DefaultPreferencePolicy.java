@@ -29,8 +29,8 @@ import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.Version;
-import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.resource.spi.AbstractCapability;
+import org.jboss.gravia.runtime.Wiring;
 
 /**
  * The default {@link PreferencePolicy}.

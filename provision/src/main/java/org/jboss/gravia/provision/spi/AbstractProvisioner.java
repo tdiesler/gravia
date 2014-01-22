@@ -48,13 +48,13 @@ import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resolver.spi.AbstractEnvironment;
 import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.DefaultWire;
-import org.jboss.gravia.resource.DefaultWiring;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.Wire;
-import org.jboss.gravia.resource.Wiring;
+import org.jboss.gravia.runtime.DefaultWire;
+import org.jboss.gravia.runtime.DefaultWiring;
+import org.jboss.gravia.runtime.Wire;
+import org.jboss.gravia.runtime.Wiring;
 import org.jboss.gravia.utils.NotNullException;
 
 /**

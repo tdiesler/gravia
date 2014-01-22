@@ -26,8 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resource.MatchPolicy;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.Wiring;
 import org.jboss.gravia.resource.spi.AbstractResourceStore;
+import org.jboss.gravia.runtime.Wiring;
 
 /**
  * An abstract {@link Environment}

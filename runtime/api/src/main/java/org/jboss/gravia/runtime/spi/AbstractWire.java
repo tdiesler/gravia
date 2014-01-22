@@ -17,12 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.resource.spi;
+package org.jboss.gravia.runtime.spi;
 
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.Wire;
+import org.jboss.gravia.runtime.Wire;
 
 /**
  * An abstract {@link Wire}.

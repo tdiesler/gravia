@@ -38,8 +38,8 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
-import org.jboss.gravia.resource.Wire;
-import org.jboss.gravia.resource.Wiring;
+import org.jboss.gravia.runtime.Wire;
+import org.jboss.gravia.runtime.Wiring;
 import org.junit.Assert;
 import org.junit.Test;
 
