@@ -8,7 +8,7 @@ Supported Target Containers
 
 The set of supported target containers includes but is not limited to 
 
-* [OSGi Framework](http://felix.apache.org/documentation/subprojects/apache-felix-framework/apache-felix-framework-usage-documentation.html)
+* [Karaf](http://karaf.apache.org/)
 * [Apache Tomcat](http://tomcat.apache.org/)
 * [JBoss WildFly](http://www.wildfly.org/)
 
@@ -38,8 +38,7 @@ The OSGi Runtime is used on OSGi containers (e.g. Apache Felix, Equinox)
 Links
 -----
 
-* [Gravia API](http://tdiesler.github.io/gravia/1.0/apidocs)
-* [Tomcat Integration and Usage](../../wiki/Tomcat-Integration)
-* [OSGi Integration and Usage](../../wiki/OSGi-Integration)
-* [WildFly Integration and Usage](../../wiki/WildFly-Integration)
-* [FAQ](../../wiki/Frequent-Questions)
+* [Gravia API](http://tdiesler.github.io/gravia/1.1/apidocs)
+* [Tomcat Integration](../../wiki/Tomcat-Integration), [Provisioning](../../wiki/Tomcat-Provisioning)
+* [OSGi Integration](../../wiki/OSGi-Integration), [Provisioning](../../wiki/OSGi-Provisioning)
+* [WildFly Integration](../../wiki/WildFly-Integration), [Provisioning](../../wiki/WildFly-Provisioning)
