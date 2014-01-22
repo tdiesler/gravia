@@ -36,6 +36,7 @@ import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
+import org.jboss.gravia.runtime.spi.ResourceAssociation;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -93,7 +94,10 @@ public class WebAppContextListener implements ServletContextListener {
         }
     }
 
-    private Module installWebappModule(ServletContext servletContext) {
+    /**
+     * Install a webapp module from the given servlet context.
+     */
+    public Module installWebappModule(ServletContext servletContext) {
 
         Manifest manifest = getWebappManifest(servletContext);
         if (manifest == null)

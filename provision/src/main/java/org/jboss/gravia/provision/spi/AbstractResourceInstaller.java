@@ -33,7 +33,7 @@ import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.runtime.ResourceAssociation;
+import org.jboss.gravia.runtime.spi.ResourceAssociation;
 
 /**
  * An abstract {@link ResourceInstaller}.
