@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,6 +34,7 @@ import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.SynchronousModuleListener;
 import org.jboss.gravia.runtime.spi.AbstractModuleContext;
 import org.jboss.gravia.utils.NotNullException;
 import org.osgi.framework.Bundle;
@@ -185,8 +186,8 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
     }
 
     private Module mappedModule(Bundle bundle) {
-        Runtime runtime = getModule().adapt(Runtime.class);
-        return runtime.getModule(bundle.getBundleId());
+        OSGiRuntime runtime = (OSGiRuntime) getModule().adapt(Runtime.class);
+        return runtime.getModule(bundle);
     }
 
     @SuppressWarnings("unchecked")
@@ -199,7 +200,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
     }
 
     private BundleListener adaptModuleListener(ModuleListener listener) {
-        if (listener instanceof SynchronousBundleListener) {
+        if (listener instanceof SynchronousModuleListener) {
             return new SynchronousModuleListenerAdaptor(listener);
         } else {
             return new ModuleListenerAdaptor(listener);

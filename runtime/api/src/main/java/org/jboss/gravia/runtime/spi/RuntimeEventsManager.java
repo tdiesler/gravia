@@ -38,6 +38,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import org.jboss.gravia.runtime.AllServiceListener;
+import org.jboss.gravia.runtime.ConstantsHelper;
 import org.jboss.gravia.runtime.Filter;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;

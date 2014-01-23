@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.WeakHashMap;
 
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
@@ -44,8 +45,9 @@ import org.jboss.gravia.utils.NotNullException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.util.tracker.BundleTracker;
 
 /**
  * The OSGi {@link Runtime}
@@ -56,7 +58,8 @@ import org.osgi.util.tracker.BundleTracker;
 public final class OSGiRuntime extends AbstractRuntime {
 
     private final BundleContext syscontext;
-    private final BundleTracker<Bundle> tracker;
+    private final BundleListener installListener;
+    private final WeakHashMap<Bundle, Module> uninstalled = new WeakHashMap<Bundle, Module>();
 
     public OSGiRuntime(BundleContext syscontext, PropertiesProvider propertiesProvider) {
         super(propertiesProvider);
@@ -69,46 +72,50 @@ public final class OSGiRuntime extends AbstractRuntime {
             throw new IllegalArgumentException("Not the system bundle: " + syscontext.getBundle());
 
         // Install system module
-        Resource resource = new DefaultResourceBuilder().addIdentityCapability(getSystemIdentity()).getResource();
         try {
+            Resource resource = new DefaultResourceBuilder().addIdentityCapability(getSystemIdentity()).getResource();
             BundleWiring wiring = syscontext.getBundle().adapt(BundleWiring.class);
             installModule(wiring.getClassLoader(), resource, null, null);
         } catch (ModuleException ex) {
             throw new IllegalStateException("Cannot install system module", ex);
         }
 
-        // Setup the bundle tracker
-        tracker = new BundleTracker<Bundle>(syscontext, Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE | Bundle.STOPPING, null) {
-
+        installListener = new SynchronousBundleListener() {
             @Override
-            public Bundle addingBundle(Bundle bundle, BundleEvent event) {
-                BundleWiring wiring = bundle.adapt(BundleWiring.class);
-                ClassLoader classLoader = wiring != null ? wiring.getClassLoader() : null;
-                ResourceBuilder resBuilder = new DictionaryResourceBuilder().load(bundle.getHeaders());
-                if (classLoader != null && resBuilder.isValid()) {
-                    try {
-                        installModule(classLoader, bundle.getHeaders());
-                    } catch (ModuleException ex) {
-                        LOGGER.error("Cannot install module from: " + bundle, ex);
+            public void bundleChanged(BundleEvent event) {
+                int eventType = event.getType();
+                Bundle bundle = event.getBundle();
+                if (eventType == BundleEvent.RESOLVED) {
+                    installModule(bundle);
+                } else if (eventType == BundleEvent.UNINSTALLED) {
+                    Module module = getModule(bundle);
+                    if (module != null) {
+                        uninstalled.put(bundle, module);
+                        uninstallModule(module);
                     }
                 }
-                return bundle;
-            }
-
-            @Override
-            public void remove(Bundle bundle) {
-                Module module = getModule(bundle.getBundleId());
-                if (module != null) {
-                    module.uninstall();
-                }
-                super.remove(bundle);
             }
         };
     }
 
+     Module getModule(Bundle bundle) {
+        Module module = super.getModule(bundle.getBundleId());
+        if (module == null && bundle.getState() == Bundle.UNINSTALLED) {
+            module = uninstalled.get(bundle);
+        }
+        return module;
+    }
+
     @Override
     public void init() {
-        tracker.open();
+
+        // Setup the bundle tracker
+        syscontext.addBundleListener(installListener);
+
+        // Install already existing bundles
+        for (Bundle bundle : syscontext.getBundles()) {
+            installModule(bundle);
+        }
     }
 
     BundleContext getSystemContext() {
@@ -128,6 +135,35 @@ public final class OSGiRuntime extends AbstractRuntime {
     @Override
     protected void uninstallModule(Module module) {
         super.uninstallModule(module);
+    }
+
+    private Module installModule(Bundle bundle) {
+
+        Module module = getModule(bundle.getBundleId());
+        if (module != null)
+            return module;
+
+        BundleWiring wiring = bundle.adapt(BundleWiring.class);
+        ClassLoader classLoader = wiring != null ? wiring.getClassLoader() : null;
+        if (classLoader == null)
+            return null;
+
+        Dictionary<String, String> headers = bundle.getHeaders();
+        ResourceBuilder builder = new DictionaryResourceBuilder().load(headers);
+        try {
+            // If the bundle is not gravia enabled we use the bundle identity
+            if (builder.isValid() == false) {
+                String symbolicName = bundle.getSymbolicName();
+                String version = bundle.getVersion().toString();
+                builder.addIdentityCapability(symbolicName, version);
+            }
+            Resource resource = builder.getResource();
+            module = installModule(classLoader, resource, headers);
+        } catch (ModuleException ex) {
+            LOGGER.error("Cannot install module from: " + bundle, ex);
+        }
+
+        return module;
     }
 
     private class OSGiModuleEntriesProvider implements ModuleEntriesProvider {
