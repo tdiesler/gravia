@@ -40,8 +40,6 @@ public final class ConstantsHelper {
         String retType = "[" + eventType + "]";
         if (ModuleEvent.INSTALLED == eventType)
             retType = "INSTALLED";
-        else if (ModuleEvent.RESOLVED == eventType)
-            retType = "RESOLVED";
         else if (ModuleEvent.STARTING == eventType)
             retType = "STARTING";
         else if (ModuleEvent.STARTED == eventType)

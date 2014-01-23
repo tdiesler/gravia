@@ -23,17 +23,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleListener;
+import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceEvent;
 import org.jboss.gravia.runtime.ServiceFactory;
 import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
-import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.SynchronousModuleListener;
 import org.jboss.gravia.runtime.spi.AbstractModuleContext;
 import org.jboss.gravia.utils.NotNullException;
@@ -214,6 +216,16 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         }
     }
 
+    private static Map<Integer, Integer> eventMapping = new HashMap<Integer, Integer>();
+    static {
+        eventMapping.put(BundleEvent.RESOLVED, ModuleEvent.INSTALLED);
+        eventMapping.put(BundleEvent.STARTING, ModuleEvent.STARTING);
+        eventMapping.put(BundleEvent.STARTED, ModuleEvent.STARTED);
+        eventMapping.put(BundleEvent.STOPPING, ModuleEvent.STOPPING);
+        eventMapping.put(BundleEvent.STOPPED, ModuleEvent.STOPPED);
+        eventMapping.put(BundleEvent.UNRESOLVED, ModuleEvent.UNINSTALLED);
+    }
+
     private class ModuleListenerAdaptor implements BundleListener {
 
         private final ModuleListener delegate;
@@ -225,10 +237,11 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
 
         @Override
         public void bundleChanged(BundleEvent event) {
-            int type = event.getType();
+            Integer bndtype = event.getType();
             Module module = mappedModule(event.getBundle());
-            if (module != null) {
-                ModuleEvent moduleEvent = new ModuleEvent(type, module);
+            Integer modtype = eventMapping.get(bndtype);
+            if (module != null && modtype != null) {
+                ModuleEvent moduleEvent = new ModuleEvent(modtype, module);
                 delegate.moduleChanged(moduleEvent);
             }
         }

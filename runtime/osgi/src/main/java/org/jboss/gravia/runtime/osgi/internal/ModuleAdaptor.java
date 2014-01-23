@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -70,17 +70,16 @@ final class ModuleAdaptor extends AbstractModule {
         int bundleState = bundle.getState();
         switch(bundleState) {
             case Bundle.INSTALLED:
-                return State.INSTALLED;
+            case Bundle.UNINSTALLED:
+                return State.UNINSTALLED;
             case Bundle.RESOLVED:
-                return State.RESOLVED;
+                return State.INSTALLED;
             case Bundle.STARTING:
                 return State.STARTING;
             case Bundle.ACTIVE:
                 return State.ACTIVE;
             case Bundle.STOPPING:
                 return State.STOPPING;
-            case Bundle.UNINSTALLED:
-                return State.UNINSTALLED;
         }
         throw new IllegalArgumentException("Unsupported bundle state: " + bundleState);
     }

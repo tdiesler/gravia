@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -81,11 +81,6 @@ public class ModuleEvent extends EventObject {
     public final static int UNINSTALLED = 0x00000010;
 
     /**
-     * The module has been resolved.
-     */
-    public final static int RESOLVED = 0x00000020;
-
-    /**
      * The module is about to be activated.
      * <p>
      * The module's {@link ModuleActivator#start(ModuleContext) ModuleActivator
@@ -118,6 +113,8 @@ public class ModuleEvent extends EventObject {
      */
     public ModuleEvent(int type, Module module) {
         super(module);
+        if (type != INSTALLED && type != STARTED && type != STOPPED && type != UNINSTALLED && type != STARTING && type != STOPPING)
+            throw new IllegalArgumentException("Invalid type: " + type);
         this.type = type;
     }
 
@@ -135,12 +132,11 @@ public class ModuleEvent extends EventObject {
      * Returns the type of lifecyle event. The type values are:
      * <ul>
      * <li>{@link #INSTALLED}
-     * <li>{@link #RESOLVED}
-     * <li>{@link #STARTING}
      * <li>{@link #STARTED}
-     * <li>{@link #STOPPING}
      * <li>{@link #STOPPED}
      * <li>{@link #UNINSTALLED}
+     * <li>{@link #STARTING}
+     * <li>{@link #STOPPING}
      * </ul>
      *
      * @return The type of lifecycle event.

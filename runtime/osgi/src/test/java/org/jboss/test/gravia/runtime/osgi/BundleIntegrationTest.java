@@ -139,13 +139,13 @@ public class BundleIntegrationTest {
         // Verify that the Module is available
         moduleA = runtime.getModule(bundleA.getBundleId());
         Assert.assertNotNull("Module not null", moduleA);
-        Assert.assertEquals(Module.State.RESOLVED, moduleA.getState());
+        Assert.assertEquals(Module.State.INSTALLED, moduleA.getState());
         ModuleContext contextA = moduleA.getModuleContext();
         Assert.assertNull("ModuleContext null", contextA);
 
         // Verify Module events
         Assert.assertEquals("Module events", 1, events.size());
-        Assert.assertEquals("bundleA:1.0.0:RESOLVED", events.get(0));
+        Assert.assertEquals("bundleA:1.0.0:INSTALLED", events.get(0));
 
         // Start the Bundle
         bundleA.start();
@@ -165,7 +165,7 @@ public class BundleIntegrationTest {
         // Stop the Bundle
         bundleA.stop();
         Assert.assertEquals("Bundle RESOLVED", Bundle.RESOLVED, bundleA.getState());
-        Assert.assertEquals(Module.State.RESOLVED, moduleA.getState());
+        Assert.assertEquals(Module.State.INSTALLED, moduleA.getState());
         contextA = moduleA.getModuleContext();
         Assert.assertNull("ModuleContext null", contextA);
         sref = rtcontext.getServiceReference(String.class);
@@ -182,9 +182,8 @@ public class BundleIntegrationTest {
         Assert.assertEquals(Module.State.UNINSTALLED, moduleA.getState());
 
         // Verify Module events
-        Assert.assertEquals("Module events", 7, events.size());
-        Assert.assertEquals("bundleA:1.0.0:[64]", events.get(5));
-        Assert.assertEquals("bundleA:1.0.0:UNINSTALLED", events.get(6));
+        Assert.assertEquals("Module events", 6, events.size());
+        Assert.assertEquals("bundleA:1.0.0:UNINSTALLED", events.get(5));
     }
 
     @Deployment(name = BUNDLE_A, testable = false, managed = false)

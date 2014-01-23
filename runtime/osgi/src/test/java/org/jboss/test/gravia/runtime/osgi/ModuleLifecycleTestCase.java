@@ -112,7 +112,7 @@ public class ModuleLifecycleTestCase {
         Assert.assertEquals(State.ACTIVE, module.getState());
 
         module.stop();
-        Assert.assertEquals(State.RESOLVED, module.getState());
+        Assert.assertEquals(State.INSTALLED, module.getState());
         Assert.assertNull("ModuleContext null", module.getModuleContext());
 
         module.start();

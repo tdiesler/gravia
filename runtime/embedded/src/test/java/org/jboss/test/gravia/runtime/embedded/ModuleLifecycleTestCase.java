@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,7 +47,7 @@ public class ModuleLifecycleTestCase extends AbstractEmbeddedRuntimeTest {
         ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(manifest);
 
         Module modA = getRuntime().installModule(SimpleModuleActivator.class.getClassLoader(), headersProvider.getHeaders());
-        Assert.assertEquals(Module.State.RESOLVED, modA.getState());
+        Assert.assertEquals(Module.State.INSTALLED, modA.getState());
 
         modA.start();
         Assert.assertEquals(Module.State.ACTIVE, modA.getState());
@@ -60,7 +60,7 @@ public class ModuleLifecycleTestCase extends AbstractEmbeddedRuntimeTest {
         Assert.assertEquals("Hello", service);
 
         modA.stop();
-        Assert.assertEquals(Module.State.RESOLVED, modA.getState());
+        Assert.assertEquals(Module.State.INSTALLED, modA.getState());
 
         modA.uninstall();
         Assert.assertEquals(Module.State.UNINSTALLED, modA.getState());
@@ -81,7 +81,7 @@ public class ModuleLifecycleTestCase extends AbstractEmbeddedRuntimeTest {
         ManifestHeadersProvider headersProvider = new ManifestHeadersProvider(builder.getManifest());
 
         Module modA = getRuntime().installModule(SimpleModuleActivator.class.getClassLoader(), headersProvider.getHeaders());
-        Assert.assertEquals(Module.State.RESOLVED, modA.getState());
+        Assert.assertEquals(Module.State.INSTALLED, modA.getState());
 
         ModuleContext ctxA = modA.getModuleContext();
         Assert.assertNull("Null moduleContext", ctxA);
@@ -97,7 +97,7 @@ public class ModuleLifecycleTestCase extends AbstractEmbeddedRuntimeTest {
         Assert.assertEquals("Hello", srvA);
 
         modA.stop();
-        Assert.assertEquals(Module.State.RESOLVED, modA.getState());
+        Assert.assertEquals(Module.State.INSTALLED, modA.getState());
 
         modA.uninstall();
         Assert.assertEquals(Module.State.UNINSTALLED, modA.getState());
