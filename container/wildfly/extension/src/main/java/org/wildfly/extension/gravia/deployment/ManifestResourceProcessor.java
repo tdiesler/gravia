@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.module.ResourceRoot;
 import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.wildfly.extension.gravia.GraviaConstants;
 
 /**
@@ -47,14 +48,19 @@ public class ManifestResourceProcessor implements DeploymentUnitProcessor {
         if (resource != null)
             return;
 
-        ResourceRoot deploymentRoot = depUnit.getAttachment(Attachments.DEPLOYMENT_ROOT);
-        Manifest manifest = deploymentRoot != null ? deploymentRoot.getAttachment(Attachments.MANIFEST) : null;
-        if (manifest == null)
-            return;
+        resource = NamedResourceAssociation.getResource(depUnit.getName());
+        if (resource == null) {
+            ResourceRoot deploymentRoot = depUnit.getAttachment(Attachments.DEPLOYMENT_ROOT);
+            Manifest manifest = deploymentRoot != null ? deploymentRoot.getAttachment(Attachments.MANIFEST) : null;
+            if (manifest != null) {
+                ManifestResourceBuilder builder = new ManifestResourceBuilder().load(manifest);
+                if (builder.isValid()) {
+                    resource = builder.getResource();
+                }
+            }
+        }
 
-        ManifestResourceBuilder builder = new ManifestResourceBuilder().load(manifest);
-        if (builder.isValid()) {
-            resource = builder.getResource();
+        if (resource != null) {
             depUnit.putAttachment(GraviaConstants.RESOURCE_KEY, resource);
         }
     }

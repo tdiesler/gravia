@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,7 +33,6 @@ import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.runtime.spi.ResourceAssociation;
 
 /**
  * An abstract {@link ResourceInstaller}.
@@ -63,7 +62,6 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
     }
 
     private synchronized ResourceHandle installResourceInternal(Resource resource, Map<Requirement, Resource> mapping) throws ProvisionException {
-        ResourceAssociation.putResource(resource);
         try {
             if (isShared(resource)) {
                 return installSharedResource(resource, mapping);
@@ -76,8 +74,6 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
             throw ex;
         } catch (Exception ex) {
             throw new ProvisionException("Cannot provision resource: " + resource, ex);
-        } finally {
-            ResourceAssociation.removeResource(resource.getIdentity());
         }
     }
 

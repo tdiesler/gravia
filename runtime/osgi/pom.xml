@@ -47,6 +47,11 @@
 	        <artifactId>gravia-runtime-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-provision</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
         <!-- Provided Dependencies -->
         <dependency>

@@ -50,6 +50,7 @@ import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.jboss.gravia.utils.IOUtils;
 
 /**
@@ -133,6 +134,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         final User user = userDatabase.findUser(TOMCAT_USER);
         final String password = user.getPassword();
 
+        NamedResourceAssociation.putResource(contextPath, resource);
         try {
             DeployTask task = new DeployTask();
             task.setWar(contentURL.toExternalForm());
@@ -141,6 +143,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
             task.setPath(contextPath);
             task.execute();
         } finally {
+            NamedResourceAssociation.removeResource(contextPath);
             if (tempfile != null) {
                 tempfile.delete();
             }

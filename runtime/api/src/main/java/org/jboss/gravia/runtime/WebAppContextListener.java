@@ -33,10 +33,9 @@ import org.jboss.gravia.resource.AttachmentKey;
 import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
-import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
-import org.jboss.gravia.runtime.spi.ResourceAssociation;
+import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -78,7 +77,7 @@ public class WebAppContextListener implements ServletContextListener {
 
             // HttpService integration
             BundleContext bundleContext = module.adapt(Bundle.class).getBundleContext();
-            servletContext.setAttribute("org.osgi.framework.BundleContext", bundleContext);
+            servletContext.setAttribute(BundleContext.class.getName(), bundleContext);
         }
     }
 
@@ -115,8 +114,8 @@ public class WebAppContextListener implements ServletContextListener {
 
     private Module installWebappModule(ServletContext servletContext, Resource resource, Dictionary<String, String> headers) {
 
-        ResourceIdentity identity = resource.getIdentity();
-        Resource association = ResourceAssociation.getResource(identity);
+        String contextPath = servletContext.getContextPath();
+        Resource association = NamedResourceAssociation.getResource(contextPath);
         resource = association != null ? association : resource;
 
         AttachableSupport context = new AttachableSupport();

@@ -34,22 +34,22 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.spi.ThreadResourceAssociation;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.wiring.BundleWiring;
 
-class BundleContextResourceInstaller extends AbstractResourceInstaller {
+public class BundleResourceInstaller extends AbstractResourceInstaller {
 
     private final RuntimeEnvironment environment;
-    private final BundleContext bundleContext;
+    private final BundleContext context;
 
-    BundleContextResourceInstaller(ModuleContext context, RuntimeEnvironment environment) {
-        this.bundleContext = context.getModule().adapt(Bundle.class).getBundleContext();
+    BundleResourceInstaller(BundleContext context, RuntimeEnvironment environment) {
+        this.context = context;
         this.environment = environment;
     }
 
@@ -71,20 +71,25 @@ class BundleContextResourceInstaller extends AbstractResourceInstaller {
     }
 
     private ResourceHandle installBundleResource(Resource resource) throws ProvisionException {
+
+        // Install the Bundle
         ResourceIdentity identity = resource.getIdentity();
         InputStream content = resource.adapt(ResourceContent.class).getContent();
-        final Bundle bundle;
+        Bundle bundle;
         try {
-            bundle = bundleContext.installBundle(identity.toString(), content);
+            bundle = context.installBundle(identity.toString(), content);
         } catch (BundleException ex) {
             throw new ProvisionException(ex);
         }
 
         // Attempt to start the bundle. This relies on provision ordering.
+        ThreadResourceAssociation.putResource(resource);
         try {
             bundle.start();
         } catch (BundleException ex) {
             // ignore
+        } finally {
+            ThreadResourceAssociation.removeResource();
         }
 
         // Install the bundle as module if it has not already happened

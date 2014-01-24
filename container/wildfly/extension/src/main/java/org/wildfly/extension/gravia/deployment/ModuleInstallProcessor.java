@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,14 +31,12 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.module.ResourceRoot;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
-import org.jboss.gravia.runtime.spi.ResourceAssociation;
 import org.jboss.modules.ModuleClassLoader;
 import org.wildfly.extension.gravia.GraviaConstants;
 import org.wildfly.extension.gravia.service.WildflyRuntime;
@@ -59,14 +57,6 @@ public class ModuleInstallProcessor implements DeploymentUnitProcessor {
         if (resource == null)
             return;
 
-        // Use the associated resource if we have one
-        ResourceIdentity identity = resource.getIdentity();
-        Resource association = ResourceAssociation.getResource(identity);
-        if (association != null) {
-            depUnit.putAttachment(GraviaConstants.RESOURCE_KEY, association);
-            resource = association;
-        }
-
         // Get the headers from the manifest
         Dictionary<String, String> headers = null;
         ResourceRoot deploymentRoot = depUnit.getAttachment(Attachments.DEPLOYMENT_ROOT);
@@ -85,6 +75,7 @@ public class ModuleInstallProcessor implements DeploymentUnitProcessor {
             Runtime runtime = RuntimeLocator.getRequiredRuntime();
             Module module = runtime.installModule(classLoader, resource, headers, context);
             depUnit.putAttachment(GraviaConstants.MODULE_KEY, module);
+            depUnit.putAttachment(GraviaConstants.RESOURCE_KEY, module.adapt(Resource.class));
         } catch (ModuleException ex) {
             throw new DeploymentUnitProcessingException(ex);
         }

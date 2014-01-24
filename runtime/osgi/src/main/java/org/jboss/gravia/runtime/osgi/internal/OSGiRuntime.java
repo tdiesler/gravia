@@ -41,6 +41,7 @@ import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.runtime.spi.ThreadResourceAssociation;
 import org.jboss.gravia.utils.NotNullException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -148,16 +149,19 @@ public final class OSGiRuntime extends AbstractRuntime {
         if (classLoader == null)
             return null;
 
+        Resource resource = ThreadResourceAssociation.getResource();
         Dictionary<String, String> headers = bundle.getHeaders();
-        ResourceBuilder builder = new DictionaryResourceBuilder().load(headers);
-        try {
-            // If the bundle is not gravia enabled we use the bundle identity
+        if (resource == null) {
+            ResourceBuilder builder = new DictionaryResourceBuilder().load(headers);
             if (builder.isValid() == false) {
                 String symbolicName = bundle.getSymbolicName();
                 String version = bundle.getVersion().toString();
                 builder.addIdentityCapability(symbolicName, version);
             }
-            Resource resource = builder.getResource();
+            resource = builder.getResource();
+        }
+
+        try {
             module = installModule(classLoader, resource, headers);
         } catch (ModuleException ex) {
             LOGGER.error("Cannot install module from: " + bundle, ex);

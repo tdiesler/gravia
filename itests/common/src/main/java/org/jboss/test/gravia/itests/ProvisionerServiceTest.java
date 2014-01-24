@@ -79,7 +79,6 @@ import org.jboss.test.gravia.itests.support.AnnotatedProxyServlet;
 import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.jboss.test.gravia.itests.support.HttpRequest;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -211,10 +210,6 @@ public class ProvisionerServiceTest {
 
     @Test
     public void testProvisionResources() throws Exception {
-
-        // [TODO] A module installed from a bundle that is not gravia enabled
-        // should still use the provisioner provided resource
-        Assume.assumeFalse(RuntimeType.getRuntimeType() == RuntimeType.KARAF);
 
         // Build a resource to the repository that has a dependency on camel.core
         DefaultResourceBuilder builder = new DefaultResourceBuilder();

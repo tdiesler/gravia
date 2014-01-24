@@ -55,6 +55,7 @@ import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.jboss.gravia.utils.IOUtils;
 import org.jboss.modules.ModuleClassLoader;
 import org.jboss.modules.ModuleIdentifier;
@@ -190,9 +191,15 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
 
         final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
         final ResourceWrapper wrapper = getWrappedResourceContent(resource, mapping);
-        final String runtimeName = wrapper.getRuntimeName();
 
-        serverDeployer.deploy(runtimeName, wrapper.getInputStream());
+        String runtimeName = wrapper.getRuntimeName();
+        NamedResourceAssociation.putResource(runtimeName, resource);
+        try {
+            String deploymentName = wrapper.getDeploymentName();
+            serverDeployer.deploy(deploymentName, wrapper.getInputStream());
+        } finally {
+            NamedResourceAssociation.removeResource(runtimeName);
+        }
 
         // Install the resource as module if it has not happend already
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
@@ -209,7 +216,8 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
             @Override
             public void uninstall() {
                 try {
-                    serverDeployer.undeploy(runtimeName);
+                    String deploymentName = wrapper.getDeploymentName();
+                    serverDeployer.undeploy(deploymentName);
                 } catch (Throwable th) {
                     LOGGER.warn("Cannot uninstall provisioned resource: " + getResource(), th);
                 }
@@ -227,7 +235,7 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         // Do nothing if there is no mapping
         if (mapping == null) {
             InputStream content = resource.adapt(ResourceContent.class).getContent();
-            return new ResourceWrapper(runtimeName, content);
+            return new ResourceWrapper(runtimeName, runtimeName, content);
         }
 
         // Create content archive
@@ -251,7 +259,7 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         wrapper.add(archive, "/", ZipExporter.class);
 
         InputStream content = wrapper.as(ZipExporter.class).exportAsInputStream();
-        return new ResourceWrapper(wrapper.getName(), content);
+        return new ResourceWrapper(wrapper.getName(), runtimeName, content);
     }
 
     private String generateModuleXML(File resFile, Resource resource, ModuleIdentifier modid, Map<Requirement, Resource> mapping) throws IOException {
@@ -318,11 +326,16 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
     }
 
     static class ResourceWrapper {
+        private final String deploymentName;
         private final String runtimeName;
         private final InputStream inputStream;
-        ResourceWrapper(String runtimeName, InputStream inputStream) {
+        ResourceWrapper(String deploymentName, String runtimeName, InputStream inputStream) {
+            this.deploymentName = deploymentName;
             this.runtimeName = runtimeName;
             this.inputStream = inputStream;
+        }
+        String getDeploymentName() {
+            return deploymentName;
         }
         String getRuntimeName() {
             return runtimeName;

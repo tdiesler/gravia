@@ -90,9 +90,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Activator>org.jboss.gravia.runtime.ModuleActivatorBridge</Bundle-Activator>
-                        <Module-Activator>org.jboss.gravia.repository.internal.RepositoryActivator</Module-Activator>
-                        <Gravia-Enabled>true</Gravia-Enabled>
+                        <Bundle-Activator>org.jboss.gravia.repository.internal.RepositoryActivator</Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
