@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -56,11 +56,11 @@ import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import org.jboss.test.gravia.itests.support.ArchiveBuilder;
-import org.jboss.test.gravia.itests.support.HttpRequest;
+import org.jboss.test.gravia.itests.support.AnnotatedContextListener;
 import org.jboss.test.gravia.itests.support.AnnotatedProxyListener;
 import org.jboss.test.gravia.itests.support.AnnotatedProxyServlet;
-import org.jboss.test.gravia.itests.support.AnnotatedContextListener;
+import org.jboss.test.gravia.itests.support.ArchiveBuilder;
+import org.jboss.test.gravia.itests.support.HttpRequest;
 import org.jboss.test.gravia.itests.support.SecureHttpContext;
 import org.junit.Assert;
 import org.junit.Test;
@@ -89,6 +89,7 @@ public class HttpServiceSecureTestCase {
         archive.addClasses(HttpRequest.class, SecureHttpContext.class, Base64Encoder.class);
         archive.addClasses(UserDatabaseLoginModule.class);
         archive.addAsResource(STRING_ASSET, "res/message.txt");
+        archive.addAsWebResource("OSGI-INF/blueprint/gravia-jaas-realm.xml", "OSGI-INF/blueprint/gravia-jaas-realm.xml");
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
@@ -100,6 +101,10 @@ public class HttpServiceSecureTestCase {
                     builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
                     builder.addImportPackages(RuntimeLocator.class, Servlet.class, HttpServlet.class, HttpService.class);
                     builder.addImportPackages(Subject.class, Callback.class, LoginContext.class);
+                    builder.addImportPackage("org.apache.karaf.jaas.config");
+                    builder.addImportPackage("org.apache.karaf.jaas.modules");
+                    builder.addImportPackage("org.apache.karaf.jaas.modules.encryption");
+                    builder.addImportPackage("org.apache.karaf.jaas.modules.properties");
                     builder.addImportPackages(Logger.class);
                     builder.addBundleClasspath("WEB-INF/classes");
                     return builder.openStream();
@@ -130,7 +135,7 @@ public class HttpServiceSecureTestCase {
             assertNotAvailable(reqspec, headers);
 
             HttpContext base = httpService.createDefaultHttpContext();
-            String realm = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "karaf" : "ApplicationRealm";
+            String realm = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "gravia" : "ApplicationRealm";
             HttpContext secureContext = new SecureHttpContext(base, realm, "graviaRole");
 
             // Register the test servlet and make a call
@@ -163,7 +168,7 @@ public class HttpServiceSecureTestCase {
             assertNotAvailable(reqspec, headers);
 
             HttpContext base = httpService.createDefaultHttpContext();
-            String realm = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "karaf" : "ApplicationRealm";
+            String realm = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "gravia" : "ApplicationRealm";
             HttpContext secureContext = new SecureHttpContext(base, realm, "graviaRole");
 
             // Register the test resource and make a call
