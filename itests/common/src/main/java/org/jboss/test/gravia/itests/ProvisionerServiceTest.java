@@ -149,7 +149,6 @@ public class ProvisionerServiceTest {
         ResourceIdentity identity = ResourceIdentity.fromString("camel.core.feature:0.0.0");
         Requirement req = new IdentityRequirementBuilder(identity).getRequirement();
         Set<ResourceHandle> result = provisioner.provisionResources(Collections.singleton(req));
-        Assert.assertEquals("One resource", 1, result.size());
 
         List<ResourceHandle> handles = new ArrayList<ResourceHandle>(result);
         try {
