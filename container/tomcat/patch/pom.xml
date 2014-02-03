@@ -169,10 +169,6 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>${tomcat.patch}.zip</file>
-                                    <type>zip</type>
-                                </artifact>
-                                <artifact>
                                     <file>${tomcat.patch}.tar.gz</file>
                                     <type>tar.gz</type>
                                 </artifact>

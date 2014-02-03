@@ -66,8 +66,8 @@
 		<copy file="${deploy.artifacts.lib}/gravia-container-tomcat-webapp-${project.version}.war" 
 			tofile="${tomcat.patch.dir}/webapps/gravia.war" overwrite="true"/>
 
-		<!-- Zip the tomcat patch -->
-		<zip destfile="${output.dir}/${project.artifactId}-${project.version}.zip" basedir="${tomcat.patch.dir}"/>
+		<!-- Build the tomcat patch -->
 		<tar destfile="${output.dir}/${project.artifactId}-${project.version}.tar.gz" basedir="${tomcat.patch.dir}" compression="gzip"/>
+		
 	</target>
 </project>

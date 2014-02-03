@@ -116,8 +116,8 @@ org.jboss.gravia.runtime.type=karaf
 # felix.log.level=4
     </echo>
 	
-  	<!-- Zip the tomcat patch -->
-  	<zip destfile="${output.dir}/${project.artifactId}-${project.version}.zip" basedir="${karaf.patch.dir}"/>
+  	<!-- Build the tomcat patch -->
   	<tar destfile="${output.dir}/${project.artifactId}-${project.version}.tar.gz" basedir="${karaf.patch.dir}" compression="gzip"/>
+  	
   </target>
 </project>
