@@ -66,7 +66,7 @@
         <version.jboss.osgi.metadata>4.0.0.CR1</version.jboss.osgi.metadata>
         <version.jboss.shrinkwrap>1.1.2</version.jboss.shrinkwrap>
         <version.jboss.shrinkwrap.resolver>2.0.0</version.jboss.shrinkwrap.resolver>
-        <version.jboss.wildfly>8.0.0.Beta1</version.jboss.wildfly>
+        <version.jboss.wildfly>8.0.0.CR1</version.jboss.wildfly>
         <version.junit>4.11</version.junit>
         <version.mockito>1.8.4</version.mockito>
         <version.osgi>5.0.0</version.osgi>
