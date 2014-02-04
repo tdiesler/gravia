@@ -50,7 +50,7 @@ import org.osgi.service.component.ComponentContext;
 /**
  * Test basic SCR Component
  *
- * @author thomas.diesler@jbos.com
+ * @author thomas.diesler@jboss.com
  * @since 04-Oct-2013
  */
 @RunWith(Arquillian.class)

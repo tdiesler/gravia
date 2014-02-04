@@ -33,7 +33,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 /**
  * A test archive builder
  *
- * @author thomas.diesler@jbos.com
+ * @author thomas.diesler@jboss.com
  * @since 22-Nov-2013
  */
 public class ArchiveBuilder  {

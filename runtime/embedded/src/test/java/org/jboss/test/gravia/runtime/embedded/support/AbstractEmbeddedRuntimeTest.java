@@ -37,7 +37,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * Abstract embedded runtome test.
  *
- * @author thomas.diesler@jbos.com
+ * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
 public abstract class AbstractEmbeddedRuntimeTest {

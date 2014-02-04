@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Test basic runtime functionality.
  *
- * @author thomas.diesler@jbos.com
+ * @author thomas.diesler@jboss.com
  * @since 27-Jan-2012
  */
 public class ServiceComponentTestCase extends AbstractEmbeddedRuntimeTest {

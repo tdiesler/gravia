@@ -26,7 +26,7 @@ import org.junit.Test;
 /**
  * A simple {@link RuntimeType} test.
  *
- * @author thomas.diesler@jbos.com
+ * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
 public class RuntimeTypeTest {
