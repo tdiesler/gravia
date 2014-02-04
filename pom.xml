@@ -420,5 +420,16 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>wildfly-snapshot</id>
+            <activation>
+                <property>
+                    <name>wfsnap</name>
+                </property>
+            </activation>
+            <properties>
+                <version.jboss.wildfly>8.0.0.Final-SNAPSHOT</version.jboss.wildfly>
+            </properties>
+        </profile>
     </profiles>
 </project>
