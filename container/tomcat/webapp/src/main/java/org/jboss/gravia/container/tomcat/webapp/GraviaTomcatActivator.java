@@ -40,10 +40,8 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
-import org.jboss.gravia.runtime.embedded.spi.BundleContextAdaptor;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimePropertiesProvider;
-import org.osgi.framework.BundleContext;
 
 /**
  * Activates the {@link Runtime} as part of the web app lifecycle.
@@ -66,11 +64,6 @@ public class GraviaTomcatActivator implements ServletContextListener {
         PropertiesProvider propsProvider = new TomcatPropertiesProvider(servletContext);
         Runtime runtime = RuntimeLocator.createRuntime(new TomcatRuntimeFactory(servletContext), propsProvider);
         runtime.init();
-
-        // HttpService integration
-        ModuleContext moduleContext = runtime.getModuleContext();
-        BundleContext bundleContext = new BundleContextAdaptor(moduleContext);
-        servletContext.setAttribute(BundleContext.class.getName(), bundleContext);
 
         // Register the {@link Repository}, {@link Resolver}, {@link Provisioner} services
         Repository repository = registerRepositoryService(runtime);

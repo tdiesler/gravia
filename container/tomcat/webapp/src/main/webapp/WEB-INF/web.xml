@@ -26,27 +26,15 @@
     <listener>
         <listener-class>org.jboss.gravia.container.tomcat.webapp.GraviaTomcatActivator</listener-class>
     </listener>
-    <listener>
-        <listener-class>org.apache.felix.http.proxy.ProxyListener</listener-class>
-    </listener>
 
-    <servlet>
-        <servlet-name>proxy</servlet-name>
-        <servlet-class>org.apache.felix.http.proxy.ProxyServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
     <servlet>
         <servlet-name>gravia</servlet-name>
         <servlet-class>org.jboss.gravia.container.tomcat.webapp.GraviaServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>proxy</servlet-name>
-        <url-pattern>/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>gravia</servlet-name>
-        <url-pattern>/servlet/*</url-pattern>
+        <url-pattern>/*</url-pattern>
     </servlet-mapping>
 
 </web-app>

@@ -84,7 +84,7 @@ import org.jboss.gravia.resource.ResourceIdentity;
 public interface Module {
 
     /**
-     * A module can be in one of six states:
+     * A module can be in one of five states:
      */
     enum State {
         /**

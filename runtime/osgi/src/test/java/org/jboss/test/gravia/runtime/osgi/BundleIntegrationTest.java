@@ -64,7 +64,6 @@ import org.osgi.framework.wiring.BundleWiring;
  * @since 23-Jan-2014
  */
 @RunWith(Arquillian.class)
-//@Ignore
 public class BundleIntegrationTest {
 
     private static final String BUNDLE_A = "bundleA";

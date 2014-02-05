@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,9 +28,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
-import org.jboss.gravia.runtime.ServiceEvent;
-import org.jboss.gravia.runtime.ServiceListener;
 import org.jboss.gravia.runtime.ServiceReference;
+import org.jboss.gravia.runtime.ServiceTracker;
 import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
 import org.jboss.test.gravia.runtime.embedded.sub.a.ServiceC;
 import org.jboss.test.gravia.runtime.embedded.support.AbstractEmbeddedRuntimeTest;
@@ -49,10 +48,18 @@ public class ConfigurationModifiedTestCase extends AbstractEmbeddedRuntimeTest {
 
     static final String MODULE_C = "moduleC";
 
-    AtomicReference<CountDownLatch> latchref = new AtomicReference<CountDownLatch>();
-
     @Test
     public void testServiceAccess() throws Exception {
+
+        final AtomicReference<CountDownLatch> latchref = new AtomicReference<CountDownLatch>(new CountDownLatch(1));
+        ModuleContext syscontext = getRuntime().getModuleContext();
+        ServiceTracker<?, ?> tracker = new ServiceTracker<ServiceC, ServiceC>(syscontext, ServiceC.class, null) {
+            @Override
+            public void modifiedService(ServiceReference<ServiceC> reference, ServiceC service) {
+                latchref.get().countDown();
+            }
+        };
+        tracker.open();
 
         Module modC = getRuntime().installModule(getClass().getClassLoader(), getModuleHeadersD());
         modC.start();
@@ -63,17 +70,6 @@ public class ConfigurationModifiedTestCase extends AbstractEmbeddedRuntimeTest {
 
         ServiceC srvC = contextC.getService(srefC);
         Assert.assertEquals("ServiceC#1:null", srvC.doStuff());
-
-        latchref.set(new CountDownLatch(1));
-        ServiceListener listener = new ServiceListener() {
-            @Override
-            public void serviceChanged(ServiceEvent event) {
-                if (event.getType() == ServiceEvent.MODIFIED) {
-                    latchref.get().countDown();
-                }
-            }
-        };
-        contextC.addServiceListener(listener);
 
         ConfigurationAdmin configAdmin = getConfigurationAdmin(modC);
         Configuration config = configAdmin.getConfiguration(ServiceC.PID, null);

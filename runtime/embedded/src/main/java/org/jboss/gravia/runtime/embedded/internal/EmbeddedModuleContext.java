@@ -59,35 +59,35 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     public void addModuleListener(ModuleListener listener) {
         NotNullException.assertValue(listener, "listener");
         assertNotDestroyed();
-        getEventsHandler().addModuleListener(getModule(), listener);
+        getEventsManager().addModuleListener(getModule(), listener);
     }
 
     @Override
     public void removeModuleListener(ModuleListener listener) {
         NotNullException.assertValue(listener, "listener");
         assertNotDestroyed();
-        getEventsHandler().removeModuleListener(getModule(), listener);
+        getEventsManager().removeModuleListener(getModule(), listener);
     }
 
     @Override
     public void addServiceListener(ServiceListener listener, String filterstr) {
         NotNullException.assertValue(listener, "listener");
         assertNotDestroyed();
-        getEventsHandler().addServiceListener(getModule(), listener, filterstr);
+        getEventsManager().addServiceListener(getModule(), listener, filterstr);
     }
 
     @Override
     public void addServiceListener(ServiceListener listener) {
         NotNullException.assertValue(listener, "listener");
         assertNotDestroyed();
-        getEventsHandler().addServiceListener(getModule(), listener, null);
+        getEventsManager().addServiceListener(getModule(), listener, null);
     }
 
     @Override
     public void removeServiceListener(ServiceListener listener) {
         NotNullException.assertValue(listener, "listener");
         assertNotDestroyed();
-        getEventsHandler().removeServiceListener(getModule(), listener);
+        getEventsManager().removeServiceListener(getModule(), listener);
     }
 
     @Override
@@ -96,7 +96,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
         NotNullException.assertValue(clazz, "clazz");
         NotNullException.assertValue(service, "service");
         assertNotDestroyed();
-        return getServicesHandler().registerService(this, new String[]{ clazz.getName() }, service, properties);
+        return getServicesManager().registerService(this, new String[]{ clazz.getName() }, service, properties);
     }
 
     @Override
@@ -104,7 +104,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
         NotNullException.assertValue(className, "className");
         NotNullException.assertValue(service, "service");
         assertNotDestroyed();
-        return getServicesHandler().registerService(this, new String[]{ className }, service, properties);
+        return getServicesManager().registerService(this, new String[]{ className }, service, properties);
     }
 
     @Override
@@ -112,7 +112,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
         NotNullException.assertValue(classNames, "classNames");
         NotNullException.assertValue(service, "service");
         assertNotDestroyed();
-        return getServicesHandler().registerService(this, classNames, service, properties);
+        return getServicesManager().registerService(this, classNames, service, properties);
     }
 
     @Override
@@ -120,7 +120,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
         NotNullException.assertValue(clazz, "clazz");
         assertNotDestroyed();
-        return (ServiceReference<S>) getServicesHandler().getServiceReference(this, clazz.getName());
+        return (ServiceReference<S>) getServicesManager().getServiceReference(this, clazz.getName());
     }
 
 
@@ -128,14 +128,14 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     public ServiceReference<?> getServiceReference(String className) {
         NotNullException.assertValue(className, "className");
         assertNotDestroyed();
-        return getServicesHandler().getServiceReference(this, className);
+        return getServicesManager().getServiceReference(this, className);
     }
 
     @Override
     public ServiceReference<?>[] getServiceReferences(String className, String filter) {
         assertNotDestroyed();
 
-        List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, true);
+        List<ServiceState<?>> srefs = getServicesManager().getServiceReferences(this, className, filter, true);
         if (srefs.isEmpty())
             return null;
 
@@ -152,7 +152,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
         assertNotDestroyed();
 
         String className = clazz != null ? clazz.getName() : null;
-        List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, true);
+        List<ServiceState<?>> srefs = getServicesManager().getServiceReferences(this, className, filter, true);
 
         List<ServiceReference<S>> result = new ArrayList<ServiceReference<S>>();
         for (ServiceState<?> serviceState : srefs)
@@ -165,7 +165,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     public ServiceReference<?>[] getAllServiceReferences(String className, String filter) {
         assertNotDestroyed();
 
-        List<ServiceState<?>> srefs = getServicesHandler().getServiceReferences(this, className, filter, false);
+        List<ServiceState<?>> srefs = getServicesManager().getServiceReferences(this, className, filter, false);
         if (srefs.isEmpty())
             return null;
 
@@ -184,7 +184,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
             return false;
         } else {
             ServiceState<?> serviceState = ServiceState.assertServiceState(reference);
-            return getServicesHandler().ungetService((AbstractModule) getModule(), serviceState);
+            return getServicesManager().ungetService((AbstractModule) getModule(), serviceState);
         }
     }
 
@@ -195,15 +195,15 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
         assertNotDestroyed();
 
         ServiceState<S> serviceState = ServiceState.assertServiceState(reference);
-        return getServicesHandler().getService(this, serviceState);
+        return getServicesManager().getService(this, serviceState);
     }
 
-    private RuntimeServicesManager getServicesHandler() {
+    private RuntimeServicesManager getServicesManager() {
         AbstractRuntime runtime = getModule().adapt(AbstractRuntime.class);
         return runtime.adapt(RuntimeServicesManager.class);
     }
 
-    private RuntimeEventsManager getEventsHandler() {
+    private RuntimeEventsManager getEventsManager() {
         AbstractRuntime runtime = getModule().adapt(AbstractRuntime.class);
         return runtime.adapt(RuntimeEventsManager.class);
     }
