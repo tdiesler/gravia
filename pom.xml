@@ -60,7 +60,7 @@
         <version.apache.karaf>2.3.3</version.apache.karaf>
         <version.apache.tomcat>7.0.42</version.apache.tomcat>
         <version.javax.servlet30.api>1.0.2.Final</version.javax.servlet30.api>
-        <version.jboss.arquillian.core>1.1.1.Final</version.jboss.arquillian.core>
+        <version.jboss.arquillian.core>1.1.2.Final-wildfly-1</version.jboss.arquillian.core>
         <version.jboss.arquillian.osgi>2.1.0.CR9</version.jboss.arquillian.osgi>
         <version.jboss.arquillian.tomcat>1.0.0.CR5</version.jboss.arquillian.tomcat>
         <version.jboss.osgi.metadata>4.0.0.CR1</version.jboss.osgi.metadata>
@@ -71,6 +71,9 @@
         <version.mockito>1.8.4</version.mockito>
         <version.osgi>5.0.0</version.osgi>
         <version.slf4j>1.5.11</version.slf4j>
+        
+        <!-- [SUREFIRE-1020] Incorrect XML escape in <system-out> and <system-err> content of junit xml report -->
+        <version.surefire.plugin>2.16</version.surefire.plugin>
         
 		<surefire.system.args>-ea</surefire.system.args>
     </properties>
