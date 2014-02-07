@@ -58,8 +58,10 @@ public class CamelTransformActivator implements ModuleActivator {
         tracker = new ServiceTracker<HttpService, HttpService>(context, HttpService.class, null) {
             @Override
             public HttpService addingService(ServiceReference<HttpService> sref) {
-                httpService = super.addingService(sref);
-                registerHttpServiceServlet();
+                if (httpService == null) {
+                    httpService = super.addingService(sref);
+                    registerHttpServiceServlet(httpService);
+                }
                 return httpService;
             }
         };
@@ -77,7 +79,7 @@ public class CamelTransformActivator implements ModuleActivator {
         }
     }
 
-    private void registerHttpServiceServlet() {
+    private void registerHttpServiceServlet(HttpService httpService) {
         try {
             httpService.registerServlet("/service", new HttpServiceServlet(camelctx), null, null);
         } catch (Exception ex) {
