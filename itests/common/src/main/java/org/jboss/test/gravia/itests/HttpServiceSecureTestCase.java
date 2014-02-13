@@ -199,8 +199,9 @@ public class HttpServiceSecureTestCase {
     }
 
     private String performCall(String path, Map<String, String> headers, long timeout, TimeUnit unit) throws Exception {
+        Object port = RuntimeLocator.getRequiredRuntime().getProperty("org.osgi.service.http.port", "8080");
         String context = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "" : "/http-service-secure";
-        return HttpRequest.get("http://localhost:8080" + context + path, headers, timeout, unit);
+        return HttpRequest.get("http://localhost:" + port + context + path, headers, timeout, unit);
     }
 
     @SuppressWarnings("serial")

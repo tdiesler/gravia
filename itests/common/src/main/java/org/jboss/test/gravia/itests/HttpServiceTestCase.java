@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -170,8 +170,9 @@ public class HttpServiceTestCase {
     }
 
     private String performCall(String path, Map<String, String> headers, long timeout, TimeUnit unit) throws Exception {
+        Object port = RuntimeLocator.getRequiredRuntime().getProperty("org.osgi.service.http.port", "8080");
         String context = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "" : "/http-service";
-        return HttpRequest.get("http://localhost:8080" + context + path, headers, timeout, unit);
+        return HttpRequest.get("http://localhost:" + port + context + path, headers, timeout, unit);
     }
 
     @SuppressWarnings("serial")
