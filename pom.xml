@@ -61,7 +61,7 @@
         <version.apache.tomcat>7.0.42</version.apache.tomcat>
         <version.javax.servlet30.api>1.0.2.Final</version.javax.servlet30.api>
         <version.jboss.arquillian.core>1.1.2.Final-wildfly-1</version.jboss.arquillian.core>
-        <version.jboss.arquillian.osgi>2.1.0.CR9</version.jboss.arquillian.osgi>
+        <version.jboss.arquillian.osgi>2.1.0.CR10</version.jboss.arquillian.osgi>
         <version.jboss.arquillian.tomcat>1.0.0.CR5</version.jboss.arquillian.tomcat>
         <version.jboss.osgi.metadata>4.0.0.CR1</version.jboss.osgi.metadata>
         <version.jboss.shrinkwrap>1.1.2</version.jboss.shrinkwrap>
