@@ -68,6 +68,7 @@
         <version.jboss.shrinkwrap.resolver>2.0.0</version.jboss.shrinkwrap.resolver>
         <version.jboss.wildfly>8.0.0.CR1</version.jboss.wildfly>
         <version.junit>4.11</version.junit>
+        <version.log4j>1.2.16</version.log4j>
         <version.mockito>1.8.4</version.mockito>
         <version.osgi>5.0.0</version.osgi>
         <version.slf4j>1.5.11</version.slf4j>
@@ -247,6 +248,13 @@
                 <version>${version.apache.karaf}</version>
             </dependency>
             
+            <!-- Log4j -->
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${version.log4j}</version>
+            </dependency>
+            
             <!-- OSGi -->
             <dependency>
                 <groupId>org.osgi</groupId>
@@ -257,6 +265,28 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.enterprise</artifactId>
                 <version>${version.osgi}</version>
+            </dependency>
+            
+            <!-- SLF4J -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${version.slf4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-jdk14</artifactId>
+                <version>${version.slf4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${version.slf4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${version.slf4j}</version>
             </dependency>
             
             <!-- Tomcat -->
@@ -304,21 +334,6 @@
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>${version.mockito}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${version.slf4j}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>${version.slf4j}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>${version.slf4j}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

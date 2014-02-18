@@ -26,6 +26,7 @@
     </properties>
 
     <resources>
+        <resource-root path="gravia-container-common-@project.version@.jar"/>
         <resource-root path="gravia-container-wildfly-extension-@project.version@.jar"/>
     </resources>
 
@@ -43,6 +44,7 @@
         <module name="org.jboss.shrinkwrap.core"/>
         <module name="org.jboss.staxmapper"/>
         <module name="org.jboss.vfs"/>
+        <module name="org.osgi.enterprise"/>
         <module name="org.slf4j"/>
         <module name="org.wildfly.security.manager"/>
     </dependencies>

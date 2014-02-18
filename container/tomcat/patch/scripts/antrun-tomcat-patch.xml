@@ -60,7 +60,8 @@
 				<include name="org.osgi.core-*.jar" />
 				<include name="org.osgi.enterprise-*.jar" />
 				<include name="slf4j-api-*.jar" />
-				<include name="slf4j-simple-*.jar" />
+				<include name="slf4j-log4j12-*.jar" />
+			    <include name="log4j-*.jar" />
 	        </fileset>
 		</copy>
 		<copy file="${deploy.artifacts.lib}/gravia-container-tomcat-webapp-${project.version}.war" 

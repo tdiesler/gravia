@@ -98,7 +98,7 @@ public class ServiceComponentTest  {
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Module modA = runtime.getModule(getClass().getClassLoader());
 
-        final ModuleContext ctxA = modA.getModuleContext();
+        ModuleContext ctxA = modA.getModuleContext();
         ServiceReference<ServiceA> srefA = ctxA.getServiceReference(ServiceA.class);
         Assert.assertNotNull("ServiceReference not null", srefA);
 

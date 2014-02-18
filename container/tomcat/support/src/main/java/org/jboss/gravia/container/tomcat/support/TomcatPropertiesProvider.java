@@ -39,7 +39,8 @@ import org.jboss.gravia.utils.NotNullException;
 public class TomcatPropertiesProvider implements PropertiesProvider {
 
     private final static File catalinaHome = new File(SecurityActions.getSystemProperty("catalina.home", null));
-    private final static File catalinaWork = new File(catalinaHome.getPath() + File.separator + "work");
+    private final static File catalinaConf = new File(catalinaHome, "conf");
+    private final static File catalinaWork = new File(catalinaHome, "work");
 
     private final ServletContext servletContext;
     private PropertiesProvider delegate;
@@ -85,15 +86,21 @@ public class TomcatPropertiesProvider implements PropertiesProvider {
 
         String storageDir = servletContext.getInitParameter(Constants.RUNTIME_STORAGE);
         if (storageDir == null) {
-            storageDir = new File(catalinaWork.getPath() + File.separator + Constants.RUNTIME_STORAGE_DEFAULT).getAbsolutePath();
+            storageDir = new File(catalinaWork, Constants.RUNTIME_STORAGE_DEFAULT).getAbsolutePath();
         }
         properties.setProperty(Constants.RUNTIME_STORAGE, storageDir);
 
-        storageDir = servletContext.getInitParameter(Constants.PROPERTY_REPOSITORY_STORAGE_DIR);
-        if (storageDir == null) {
-            storageDir = new File(catalinaWork.getPath() + File.separator + "repository").getAbsolutePath();
+        String repositoryDir = servletContext.getInitParameter(Constants.PROPERTY_REPOSITORY_STORAGE_DIR);
+        if (repositoryDir == null) {
+            repositoryDir = new File(catalinaWork, "repository").getAbsolutePath();
         }
-        properties.setProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, storageDir);
+        properties.setProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, repositoryDir);
+
+        String configsDir = servletContext.getInitParameter(Constants.PROPERTY_CONFIGURATIONS_DIR);
+        if (configsDir == null) {
+            configsDir = new File(catalinaConf, "gravia" + File.separator + "configs").getAbsolutePath();
+        }
+        properties.setProperty(Constants.PROPERTY_CONFIGURATIONS_DIR, configsDir);
 
         return properties;
     }

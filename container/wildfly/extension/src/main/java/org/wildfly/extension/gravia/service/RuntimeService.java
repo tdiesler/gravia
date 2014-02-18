@@ -17,8 +17,6 @@
  * limitations under the License.
  * #L%
  */
-
-
 package org.wildfly.extension.gravia.service;
 
 import java.io.File;
@@ -27,6 +25,8 @@ import java.util.Properties;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.server.ServerEnvironment;
 import org.jboss.as.server.ServerEnvironmentService;
+import org.jboss.gravia.Constants;
+import org.jboss.gravia.container.common.ActivationSupport;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.RuntimeType;
@@ -60,9 +60,13 @@ public class RuntimeService extends AbstractService<Runtime> {
 
     @Override
     public void start(StartContext startContext) throws StartException {
-        PropertiesProvider propertiesProvider = new DefaultPropertiesProvider(getRuntimeProperties(), true);
-        Runtime runtime = RuntimeLocator.createRuntime(new WildFlyRuntimeFactory(), propertiesProvider);
+        PropertiesProvider propsProvider = new DefaultPropertiesProvider(getRuntimeProperties(), true);
+        Runtime runtime = RuntimeLocator.createRuntime(new WildFlyRuntimeFactory(), propsProvider);
         runtime.init();
+
+        // Initialize ConfigurationAdmin content
+        Object configsDir = propsProvider.getProperty(Constants.PROPERTY_CONFIGURATIONS_DIR);
+        ActivationSupport.initConfigurationAdmin(new File((String) configsDir));
     }
 
     @Override
@@ -78,12 +82,14 @@ public class RuntimeService extends AbstractService<Runtime> {
 
         Properties properties = new Properties();
         ServerEnvironment serverEnv = getServerEnvironment();
-        File storageDir = new File(serverEnv.getServerDataDir().getPath() + File.separator + org.jboss.gravia.Constants.RUNTIME_STORAGE_DEFAULT);
+        File storageDir = new File(serverEnv.getServerDataDir(), Constants.RUNTIME_STORAGE_DEFAULT);
+        File configsDir = new File(serverEnv.getServerConfigurationDir(), "gravia" + File.separator + "configs");
 
         // Gravia integration properties
-        properties.setProperty(org.jboss.gravia.Constants.RUNTIME_STORAGE_CLEAN, org.jboss.gravia.Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT);
-        properties.setProperty(org.jboss.gravia.Constants.RUNTIME_STORAGE, storageDir.getAbsolutePath());
-        properties.setProperty(org.jboss.gravia.Constants.RUNTIME_TYPE, RuntimeType.WILDFLY.toString());
+        properties.setProperty(Constants.RUNTIME_STORAGE_CLEAN, Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT);
+        properties.setProperty(Constants.RUNTIME_STORAGE, storageDir.getAbsolutePath());
+        properties.setProperty(Constants.PROPERTY_CONFIGURATIONS_DIR, configsDir.getAbsolutePath());
+        properties.setProperty(Constants.RUNTIME_TYPE, RuntimeType.WILDFLY.toString());
 
         return properties;
     }

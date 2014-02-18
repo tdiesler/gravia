@@ -46,7 +46,8 @@
                 <include>*:org.osgi.core:jar</include>
                 <include>*:org.osgi.enterprise:jar</include>
                 <include>*:slf4j-api:jar</include>
-                <include>*:slf4j-simple:jar</include>
+                <include>*:slf4j-log4j12:jar</include>
+                <include>*:log4j:jar</include>
             </includes>
             <scope>provided</scope>
             <unpack>false</unpack>

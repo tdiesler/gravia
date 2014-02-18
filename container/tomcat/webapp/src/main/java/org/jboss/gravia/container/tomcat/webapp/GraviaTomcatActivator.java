@@ -19,11 +19,15 @@
  */
 package org.jboss.gravia.container.tomcat.webapp;
 
+import java.io.File;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import org.jboss.gravia.Constants;
+import org.jboss.gravia.container.common.ActivationSupport;
 import org.jboss.gravia.container.tomcat.support.TomcatPropertiesProvider;
 import org.jboss.gravia.container.tomcat.support.TomcatResourceInstaller;
 import org.jboss.gravia.container.tomcat.support.TomcatRuntimeFactory;
@@ -61,9 +65,13 @@ public class GraviaTomcatActivator implements ServletContextListener {
 
         // Create the runtime
         ServletContext servletContext = event.getServletContext();
-        PropertiesProvider propsProvider = new TomcatPropertiesProvider(servletContext);
+        TomcatPropertiesProvider propsProvider = new TomcatPropertiesProvider(servletContext);
         Runtime runtime = RuntimeLocator.createRuntime(new TomcatRuntimeFactory(servletContext), propsProvider);
         runtime.init();
+
+        // Initialize ConfigurationAdmin content
+        Object configsDir = propsProvider.getProperty(Constants.PROPERTY_CONFIGURATIONS_DIR);
+        ActivationSupport.initConfigurationAdmin(new File((String) configsDir));
 
         // Register the {@link Repository}, {@link Resolver}, {@link Provisioner} services
         Repository repository = registerRepositoryService(runtime);
@@ -95,7 +103,7 @@ public class GraviaTomcatActivator implements ServletContextListener {
         PropertiesProvider propertyProvider = new RuntimePropertiesProvider(runtime);
         Repository repository = new DefaultRepository(propertyProvider);
         ModuleContext syscontext = runtime.getModuleContext();
-        repositoryRegistration =  RepositoryRuntimeRegistration.registerRepository(syscontext, repository);
+        repositoryRegistration = RepositoryRuntimeRegistration.registerRepository(syscontext, repository);
         return repository;
     }
 

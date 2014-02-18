@@ -153,7 +153,7 @@
                         <dependency>org.jboss.gravia:gravia-itests-common</dependency>
                     </dependenciesToScan>
 			        <systemPropertyVariables>
-                        <log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration>
+                        <!-- log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration -->
                         <target.container>tomcat</target.container>
 			        </systemPropertyVariables>
 			    </configuration>
