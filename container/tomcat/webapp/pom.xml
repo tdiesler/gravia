@@ -45,17 +45,11 @@
         <dependency>
             <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-runtime-embedded</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.apache.felix.http.api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.apache.felix.http.base</artifactId>
-                </exclusion>
-            </exclusions>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.bridge</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>

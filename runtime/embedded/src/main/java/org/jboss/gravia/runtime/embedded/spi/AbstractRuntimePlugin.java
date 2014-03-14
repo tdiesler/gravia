@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
+import org.jboss.gravia.runtime.spi.RuntimeLogger;
 import org.jboss.gravia.runtime.spi.RuntimePlugin;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.Constants;
@@ -50,8 +51,10 @@ public abstract class AbstractRuntimePlugin implements RuntimePlugin, ModuleActi
     public Module installPluginModule(Runtime runtime, ClassLoader classLoader) throws ModuleException {
         String resourceName = getBundleActivator().replace('.', '/') + ".class";
         URL resurl = classLoader.getResource(resourceName);
-        if (resurl == null)
-            throw new ModuleException("Cannot load BundleActivator resource '" + resourceName + "' from: " + classLoader);
+        if (resurl == null) {
+            RuntimeLogger.LOGGER.warn("Cannot load BundleActivator resource '{}'", resourceName);
+            return null;
+        }
 
         String urlpath = resurl.toExternalForm();
         urlpath = urlpath.substring(0, urlpath.indexOf(resourceName));

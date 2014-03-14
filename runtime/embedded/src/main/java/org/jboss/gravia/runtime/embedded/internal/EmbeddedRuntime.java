@@ -90,7 +90,9 @@ public class EmbeddedRuntime extends AbstractRuntime {
             RuntimePlugin plugin = iterator.next();
             try {
                 Module module = plugin.installPluginModule(this, classLoader);
-                pluginModules.add(module);
+                if (module != null) {
+                    pluginModules.add(module);
+                }
             } catch (ModuleException ex) {
                 LOGGER.error("Cannot load plugin: " + plugin.getClass().getName(), ex);
             }

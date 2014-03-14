@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,14 +39,10 @@ public class DictionaryResourceBuilder extends DefaultResourceBuilder {
 
     public DictionaryResourceBuilder load(Dictionary<String, String> headers) {
         boolean identityFound = false;
-        boolean headerFound = false;
         Enumeration<String> keys = headers.keys();
         while (keys.hasMoreElements()) {
             String name = keys.nextElement();
             String value = headers.get(name);
-            if (name.startsWith("Gravia-") || name.equals(Constants.MODULE_ACTIVATOR)) {
-                headerFound = true;
-            }
             if (Constants.GRAVIA_IDENTITY_CAPABILITY.equals(name)) {
                 Map<String, Object> atts = new LinkedHashMap<String, Object>();
                 Map<String, String> dirs = new LinkedHashMap<String, String>();
@@ -78,7 +74,7 @@ public class DictionaryResourceBuilder extends DefaultResourceBuilder {
         }
 
         // Derive the identity from OSGi headers
-        if (headerFound && !identityFound) {
+        if (!identityFound) {
             String symbolicName = null;
             Version version = null;
             keys = headers.keys();
