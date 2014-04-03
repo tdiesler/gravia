@@ -35,14 +35,14 @@
     <artifactId>gravia</artifactId>
     <packaging>pom</packaging>
 
-    <version>1.1.0.Beta12</version>
+    <version>1.1.0.Beta13-SNAPSHOT</version>
 
     <!-- Source Control -->
     <scm>
         <connection>scm:git:git://github.com/tdiesler/gravia.git</connection>
         <developerConnection>scm:git:git@github.com:tdiesler/gravia.git</developerConnection>
         <url>http://github.com/tdiesler/gravia</url>
-      <tag>1.1.0.Beta12</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <!-- Properties -->
