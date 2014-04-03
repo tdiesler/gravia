@@ -171,11 +171,13 @@ public final class RuntimeEventsManager {
 
     Collection<ListenerInfo> getServiceListenerInfos(final Module moduleState) {
         Collection<ListenerInfo> listeners = new ArrayList<ListenerInfo>();
-        for (Entry<Module, List<ServiceListenerRegistration>> entry : serviceListeners.entrySet()) {
-            if (moduleState == null || moduleState.equals(entry.getKey())) {
-                for (ServiceListenerRegistration aux : entry.getValue()) {
-                    ListenerInfo info = aux.getListenerInfo();
-                    listeners.add(info);
+        synchronized (serviceListeners) {
+            for (Entry<Module, List<ServiceListenerRegistration>> entry : serviceListeners.entrySet()) {
+                if (moduleState == null || moduleState.equals(entry.getKey())) {
+                    for (ServiceListenerRegistration aux : entry.getValue()) {
+                        ListenerInfo info = aux.getListenerInfo();
+                        listeners.add(info);
+                    }
                 }
             }
         }
@@ -185,12 +187,14 @@ public final class RuntimeEventsManager {
 
     public void removeServiceListener(final Module moduleState, final ServiceListener listener) {
         assert listener != null : "Null listener";
-        List<ServiceListenerRegistration> listeners = serviceListeners.get(moduleState);
-        if (listeners != null) {
-            ServiceListenerRegistration slreg = new ServiceListenerRegistration(moduleState, listener, NoFilter.INSTANCE);
-            int index = listeners.indexOf(slreg);
-            if (index >= 0) {
-                slreg = listeners.remove(index);
+        synchronized (serviceListeners) {
+            List<ServiceListenerRegistration> listeners = serviceListeners.get(moduleState);
+            if (listeners != null) {
+                ServiceListenerRegistration slreg = new ServiceListenerRegistration(moduleState, listener, NoFilter.INSTANCE);
+                int index = listeners.indexOf(slreg);
+                if (index >= 0) {
+                    slreg = listeners.remove(index);
+                }
             }
         }
     }
@@ -290,16 +294,18 @@ public final class RuntimeEventsManager {
 
         // Get a snapshot of the current listeners
         Map<ModuleContext, Collection<ListenerInfo>> listeners = new HashMap<ModuleContext, Collection<ListenerInfo>>();
-        for (Entry<Module, List<ServiceListenerRegistration>> entry : serviceListeners.entrySet()) {
-            for (ServiceListenerRegistration listener : entry.getValue()) {
-                ModuleContext context = listener.getModuleContext();
-                if (context != null) {
-                    Collection<ListenerInfo> infos = listeners.get(context);
-                    if (infos == null) {
-                        infos = new ArrayList<ListenerInfo>();
-                        listeners.put(context, infos);
+        synchronized (serviceListeners) {
+            for (Entry<Module, List<ServiceListenerRegistration>> entry : serviceListeners.entrySet()) {
+                for (ServiceListenerRegistration listener : entry.getValue()) {
+                    ModuleContext context = listener.getModuleContext();
+                    if (context != null) {
+                        Collection<ListenerInfo> infos = listeners.get(context);
+                        if (infos == null) {
+                            infos = new ArrayList<ListenerInfo>();
+                            listeners.put(context, infos);
+                        }
+                        infos.add(listener.getListenerInfo());
                     }
-                    infos.add(listener.getListenerInfo());
                 }
             }
         }
