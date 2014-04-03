@@ -71,7 +71,7 @@
         <version.log4j>1.2.16</version.log4j>
         <version.mockito>1.8.4</version.mockito>
         <version.osgi>5.0.0</version.osgi>
-        <version.slf4j>1.5.11</version.slf4j>
+        <version.slf4j>1.6.6</version.slf4j>
         
         <!-- [SUREFIRE-1020] Incorrect XML escape in <system-out> and <system-err> content of junit xml report -->
         <version.surefire.plugin>2.16</version.surefire.plugin>
