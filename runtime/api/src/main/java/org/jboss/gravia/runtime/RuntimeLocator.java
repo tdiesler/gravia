@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,8 @@
  * #L%
  */
 package org.jboss.gravia.runtime;
+
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 
 import java.util.Iterator;
 import java.util.ServiceLoader;
@@ -56,8 +58,9 @@ public final class RuntimeLocator {
      */
     public static Runtime getRequiredRuntime() {
         Runtime runtime = runtimeReference.get();
-        if (runtime == null)
-            throw new IllegalStateException("Runtime not available");
+        if (runtime == null) {
+            throw new IllegalStateException("Runtime not available from: " + RuntimeLocator.class.getClassLoader());
+        }
         return runtime;
     }
 
@@ -79,6 +82,7 @@ public final class RuntimeLocator {
             runtime = factory.createRuntime(props);
             runtimeReference.set(runtime);
 
+            LOGGER.info("Runtime created: {}", runtime);
             return runtime;
         }
     }
@@ -118,6 +122,9 @@ public final class RuntimeLocator {
      * Release the default runtime instance.
      */
     public static void releaseRuntime() {
-        runtimeReference.set(null);
+        Runtime runtime = runtimeReference.getAndSet(null);
+        if (runtime != null) {
+            LOGGER.info("Runtime released: {}", runtime);
+        }
     }
 }
