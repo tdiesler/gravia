@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ package org.jboss.gravia.runtime;
 
 import java.util.Dictionary;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.Resource;
@@ -175,4 +176,31 @@ public interface Runtime {
      * </ol>
      */
     Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) throws ModuleException;
+
+    /**
+     * Shutdown the runtime.
+     *
+     * Asynchronously
+     * <ul>
+     * <li>Uninstall all modules
+     * <li>Unregister system services
+     * </ul>
+     */
+    Runtime shutdown();
+
+    /**
+     * True, if runtime shutdown has been initiated
+     */
+    boolean shutdownInProgress();
+
+    /**
+     * True, if runtime shutdown has been completed
+     */
+    boolean shutdownComplete();
+
+    /**
+     * Await shutdown complete
+     * @return true, if shutdown completed in time
+     */
+    boolean awaitShutdown(long timeout, TimeUnit unit) throws InterruptedException;
 }

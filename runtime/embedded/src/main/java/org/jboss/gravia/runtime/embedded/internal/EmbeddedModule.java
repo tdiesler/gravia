@@ -60,7 +60,7 @@ final class EmbeddedModule extends AbstractModule {
     private final ReentrantLock startStopLock = new ReentrantLock();
     private final long moduleId;
 
-    EmbeddedModule(EmbeddedRuntime runtime, ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
+    EmbeddedModule(AbstractRuntime runtime, ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
         super(runtime, classLoader, resource, headers);
         this.moduleId = moduleIdGenerator.incrementAndGet();
         this.stateRef.set(State.UNINSTALLED);

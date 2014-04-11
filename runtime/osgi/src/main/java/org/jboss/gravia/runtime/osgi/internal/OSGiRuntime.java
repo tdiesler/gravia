@@ -170,6 +170,11 @@ public final class OSGiRuntime extends AbstractRuntime {
         return module;
     }
 
+    @Override
+    public Runtime shutdown() {
+        throw new UnsupportedOperationException();
+    }
+
     private class OSGiModuleEntriesProvider implements ModuleEntriesProvider {
 
         private final Module module;

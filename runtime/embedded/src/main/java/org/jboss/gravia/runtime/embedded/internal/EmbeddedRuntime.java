@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,6 +37,7 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
+import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
@@ -55,6 +56,7 @@ public class EmbeddedRuntime extends AbstractRuntime {
 
     private final RuntimeServicesManager serviceManager;
     private final RuntimeStorageHandler storageHandler;
+    private final List<ServiceRegistration<?>> systemServices = new ArrayList<ServiceRegistration<?>>();
 
     public EmbeddedRuntime(PropertiesProvider propertiesProvider, Attachable context) {
         super(propertiesProvider);
@@ -72,14 +74,15 @@ public class EmbeddedRuntime extends AbstractRuntime {
 
     @Override
     public void init() {
+        assertNoShutdown();
 
         // Register the LogService
         ModuleContext syscontext = adapt(ModuleContext.class);
-        syscontext.registerService(LogService.class.getName(), new EmbeddedLogServiceFactory(), null);
+        systemServices.add(syscontext.registerService(LogService.class.getName(), new EmbeddedLogServiceFactory(), null));
 
         // Register the MBeanServer service
         MBeanServer mbeanServer = findOrCreateMBeanServer();
-        syscontext.registerService(MBeanServer.class, mbeanServer, null);
+        systemServices.add(syscontext.registerService(MBeanServer.class, mbeanServer, null));
 
         // Install the plugin modules
         List<Module> pluginModules = new ArrayList<Module>();
@@ -110,6 +113,8 @@ public class EmbeddedRuntime extends AbstractRuntime {
 
     @Override
     protected AbstractModule createModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) {
+        assertNoShutdown();
+
         AbstractModule module;
         if (resource != null && resource.getIdentity().equals(getSystemIdentity())) {
             module = new SystemModule(this, classLoader, resource);
@@ -143,23 +148,27 @@ public class EmbeddedRuntime extends AbstractRuntime {
         super.uninstallModule(module);
     }
 
+    @Override
+    protected void doShutdown() {
+        super.doShutdown();
+        for (ServiceRegistration<?> sreg : systemServices) {
+            sreg.unregister();
+        }
+    }
+
     private MBeanServer findOrCreateMBeanServer() {
-        MBeanServer mbeanServer = null;
 
         ArrayList<MBeanServer> serverArr = MBeanServerFactory.findMBeanServer(null);
-        if (serverArr.size() > 1)
-            LOGGER.warn("Multiple MBeanServer instances: {}", serverArr);
-
-        if (serverArr.size() > 0) {
-            mbeanServer = serverArr.get(0);
+        if (serverArr.size() == 1) {
+            MBeanServer mbeanServer = serverArr.get(0);
             LOGGER.debug("Found MBeanServer: {}", mbeanServer.getDefaultDomain());
+            return mbeanServer;
+        } else {
+            if (serverArr.size() > 1) {
+                LOGGER.info("Multiple MBeanServer instances: {}", serverArr);
+            }
+            LOGGER.debug("Using the platform MBeanServer");
+            return ManagementFactory.getPlatformMBeanServer();
         }
-
-        if (mbeanServer == null) {
-            LOGGER.debug("No MBeanServer, create one ...");
-            mbeanServer = ManagementFactory.getPlatformMBeanServer();
-        }
-
-        return mbeanServer;
     }
 }

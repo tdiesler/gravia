@@ -27,6 +27,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.Resource;
@@ -52,6 +55,8 @@ public abstract class AbstractRuntime implements Runtime {
 
     private final ResourceIdentity systemIdentity = ResourceIdentity.create("gravia-system", Version.emptyVersion);
     private final Map<Long, Module> modules = new ConcurrentHashMap<Long, Module>();
+    private final CountDownLatch shutdownComplete = new CountDownLatch(1);
+    private final AtomicBoolean shutdown = new AtomicBoolean();
     private final RuntimeEventsManager runtimeEvents;
     private final PropertiesProvider properties;
 
@@ -152,16 +157,19 @@ public abstract class AbstractRuntime implements Runtime {
 
     @Override
     public final Module installModule(ClassLoader classLoader, Dictionary<String, String> headers) throws ModuleException {
+        assertNoShutdown();
         return installModule(classLoader, null, headers, null);
     }
 
     @Override
     public final Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) throws ModuleException {
+        assertNoShutdown();
         return installModule(classLoader, resource, headers, null);
     }
 
     @Override
     public final Module installModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers, Attachable context) throws ModuleException {
+        assertNoShutdown();
 
         context = context != null ? context : new AttachableSupport();
         AbstractModule module = createModule(classLoader, resource, headers, context);
@@ -191,5 +199,54 @@ public abstract class AbstractRuntime implements Runtime {
     protected void uninstallModule(Module module) {
         modules.remove(module.getModuleId());
         LOGGER.info("Uninstalled: {}", module);
+    }
+
+    @Override
+    public Runtime shutdown() {
+        if (shutdown.compareAndSet(false, true)) {
+            new ShutdownThread().start();
+        }
+        return this;
+    }
+
+    @Override
+    public boolean shutdownInProgress() {
+        return shutdown.get();
+    }
+
+    @Override
+    public boolean awaitShutdown(long timeout, TimeUnit unit) throws InterruptedException {
+        return shutdownComplete.await(timeout, unit);
+    }
+
+    @Override
+    public boolean shutdownComplete() {
+        return shutdownComplete.getCount() == 0;
+    }
+
+    protected void assertNoShutdown() {
+        if (shutdown.get()) {
+            throw new IllegalStateException(shutdownComplete() ? "Runtime has been shut down" : "Runtime is shuting down");
+        }
+    }
+
+    protected void doShutdown() {
+        for (Module module : getModules()) {
+            if (!module.getIdentity().equals(systemIdentity)) {
+                module.uninstall();
+            }
+        }
+    }
+
+    class ShutdownThread extends Thread {
+
+        @Override
+        public void run() {
+            try {
+                doShutdown();
+            } finally {
+                shutdownComplete.countDown();
+            }
+        }
     }
 }
