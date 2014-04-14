@@ -21,7 +21,6 @@ package org.jboss.gravia.utils;
 
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 /**
@@ -33,13 +32,7 @@ import javax.management.ObjectName;
 public class MBeanProxy {
 
     public static <T> T get(MBeanServerConnection server, String name, Class<T> interf) {
-        ObjectName oname;
-        try {
-            oname = ObjectName.getInstance(name);
-        } catch (MalformedObjectNameException ex) {
-            throw new IllegalArgumentException("Invalid object name: " + name);
-        }
-        return MBeanProxy.get(server, oname, interf);
+        return MBeanProxy.get(server, ObjectNameFactory.create(name), interf);
     }
 
     public static <T> T get(MBeanServerConnection server, ObjectName name, Class<T> interf) {

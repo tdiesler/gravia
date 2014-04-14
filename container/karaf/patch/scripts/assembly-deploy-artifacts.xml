@@ -36,16 +36,16 @@
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>*:arquillian-osgi-bundle:jar</include>
-                <include>*:org.apache.felix.eventadmin:jar</include>
-                <include>*:org.apache.felix.http.bundle:jar</include>
-                <include>*:org.apache.felix.metatype:jar</include>
-                <include>*:org.apache.felix.scr:jar</include>
                 <include>*:gravia-provision:jar</include>
                 <include>*:gravia-repository:jar</include>
                 <include>*:gravia-resolver:jar</include>
                 <include>*:gravia-resource:jar</include>
                 <include>*:gravia-runtime-api:jar</include>
                 <include>*:gravia-runtime-osgi:jar</include>
+                <include>*:org.apache.felix.eventadmin:jar</include>
+                <include>*:org.apache.felix.http.bundle:jar</include>
+                <include>*:org.apache.felix.metatype:jar</include>
+                <include>*:org.apache.felix.scr:jar</include>
             </includes>
             <scope>provided</scope>
             <unpack>false</unpack>

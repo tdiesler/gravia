@@ -28,9 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
-import javax.management.MBeanServerFactory;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -129,28 +127,17 @@ public class ContainerSetupObserver {
         String jmxPassword = props.get(PROPERTY_JMX_PASSWORD);
 
         MBeanServerConnection mbeanServer = null;
-        if (jmxServiceURL == null) {
-            List<MBeanServer> serverArr = MBeanServerFactory.findMBeanServer(null);
-            if (serverArr.size() > 1)
-                LOGGER.warn("Multiple MBeanServer instances: {}",  serverArr);
-
-            if (serverArr.size() > 0) {
-                mbeanServer = serverArr.get(0);
-                LOGGER.debug("Found MBeanServer: {}", mbeanServer.getDefaultDomain());
+        try {
+            JMXServiceURL serviceURL = new JMXServiceURL(jmxServiceURL);
+            Map<String, Object> env = new HashMap<String, Object>();
+            if (jmxUsername != null && jmxPassword != null) {
+                String[] credentials = new String[] { jmxUsername, jmxPassword };
+                env.put(JMXConnector.CREDENTIALS, credentials);
             }
-        } else {
-            try {
-                JMXServiceURL serviceURL = new JMXServiceURL(jmxServiceURL);
-                Map<String, Object> env = new HashMap<String, Object>();
-                if (jmxUsername != null && jmxPassword != null) {
-                    String[] credentials = new String[] { jmxUsername, jmxPassword };
-                    env.put(JMXConnector.CREDENTIALS, credentials);
-                }
-                JMXConnector connector = JMXConnectorFactory.connect(serviceURL, env);
-                mbeanServer = connector.getMBeanServerConnection();
-            } catch (Exception ex) {
-                LOGGER.warn("Cannot create JMXServiceURL from: {}", jmxServiceURL);
-            }
+            JMXConnector connector = JMXConnectorFactory.connect(serviceURL, env);
+            mbeanServer = connector.getMBeanServerConnection();
+        } catch (Exception ex) {
+            LOGGER.warn("Cannot create JMXServiceURL from: {}", jmxServiceURL);
         }
         return mbeanServer;
     }
