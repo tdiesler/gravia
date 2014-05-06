@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,7 +66,6 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
     private final ServiceReference<S> reference;
     private final Set<AbstractModule> usingModules = new HashSet<AbstractModule>();
     private final Map<ResourceIdentity, ServiceFactoryHolder<S>> factoryValues;
-    private final ThreadLocal<Module> factoryRecursion = new ThreadLocal<Module>();
     private final ServiceRegistration<S> registration;
 
     // The properties
@@ -134,16 +133,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         try {
             Thread.currentThread().setContextClassLoader(null);
 
-            // If this method is called recursively for the same module
-            // then it must return null to break the recursion.
-            if (factoryRecursion.get() == module) {
-                LOGGER.error("ServiceFactory recusion for " + module + " in: " + this, new RuntimeException());
-                return null;
-            }
-
             try {
-                factoryRecursion.set(module);
-
                 ServiceFactoryHolder<S> factoryHolder = getFactoryHolder(module);
                 if (factoryHolder == null) {
                     ServiceFactory factory = (ServiceFactory) valueProvider.getValue();
@@ -168,8 +158,6 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
                 String message = "Cannot get factory value from: " + this;
                 ServiceException ex = new ServiceException(message, ServiceException.FACTORY_EXCEPTION, th);
                 LOGGER.error(message, ex);
-            } finally {
-                factoryRecursion.remove();
             }
         } finally {
             Thread.currentThread().setContextClassLoader(tccl);
@@ -428,9 +416,10 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
     class ServiceFactoryHolder<T> {
 
+        ThreadLocal<Module> factoryRecursion = new ThreadLocal<Module>();
         ServiceFactory factory;
-        Module module;
         AtomicInteger useCount;
+        Module module;
         T value;
 
         ServiceFactoryHolder(Module module, ServiceFactory factory) {
@@ -440,39 +429,46 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
         }
 
         @SuppressWarnings("unchecked")
-        T getService() {
-            // Multiple calls to getService() return the same value
-            if (useCount.get() == 0) {
-                // The Framework must not allow this method to be concurrently called for the same module
-                synchronized (module) {
-                    T retValue = (T) factory.getService(module, getRegistration());
-                    if (retValue == null)
-                        return null;
+        synchronized T getService() {
 
-                    // The Framework will check if the returned service object is an instance of all the
-                    // classes named when the service was registered. If not, then null is returned to the module.
-                    if (checkValidClassNames(ownerModule, (String[]) getProperty(org.jboss.gravia.Constants.OBJECTCLASS), retValue) == false)
-                        return null;
-
-                    value = retValue;
-                }
+            // If this method is called recursively for the same module
+            // then it must return null to break the recursion.
+            if (factoryRecursion.get() == module) {
+                LOGGER.error("ServiceFactory recusion for " + module + " in: " + this, new RuntimeException());
+                return null;
+            } else {
+                factoryRecursion.set(module);
             }
 
-            useCount.incrementAndGet();
+            try {
+                // Multiple calls to getService() return the same value
+                if (useCount.getAndIncrement() > 0) {
+                    return value;
+                }
+
+                // The Framework will check if the returned service object is an instance of all the
+                // classes named when the service was registered. If not, then null is returned to the module.
+                T retValue = (T) factory.getService(module, getRegistration());
+                if (retValue != null && checkValidClassNames(ownerModule, (String[]) getProperty(org.jboss.gravia.Constants.OBJECTCLASS), retValue)) {
+                    value = retValue;
+                }
+            } finally {
+                factoryRecursion.set(null);
+            }
+
             return value;
         }
 
         @SuppressWarnings("unchecked")
-        void ungetService() {
+        synchronized void ungetService() {
+
             if (useCount.get() == 0)
                 return;
 
             // Call unget on the factory when done
             if (useCount.decrementAndGet() == 0) {
-                synchronized (module) {
-                    factory.ungetService(module, getRegistration(), value);
-                    value = null;
-                }
+                factory.ungetService(module, getRegistration(), value);
+                value = null;
             }
         }
     }
