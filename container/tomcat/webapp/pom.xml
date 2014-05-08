@@ -106,6 +106,58 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/components</outputDirectory>
+                            <overWrite>true</overWrite>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.jboss.gravia</groupId>
+                                    <artifactId>gravia-provision</artifactId>
+                                    <version>${project.version}</version>
+                                    <includes>OSGI-INF/org.jboss.gravia.**</includes>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.jboss.gravia</groupId>
+                                    <artifactId>gravia-resolver</artifactId>
+                                    <version>${project.version}</version>
+                                    <includes>OSGI-INF/org.jboss.gravia.**</includes>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.jboss.gravia</groupId>
+                                    <artifactId>gravia-repository</artifactId>
+                                    <version>${project.version}</version>
+                                    <includes>OSGI-INF/org.jboss.gravia.**</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Gravia-Identity>${project.artifactId};version=${project.version}</Gravia-Identity>
+                            <Service-Component>OSGI-INF/org.jboss.gravia.provision.internal.ProvisionerService.xml,OSGI-INF/org.jboss.gravia.repository.internal.RepositoryMBeanService.xml,OSGI-INF/org.jboss.gravia.repository.internal.RepositoryService.xml,OSGI-INF/org.jboss.gravia.resolver.internal.ResolverService.xml</Service-Component>
+                        </manifestEntries>
+                    </archive>
+                    <webResources>
+                        <resource>
+                            <directory>${project.build.directory}/components</directory>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

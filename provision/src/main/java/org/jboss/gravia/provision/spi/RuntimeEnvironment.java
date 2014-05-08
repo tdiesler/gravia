@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -60,6 +60,7 @@ import org.jboss.gravia.utils.NotNullException;
 public class RuntimeEnvironment extends AbstractEnvironment {
 
     private final ResourceStore systemStore;
+    private final Runtime runtime;
 
     public RuntimeEnvironment(Runtime runtime) {
         this(runtime, new DefaultResourceStore("SystemResources"), new DefaultMatchPolicy());
@@ -71,6 +72,7 @@ public class RuntimeEnvironment extends AbstractEnvironment {
         NotNullException.assertValue(systemStore, "systemStore");
         NotNullException.assertValue(matchPolicy, "matchPolicy");
         this.systemStore = systemStore;
+        this.runtime = runtime;
 
         // Add the initial set of modules
         for (Module module : runtime.getModules()) {
@@ -97,6 +99,10 @@ public class RuntimeEnvironment extends AbstractEnvironment {
         if (!(env instanceof RuntimeEnvironment))
             throw new IllegalArgumentException("Not an RuntimeEnvironment: " + env);
         return (RuntimeEnvironment) env;
+    }
+
+    public Runtime getRuntime() {
+        return runtime;
     }
 
     public Iterator<Resource> getRuntimeResources() {

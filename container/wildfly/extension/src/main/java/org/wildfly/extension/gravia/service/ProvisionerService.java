@@ -21,23 +21,11 @@
 
 package org.wildfly.extension.gravia.service;
 
-import org.jboss.as.controller.ServiceVerificationHandler;
-import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.Provisioner;
-import org.jboss.gravia.provision.ResourceInstaller;
-import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.resolver.Environment;
-import org.jboss.gravia.resolver.Resolver;
-import org.jboss.gravia.runtime.ModuleContext;
-import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.msc.service.AbstractService;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceTarget;
-import org.jboss.msc.service.StartContext;
-import org.jboss.msc.service.StartException;
-import org.jboss.msc.service.StopContext;
-import org.jboss.msc.value.InjectedValue;
 import org.wildfly.extension.gravia.GraviaConstants;
 
 /**
@@ -48,44 +36,15 @@ import org.wildfly.extension.gravia.GraviaConstants;
  */
 public class ProvisionerService extends AbstractService<Provisioner> {
 
-    private final InjectedValue<ModuleContext> injectedModuleContext = new InjectedValue<ModuleContext>();
-    private final InjectedValue<Environment> injectedEnvironment = new InjectedValue<Environment>();
-    private final InjectedValue<Repository> injectedRepository = new InjectedValue<Repository>();
-    private final InjectedValue<Resolver> injectedResolver = new InjectedValue<Resolver>();
-    private final InjectedValue<ResourceInstaller> injectedInstaller = new InjectedValue<ResourceInstaller>();
-    private ServiceRegistration<Provisioner> registration;
-    private Provisioner provisioner;
+    private final Provisioner provisioner;
 
-    public ServiceController<Provisioner> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
+    public ProvisionerService(Provisioner provisioner) {
+        this.provisioner = provisioner;
+    }
+
+    public ServiceController<Provisioner> install(ServiceTarget serviceTarget) {
         ServiceBuilder<Provisioner> builder = serviceTarget.addService(GraviaConstants.PROVISIONER_SERVICE_NAME, this);
-        builder.addDependency(GraviaConstants.ENVIRONMENT_SERVICE_NAME, Environment.class, injectedEnvironment);
-        builder.addDependency(GraviaConstants.MODULE_CONTEXT_SERVICE_NAME, ModuleContext.class, injectedModuleContext);
-        builder.addDependency(GraviaConstants.REPOSITORY_SERVICE_NAME, Repository.class, injectedRepository);
-        builder.addDependency(GraviaConstants.RESOLVER_SERVICE_NAME, Resolver.class, injectedResolver);
-        builder.addDependency(GraviaConstants.RESOURCE_INSTALLER_SERVICE_NAME, ResourceInstaller.class, injectedInstaller);
-        builder.addListener(verificationHandler);
         return builder.install();
-    }
-
-    @Override
-    public void start(StartContext startContext) throws StartException {
-
-        Resolver resolver = injectedResolver.getValue();
-        Repository repository = injectedRepository.getValue();
-        Environment environment = injectedEnvironment.getValue();
-        ResourceInstaller installer = injectedInstaller.getValue();
-        provisioner = new DefaultProvisioner(environment, resolver, repository, installer);
-
-        // Register the provisioner as a service
-        ModuleContext syscontext = injectedModuleContext.getValue();
-        registration = syscontext.registerService(Provisioner.class, provisioner, null);
-    }
-
-    @Override
-    public void stop(StopContext context) {
-        if (registration != null) {
-            registration.unregister();
-        }
     }
 
     @Override

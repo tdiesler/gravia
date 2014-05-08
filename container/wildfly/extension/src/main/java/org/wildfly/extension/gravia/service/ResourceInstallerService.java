@@ -53,8 +53,10 @@ import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.jboss.gravia.utils.IOUtils;
 import org.jboss.modules.ModuleClassLoader;
@@ -88,14 +90,17 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
     private final InjectedValue<ServiceModuleLoader> injectedServiceModuleLoader = new InjectedValue<ServiceModuleLoader>();
     private final InjectedValue<ModelController> injectedController = new InjectedValue<ModelController>();
+    private final InjectedValue<ModuleContext> injectedModuleContext = new InjectedValue<ModuleContext>();
     private final InjectedValue<RuntimeEnvironment> injectedEnvironment = new InjectedValue<RuntimeEnvironment>();
     private ServerDeploymentManager serverDeploymentManager;
     private ModelControllerClient modelControllerClient;
+    private ServiceRegistration<?> registration;
 
     public ServiceController<ResourceInstaller> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<ResourceInstaller> builder = serviceTarget.addService(GraviaConstants.RESOURCE_INSTALLER_SERVICE_NAME, this);
         builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, injectedServerEnvironment);
         builder.addDependency(GraviaConstants.ENVIRONMENT_SERVICE_NAME, RuntimeEnvironment.class, injectedEnvironment);
+        builder.addDependency(GraviaConstants.MODULE_CONTEXT_SERVICE_NAME, ModuleContext.class, injectedModuleContext);
         builder.addDependency(Services.JBOSS_SERVICE_MODULE_LOADER, ServiceModuleLoader.class, injectedServiceModuleLoader);
         builder.addDependency(Services.JBOSS_SERVER_CONTROLLER, ModelController.class, injectedController);
         builder.addListener(verificationHandler);
@@ -107,10 +112,16 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         ModelController modelController = injectedController.getValue();
         modelControllerClient = modelController.createClient(Executors.newCachedThreadPool());
         serverDeploymentManager = ServerDeploymentManager.Factory.create(modelControllerClient);
+
+        ModuleContext syscontext = injectedModuleContext.getValue();
+        registration = syscontext.registerService(ResourceInstaller.class, this, null);
     }
 
     @Override
     public void stop(StopContext context) {
+        if (registration != null) {
+            registration.unregister();
+        }
         try {
             modelControllerClient.close();
         } catch (IOException ex) {

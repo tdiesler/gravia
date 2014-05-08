@@ -96,6 +96,18 @@
 
 	<build>
 		<plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Gravia-Identity>${project.artifactId};version=${project.version}</Gravia-Identity>
+                            <Service-Component>OSGI-INF/org.jboss.gravia.provision.internal.ProvisionerService.xml,OSGI-INF/org.jboss.gravia.repository.internal.RepositoryMBeanService.xml,OSGI-INF/org.jboss.gravia.repository.internal.RepositoryService.xml,OSGI-INF/org.jboss.gravia.resolver.internal.ResolverService.xml</Service-Component>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 </project>

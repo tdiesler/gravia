@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,6 +33,13 @@ import org.jboss.gravia.utils.NotNullException;
 /**
  * The default properties provider.
  *
+ * Discover the configuration properties as follows
+ * <p>
+ * <ol>
+ * <li>Use the explicit 'gravia.properties' system property</li>
+ * <li>Discover the 'gravia.properties' config file as resource</li>
+ * </ol>
+ *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  *
@@ -43,16 +50,8 @@ public class DefaultPropertiesProvider implements PropertiesProvider {
     private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
     private final boolean systemPropertyDelegation;
 
-    /**
-     * Discover the configuration properties as follows
-     * <p>
-     * <ol>
-     * <li>Use the explicit 'gravia.properties' system property</li>
-     * <li>Discover the 'gravia.properties' config file as resource</li>
-     * </ol>
-     */
     public DefaultPropertiesProvider() {
-        this(getDefaultProperties(), true);
+        this(new HashMap<String, Object>(), true);
     }
 
     public DefaultPropertiesProvider(Properties props, boolean sysprops) {
@@ -62,6 +61,7 @@ public class DefaultPropertiesProvider implements PropertiesProvider {
     public DefaultPropertiesProvider(Map<String, Object> props, boolean sysprops) {
         NotNullException.assertValue(props, "props");
         systemPropertyDelegation = sysprops;
+        properties.putAll(propsToMap(getDefaultProperties()));
         properties.putAll(props);
     }
 

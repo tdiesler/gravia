@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,7 +42,9 @@ import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.ResourceStore;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
@@ -53,6 +55,7 @@ import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
+import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.InjectedValue;
 import org.wildfly.extension.gravia.GraviaConstants;
 
@@ -66,7 +69,8 @@ public class EnvironmentService extends AbstractService<Environment> {
 
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
     private final InjectedValue<Runtime> injectedRuntime = new InjectedValue<Runtime>();
-    private Environment environment;
+    private ServiceRegistration<?> registration;
+    private RuntimeEnvironment environment;
 
     public ServiceController<Environment> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<Environment> builder = serviceTarget.addService(GraviaConstants.ENVIRONMENT_SERVICE_NAME, this);
@@ -83,6 +87,16 @@ public class EnvironmentService extends AbstractService<Environment> {
         MatchPolicy matchPolicy = new DefaultMatchPolicy();
         File modulesDir = injectedServerEnvironment.getValue().getModulesDir();
         environment = new RuntimeEnvironment(runtime, new SystemResourceStore(modulesDir), matchPolicy);
+
+        ModuleContext syscontext = runtime.getModuleContext();
+        registration = syscontext.registerService(RuntimeEnvironment.class, environment, null);
+    }
+
+    @Override
+    public void stop(StopContext context) {
+        if (registration != null) {
+            registration.unregister();
+        }
     }
 
     @Override

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,9 @@ import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.server.DeploymentProcessorTarget;
 import org.jboss.as.server.deployment.Phase;
+import org.jboss.gravia.provision.ResourceInstaller;
+import org.jboss.gravia.resolver.Environment;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.msc.service.ServiceController;
 import org.wildfly.extension.gravia.deployment.GraviaServicesProcessor;
@@ -37,9 +40,6 @@ import org.wildfly.extension.gravia.deployment.ModuleStartProcessor;
 import org.wildfly.extension.gravia.service.EnvironmentService;
 import org.wildfly.extension.gravia.service.GraviaBootstrapService;
 import org.wildfly.extension.gravia.service.ModuleContextService;
-import org.wildfly.extension.gravia.service.ProvisionerService;
-import org.wildfly.extension.gravia.service.RepositoryService;
-import org.wildfly.extension.gravia.service.ResolverService;
 import org.wildfly.extension.gravia.service.ResourceInstallerService;
 import org.wildfly.extension.gravia.service.RuntimeService;
 
@@ -60,13 +60,10 @@ public class GraviaSubsystemBootstrap {
     public List<ServiceController<?>> getSubsystemServices(OperationContext context, ServiceVerificationHandler verificationHandler) {
         List<ServiceController<?>> controllers = new ArrayList<ServiceController<?>>();
         controllers.add(getBoostrapService(context, verificationHandler));
-        controllers.add(new EnvironmentService().install(context.getServiceTarget(), verificationHandler));
-        controllers.add(new ModuleContextService().install(context.getServiceTarget(), verificationHandler));
-        controllers.add(new ProvisionerService().install(context.getServiceTarget(), verificationHandler));
-        controllers.add(new ResolverService().install(context.getServiceTarget(), verificationHandler));
-        controllers.add(new ResourceInstallerService().install(context.getServiceTarget(), verificationHandler));
-        controllers.add(new RepositoryService().install(context.getServiceTarget(), verificationHandler));
+        controllers.add(getResourceInstallService(context, verificationHandler));
+        controllers.add(getRuntimeEnvironmentService(context, verificationHandler));
         controllers.add(getRuntimeService(context, verificationHandler));
+        controllers.add(getSystemContextService(context, verificationHandler));
         return controllers;
     }
 
@@ -74,8 +71,20 @@ public class GraviaSubsystemBootstrap {
         return new GraviaBootstrapService().install(context.getServiceTarget(), verificationHandler);
     }
 
+    protected ServiceController<ResourceInstaller> getResourceInstallService(OperationContext context, ServiceVerificationHandler verificationHandler) {
+        return new ResourceInstallerService().install(context.getServiceTarget(), verificationHandler);
+    }
+
+    protected ServiceController<Environment> getRuntimeEnvironmentService(OperationContext context, ServiceVerificationHandler verificationHandler) {
+        return new EnvironmentService().install(context.getServiceTarget(), verificationHandler);
+    }
+
     protected ServiceController<Runtime> getRuntimeService(OperationContext context, ServiceVerificationHandler verificationHandler) {
         return new RuntimeService().install(context.getServiceTarget(), verificationHandler);
+    }
+
+    protected ServiceController<ModuleContext> getSystemContextService(OperationContext context, ServiceVerificationHandler verificationHandler) {
+        return new ModuleContextService().install(context.getServiceTarget(), verificationHandler);
     }
 
     public void addDeploymentUnitProcessors(DeploymentProcessorTarget processorTarget) {
