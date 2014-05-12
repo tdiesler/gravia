@@ -23,12 +23,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.jboss.osgi</groupId>
-        <artifactId>jbosgi-parent</artifactId>
-        <version>1.0.24</version>
-    </parent>
-
     <name>Gravia</name>
 
     <groupId>org.jboss.gravia</groupId>
@@ -37,6 +31,10 @@
 
     <version>1.1.0.Beta17-SNAPSHOT</version>
 
+    <prerequisites>
+        <maven>3.1.1</maven>
+    </prerequisites>
+    
     <!-- Source Control -->
     <scm>
         <connection>scm:git:git://github.com/tdiesler/gravia.git</connection>
@@ -60,9 +58,9 @@
         <version.apache.karaf>2.3.3</version.apache.karaf>
         <version.apache.tomcat>7.0.42</version.apache.tomcat>
         <version.javax.servlet30.api>3.0.1</version.javax.servlet30.api>
-        <version.jboss.arquillian.core>1.1.2.Final-wildfly-1</version.jboss.arquillian.core>
-        <version.jboss.arquillian.osgi>2.1.0.CR10</version.jboss.arquillian.osgi>
-        <version.jboss.arquillian.tomcat>1.0.0.CR5</version.jboss.arquillian.tomcat>
+        <version.jboss.arquillian.core>1.1.2.Final</version.jboss.arquillian.core>
+        <version.jboss.arquillian.osgi>2.1.0.CR15</version.jboss.arquillian.osgi>
+        <version.jboss.arquillian.tomcat>1.0.0.CR6</version.jboss.arquillian.tomcat>
         <version.jboss.osgi.metadata>4.0.0.CR1</version.jboss.osgi.metadata>
         <version.jboss.shrinkwrap>1.1.2</version.jboss.shrinkwrap>
         <version.jboss.shrinkwrap.resolver>2.0.0</version.jboss.shrinkwrap.resolver>
@@ -73,8 +71,15 @@
         <version.osgi>5.0.0</version.osgi>
         <version.slf4j>1.6.6</version.slf4j>
         
-        <!-- [SUREFIRE-1020] Incorrect XML escape in <system-out> and <system-err> content of junit xml report -->
-        <version.surefire.plugin>2.16</version.surefire.plugin>
+        <!-- Plugin Versions -->
+        <version-apache-felix-scr-plugin>1.15.0</version-apache-felix-scr-plugin>
+        <version-maven-antrun-plugin>1.7</version-maven-antrun-plugin>
+        <version-maven-assembly-plugin>2.4</version-maven-assembly-plugin>
+        <version-maven-compiler-plugin>3.1</version-maven-compiler-plugin>
+        <version-maven-bundle-plugin>2.3.4</version-maven-bundle-plugin>
+        <version-maven-javadoc-plugin>2.9.1</version-maven-javadoc-plugin>
+        <version-maven-release-plugin>2.5</version-maven-release-plugin>
+        <version-maven-surefire-plugin>2.16</version-maven-surefire-plugin>
         
 		<surefire.system.args>-ea</surefire.system.args>
     </properties>
@@ -343,26 +348,33 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>license-maven-plugin</artifactId>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>${version-maven-bundle-plugin}</version>
+                    <extensions>true</extensions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-scr-plugin</artifactId>
+                    <version>${version-apache-felix-scr-plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>${version-maven-antrun-plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${version-maven-assembly-plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${version-maven-compiler-plugin}</version>
                     <configuration>
-                        <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
-                        <canUpdateCopyright>true</canUpdateCopyright>
-                        <canUpdateDescription>true</canUpdateDescription>
-                        <licenseName>apache_v2</licenseName>
-                        <roots>
-                            <root>etc</root>
-                            <root>src</root>
-                            <root>scripts</root>
-                        </roots>
-                        <!--  
-                        <roots>
-                            <root>${basedir}</root>
-                        </roots>
-                        <includes>
-                            <include>pom.xml</include>
-                        </includes>
-                        -->
+                        <source>1.7</source>
+                        <target>1.7</target>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -394,6 +406,45 @@
                         <quiet>true</quiet>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>${version-maven-release-plugin}</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${version-maven-surefire-plugin}</version>
+                    <configuration>
+                        <failIfNoTests>false</failIfNoTests>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <configuration>
+                        <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+                        <canUpdateCopyright>true</canUpdateCopyright>
+                        <canUpdateDescription>true</canUpdateDescription>
+                        <licenseName>apache_v2</licenseName>
+                        <roots>
+                            <root>etc</root>
+                            <root>src</root>
+                            <root>scripts</root>
+                        </roots>
+                        <!--  
+                        <roots>
+                            <root>${basedir}</root>
+                        </roots>
+                        <includes>
+                            <include>pom.xml</include>
+                        </includes>
+                        -->
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -416,6 +467,20 @@
         </repository>
     </repositories>
 
+    <!-- Distribution Management -->
+    <distributionManagement>
+        <repository>
+            <id>jboss-releases-repository</id>
+            <name>JBoss Releases Repository</name>
+            <url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2</url>
+        </repository>
+        <snapshotRepository>
+            <id>jboss-snapshots-repository</id>
+            <name>JBoss Snapshots Repository</name>
+            <url>https://repository.jboss.org/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+    
     <!-- Profiles -->
     <profiles>
         <profile>
