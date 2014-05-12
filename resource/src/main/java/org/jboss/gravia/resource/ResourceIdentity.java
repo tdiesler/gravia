@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,7 +34,7 @@ public final class ResourceIdentity {
 
     private final String symbolicName;
     private final Version version;
-    private final String canonicalName;
+    private final String canonicalForm;
 
     public static ResourceIdentity create(String symbolicName, String version) {
         return new ResourceIdentity(symbolicName, version != null ? Version.parseVersion(version) : null);
@@ -55,7 +55,7 @@ public final class ResourceIdentity {
         NotNullException.assertValue(symbolicName, "symbolicName");
         this.symbolicName = symbolicName;
         this.version = version != null ? version : Version.emptyVersion;
-        this.canonicalName = symbolicName + ":" + version;
+        this.canonicalForm = symbolicName + ":" + version;
     }
 
     public String getSymbolicName() {
@@ -66,6 +66,10 @@ public final class ResourceIdentity {
         return version;
     }
 
+    public String getCanonicalForm() {
+        return canonicalForm;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof ResourceIdentity))
@@ -73,16 +77,16 @@ public final class ResourceIdentity {
         if (obj == this)
             return true;
         ResourceIdentity other = (ResourceIdentity) obj;
-        return canonicalName.equals(other.canonicalName);
+        return canonicalForm.equals(other.canonicalForm);
     }
 
     @Override
     public int hashCode() {
-        return canonicalName.hashCode();
+        return canonicalForm.hashCode();
     }
 
     @Override
     public String toString() {
-        return canonicalName;
+        return canonicalForm;
     }
 }

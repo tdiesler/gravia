@@ -22,17 +22,15 @@ package org.jboss.gravia.provision.spi;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.resource.IdentityNamespace;
-import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.utils.NotNullException;
 
 /**
  * An abstract {@link ResourceInstaller}.
@@ -45,29 +43,35 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
     public abstract RuntimeEnvironment getEnvironment();
 
     @Override
-    public synchronized Set<ResourceHandle> installResources(List<Resource> resources, Map<Requirement, Resource> mapping) throws ProvisionException {
+    public synchronized Set<ResourceHandle> installResources(Context context) throws ProvisionException {
+        NotNullException.assertValue(context, "context");
         Set<ResourceHandle> handles = new HashSet<ResourceHandle>();
-        for (Resource res : resources) {
+        for (Resource res : context.getResources()) {
             ResourceIdentity identity = res.getIdentity();
             if (!isAbstract(res) && getEnvironment().getResource(identity) == null) {
-                handles.add(installResourceInternal(res, mapping));
+                handles.add(installResourceInternal(context, res, isShared(res)));
             }
         }
         return Collections.unmodifiableSet(handles);
     }
 
     @Override
-    public synchronized ResourceHandle installResource(Resource res, Map<Requirement, Resource> mapping) throws ProvisionException {
-        return installResourceInternal(res, mapping);
+    public ResourceHandle installResource(Context context, Resource res) throws ProvisionException {
+        return installResourceInternal(context, res, isShared(res));
     }
 
-    private synchronized ResourceHandle installResourceInternal(Resource resource, Map<Requirement, Resource> mapping) throws ProvisionException {
+    @Override
+    public ResourceHandle installSharedResource(Context context, Resource res) throws ProvisionException {
+        return installResourceInternal(context, res, true);
+    }
+
+    private synchronized ResourceHandle installResourceInternal(Context context, Resource resource, boolean shared) throws ProvisionException {
+        NotNullException.assertValue(resource, "resource");
+        if (context == null) {
+            context = new DefaultInstallerContext(resource);
+        }
         try {
-            if (isShared(resource)) {
-                return installSharedResource(resource, mapping);
-            } else {
-                return installUnsharedResource(resource, mapping);
-            }
+            return shared ? processSharedResource(context, resource) : processUnsharedResource(context, resource);
         } catch (RuntimeException rte) {
             throw rte;
         } catch (ProvisionException ex) {
@@ -77,9 +81,9 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
         }
     }
 
-    public abstract ResourceHandle installSharedResource(Resource resource, Map<Requirement, Resource> mapping) throws Exception;
+    public abstract ResourceHandle processSharedResource(Context context, Resource resource) throws Exception;
 
-    public abstract ResourceHandle installUnsharedResource(Resource resource, Map<Requirement, Resource> mapping) throws Exception;
+    public abstract ResourceHandle processUnsharedResource(Context context, Resource resource) throws Exception;
 
     private boolean isAbstract(Resource res) {
         Object attval = res.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE);

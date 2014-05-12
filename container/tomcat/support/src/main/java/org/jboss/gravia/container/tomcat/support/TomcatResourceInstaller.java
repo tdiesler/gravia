@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Map;
 
 import org.apache.catalina.User;
 import org.apache.catalina.UserDatabase;
@@ -88,7 +87,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public ResourceHandle installSharedResource(Resource resource, Map<Requirement, Resource> mapping) throws Exception {
+    public ResourceHandle processSharedResource(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing shared resource: {}", resource);
 
         ResourceIdentity resid = resource.getIdentity();
@@ -115,7 +114,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public ResourceHandle installUnsharedResource(Resource resource, Map<Requirement, Resource> mapping) throws Exception {
+    public ResourceHandle processUnsharedResource(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing unshared resource: {}", resource);
 
         File tempfile = null;

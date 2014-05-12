@@ -186,7 +186,8 @@ public abstract class AbstractProvisioner implements Provisioner {
         // Install resources
         List<Resource> resources = result.getResources();
         Map<Requirement, Resource> mapping = result.getMapping();
-        Set<ResourceHandle> handles = installer.installResources(resources, mapping);
+        DefaultInstallerContext context = new DefaultInstallerContext(resources, mapping);
+        Set<ResourceHandle> handles = installer.installResources(context);
 
         // Update the wirings
         Map<Resource, Wiring> auxwirings = result.getWirings();

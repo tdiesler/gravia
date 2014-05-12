@@ -141,7 +141,7 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
 
     @Override
     @SuppressWarnings("deprecation")
-    public ResourceHandle installSharedResource(Resource resource, Map<Requirement, Resource> mapping) throws Exception {
+    public ResourceHandle processSharedResource(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing shared resource: {}", resource);
 
         ResourceIdentity identity = resource.getIdentity();
@@ -166,6 +166,7 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
 
         // generate module.xml
         File xmlFile = new File(moduleDir, "module.xml");
+        Map<Requirement, Resource> mapping = context.getResourceMapping();
         String moduleXML = generateModuleXML(resFile, resource, modid, mapping);
         OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(xmlFile));
         osw.write(moduleXML);
@@ -197,11 +198,11 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
     }
 
     @Override
-    public ResourceHandle installUnsharedResource(Resource resource, Map<Requirement, Resource> mapping) throws Exception {
+    public ResourceHandle processUnsharedResource(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing unshared resource: {}", resource);
 
         final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
-        final ResourceWrapper wrapper = getWrappedResourceContent(resource, mapping);
+        final ResourceWrapper wrapper = getWrappedResourceContent(resource, context.getResourceMapping());
 
         String runtimeName = wrapper.getRuntimeName();
         NamedResourceAssociation.putResource(runtimeName, resource);
@@ -244,7 +245,7 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         String runtimeName = rtnameAtt != null ? rtnameAtt : resource.getIdentity().getSymbolicName() + ".jar";
 
         // Do nothing if there is no mapping
-        if (mapping == null) {
+        if (mapping == null || mapping.isEmpty()) {
             InputStream content = resource.adapt(ResourceContent.class).getContent();
             return new ResourceWrapper(runtimeName, runtimeName, content);
         }

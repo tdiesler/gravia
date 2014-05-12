@@ -172,7 +172,7 @@ public class ProvisionerServiceTest {
 
             // Deploy a resource through the {@link ResourceInstaller}
             ResourceInstaller installer = provisioner.getResourceInstaller();
-            handles.add(installer.installResource(resB, null));
+            handles.add(installer.installResource(null, resB));
             Assert.assertTrue("At least one resource", handles.size() > 0);
 
             // Make a call to the HttpService endpoint that goes through a Camel route
