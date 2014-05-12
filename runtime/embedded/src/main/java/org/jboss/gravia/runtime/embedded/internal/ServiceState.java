@@ -143,17 +143,6 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
                 result = factoryHolder.getService();
 
-                // If the service object returned by the ServiceFactory object is not an instanceof all the classes named
-                // when the service was registered or the ServiceFactory object throws an exception,
-                // null is returned and a Framework event of type {@link FrameworkEvent#ERROR}
-                // containing a {@link ServiceException} describing the error is fired.
-                if (result == null) {
-                    String message = "Cannot get factory value from: " + this;
-                    ServiceException ex = new ServiceException(message, ServiceException.FACTORY_ERROR);
-                    Thread.currentThread().setContextClassLoader(null);
-                    LOGGER.error(message, ex);
-                }
-
             } catch (Throwable th) {
                 String message = "Cannot get factory value from: " + this;
                 ServiceException ex = new ServiceException(message, ServiceException.FACTORY_EXCEPTION, th);
@@ -452,6 +441,17 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
                 if (retValue != null && checkValidClassNames(ownerModule, (String[]) getProperty(org.jboss.gravia.Constants.OBJECTCLASS), retValue)) {
                     value = retValue;
                 }
+
+                // If the service object returned by the ServiceFactory object is not an instanceof all the classes named
+                // when the service was registered or the ServiceFactory object throws an exception,
+                // null is returned and a Framework event of type {@link FrameworkEvent#ERROR}
+                // containing a {@link ServiceException} describing the error is fired.
+                if (value == null) {
+                    String message = "Cannot get factory value from: " + factory;
+                    ServiceException ex = new ServiceException(message, ServiceException.FACTORY_ERROR);
+                    LOGGER.error(message, ex);
+                }
+
             } finally {
                 factoryRecursion.set(null);
             }
