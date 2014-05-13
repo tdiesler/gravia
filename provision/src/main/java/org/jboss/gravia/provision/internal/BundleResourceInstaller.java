@@ -22,6 +22,7 @@ package org.jboss.gravia.provision.internal;
 import static org.jboss.gravia.provision.spi.ProvisionLogger.LOGGER;
 
 import java.io.InputStream;
+import java.util.Dictionary;
 
 import org.jboss.gravia.provision.DefaultResourceHandle;
 import org.jboss.gravia.provision.ProvisionException;
@@ -57,18 +58,12 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public ResourceHandle processUnsharedResource(Context context, Resource resource) throws ProvisionException {
-        LOGGER.info("Installing unshared resource: {}", resource);
-        return installBundleResource(resource);
+    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, Dictionary<String, String> headers) throws ProvisionException {
+        LOGGER.info("Installing resource: {}", resource);
+        return installBundleResource(resource, headers);
     }
 
-    @Override
-    public ResourceHandle processSharedResource(Context context, Resource resource) throws ProvisionException {
-        LOGGER.info("Installing shared resource: {}", resource);
-        return installBundleResource(resource);
-    }
-
-    private ResourceHandle installBundleResource(Resource resource) throws ProvisionException {
+    private ResourceHandle installBundleResource(Resource resource, Dictionary<String, String> headers) throws ProvisionException {
 
         // Install the Bundle
         ResourceIdentity identity = resource.getIdentity();

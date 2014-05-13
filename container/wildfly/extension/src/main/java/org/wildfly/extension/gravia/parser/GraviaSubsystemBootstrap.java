@@ -40,7 +40,7 @@ import org.wildfly.extension.gravia.deployment.ModuleStartProcessor;
 import org.wildfly.extension.gravia.service.EnvironmentService;
 import org.wildfly.extension.gravia.service.GraviaBootstrapService;
 import org.wildfly.extension.gravia.service.ModuleContextService;
-import org.wildfly.extension.gravia.service.ResourceInstallerService;
+import org.wildfly.extension.gravia.service.WildFlyResourceInstaller;
 import org.wildfly.extension.gravia.service.RuntimeService;
 
 /**
@@ -72,7 +72,7 @@ public class GraviaSubsystemBootstrap {
     }
 
     protected ServiceController<ResourceInstaller> getResourceInstallService(OperationContext context, ServiceVerificationHandler verificationHandler) {
-        return new ResourceInstallerService().install(context.getServiceTarget(), verificationHandler);
+        return new WildFlyResourceInstaller().install(context.getServiceTarget(), verificationHandler);
     }
 
     protected ServiceController<Environment> getRuntimeEnvironmentService(OperationContext context, ServiceVerificationHandler verificationHandler) {

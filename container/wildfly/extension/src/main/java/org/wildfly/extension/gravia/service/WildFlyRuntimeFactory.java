@@ -33,6 +33,6 @@ public class WildFlyRuntimeFactory implements RuntimeFactory {
 
     @Override
     public Runtime createRuntime(PropertiesProvider propertiesProvider) {
-        return new WildflyRuntime(propertiesProvider, null);
+        return new WildFlyRuntime(propertiesProvider, null);
     }
 }

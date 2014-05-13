@@ -33,17 +33,17 @@ import org.jboss.gravia.runtime.spi.PropertiesProvider;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public class WildflyRuntime extends EmbeddedRuntime {
+public class WildFlyRuntime extends EmbeddedRuntime {
 
     public static AttachmentKey<ResourceRoot> DEPLOYMENT_ROOT_KEY = AttachmentKey.create(ResourceRoot.class);
 
-    public WildflyRuntime(PropertiesProvider propertiesProvider, Attachable context) {
+    public WildFlyRuntime(PropertiesProvider propertiesProvider, Attachable context) {
         super(propertiesProvider, context);
     }
 
     @Override
     protected ModuleEntriesProvider getDefaultEntriesProvider(Module module, Attachable context) {
-        ResourceRoot resourceRoot = context.getAttachment(WildflyRuntime.DEPLOYMENT_ROOT_KEY);
+        ResourceRoot resourceRoot = context.getAttachment(WildFlyRuntime.DEPLOYMENT_ROOT_KEY);
         return resourceRoot != null ? new VirtualFileEntriesProvider(resourceRoot) : null;
     }
 }

@@ -44,7 +44,6 @@ import org.jboss.gravia.arquillian.container.ContainerSetup;
 import org.jboss.gravia.arquillian.container.ContainerSetupTask;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.ResourceHandle;
-import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.Resolver;
@@ -171,8 +170,7 @@ public class ProvisionerServiceTest {
             Resource resB = builder.getResource();
 
             // Deploy a resource through the {@link ResourceInstaller}
-            ResourceInstaller installer = provisioner.getResourceInstaller();
-            handles.add(installer.installResource(null, resB));
+            handles.add(provisioner.installResource(resB, null));
             Assert.assertTrue("At least one resource", handles.size() > 0);
 
             // Make a call to the HttpService endpoint that goes through a Camel route

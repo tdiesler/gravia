@@ -19,6 +19,8 @@
  */
 package org.jboss.gravia.provision.internal;
 
+import java.io.InputStream;
+import java.util.Dictionary;
 import java.util.Set;
 
 import javax.management.JMException;
@@ -34,6 +36,7 @@ import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.Requirement;
+import org.jboss.gravia.resource.Resource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -89,6 +92,26 @@ public final class ProvisionerService implements Provisioner {
     @Override
     public Set<ResourceHandle> provisionResources(Set<Requirement> reqs) throws ProvisionException {
         return delegate.provisionResources(reqs);
+    }
+
+    @Override
+    public ResourceHandle installResource(String runtimeName, InputStream inputStream, Dictionary<String, String> headers) throws ProvisionException {
+        return delegate.installResource(runtimeName, inputStream, headers);
+    }
+
+    @Override
+    public ResourceHandle installSharedResource(String runtimeName, InputStream inputStream, Dictionary<String, String> headers) throws ProvisionException {
+        return delegate.installSharedResource(runtimeName, inputStream, headers);
+    }
+
+    @Override
+    public ResourceHandle installResource(Resource resource, Dictionary<String, String> headers) throws ProvisionException {
+        return delegate.installResource(resource, headers);
+    }
+
+    @Override
+    public ResourceHandle installSharedResource(Resource resource, Dictionary<String, String> headers) throws ProvisionException {
+        return delegate.installSharedResource(resource, headers);
     }
 
     @Reference

@@ -19,25 +19,38 @@
  */
 package org.jboss.gravia.provision.spi;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.jboss.gravia.provision.spi.ProvisionLogger.LOGGER;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ProvisionResult;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
+import org.jboss.gravia.provision.ResourceInstaller.Context;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.DefaultPreferencePolicy;
 import org.jboss.gravia.resolver.DefaultResolveContext;
@@ -48,14 +61,19 @@ import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resolver.spi.AbstractEnvironment;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.DictionaryResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceBuilder;
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.DefaultWire;
 import org.jboss.gravia.runtime.DefaultWiring;
 import org.jboss.gravia.runtime.Wire;
 import org.jboss.gravia.runtime.Wiring;
 import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IOUtils;
 
 /**
  * An abstract {@link Provisioner}
@@ -187,7 +205,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         List<Resource> resources = result.getResources();
         Map<Requirement, Resource> mapping = result.getMapping();
         DefaultInstallerContext context = new DefaultInstallerContext(resources, mapping);
-        Set<ResourceHandle> handles = installer.installResources(context);
+        Set<ResourceHandle> handles = installResources(context);
 
         // Update the wirings
         Map<Resource, Wiring> auxwirings = result.getWirings();
@@ -215,6 +233,110 @@ public abstract class AbstractProvisioner implements Provisioner {
         }
 
         return handles;
+    }
+
+    private Set<ResourceHandle> installResources(Context context) throws ProvisionException {
+        ArgumentAssertion.assertNotNull(context, "context");
+        Set<ResourceHandle> handles = new HashSet<ResourceHandle>();
+        for (Resource res : context.getResources()) {
+            ResourceIdentity identity = res.getIdentity();
+            if (!isAbstract(res) && getEnvironment().getResource(identity) == null) {
+                handles.add(installer.installResource(context, res, null));
+            }
+        }
+        return Collections.unmodifiableSet(handles);
+    }
+
+    @Override
+    public ResourceHandle installResource(String runtimeName, InputStream inputStream, Dictionary<String, String> headers) throws ProvisionException {
+        return installResourceInternal(runtimeName, false, inputStream, headers);
+    }
+
+    @Override
+    public ResourceHandle installSharedResource(String runtimeName, InputStream inputStream, Dictionary<String, String> headers) throws ProvisionException {
+        return installResourceInternal(runtimeName, true, inputStream, headers);
+    }
+
+    @Override
+    public ResourceHandle installResource(Resource resource, Dictionary<String, String> headers) throws ProvisionException {
+        Context context = new DefaultInstallerContext(resource);
+        return installResourceInternal(context, false, resource, headers);
+    }
+
+    @Override
+    public ResourceHandle installSharedResource(Resource resource, Dictionary<String, String> headers) throws ProvisionException {
+        Context context = new DefaultInstallerContext(resource);
+        return installResourceInternal(context, true, resource, headers);
+    }
+
+
+    private ResourceHandle installResourceInternal(String runtimeName, boolean shared, InputStream inputStream, Dictionary<String, String> headers) throws ProvisionException {
+        ArgumentAssertion.assertNotNull(runtimeName, "runtimeName");
+        ArgumentAssertion.assertNotNull(inputStream, "inputStream");
+
+        URL contentURL;
+        File tempFile;
+        try {
+            Path tempPath = Files.createTempFile(runtimeName, null);
+            Files.copy(inputStream, tempPath, REPLACE_EXISTING);
+            contentURL = tempPath.toUri().toURL();
+            tempFile = tempPath.toFile();
+        } catch (Exception ex) {
+            throw new ProvisionException(ex);
+        }
+
+        ResourceBuilder builder;
+        if (headers != null) {
+            builder = new DictionaryResourceBuilder().load(headers);
+        } else {
+            Manifest manifest;
+            JarFile jarFile = null;
+            try {
+                jarFile = new JarFile(tempFile);
+                manifest = jarFile.getManifest();
+            } catch (IOException ex) {
+                throw new ProvisionException(ex);
+            } finally {
+                IOUtils.safeClose(jarFile);
+            }
+            builder = new ManifestResourceBuilder().load(manifest);
+            headers = getManifestHeaders(manifest);
+        }
+
+        // Build the {@link Resource}
+        builder.addContentCapability(contentURL);
+        Resource resource = builder.getResource();
+
+        // Install the {@link Resource}
+        ResourceHandle handle;
+        try {
+            Context context = new DefaultInstallerContext(resource);
+            handle = installResourceInternal(context, false, resource, headers);
+        } finally {
+            tempFile.delete();
+        }
+        return handle;
+    }
+
+    private Dictionary<String, String> getManifestHeaders(Manifest manifest) {
+        Hashtable<String, String> headers = new Hashtable<String, String>();
+        Attributes mainatts = manifest.getMainAttributes();
+        for (Object key : mainatts.keySet()) {
+            String name = key.toString();
+            String value = mainatts.getValue(name);
+            headers.put(name, value);
+        }
+        return headers;
+    }
+
+    private ResourceHandle installResourceInternal(Context context, boolean shared, Resource resource, Dictionary<String, String> headers) throws ProvisionException {
+        ResourceHandle handle;
+        if (shared) {
+            handle = installer.installSharedResource(context, resource, headers);
+        } else {
+            handle = installer.installResource(context, resource, headers);
+        }
+        return handle;
     }
 
     private Capability findTargetCapability(Capability auxcap) {

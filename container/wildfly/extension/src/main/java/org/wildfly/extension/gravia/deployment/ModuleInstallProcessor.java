@@ -39,7 +39,7 @@ import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
 import org.jboss.modules.ModuleClassLoader;
 import org.wildfly.extension.gravia.GraviaConstants;
-import org.wildfly.extension.gravia.service.WildflyRuntime;
+import org.wildfly.extension.gravia.service.WildFlyRuntime;
 
 /**
  * Install/Uninstall the {@link Module} from the {@link Runtime}
@@ -67,7 +67,7 @@ public class ModuleInstallProcessor implements DeploymentUnitProcessor {
 
         // Initialize the module install context
         AttachableSupport context = new AttachableSupport();
-        context.putAttachment(WildflyRuntime.DEPLOYMENT_ROOT_KEY, deploymentRoot);
+        context.putAttachment(WildFlyRuntime.DEPLOYMENT_ROOT_KEY, deploymentRoot);
 
         // Install the module
         ModuleClassLoader classLoader = depUnit.getAttachment(Attachments.MODULE).getClassLoader();

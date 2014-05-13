@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
@@ -85,7 +86,7 @@ import org.wildfly.extension.gravia.GraviaConstants;
  * @author Thomas.Diesler@jboss.com
  * @since 27-Jun-2013
  */
-public class ResourceInstallerService extends AbstractResourceInstaller implements Service<ResourceInstaller> {
+public class WildFlyResourceInstaller extends AbstractResourceInstaller implements Service<ResourceInstaller> {
 
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
     private final InjectedValue<ServiceModuleLoader> injectedServiceModuleLoader = new InjectedValue<ServiceModuleLoader>();
@@ -140,8 +141,18 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
     }
 
     @Override
+    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, Dictionary<String, String> headers) throws Exception {
+        ResourceHandle handle;
+        if (shared) {
+            handle = installSharedResourceInternal(context, resource, headers);
+        } else {
+            handle = installUnsharedResourceInternal(context, resource, headers);
+        }
+        return handle;
+    }
+
     @SuppressWarnings("deprecation")
-    public ResourceHandle processSharedResource(Context context, Resource resource) throws Exception {
+    private ResourceHandle installSharedResourceInternal(Context context, Resource resource, Dictionary<String, String> headers) throws Exception {
         LOGGER.info("Installing shared resource: {}", resource);
 
         ResourceIdentity identity = resource.getIdentity();
@@ -197,8 +208,7 @@ public class ResourceInstallerService extends AbstractResourceInstaller implemen
         };
     }
 
-    @Override
-    public ResourceHandle processUnsharedResource(Context context, Resource resource) throws Exception {
+    private ResourceHandle installUnsharedResourceInternal(Context context, Resource resource, Dictionary<String, String> headers) throws Exception {
         LOGGER.info("Installing unshared resource: {}", resource);
 
         final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);

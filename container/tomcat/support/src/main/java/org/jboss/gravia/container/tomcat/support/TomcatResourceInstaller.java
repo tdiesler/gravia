@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Dictionary;
 
 import org.apache.catalina.User;
 import org.apache.catalina.UserDatabase;
@@ -87,7 +88,17 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public ResourceHandle processSharedResource(Context context, Resource resource) throws Exception {
+    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, Dictionary<String, String> headers) throws Exception {
+        ResourceHandle handle;
+        if (shared) {
+            handle = installSharedResourceInternal(context, resource, headers);
+        } else {
+            handle = installUnsharedResourceInternal(context, resource, headers);
+        }
+        return handle;
+    }
+
+    private ResourceHandle installSharedResourceInternal(Context context, Resource resource, Dictionary<String, String> headers) throws Exception {
         LOGGER.info("Installing shared resource: {}", resource);
 
         ResourceIdentity resid = resource.getIdentity();
@@ -113,8 +124,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         };
     }
 
-    @Override
-    public ResourceHandle processUnsharedResource(Context context, Resource resource) throws Exception {
+    private ResourceHandle installUnsharedResourceInternal(Context context, Resource resource, Dictionary<String, String> headers) throws Exception {
         LOGGER.info("Installing unshared resource: {}", resource);
 
         File tempfile = null;

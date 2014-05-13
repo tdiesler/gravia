@@ -20,16 +20,13 @@
 
 package org.jboss.gravia.provision.spi;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Dictionary;
 
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
@@ -43,35 +40,22 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
     public abstract RuntimeEnvironment getEnvironment();
 
     @Override
-    public synchronized Set<ResourceHandle> installResources(Context context) throws ProvisionException {
-        ArgumentAssertion.assertNotNull(context, "context");
-        Set<ResourceHandle> handles = new HashSet<ResourceHandle>();
-        for (Resource res : context.getResources()) {
-            ResourceIdentity identity = res.getIdentity();
-            if (!isAbstract(res) && getEnvironment().getResource(identity) == null) {
-                handles.add(installResourceInternal(context, res, isShared(res)));
-            }
-        }
-        return Collections.unmodifiableSet(handles);
+    public ResourceHandle installResource(Context context, Resource res, Dictionary<String, String> headers) throws ProvisionException {
+        return installResourceInternal(context, res, isShared(res), headers);
     }
 
     @Override
-    public ResourceHandle installResource(Context context, Resource res) throws ProvisionException {
-        return installResourceInternal(context, res, isShared(res));
+    public ResourceHandle installSharedResource(Context context, Resource res, Dictionary<String, String> headers) throws ProvisionException {
+        return installResourceInternal(context, res, true, headers);
     }
 
-    @Override
-    public ResourceHandle installSharedResource(Context context, Resource res) throws ProvisionException {
-        return installResourceInternal(context, res, true);
-    }
-
-    private synchronized ResourceHandle installResourceInternal(Context context, Resource resource, boolean shared) throws ProvisionException {
+    private synchronized ResourceHandle installResourceInternal(Context context, Resource resource, boolean shared, Dictionary<String, String> headers) throws ProvisionException {
         ArgumentAssertion.assertNotNull(resource, "resource");
         if (context == null) {
             context = new DefaultInstallerContext(resource);
         }
         try {
-            return shared ? processSharedResource(context, resource) : processUnsharedResource(context, resource);
+            return installResourceProtected(context, resource, shared, headers);
         } catch (RuntimeException rte) {
             throw rte;
         } catch (ProvisionException ex) {
@@ -81,14 +65,7 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
         }
     }
 
-    public abstract ResourceHandle processSharedResource(Context context, Resource resource) throws Exception;
-
-    public abstract ResourceHandle processUnsharedResource(Context context, Resource resource) throws Exception;
-
-    private boolean isAbstract(Resource res) {
-        Object attval = res.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE);
-        return IdentityNamespace.TYPE_ABSTRACT.equals(attval);
-    }
+    protected abstract ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, Dictionary<String, String> headers) throws Exception;
 
     private boolean isShared(Resource resource) {
         Object attval = resource.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_SHARED_ATTRIBUTE);
