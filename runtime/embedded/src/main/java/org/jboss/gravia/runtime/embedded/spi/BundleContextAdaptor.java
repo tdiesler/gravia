@@ -35,7 +35,7 @@ import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.SynchronousModuleListener;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -64,7 +64,7 @@ public final class BundleContextAdaptor implements BundleContext {
     private final ModuleContext moduleContext;
 
     public BundleContextAdaptor(ModuleContext moduleContext) {
-        ArgumentAssertion.assertNotNull(moduleContext, "moduleContext");
+        IllegalArgumentAssertion.assertNotNull(moduleContext, "moduleContext");
         this.moduleContext = moduleContext;
     }
 
@@ -276,7 +276,7 @@ public final class BundleContextAdaptor implements BundleContext {
         private final BundleListener delegate;
 
         BundleListenerAdaptor(BundleListener delegate) {
-            ArgumentAssertion.assertNotNull(delegate, "delegate");
+            IllegalArgumentAssertion.assertNotNull(delegate, "delegate");
             this.delegate = delegate;
         }
 
@@ -312,7 +312,7 @@ public final class BundleContextAdaptor implements BundleContext {
         private final ServiceListener delegate;
 
         ServiceListenerAdaptor(ServiceListener delegate) {
-            ArgumentAssertion.assertNotNull(delegate, "delegate");
+            IllegalArgumentAssertion.assertNotNull(delegate, "delegate");
             this.delegate = delegate;
         }
 
@@ -347,7 +347,7 @@ public final class BundleContextAdaptor implements BundleContext {
         private final org.jboss.gravia.runtime.ServiceReference<S> delegate;
 
         ServiceReferenceAdaptor(org.jboss.gravia.runtime.ServiceReference<S> delegate) {
-            ArgumentAssertion.assertNotNull(delegate, "delegate");
+            IllegalArgumentAssertion.assertNotNull(delegate, "delegate");
             this.delegate = delegate;
         }
 
@@ -407,7 +407,7 @@ public final class BundleContextAdaptor implements BundleContext {
         private final org.jboss.gravia.runtime.ServiceRegistration<S> delegate;
 
         ServiceRegistrationAdaptor(org.jboss.gravia.runtime.ServiceRegistration<S> delegate) {
-            ArgumentAssertion.assertNotNull(delegate, "delegate");
+            IllegalArgumentAssertion.assertNotNull(delegate, "delegate");
             this.delegate = delegate;
         }
 
@@ -437,7 +437,7 @@ public final class BundleContextAdaptor implements BundleContext {
         private final ServiceFactory<S> delegate;
 
         ServiceFactoryAdaptor(ServiceFactory<S> delegate) {
-            ArgumentAssertion.assertNotNull(delegate, "delegate");
+            IllegalArgumentAssertion.assertNotNull(delegate, "delegate");
             this.delegate = delegate;
         }
 

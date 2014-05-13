@@ -24,7 +24,7 @@ import java.util.Hashtable;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
 /**
  * A manifest {@link Resource} builder.
@@ -37,7 +37,7 @@ import org.jboss.gravia.utils.ArgumentAssertion;
 public class ManifestResourceBuilder extends DictionaryResourceBuilder {
 
     public ManifestResourceBuilder load(Manifest manifest) {
-        ArgumentAssertion.assertNotNull(manifest, "manifest");
+        IllegalArgumentAssertion.assertNotNull(manifest, "manifest");
         Dictionary<String, String> headers = getManifestHeaders(manifest);
         load(headers);
         return this;

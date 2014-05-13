@@ -72,7 +72,7 @@ import org.jboss.gravia.runtime.DefaultWire;
 import org.jboss.gravia.runtime.DefaultWiring;
 import org.jboss.gravia.runtime.Wire;
 import org.jboss.gravia.runtime.Wiring;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 import org.jboss.gravia.utils.IOUtils;
 
 /**
@@ -94,11 +94,11 @@ public abstract class AbstractProvisioner implements Provisioner {
     }
 
     public AbstractProvisioner(Environment environment, Resolver resolver, Repository repository, ResourceInstaller installer, PreferencePolicy policy) {
-        ArgumentAssertion.assertNotNull(environment, "environment");
-        ArgumentAssertion.assertNotNull(resolver, "resolver");
-        ArgumentAssertion.assertNotNull(repository, "repository");
-        ArgumentAssertion.assertNotNull(installer, "installer");
-        ArgumentAssertion.assertNotNull(policy, "policy");
+        IllegalArgumentAssertion.assertNotNull(environment, "environment");
+        IllegalArgumentAssertion.assertNotNull(resolver, "resolver");
+        IllegalArgumentAssertion.assertNotNull(repository, "repository");
+        IllegalArgumentAssertion.assertNotNull(installer, "installer");
+        IllegalArgumentAssertion.assertNotNull(policy, "policy");
         this.environment = environment;
         this.resolver = resolver;
         this.repository = repository;
@@ -236,7 +236,7 @@ public abstract class AbstractProvisioner implements Provisioner {
     }
 
     private Set<ResourceHandle> installResources(Context context) throws ProvisionException {
-        ArgumentAssertion.assertNotNull(context, "context");
+        IllegalArgumentAssertion.assertNotNull(context, "context");
         Set<ResourceHandle> handles = new HashSet<ResourceHandle>();
         for (Resource res : context.getResources()) {
             ResourceIdentity identity = res.getIdentity();
@@ -271,8 +271,8 @@ public abstract class AbstractProvisioner implements Provisioner {
 
 
     private ResourceHandle installResourceInternal(String runtimeName, boolean shared, InputStream inputStream, Dictionary<String, String> headers) throws ProvisionException {
-        ArgumentAssertion.assertNotNull(runtimeName, "runtimeName");
-        ArgumentAssertion.assertNotNull(inputStream, "inputStream");
+        IllegalArgumentAssertion.assertNotNull(runtimeName, "runtimeName");
+        IllegalArgumentAssertion.assertNotNull(inputStream, "inputStream");
 
         URL contentURL;
         File tempFile;

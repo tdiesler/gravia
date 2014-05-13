@@ -23,7 +23,7 @@ import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.osgi.internal.OSGiRuntime;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeFactory;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -37,7 +37,7 @@ public final class OSGiRuntimeFactory implements RuntimeFactory {
     private final BundleContext syscontext;
 
     public OSGiRuntimeFactory(BundleContext syscontext) {
-        ArgumentAssertion.assertNotNull(syscontext, "syscontext");
+        IllegalArgumentAssertion.assertNotNull(syscontext, "syscontext");
         this.syscontext = syscontext;
     }
 

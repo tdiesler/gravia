@@ -22,7 +22,7 @@ package org.jboss.gravia.provision;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
 /**
  * An default {@link ResourceHandle}
@@ -36,7 +36,7 @@ public class DefaultResourceHandle implements ResourceHandle {
     private final Module module;
 
     public DefaultResourceHandle(Resource resource, Module module) {
-        ArgumentAssertion.assertNotNull(resource, "resource");
+        IllegalArgumentAssertion.assertNotNull(resource, "resource");
         this.resource = resource;
         this.module = module;
     }

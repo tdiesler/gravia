@@ -49,7 +49,7 @@ import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.SynchronousModuleListener;
 import org.jboss.gravia.utils.IOUtils;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
 /**
  * An {@link Environment} that maintains the set of runtime resources.
@@ -68,9 +68,9 @@ public class RuntimeEnvironment extends AbstractEnvironment {
 
     public RuntimeEnvironment(Runtime runtime, ResourceStore systemStore, MatchPolicy matchPolicy) {
         super(RuntimeEnvironment.class.getSimpleName(), matchPolicy);
-        ArgumentAssertion.assertNotNull(runtime, "runtime");
-        ArgumentAssertion.assertNotNull(systemStore, "systemStore");
-        ArgumentAssertion.assertNotNull(matchPolicy, "matchPolicy");
+        IllegalArgumentAssertion.assertNotNull(runtime, "runtime");
+        IllegalArgumentAssertion.assertNotNull(systemStore, "systemStore");
+        IllegalArgumentAssertion.assertNotNull(matchPolicy, "matchPolicy");
         this.systemStore = systemStore;
         this.runtime = runtime;
 
@@ -135,7 +135,7 @@ public class RuntimeEnvironment extends AbstractEnvironment {
     }
 
     public RuntimeEnvironment initDefaultContent(InputStream content) {
-        ArgumentAssertion.assertNotNull(content, "content");
+        IllegalArgumentAssertion.assertNotNull(content, "content");
         try {
             RepositoryReader reader = new DefaultRepositoryXMLReader(content);
             Resource xmlres = reader.nextResource();

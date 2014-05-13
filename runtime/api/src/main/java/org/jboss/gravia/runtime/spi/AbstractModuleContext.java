@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.jboss.gravia.runtime.Filter;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
 /**
  * The abstract base implementation for a {@link ModuleContext}
@@ -38,7 +38,7 @@ public abstract class AbstractModuleContext implements ModuleContext {
     private final Module module;
 
     protected AbstractModuleContext(Module module) {
-        ArgumentAssertion.assertNotNull(module, "module");
+        IllegalArgumentAssertion.assertNotNull(module, "module");
         this.module = module;
     }
 

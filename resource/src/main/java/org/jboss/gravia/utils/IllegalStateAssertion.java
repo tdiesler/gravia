@@ -25,10 +25,10 @@ package org.jboss.gravia.utils;
  * @author thomas.diesler@jboss.com
  * @since 18-Apr-2014
  */
-public final class StateAssertion {
+public final class IllegalStateAssertion {
 
     // hide ctor
-    private StateAssertion() {
+    private IllegalStateAssertion() {
     }
 
     /**

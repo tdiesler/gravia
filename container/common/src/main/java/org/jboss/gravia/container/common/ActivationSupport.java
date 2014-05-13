@@ -31,7 +31,7 @@ import java.util.Properties;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -50,7 +50,7 @@ public final class ActivationSupport {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static void initConfigurationAdmin(File configsDir) {
-        ArgumentAssertion.assertNotNull(configsDir, "configsDir");
+        IllegalArgumentAssertion.assertNotNull(configsDir, "configsDir");
         ConfigurationAdmin configAdmin = getConfigurationAdmin();
         if (!configsDir.isDirectory() || configAdmin == null) {
             LOGGER.info("No ConfigurationAdmin content");

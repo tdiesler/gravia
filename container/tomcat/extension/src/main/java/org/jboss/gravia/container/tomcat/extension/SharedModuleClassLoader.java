@@ -27,7 +27,7 @@ import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.ContentCapability;
 import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
 /**
  * The shared module {@link ClassLoader}.
@@ -55,7 +55,7 @@ public final class SharedModuleClassLoader extends ClassLoader {
     }
 
     public static void addSharedModule(Resource resource) {
-        ArgumentAssertion.assertNotNull(resource, "resource");
+        IllegalArgumentAssertion.assertNotNull(resource, "resource");
 
         List<Capability> ccaps = resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
         if (ccaps.isEmpty())

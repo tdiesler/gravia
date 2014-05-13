@@ -28,7 +28,7 @@ import org.jboss.gravia.Constants;
 import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.spi.DefaultPropertiesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
 /**
  * The Tomcat {@link PropertiesProvider}
@@ -46,7 +46,7 @@ public class TomcatPropertiesProvider implements PropertiesProvider {
     private PropertiesProvider delegate;
 
     public TomcatPropertiesProvider(ServletContext servletContext) {
-        ArgumentAssertion.assertNotNull(servletContext, "servletContext");
+        IllegalArgumentAssertion.assertNotNull(servletContext, "servletContext");
         this.servletContext = servletContext;
     }
 

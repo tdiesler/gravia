@@ -27,7 +27,7 @@ import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
 /**
  * An abstract {@link ResourceInstaller}.
@@ -50,7 +50,7 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
     }
 
     private synchronized ResourceHandle installResourceInternal(Context context, Resource resource, boolean shared, Dictionary<String, String> headers) throws ProvisionException {
-        ArgumentAssertion.assertNotNull(resource, "resource");
+        IllegalArgumentAssertion.assertNotNull(resource, "resource");
         if (context == null) {
             context = new DefaultInstallerContext(resource);
         }

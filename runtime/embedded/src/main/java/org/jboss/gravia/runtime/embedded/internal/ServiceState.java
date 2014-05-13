@@ -45,7 +45,7 @@ import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.utils.CaseInsensitiveDictionary;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 import org.jboss.gravia.utils.UnmodifiableDictionary;
 
 /**
@@ -274,8 +274,8 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
     @Override
     public boolean isAssignableTo(Module module, String className) {
-        ArgumentAssertion.assertNotNull(module, "module");
-        ArgumentAssertion.assertNotNull(className, "className");
+        IllegalArgumentAssertion.assertNotNull(module, "module");
+        IllegalArgumentAssertion.assertNotNull(className, "className");
 
         if (module == ownerModule || className.startsWith("java."))
             return true;

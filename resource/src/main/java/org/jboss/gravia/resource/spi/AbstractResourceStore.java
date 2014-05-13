@@ -37,7 +37,7 @@ import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.ResourceStore;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
 /**
  * An abstract {@link ResourceStore}
@@ -53,8 +53,8 @@ public abstract class AbstractResourceStore implements ResourceStore {
     private final MatchPolicy matchPolicy;
 
     public AbstractResourceStore(String storeName, MatchPolicy matchPolicy) {
-        ArgumentAssertion.assertNotNull(storeName, "storeName");
-        ArgumentAssertion.assertNotNull(matchPolicy, "matchPolicy");
+        IllegalArgumentAssertion.assertNotNull(storeName, "storeName");
+        IllegalArgumentAssertion.assertNotNull(matchPolicy, "matchPolicy");
         this.storeName = storeName;
         this.matchPolicy = matchPolicy;
     }

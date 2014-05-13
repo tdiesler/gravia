@@ -42,7 +42,7 @@ import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.ThreadResourceAssociation;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -65,7 +65,7 @@ public final class OSGiRuntime extends AbstractRuntime {
     public OSGiRuntime(BundleContext syscontext, PropertiesProvider propertiesProvider) {
         super(propertiesProvider);
 
-        ArgumentAssertion.assertNotNull(syscontext, "syscontext");
+        IllegalArgumentAssertion.assertNotNull(syscontext, "syscontext");
         this.syscontext = syscontext;
 
         // Assert system bundle

@@ -19,7 +19,7 @@
  */
 package org.jboss.gravia.resource;
 
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
 
 /**
@@ -52,7 +52,7 @@ public final class ResourceIdentity {
     }
 
     private ResourceIdentity(String symbolicName, Version version) {
-        ArgumentAssertion.assertNotNull(symbolicName, "symbolicName");
+        IllegalArgumentAssertion.assertNotNull(symbolicName, "symbolicName");
         this.symbolicName = symbolicName;
         this.version = version != null ? version : Version.emptyVersion;
         this.canonicalForm = symbolicName + ":" + version;

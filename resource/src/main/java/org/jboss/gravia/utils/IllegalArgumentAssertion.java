@@ -25,10 +25,10 @@ package org.jboss.gravia.utils;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public final class ArgumentAssertion {
+public final class IllegalArgumentAssertion {
 
     // hide ctor
-    private ArgumentAssertion() {
+    private IllegalArgumentAssertion() {
     }
 
     /**

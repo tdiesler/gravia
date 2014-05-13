@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
 /**
  * A provider for module entries that delegates to
@@ -44,7 +44,7 @@ public class ServletContextEntriesProvider implements ModuleEntriesProvider {
     private final ServletContext servletContext;
 
     public ServletContextEntriesProvider(ServletContext servletContext) {
-        ArgumentAssertion.assertNotNull(servletContext, "servletContext");
+        IllegalArgumentAssertion.assertNotNull(servletContext, "servletContext");
         this.servletContext = servletContext;
     }
 
@@ -64,7 +64,7 @@ public class ServletContextEntriesProvider implements ModuleEntriesProvider {
 
     @Override
     public List<URL> findEntries(String path, String filePattern, boolean recurse) {
-        ArgumentAssertion.assertNotNull(path, "path");
+        IllegalArgumentAssertion.assertNotNull(path, "path");
         if (recurse == true)
             throw new UnsupportedOperationException("Cannot handle recursive resource discovery");
 

@@ -45,7 +45,7 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.utils.CaseInsensitiveDictionary;
-import org.jboss.gravia.utils.ArgumentAssertion;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 import org.jboss.gravia.utils.UnmodifiableDictionary;
 import org.osgi.framework.Bundle;
 
@@ -67,8 +67,8 @@ public abstract class AbstractModule implements Module, Attachable {
     private final ConcurrentHashMap<ServiceReference<?>, AtomicInteger> usedServices = new ConcurrentHashMap<ServiceReference<?>, AtomicInteger>();
 
     protected AbstractModule(AbstractRuntime runtime, ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
-        ArgumentAssertion.assertNotNull(runtime, "runtime");
-        ArgumentAssertion.assertNotNull(classLoader, "classLoader");
+        IllegalArgumentAssertion.assertNotNull(runtime, "runtime");
+        IllegalArgumentAssertion.assertNotNull(classLoader, "classLoader");
         this.runtime = runtime;
         this.classLoader = classLoader;
 
