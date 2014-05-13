@@ -37,7 +37,7 @@ public class UnmodifiableDictionary<K, V> extends Dictionary<K, V> implements Se
     private final Dictionary<K, V> delegate;
 
     public UnmodifiableDictionary(Dictionary<K, V> props) {
-        NotNullException.assertValue(props, "delegate");
+        ArgumentAssertion.assertNotNull(props, "delegate");
 
         delegate = new Hashtable<K, V>();
         Enumeration<K> keys = props.keys();

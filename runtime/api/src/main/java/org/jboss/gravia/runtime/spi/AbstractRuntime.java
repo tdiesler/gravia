@@ -43,7 +43,7 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * The abstract base implementation for a {@link Runtime}
@@ -61,7 +61,7 @@ public abstract class AbstractRuntime implements Runtime {
     private final PropertiesProvider properties;
 
     protected AbstractRuntime(PropertiesProvider propertiesProvider) {
-        NotNullException.assertValue(propertiesProvider, "propertiesProvider");
+        ArgumentAssertion.assertNotNull(propertiesProvider, "propertiesProvider");
         runtimeEvents = new RuntimeEventsManager();
         properties = propertiesProvider;
     }

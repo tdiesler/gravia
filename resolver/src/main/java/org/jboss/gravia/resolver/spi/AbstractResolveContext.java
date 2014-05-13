@@ -36,7 +36,7 @@ import org.jboss.gravia.resource.Namespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Wiring;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * The abstract implementation of a {@link ResolveContext}.
@@ -52,7 +52,7 @@ public abstract class AbstractResolveContext implements ResolveContext {
     private PreferencePolicy preferencePolicy;
 
     public AbstractResolveContext(Environment environment, Set<Resource> manres, Set<Resource> optres) {
-        NotNullException.assertValue(environment, "environment");
+        ArgumentAssertion.assertNotNull(environment, "environment");
 
         this.environment = environment;
         this.mandatory = new ArrayList<Resource>(manres != null ? manres : Collections.<Resource> emptyList());

@@ -28,7 +28,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * The default properties provider.
@@ -59,7 +59,7 @@ public class DefaultPropertiesProvider implements PropertiesProvider {
     }
 
     public DefaultPropertiesProvider(Map<String, Object> props, boolean sysprops) {
-        NotNullException.assertValue(props, "props");
+        ArgumentAssertion.assertNotNull(props, "props");
         systemPropertyDelegation = sysprops;
         properties.putAll(propsToMap(getDefaultProperties()));
         properties.putAll(props);

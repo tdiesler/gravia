@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 
 import org.jboss.as.server.deployment.module.ResourceRoot;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 import org.jboss.vfs.VirtualFile;
 
 /**
@@ -43,7 +43,7 @@ public class VirtualFileEntriesProvider implements ModuleEntriesProvider {
     private final VirtualFile rootFile;
 
     public VirtualFileEntriesProvider(ResourceRoot resourceRoot) {
-        NotNullException.assertValue(resourceRoot, "resourceRoot");
+        ArgumentAssertion.assertNotNull(resourceRoot, "resourceRoot");
         this.rootFile = resourceRoot.getRoot();
     }
 

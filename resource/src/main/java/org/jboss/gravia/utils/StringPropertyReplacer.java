@@ -90,8 +90,8 @@ public final class StringPropertyReplacer {
      *         will be returned.
      */
     public static String replaceProperties(String string, PropertyProvider provider) {
-        NotNullException.assertValue(string, "string");
-        NotNullException.assertValue(provider, "provider");
+        ArgumentAssertion.assertNotNull(string, "string");
+        ArgumentAssertion.assertNotNull(provider, "provider");
 
         final char[] chars = string.toCharArray();
         StringBuffer buffer = new StringBuffer();

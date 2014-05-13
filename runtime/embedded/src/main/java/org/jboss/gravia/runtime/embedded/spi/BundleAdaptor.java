@@ -35,7 +35,7 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.utils.CaseInsensitiveDictionary;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -54,7 +54,7 @@ public final class BundleAdaptor implements Bundle {
     private final Module module;
 
     public BundleAdaptor(Module module) {
-        NotNullException.assertValue(module, "module");
+        ArgumentAssertion.assertNotNull(module, "module");
         this.module = module;
     }
 

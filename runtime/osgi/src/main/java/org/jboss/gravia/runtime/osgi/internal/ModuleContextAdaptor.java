@@ -38,7 +38,7 @@ import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.SynchronousModuleListener;
 import org.jboss.gravia.runtime.spi.AbstractModuleContext;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -58,7 +58,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
 
     ModuleContextAdaptor(Module module, BundleContext bundleContext) {
         super(module);
-        NotNullException.assertValue(bundleContext, "bundleContext");
+        ArgumentAssertion.assertNotNull(bundleContext, "bundleContext");
         this.bundleContext = bundleContext;
     }
 
@@ -231,7 +231,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         private final ModuleListener delegate;
 
         ModuleListenerAdaptor(ModuleListener delegate) {
-            NotNullException.assertValue(delegate, "delegate");
+            ArgumentAssertion.assertNotNull(delegate, "delegate");
             this.delegate = delegate;
         }
 
@@ -265,7 +265,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         private final ServiceListener delegate;
 
         ServiceListenerAdaptor(ServiceListener delegate) {
-            NotNullException.assertValue(delegate, "delegate");
+            ArgumentAssertion.assertNotNull(delegate, "delegate");
             this.delegate = delegate;
         }
 
@@ -295,7 +295,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         private final org.osgi.framework.ServiceReference<S> delegate;
 
         ServiceReferenceAdaptor(org.osgi.framework.ServiceReference<S> delegate) {
-            NotNullException.assertValue(delegate, "delegate");
+            ArgumentAssertion.assertNotNull(delegate, "delegate");
             this.delegate = delegate;
         }
 
@@ -331,7 +331,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         private final org.osgi.framework.ServiceRegistration<S> delegate;
 
         ServiceRegistrationAdaptor(org.osgi.framework.ServiceRegistration<S> delegate) {
-            NotNullException.assertValue(delegate, "delegate");
+            ArgumentAssertion.assertNotNull(delegate, "delegate");
             this.delegate = delegate;
         }
 
@@ -356,7 +356,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         private final ServiceFactory<S> delegate;
 
         ServiceFactoryAdaptor(ServiceFactory<S> delegate) {
-            NotNullException.assertValue(delegate, "delegate");
+            ArgumentAssertion.assertNotNull(delegate, "delegate");
             this.delegate = delegate;
         }
 

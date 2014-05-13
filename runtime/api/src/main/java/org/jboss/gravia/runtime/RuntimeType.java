@@ -20,7 +20,7 @@
 package org.jboss.gravia.runtime;
 
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * The enumeration of supported target containers
@@ -38,7 +38,7 @@ public enum RuntimeType {
     }
 
     public static RuntimeType getRuntimeType(Runtime runtime) {
-        NotNullException.assertValue(runtime, "runtime");
+        ArgumentAssertion.assertNotNull(runtime, "runtime");
         Object type = runtime.getProperty(Constants.RUNTIME_TYPE);
         return RuntimeType.getRuntimeType((String) type);
     }

@@ -24,7 +24,7 @@ import java.util.Hashtable;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * A manifest {@link Resource} builder.
@@ -37,7 +37,7 @@ import org.jboss.gravia.utils.NotNullException;
 public class ManifestResourceBuilder extends DictionaryResourceBuilder {
 
     public ManifestResourceBuilder load(Manifest manifest) {
-        NotNullException.assertValue(manifest, "manifest");
+        ArgumentAssertion.assertNotNull(manifest, "manifest");
         Dictionary<String, String> headers = getManifestHeaders(manifest);
         load(headers);
         return this;

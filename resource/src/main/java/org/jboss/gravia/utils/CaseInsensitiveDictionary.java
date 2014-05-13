@@ -50,7 +50,7 @@ public class CaseInsensitiveDictionary<V> extends Hashtable<String, V> {
      * @param delegate the delegate
      */
     public CaseInsensitiveDictionary(Dictionary<String, V> delegate) {
-        NotNullException.assertValue(delegate, "delegate");
+        ArgumentAssertion.assertNotNull(delegate, "delegate");
 
         this.delegate = new Hashtable<String, V>(delegate.size());
         this.originalKeys = Collections.synchronizedSet(new HashSet<String>());

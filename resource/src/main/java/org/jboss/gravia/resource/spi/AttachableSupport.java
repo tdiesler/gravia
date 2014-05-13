@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.AttachmentKey;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 
 /**
@@ -40,8 +40,8 @@ public class AttachableSupport implements Attachable {
     @Override
     @SuppressWarnings("unchecked")
     public synchronized <T> T putAttachment(AttachmentKey<T> key, T value) {
-        NotNullException.assertValue(key, "key");
-        NotNullException.assertValue(value, "value");
+        ArgumentAssertion.assertNotNull(key, "key");
+        ArgumentAssertion.assertNotNull(value, "value");
         if (attachments == null) {
             attachments = new HashMap<AttachmentKey<?>, Object>();
         }
@@ -51,20 +51,20 @@ public class AttachableSupport implements Attachable {
     @Override
     @SuppressWarnings("unchecked")
     public synchronized <T> T getAttachment(AttachmentKey<T> key) {
-        NotNullException.assertValue(key, "key");
+        ArgumentAssertion.assertNotNull(key, "key");
         return attachments != null ? (T) attachments.get(key) : null;
     }
 
     @Override
     public synchronized <T> boolean hasAttachment(AttachmentKey<T> key) {
-        NotNullException.assertValue(key, "key");
+        ArgumentAssertion.assertNotNull(key, "key");
         return attachments != null ? attachments.containsKey(key) : false;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public synchronized <T> T removeAttachment(AttachmentKey<T> key) {
-        NotNullException.assertValue(key, "key");
+        ArgumentAssertion.assertNotNull(key, "key");
         return attachments != null ? (T) attachments.remove(key) : null;
     }
 }

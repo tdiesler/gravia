@@ -38,7 +38,7 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * An abstract  {@link Repository} that does nothing.
@@ -70,7 +70,7 @@ public abstract class AbstractRepository implements Repository {
     }
 
     public void setRepositoryStorage(RepositoryStorage storage) {
-        NotNullException.assertValue(storage, "storage");
+        ArgumentAssertion.assertNotNull(storage, "storage");
         if (this.storage != null)
             throw new IllegalStateException("RepositoryStorage already set");
         this.storage = storage;
@@ -81,7 +81,7 @@ public abstract class AbstractRepository implements Repository {
     }
 
     public void setFallbackRepository(Repository fallback) {
-        NotNullException.assertValue(fallback, "fallback");
+        ArgumentAssertion.assertNotNull(fallback, "fallback");
         if (this.fallback != null)
             throw new IllegalStateException("Fallback repository already set");
         this.fallback = fallback;
@@ -146,7 +146,7 @@ public abstract class AbstractRepository implements Repository {
 
     @Override
     public Map<Requirement, Collection<Capability>> findProviders(Collection<Requirement> reqs) {
-        NotNullException.assertValue(reqs, "reqs");
+        ArgumentAssertion.assertNotNull(reqs, "reqs");
 
         Map<Requirement, Collection<Capability>> result = new HashMap<Requirement, Collection<Capability>>();
         for (Requirement req : reqs) {
@@ -159,7 +159,7 @@ public abstract class AbstractRepository implements Repository {
 
     @Override
     public Collection<Capability> findProviders(Requirement req) {
-        NotNullException.assertValue(req, "req");
+        ArgumentAssertion.assertNotNull(req, "req");
 
         // Try to find the providers in the storage
         RepositoryStorage repositoryStorage = getRequiredRepositoryStorage();

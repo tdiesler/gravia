@@ -36,7 +36,7 @@ import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractModuleContext;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * The embedded {@link ModuleContext}
@@ -57,35 +57,35 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
 
     @Override
     public void addModuleListener(ModuleListener listener) {
-        NotNullException.assertValue(listener, "listener");
+        ArgumentAssertion.assertNotNull(listener, "listener");
         assertNotDestroyed();
         getEventsManager().addModuleListener(getModule(), listener);
     }
 
     @Override
     public void removeModuleListener(ModuleListener listener) {
-        NotNullException.assertValue(listener, "listener");
+        ArgumentAssertion.assertNotNull(listener, "listener");
         assertNotDestroyed();
         getEventsManager().removeModuleListener(getModule(), listener);
     }
 
     @Override
     public void addServiceListener(ServiceListener listener, String filterstr) {
-        NotNullException.assertValue(listener, "listener");
+        ArgumentAssertion.assertNotNull(listener, "listener");
         assertNotDestroyed();
         getEventsManager().addServiceListener(getModule(), listener, filterstr);
     }
 
     @Override
     public void addServiceListener(ServiceListener listener) {
-        NotNullException.assertValue(listener, "listener");
+        ArgumentAssertion.assertNotNull(listener, "listener");
         assertNotDestroyed();
         getEventsManager().addServiceListener(getModule(), listener, null);
     }
 
     @Override
     public void removeServiceListener(ServiceListener listener) {
-        NotNullException.assertValue(listener, "listener");
+        ArgumentAssertion.assertNotNull(listener, "listener");
         assertNotDestroyed();
         getEventsManager().removeServiceListener(getModule(), listener);
     }
@@ -93,24 +93,24 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     @SuppressWarnings("unchecked")
     public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service, Dictionary<String, ?> properties) {
-        NotNullException.assertValue(clazz, "clazz");
-        NotNullException.assertValue(service, "service");
+        ArgumentAssertion.assertNotNull(clazz, "clazz");
+        ArgumentAssertion.assertNotNull(service, "service");
         assertNotDestroyed();
         return getServicesManager().registerService(this, new String[]{ clazz.getName() }, service, properties);
     }
 
     @Override
     public ServiceRegistration<?> registerService(String className, Object service, Dictionary<String, ?> properties) {
-        NotNullException.assertValue(className, "className");
-        NotNullException.assertValue(service, "service");
+        ArgumentAssertion.assertNotNull(className, "className");
+        ArgumentAssertion.assertNotNull(service, "service");
         assertNotDestroyed();
         return getServicesManager().registerService(this, new String[]{ className }, service, properties);
     }
 
     @Override
     public ServiceRegistration<?> registerService(String[] classNames, Object service, Dictionary<String, ?> properties) {
-        NotNullException.assertValue(classNames, "classNames");
-        NotNullException.assertValue(service, "service");
+        ArgumentAssertion.assertNotNull(classNames, "classNames");
+        ArgumentAssertion.assertNotNull(service, "service");
         assertNotDestroyed();
         return getServicesManager().registerService(this, classNames, service, properties);
     }
@@ -118,7 +118,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     @SuppressWarnings("unchecked")
     public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
-        NotNullException.assertValue(clazz, "clazz");
+        ArgumentAssertion.assertNotNull(clazz, "clazz");
         assertNotDestroyed();
         return (ServiceReference<S>) getServicesManager().getServiceReference(this, clazz.getName());
     }
@@ -126,7 +126,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
 
     @Override
     public ServiceReference<?> getServiceReference(String className) {
-        NotNullException.assertValue(className, "className");
+        ArgumentAssertion.assertNotNull(className, "className");
         assertNotDestroyed();
         return getServicesManager().getServiceReference(this, className);
     }
@@ -178,7 +178,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
 
     @Override
     public boolean ungetService(ServiceReference<?> reference) {
-        NotNullException.assertValue(reference, "reference");
+        ArgumentAssertion.assertNotNull(reference, "reference");
         if (isDestroyed()) {
             LOGGER.warn("Cannot ungetService " + reference + " from already destroyed module context: " + this);
             return false;
@@ -191,7 +191,7 @@ final class EmbeddedModuleContext extends AbstractModuleContext {
     @Override
     @SuppressWarnings("unchecked")
     public <S> S getService(ServiceReference<S> reference) {
-        NotNullException.assertValue(reference, "reference");
+        ArgumentAssertion.assertNotNull(reference, "reference");
         assertNotDestroyed();
 
         ServiceState<S> serviceState = ServiceState.assertServiceState(reference);

@@ -19,7 +19,7 @@
  */
 package org.jboss.gravia.resource;
 
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 
 /**
@@ -52,7 +52,7 @@ public final class ResourceIdentity {
     }
 
     private ResourceIdentity(String symbolicName, Version version) {
-        NotNullException.assertValue(symbolicName, "symbolicName");
+        ArgumentAssertion.assertNotNull(symbolicName, "symbolicName");
         this.symbolicName = symbolicName;
         this.version = version != null ? version : Version.emptyVersion;
         this.canonicalForm = symbolicName + ":" + version;

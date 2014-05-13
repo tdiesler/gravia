@@ -25,7 +25,7 @@ import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * Provides Moduel headers from a manifest
@@ -40,7 +40,7 @@ public final class ManifestHeadersProvider {
     private final Manifest manifest;
 
     public ManifestHeadersProvider(Manifest manifest) {
-        NotNullException.assertValue(manifest, "manifest");
+        ArgumentAssertion.assertNotNull(manifest, "manifest");
         this.manifest = manifest;
     }
 

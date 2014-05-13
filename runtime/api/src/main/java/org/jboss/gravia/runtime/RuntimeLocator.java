@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeFactory;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * Locates the a Runtime instance
@@ -69,8 +69,8 @@ public final class RuntimeLocator {
      * @throws IllegalStateException If a runtime has already been created
      */
     public static Runtime createRuntime(RuntimeFactory factory, PropertiesProvider props) {
-        NotNullException.assertValue(factory, "factory");
-        NotNullException.assertValue(props, "props");
+        ArgumentAssertion.assertNotNull(factory, "factory");
+        ArgumentAssertion.assertNotNull(props, "props");
         synchronized (runtimeReference) {
 
             // Check that the runtime has not already been created
@@ -97,7 +97,7 @@ public final class RuntimeLocator {
      * </ol>
      */
     public static Runtime createRuntime(PropertiesProvider props) {
-        NotNullException.assertValue(props, "props");
+        ArgumentAssertion.assertNotNull(props, "props");
 
         RuntimeFactory factory = null;
         String className = (String) props.getProperty(RuntimeFactory.class.getName());

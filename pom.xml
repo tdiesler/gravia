@@ -31,17 +31,42 @@
 
     <version>1.1.0.Beta17-SNAPSHOT</version>
 
-    <prerequisites>
-        <maven>3.1.1</maven>
-    </prerequisites>
-    
+    <description>Fuse Portable Runtime</description>
+    <url>https://github.com/tdiesler/gravia/wiki</url>
+
+    <!-- Organization -->
+    <organization>
+        <name>JBoss by Red Hat</name>
+        <url>http://www.jboss.org</url>
+    </organization>
+
     <!-- Source Control -->
     <scm>
         <connection>scm:git:git://github.com/tdiesler/gravia.git</connection>
         <developerConnection>scm:git:git@github.com:tdiesler/gravia.git</developerConnection>
         <url>http://github.com/tdiesler/gravia</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
+
+    <!-- Licenses -->
+    <licenses>
+        <license>
+            <name>apache_v2</name>
+            <url>http://repository.jboss.org/licenses/apache-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <!-- Developers -->
+    <developers>
+        <developer>
+            <name>Gravia Committers</name>
+        </developer>
+    </developers>
+
+    <!-- Prerequisites -->
+    <prerequisites>
+        <maven>3.1.1</maven>
+    </prerequisites>
 
     <!-- Properties -->
     <properties>
@@ -70,7 +95,7 @@
         <version.mockito>1.8.4</version.mockito>
         <version.osgi>5.0.0</version.osgi>
         <version.slf4j>1.6.6</version.slf4j>
-        
+
         <!-- Plugin Versions -->
         <version-apache-felix-scr-plugin>1.15.0</version-apache-felix-scr-plugin>
         <version-maven-antrun-plugin>1.7</version-maven-antrun-plugin>
@@ -79,9 +104,10 @@
         <version-maven-bundle-plugin>2.3.4</version-maven-bundle-plugin>
         <version-maven-javadoc-plugin>2.9.1</version-maven-javadoc-plugin>
         <version-maven-release-plugin>2.5</version-maven-release-plugin>
+        <version-maven-source-plugin>2.2.1</version-maven-source-plugin>
         <version-maven-surefire-plugin>2.16</version-maven-surefire-plugin>
-        
-		<surefire.system.args>-ea</surefire.system.args>
+
+        <surefire.system.args>-ea</surefire.system.args>
     </properties>
 
     <!-- Modules -->
@@ -107,9 +133,9 @@
                 <version>${version.apache.ant}</version>
             </dependency>
             <dependency>
-               <groupId>org.apache.camel</groupId>
-               <artifactId>camel-core</artifactId>
-               <version>${version.apache.camel}</version>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-core</artifactId>
+                <version>${version.apache.camel}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -138,19 +164,19 @@
                 <version>${version.apache.felix.metatype}</version>
             </dependency>
             <dependency>
-              <groupId>org.apache.felix</groupId>
-              <artifactId>org.apache.felix.http.bridge</artifactId>
-              <version>${version.apache.felix.http}</version>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.http.bridge</artifactId>
+                <version>${version.apache.felix.http}</version>
             </dependency>
             <dependency>
-              <groupId>org.apache.felix</groupId>
-              <artifactId>org.apache.felix.http.bundle</artifactId>
-              <version>${version.apache.felix.http}</version>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.http.bundle</artifactId>
+                <version>${version.apache.felix.http}</version>
             </dependency>
             <dependency>
-              <groupId>org.apache.felix</groupId>
-              <artifactId>org.apache.felix.http.proxy</artifactId>
-              <version>${version.apache.felix.http}</version>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.http.proxy</artifactId>
+                <version>${version.apache.felix.http}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -172,7 +198,7 @@
                 <artifactId>org.apache.felix.scr.generator</artifactId>
                 <version>${version.apache.felix.scr.generator}</version>
             </dependency>
-            
+
             <!-- JBoss -->
             <dependency>
                 <groupId>org.jboss.arquillian.container</groupId>
@@ -215,9 +241,9 @@
                 <version>${version.jboss.arquillian.osgi}</version>
             </dependency>
             <dependency>
-              <groupId>org.jboss.arquillian.container</groupId>
-              <artifactId>arquillian-tomcat-managed-7</artifactId>
-              <version>${version.jboss.arquillian.tomcat}</version>
+                <groupId>org.jboss.arquillian.container</groupId>
+                <artifactId>arquillian-tomcat-managed-7</artifactId>
+                <version>${version.jboss.arquillian.tomcat}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.osgi.metadata</groupId>
@@ -234,7 +260,7 @@
                 <artifactId>shrinkwrap-impl-base</artifactId>
                 <version>${version.jboss.shrinkwrap}</version>
             </dependency>
-            <dependency> 
+            <dependency>
                 <groupId>org.jboss.shrinkwrap.resolver</groupId>
                 <artifactId>shrinkwrap-resolver-depchain</artifactId>
                 <version>${version.jboss.shrinkwrap.resolver}</version>
@@ -245,21 +271,21 @@
                 <artifactId>javax.servlet-api</artifactId>
                 <version>${version.javax.servlet30.api}</version>
             </dependency>
-            
+
             <!-- Karaf -->
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>org.apache.karaf.main</artifactId>
                 <version>${version.apache.karaf}</version>
             </dependency>
-            
+
             <!-- Log4j -->
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${version.log4j}</version>
             </dependency>
-            
+
             <!-- OSGi -->
             <dependency>
                 <groupId>org.osgi</groupId>
@@ -271,7 +297,7 @@
                 <artifactId>org.osgi.enterprise</artifactId>
                 <version>${version.osgi}</version>
             </dependency>
-            
+
             <!-- SLF4J -->
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -293,7 +319,7 @@
                 <artifactId>slf4j-simple</artifactId>
                 <version>${version.slf4j}</version>
             </dependency>
-            
+
             <!-- Tomcat -->
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
@@ -305,7 +331,7 @@
                 <artifactId>tomcat-catalina-ant</artifactId>
                 <version>${version.apache.tomcat}</version>
             </dependency>
-            
+
             <!-- WildFly -->
             <dependency>
                 <groupId>org.wildfly</groupId>
@@ -323,12 +349,12 @@
                 <artifactId>wildfly-arquillian-protocol-jmx</artifactId>
                 <version>${version.jboss.wildfly}</version>
             </dependency>
-	        <dependency>
-	            <groupId>org.wildfly</groupId>
-	            <artifactId>wildfly-server</artifactId>
+            <dependency>
+                <groupId>org.wildfly</groupId>
+                <artifactId>wildfly-server</artifactId>
                 <version>${version.jboss.wildfly}</version>
-	        </dependency>
-            
+            </dependency>
+
             <!-- Other -->
             <dependency>
                 <groupId>junit</groupId>
@@ -342,7 +368,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <build>
         <!-- Plugin Management -->
         <pluginManagement>
@@ -416,6 +442,11 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${version-maven-source-plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${version-maven-surefire-plugin}</version>
                     <configuration>
@@ -447,8 +478,23 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <inherited>true</inherited>
+            </plugin>
+        </plugins>
     </build>
-    
+
     <!-- Repositories -->
     <repositories>
         <repository>
@@ -480,7 +526,7 @@
             <url>https://repository.jboss.org/nexus/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
-    
+
     <!-- Profiles -->
     <profiles>
         <profile>

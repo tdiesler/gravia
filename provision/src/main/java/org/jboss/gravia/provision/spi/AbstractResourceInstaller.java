@@ -30,7 +30,7 @@ import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * An abstract {@link ResourceInstaller}.
@@ -44,7 +44,7 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
 
     @Override
     public synchronized Set<ResourceHandle> installResources(Context context) throws ProvisionException {
-        NotNullException.assertValue(context, "context");
+        ArgumentAssertion.assertNotNull(context, "context");
         Set<ResourceHandle> handles = new HashSet<ResourceHandle>();
         for (Resource res : context.getResources()) {
             ResourceIdentity identity = res.getIdentity();
@@ -66,7 +66,7 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
     }
 
     private synchronized ResourceHandle installResourceInternal(Context context, Resource resource, boolean shared) throws ProvisionException {
-        NotNullException.assertValue(resource, "resource");
+        ArgumentAssertion.assertNotNull(resource, "resource");
         if (context == null) {
             context = new DefaultInstallerContext(resource);
         }

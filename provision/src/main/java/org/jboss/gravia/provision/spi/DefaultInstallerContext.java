@@ -29,7 +29,7 @@ import java.util.Map;
 import org.jboss.gravia.provision.ResourceInstaller.Context;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * An abstract installer {@link Context}.
@@ -48,8 +48,8 @@ public class DefaultInstallerContext implements Context {
     }
 
     public DefaultInstallerContext(List<Resource> resources, Map<Requirement, Resource> mapping) {
-        NotNullException.assertValue(resources, "resources");
-        NotNullException.assertValue(mapping, "mapping");
+        ArgumentAssertion.assertNotNull(resources, "resources");
+        ArgumentAssertion.assertNotNull(mapping, "mapping");
         this.resources = new ArrayList<Resource>(resources);
         this.resourceMapping = new HashMap<Requirement, Resource>(mapping);
     }

@@ -29,7 +29,7 @@ import org.jboss.gravia.repository.spi.AbstractRepository;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * A {@link Repository} aggregator.
@@ -43,7 +43,7 @@ public class RepositoryAggregator extends AbstractRepository {
 
     public RepositoryAggregator(PropertiesProvider propertiesProvider, Repository... delegates) {
         super(propertiesProvider);
-        NotNullException.assertValue(delegates, "delegates");
+        ArgumentAssertion.assertNotNull(delegates, "delegates");
         this.delegates = Arrays.asList(delegates);
     }
 

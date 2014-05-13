@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * A provider for module entries that delegates to
@@ -38,7 +38,7 @@ public final class ClassLoaderEntriesProvider implements ModuleEntriesProvider {
     private final ClassLoader classLoader;
 
     public ClassLoaderEntriesProvider(Module module) {
-        NotNullException.assertValue(module, "module");
+        ArgumentAssertion.assertNotNull(module, "module");
         classLoader = module.adapt(ClassLoader.class);
     }
 

@@ -55,7 +55,7 @@ import org.jboss.gravia.runtime.DefaultWire;
 import org.jboss.gravia.runtime.DefaultWiring;
 import org.jboss.gravia.runtime.Wire;
 import org.jboss.gravia.runtime.Wiring;
-import org.jboss.gravia.utils.NotNullException;
+import org.jboss.gravia.utils.ArgumentAssertion;
 
 /**
  * An abstract {@link Provisioner}
@@ -76,11 +76,11 @@ public abstract class AbstractProvisioner implements Provisioner {
     }
 
     public AbstractProvisioner(Environment environment, Resolver resolver, Repository repository, ResourceInstaller installer, PreferencePolicy policy) {
-        NotNullException.assertValue(environment, "environment");
-        NotNullException.assertValue(resolver, "resolver");
-        NotNullException.assertValue(repository, "repository");
-        NotNullException.assertValue(installer, "installer");
-        NotNullException.assertValue(policy, "policy");
+        ArgumentAssertion.assertNotNull(environment, "environment");
+        ArgumentAssertion.assertNotNull(resolver, "resolver");
+        ArgumentAssertion.assertNotNull(repository, "repository");
+        ArgumentAssertion.assertNotNull(installer, "installer");
+        ArgumentAssertion.assertNotNull(policy, "policy");
         this.environment = environment;
         this.resolver = resolver;
         this.repository = repository;
