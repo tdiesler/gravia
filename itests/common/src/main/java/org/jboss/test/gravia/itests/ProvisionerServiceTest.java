@@ -47,6 +47,7 @@ import org.jboss.gravia.arquillian.container.ContainerSetup;
 import org.jboss.gravia.arquillian.container.ContainerSetupTask;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.ResourceHandle;
+import org.jboss.gravia.provision.spi.RuntimeEnvironment;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.Resolver;
@@ -143,6 +144,12 @@ public class ProvisionerServiceTest {
         return archive.getArchive();
     }
 
+    /**
+     * Provision a resource from an input stream.
+     *
+     * The client controlls the resource identity
+     * The installed resource is self sufficient - no additional dependency mapping needed.
+     */
     @Test
     public void testProvisionStreamResource() throws Exception {
         Provisioner provisioner = ServiceLocator.getRequiredService(Provisioner.class);
@@ -165,6 +172,13 @@ public class ProvisionerServiceTest {
         }
     }
 
+    /**
+     * Provision a resource from an input stream to the container shared location.
+     * Provision another resource from an input stream that has a class loader dependency on the first.
+     *
+     * The client controlls the resource identities
+     * The installed resources are self sufficient - no additional dependency mapping needed.
+     */
     @Test
     public void testProvisionSharedStreamResource() throws Exception {
         List<ResourceHandle> handles = new ArrayList<>();
@@ -195,12 +209,19 @@ public class ProvisionerServiceTest {
         }
     }
 
+    /**
+     * Provision a resource from maven coordinates.
+     *
+     * The client controlls the resource identity
+     * The installed resource is self sufficient - no additional dependency mapping needed.
+     */
     @Test
     public void testProvisionMavenResource() throws Exception {
 
         Provisioner provisioner = ServiceLocator.getRequiredService(Provisioner.class);
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
 
+        // Tomcat does not support jar deployments
         Assume.assumeFalse(RuntimeType.TOMCAT == RuntimeType.getRuntimeType());
 
         ResourceIdentity identityA = ResourceIdentity.fromString("camel.core.unshared");
@@ -215,6 +236,13 @@ public class ProvisionerServiceTest {
         }
     }
 
+    /**
+     * Provision a resource from maven coordinates.
+     * Provision another resource from an input stream that has a class loader dependency on the first.
+     *
+     * The client controlls the resource identity
+     * The shared resource needs additional dependency mapping to work in wildfly.
+     */
     @Test
     public void testProvisionSharedMavenResource() throws Exception {
 
@@ -247,6 +275,13 @@ public class ProvisionerServiceTest {
         }
     }
 
+    /**
+     * Provision an abstract feature.
+     *
+     * The provisioner uses the {@link RuntimeEnvironment}, {@link Resolver}, {@link Repository}
+     * The dependency mapping is defined by the repository content.
+     * Only the needed delta that is not already available in the runtime is provisioned.
+     */
     @Test
     public void testProvisionAbstractFeature() throws Exception {
 
@@ -311,6 +346,14 @@ public class ProvisionerServiceTest {
         }
     }
 
+    /**
+     * Add a resource to the repository that is then provisioned.
+     * The added resource has a dependency on an abstract feature.
+     *
+     * The provisioner uses the {@link RuntimeEnvironment}, {@link Resolver}, {@link Repository}
+     * The dependency mapping is defined by the repository content.
+     * The transitive set of dependencies is provisioned.
+     */
     @Test
     public void testProvisionRepositoryResourceWithDependency() throws Exception {
 
