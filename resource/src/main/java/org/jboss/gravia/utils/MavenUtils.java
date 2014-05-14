@@ -1,15 +1,15 @@
 /*
  * #%L
- * Gravia :: Repository
+ * Gravia :: Resource
  * %%
- * Copyright (C) 2012 - 2014 JBoss by Red Hat
+ * Copyright (C) 2010 - 2014 JBoss by Red Hat
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,29 +17,25 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.repository;
+package org.jboss.gravia.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.DefaultResourceBuilder;
-import org.jboss.gravia.resource.IdentityNamespace;
-import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Version;
 
-/**
- * The {@link Resource} builder that understands {@link MavenCoordinates}.
- *
- * @author thomas.diesler@jboss.com
- * @since 02-Jul-2010
- */
-public class MavenResourceBuilder extends DefaultResourceBuilder {
 
-    public Capability addIdentityCapability(MavenCoordinates mavenid) {
-        Capability icap = addIdentityCapability(getSymbolicName(mavenid), getVersion(mavenid), null, null);
-        icap.getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
-        return icap;
+/**
+ * A utility class for {@link MavenCoordinates}
+ *
+ * @author Thomas.Diesler@jboss.com
+ * @since 16-Sep-2010
+ */
+public final class MavenUtils {
+
+    // Hide ctor
+    private MavenUtils() {
     }
 
     public static String getSymbolicName(MavenCoordinates mavenid) {
@@ -50,14 +46,10 @@ public class MavenResourceBuilder extends DefaultResourceBuilder {
         return Version.parseVersion(cleanupVersion(mavenid.getVersion()));
     }
 
-    /**
+    /*
      * Clean up version parameters. Other builders use more fuzzy definitions of
-     * the version syntax. This method cleans up such a version to match an OSGi
-     * version.
-     *
+     * the version syntax. This method cleans up such a version to match an OSGi version.
      * https://github.com/apache/felix/blob/trunk/bundleplugin/src/main/java/org/apache/maven/shared/osgi/DefaultMaven2OsgiConverter.java
-     * https://github.com/apache/felix/commit/39cc9ac8cbb3e5d8a76793b81b7cb9b04bca85b0
-     *
      */
     private static final Pattern FUZZY_VERSION = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?", Pattern.DOTALL);
 

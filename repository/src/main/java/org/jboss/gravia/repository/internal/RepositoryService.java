@@ -26,9 +26,9 @@ import java.util.Map;
 import javax.management.JMException;
 
 import org.jboss.gravia.repository.DefaultRepository;
-import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;

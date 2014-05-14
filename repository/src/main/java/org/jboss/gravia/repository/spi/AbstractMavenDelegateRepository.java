@@ -31,13 +31,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.MavenDelegateRepository;
-import org.jboss.gravia.repository.MavenResourceBuilder;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.MavenCoordinates;
+import org.jboss.gravia.resource.MavenResourceBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.spi.DefaultPropertiesProvider;

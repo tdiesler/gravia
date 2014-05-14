@@ -87,12 +87,12 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws Exception {
+    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, String runtimeName) throws Exception {
         ResourceHandle handle;
         if (shared) {
             handle = installSharedResourceInternal(context, resource);
         } else {
-            handle = installUnsharedResourceInternal(context, resource);
+            handle = installUnsharedResourceInternal(runtimeName, context, resource);
         }
         return handle;
     }
@@ -126,7 +126,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         };
     }
 
-    private ResourceHandle installUnsharedResourceInternal(Context context, Resource resource) throws Exception {
+    private ResourceHandle installUnsharedResourceInternal(String runtimeName, Context context, Resource resource) throws Exception {
         LOGGER.info("Installing unshared resource: {}", resource);
 
         File tempfile = null;

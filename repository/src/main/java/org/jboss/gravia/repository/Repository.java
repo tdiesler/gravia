@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.jboss.gravia.resource.Adaptable;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;

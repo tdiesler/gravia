@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.jboss.gravia.repository;
+package org.jboss.gravia.resource;
 
 import java.net.MalformedURLException;
 import java.net.URL;

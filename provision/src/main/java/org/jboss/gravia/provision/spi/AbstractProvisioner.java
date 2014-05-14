@@ -19,14 +19,9 @@
  */
 package org.jboss.gravia.provision.spi;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.jboss.gravia.provision.spi.ProvisionLogger.LOGGER;
 
-import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,7 +40,6 @@ import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.provision.ResourceInstaller.Context;
-import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.MavenIdentityRequirementBuilder;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.DefaultPreferencePolicy;
@@ -59,6 +53,7 @@ import org.jboss.gravia.resolver.spi.AbstractEnvironment;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
@@ -237,78 +232,29 @@ public abstract class AbstractProvisioner implements Provisioner {
         for (Resource res : context.getResources()) {
             ResourceIdentity identity = res.getIdentity();
             if (!isAbstract(res) && getEnvironment().getResource(identity) == null) {
-                handles.add(installer.installResource(context, res));
+                handles.add(installer.installResource(context, res, null));
             }
         }
         return Collections.unmodifiableSet(handles);
     }
 
     @Override
-    public ResourceHandle installResource(ResourceIdentity identity, InputStream inputStream) throws ProvisionException {
-        return installResourceInternal(identity, inputStream, false);
-    }
-
-    @Override
-    public ResourceHandle installSharedResource(ResourceIdentity identity, InputStream inputStream) throws ProvisionException {
-        return installResourceInternal(identity, inputStream, true);
-    }
-
-    @Override
-    public ResourceHandle installResource(ResourceIdentity identity, MavenCoordinates mvnid) throws ProvisionException {
-        return installResourceInternal(identity, mvnid, false);
-    }
-
-    @Override
-    public ResourceHandle installSharedResource(ResourceIdentity identity, MavenCoordinates mvnid) throws ProvisionException {
-        return installResourceInternal(identity, mvnid, true);
-    }
-
-    @Override
-    public ResourceHandle installResource(Resource resource) throws ProvisionException {
-        return installResourceInternal(resource, false);
-    }
-
-    @Override
-    public ResourceHandle installSharedResource(Resource resource) throws ProvisionException {
-        return installResourceInternal(resource, true);
-    }
-
-    private synchronized ResourceHandle installResourceInternal(ResourceIdentity identity, InputStream inputStream, boolean shared) throws ProvisionException {
+    public ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, InputStream inputStream) {
         IllegalArgumentAssertion.assertNotNull(identity, "identity");
         IllegalArgumentAssertion.assertNotNull(inputStream, "inputStream");
 
-        URL contentURL;
-        File tempFile;
-        try {
-            Path tempPath = Files.createTempFile(identity.getSymbolicName() + "-" + identity.getVersion(), null);
-            Files.copy(inputStream, tempPath, REPLACE_EXISTING);
-            contentURL = tempPath.toUri().toURL();
-            tempFile = tempPath.toFile();
-        } catch (Exception ex) {
-            throw new ProvisionException(ex);
-        }
-
-        // Build the {@link Resource}
         ResourceBuilder builder = new DefaultResourceBuilder();
         builder.addIdentityCapability(identity);
-        builder.addContentCapability(contentURL);
-        Resource resource = builder.getResource();
+        builder.addContentCapability(inputStream);
 
-        // Install the {@link Resource}
-        ResourceHandle handle;
-        try {
-            handle = installResourceInternal(resource, shared);
-        } finally {
-            tempFile.delete();
-        }
-        return handle;
+        return builder;
     }
 
-    private synchronized ResourceHandle installResourceInternal(ResourceIdentity identity, MavenCoordinates mvnid, boolean shared) throws ProvisionException {
-        IllegalArgumentAssertion.assertNotNull(identity, "identity");
-        IllegalArgumentAssertion.assertNotNull(mvnid, "mvnid");
+    @Override
+    public ResourceBuilder getMavenResourceBuilder(ResourceIdentity identity, MavenCoordinates mavenid) {
+        IllegalArgumentAssertion.assertNotNull(mavenid, "mavenid");
 
-        Requirement ireq = new MavenIdentityRequirementBuilder(mvnid).getRequirement();
+        Requirement ireq = new MavenIdentityRequirementBuilder(mavenid).getRequirement();
         Collection<Capability> providers = getRepository().findProviders(ireq);
         IllegalStateAssertion.assertFalse(providers.isEmpty(), "Cannot find providers for requirement: " + ireq);
 
@@ -316,8 +262,8 @@ public abstract class AbstractProvisioner implements Provisioner {
 
         // Copy the mvn resource to another resource with the given identity
         DefaultResourceBuilder builder = new DefaultResourceBuilder();
-        Capability icap = builder.addIdentityCapability(identity);
-        icap.getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mvnid.toExternalForm());
+        Capability icap = identity != null ? builder.addIdentityCapability(identity) : builder.addIdentityCapability(mavenid);
+        icap.getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
         for (Capability cap : mvnres.getCapabilities(null)) {
             if (!IdentityNamespace.IDENTITY_NAMESPACE.equals(cap.getNamespace())) {
                 builder.addCapability(cap.getNamespace(), cap.getAttributes(), cap.getDirectives());
@@ -326,12 +272,26 @@ public abstract class AbstractProvisioner implements Provisioner {
         for (Requirement req : mvnres.getRequirements(null)) {
             builder.addRequirement(req.getNamespace(), req.getAttributes(), req.getDirectives());
         }
-        Resource resource = builder.getResource();
 
-        return installResourceInternal(resource, shared);
+        return builder;
     }
 
-    private synchronized ResourceHandle installResourceInternal(Resource resource, boolean shared) throws ProvisionException {
+    @Override
+    public ResourceHandle installResource(Resource resource) throws ProvisionException {
+        return installResourceInternal(null, resource, false);
+    }
+
+    @Override
+    public ResourceHandle installResource(String runtimeName, Resource resource) throws ProvisionException {
+        return installResourceInternal(runtimeName, resource, false);
+    }
+
+    @Override
+    public ResourceHandle installSharedResource(Resource resource) throws ProvisionException {
+        return installResourceInternal(null, resource, true);
+    }
+
+    private synchronized ResourceHandle installResourceInternal(String runtimeName, Resource resource, boolean shared) throws ProvisionException {
         IllegalArgumentAssertion.assertNotNull(resource, "resource");
 
         ResourceContent content = resource.adapt(ResourceContent.class);
@@ -342,7 +302,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         if (shared) {
             handle = installer.installSharedResource(context, resource);
         } else {
-            handle = installer.installResource(context, resource);
+            handle = installer.installResource(context, resource, runtimeName);
         }
         return handle;
     }

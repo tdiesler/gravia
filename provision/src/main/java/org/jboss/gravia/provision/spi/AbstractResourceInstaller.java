@@ -38,22 +38,22 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
     public abstract RuntimeEnvironment getEnvironment();
 
     @Override
-    public ResourceHandle installResource(Context context, Resource res) throws ProvisionException {
-        return installResourceInternal(context, res, isShared(res));
+    public ResourceHandle installResource(Context context, Resource res, String runtimeName) throws ProvisionException {
+        return installResourceInternal(context, res, isShared(res), runtimeName);
     }
 
     @Override
     public ResourceHandle installSharedResource(Context context, Resource res) throws ProvisionException {
-        return installResourceInternal(context, res, true);
+        return installResourceInternal(context, res, true, null);
     }
 
-    private synchronized ResourceHandle installResourceInternal(Context context, Resource resource, boolean shared) throws ProvisionException {
+    private synchronized ResourceHandle installResourceInternal(Context context, Resource resource, boolean shared, String runtimeName) throws ProvisionException {
         IllegalArgumentAssertion.assertNotNull(resource, "resource");
         if (context == null) {
             context = new DefaultInstallerContext(resource);
         }
         try {
-            return installResourceProtected(context, resource, shared);
+            return installResourceProtected(context, resource, shared, runtimeName);
         } catch (RuntimeException rte) {
             throw rte;
         } catch (ProvisionException ex) {
@@ -63,7 +63,7 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
         }
     }
 
-    protected abstract ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws Exception;
+    protected abstract ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, String runtimeName) throws Exception;
 
     private boolean isShared(Resource resource) {
         Object attval = resource.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_SHARED_ATTRIBUTE);

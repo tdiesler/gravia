@@ -52,6 +52,7 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
+import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
@@ -141,12 +142,12 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws Exception {
+    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, String runtimeName) throws Exception {
         ResourceHandle handle;
         if (shared) {
             handle = installSharedResourceInternal(context, resource);
         } else {
-            handle = installUnsharedResourceInternal(context, resource);
+            handle = installUnsharedResourceInternal(runtimeName, context, resource);
         }
         return handle;
     }
@@ -210,14 +211,14 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
         };
     }
 
-    private ResourceHandle installUnsharedResourceInternal(Context context, Resource resource) throws Exception {
+    private ResourceHandle installUnsharedResourceInternal(String runtimeName, Context context, Resource resource) throws Exception {
         LOGGER.info("Installing unshared resource: {}", resource);
 
         final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
-        final ResourceWrapper wrapper = getWrappedResourceContent(resource, context.getResourceMapping());
+        final ResourceWrapper wrapper = getWrappedResourceContent(runtimeName, resource, context.getResourceMapping());
 
-        String runtimeName = wrapper.getRuntimeName();
-        NamedResourceAssociation.putResource(runtimeName, resource);
+        runtimeName = wrapper.getRuntimeName();
+        NamedResourceAssociation.putResource(wrapper.getRuntimeName(), resource);
         try {
             String deploymentName = wrapper.getDeploymentName();
             serverDeployer.deploy(deploymentName, wrapper.getInputStream());
@@ -250,11 +251,13 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
     }
 
     // Wrap the resource and add a generated jboss-deployment-structure.xml
-    private ResourceWrapper getWrappedResourceContent(Resource resource, Map<Requirement, Resource> mapping) {
+    private ResourceWrapper getWrappedResourceContent(String runtimeName, Resource resource, Map<Requirement, Resource> mapping) {
 
         Capability icap = resource.getIdentityCapability();
-        String rtnameAtt = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE);
-        String runtimeName = rtnameAtt != null ? rtnameAtt : resource.getIdentity().getSymbolicName() + ".jar";
+        if (runtimeName == null) {
+            String rtnameAtt = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE);
+            runtimeName = rtnameAtt != null ? rtnameAtt : resource.getIdentity().getSymbolicName() + ".jar";
+        }
 
         // Do nothing if there is no mapping
         if (mapping == null || mapping.isEmpty()) {
@@ -344,6 +347,14 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
                 String slot = version != Version.emptyVersion ? "slot='" + version + "'" : "";
                 buffer.append("<module name='" + modname + "' " + slot + "/>");
                 LOGGER.info("  {}", identity);
+            } else {
+                String modname = (String) req.getAttribute(IdentityNamespace.IDENTITY_NAMESPACE);
+                VersionRange versionRange = (VersionRange) req.getAttribute(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+                if (versionRange != null) {
+                    LOGGER.warn("Cannot find mapping for: {}", req);
+                }
+                buffer.append("<module name='" + modname + "'/>");
+                LOGGER.info("  {}", modname);
             }
         }
         buffer.append(" </dependencies>");

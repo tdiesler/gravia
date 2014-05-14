@@ -56,12 +56,12 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws ProvisionException {
+    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, String runtimeName) throws ProvisionException {
         LOGGER.info("Installing resource: {}", resource);
-        return installBundleResource(resource);
+        return installBundleResource(runtimeName, resource);
     }
 
-    private ResourceHandle installBundleResource(Resource resource) throws ProvisionException {
+    private ResourceHandle installBundleResource(String runtimeName, Resource resource) throws ProvisionException {
 
         // Install the Bundle
         ResourceIdentity identity = resource.getIdentity();
@@ -70,7 +70,8 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
 
         Bundle bundle;
         try {
-            bundle = context.installBundle(identity.toString(), content.getContent());
+            String location = runtimeName != null ? runtimeName : identity.getCanonicalForm();
+            bundle = context.installBundle(location, content.getContent());
         } catch (BundleException ex) {
             throw new ProvisionException(ex);
         }

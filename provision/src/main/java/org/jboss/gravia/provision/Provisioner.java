@@ -22,13 +22,14 @@ package org.jboss.gravia.provision;
 import java.io.InputStream;
 import java.util.Set;
 
-import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.ContentCapability;
+import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
 
 /**
@@ -72,32 +73,14 @@ public interface Provisioner {
     Set<ResourceHandle> provisionResources(Set<Requirement> reqs) throws ProvisionException;
 
     /**
-     * Install a resource from the given input stream.
-     *
-     * @see Provisioner#installResource(Resource)
+     * Get a content resource builder.
      */
-    ResourceHandle installResource(ResourceIdentity identity, InputStream inputStream) throws ProvisionException;
+    ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, InputStream inputStream);
 
     /**
-     * Install a resource to the shared location from the given input stream.
-     *
-     * @see Provisioner#installSharedResource(Resource)
+     * Get a maven resource builder.
      */
-    ResourceHandle installSharedResource(ResourceIdentity identity, InputStream inputStream) throws ProvisionException;
-
-    /**
-     * Install a resource from the given maven coordinates.
-     *
-     * @see Provisioner#installResource(Resource)
-     */
-    ResourceHandle installResource(ResourceIdentity identity, MavenCoordinates mvnid) throws ProvisionException;
-
-    /**
-     * Install a resource to the shared location from the given maven coordinates.
-     *
-     * @see Provisioner#installSharedResource(Resource)
-     */
-    ResourceHandle installSharedResource(ResourceIdentity identity, MavenCoordinates mvnid) throws ProvisionException;
+    ResourceBuilder getMavenResourceBuilder(ResourceIdentity identity, MavenCoordinates mavenid);
 
     /**
      * Install the given resource.
@@ -109,6 +92,13 @@ public interface Provisioner {
      * are not used. Instead, this method delegates directly to the container specific {@link ResourceInstaller}
      */
     ResourceHandle installResource(Resource resource) throws ProvisionException;
+
+    /**
+     * Install a resource using the given runtime name.
+     *
+     * @see Provisioner#installResource(Resource)
+     */
+    ResourceHandle installResource(String runtimeName, Resource resource) throws ProvisionException;
 
     /**
      * Install the given resource to the shared location.

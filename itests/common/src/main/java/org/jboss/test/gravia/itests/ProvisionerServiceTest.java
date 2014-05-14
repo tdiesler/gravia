@@ -47,7 +47,6 @@ import org.jboss.gravia.arquillian.container.ContainerSetup;
 import org.jboss.gravia.arquillian.container.ContainerSetupTask;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.ResourceHandle;
-import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.Resolver;
@@ -56,8 +55,10 @@ import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.IdentityRequirementBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
+import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
@@ -104,6 +105,7 @@ public class ProvisionerServiceTest {
     static final String RESOURCE_A = "stream-resource";
     static final String RESOURCE_B = "shared-stream-resource";
     static final String RESOURCE_B1 = "shared-stream-resource-client";
+    static final String RESOURCE_C = "resourceC";
     static final String RESOURCE_D = "resourceD";
     static final String RESOURCE_E = "resourceE";
 
@@ -145,7 +147,8 @@ public class ProvisionerServiceTest {
     public void testProvisionStreamResource() throws Exception {
         Provisioner provisioner = ServiceLocator.getRequiredService(Provisioner.class);
         ResourceIdentity identityA = ResourceIdentity.fromString(RESOURCE_A);
-        ResourceHandle handle = provisioner.installResource(identityA, deployer.getDeployment(RESOURCE_A));
+        ResourceBuilder builderA = provisioner.getContentResourceBuilder(identityA, deployer.getDeployment(RESOURCE_A));
+        ResourceHandle handle = provisioner.installResource(builderA.getResource());
         try {
             // Verify that the module got installed
             Runtime runtime = RuntimeLocator.getRequiredRuntime();
@@ -167,9 +170,11 @@ public class ProvisionerServiceTest {
         List<ResourceHandle> handles = new ArrayList<>();
         Provisioner provisioner = ServiceLocator.getRequiredService(Provisioner.class);
         ResourceIdentity identityB = ResourceIdentity.fromString(RESOURCE_B);
+        ResourceBuilder builderB = provisioner.getContentResourceBuilder(identityB, deployer.getDeployment(RESOURCE_B));
         ResourceIdentity identityB1 = ResourceIdentity.fromString(RESOURCE_B1);
-        handles.add(provisioner.installSharedResource(identityB, deployer.getDeployment(RESOURCE_B)));
-        handles.add(provisioner.installResource(identityB1, deployer.getDeployment(RESOURCE_B1)));
+        ResourceBuilder builderB1 = provisioner.getContentResourceBuilder(identityB1, deployer.getDeployment(RESOURCE_B1));
+        handles.add(provisioner.installSharedResource(builderB.getResource()));
+        handles.add(provisioner.installResource(builderB1.getResource()));
         try {
             // Verify that the modules got installed
             Runtime runtime = RuntimeLocator.getRequiredRuntime();
@@ -199,8 +204,9 @@ public class ProvisionerServiceTest {
         Assume.assumeFalse(RuntimeType.TOMCAT == RuntimeType.getRuntimeType());
 
         ResourceIdentity identityA = ResourceIdentity.fromString("camel.core.unshared");
-        MavenCoordinates mvnid = MavenCoordinates.parse("org.apache.camel:camel-core:jar:2.11.0");
-        ResourceHandle handleA = provisioner.installResource(identityA, mvnid);
+        MavenCoordinates mavenid = MavenCoordinates.parse("org.apache.camel:camel-core:jar:2.11.0");
+        ResourceBuilder builderA = provisioner.getMavenResourceBuilder(identityA, mavenid);
+        ResourceHandle handleA = provisioner.installResource(builderA.getResource());
         try {
             Assert.assertSame(handleA.getModule(), runtime.getModule(identityA));
             Assert.assertEquals("ACTIVE " + identityA, State.ACTIVE, handleA.getModule().getState());
@@ -216,11 +222,26 @@ public class ProvisionerServiceTest {
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
 
         ResourceIdentity identityA = ResourceIdentity.fromString("camel.core.shared");
-        MavenCoordinates mvnid = MavenCoordinates.parse("org.apache.camel:camel-core:jar:2.11.0");
-        ResourceHandle handleA = provisioner.installSharedResource(identityA, mvnid);
+        MavenCoordinates mavenid = MavenCoordinates.parse("org.apache.camel:camel-core:jar:2.11.0");
+        ResourceBuilder builderA = provisioner.getMavenResourceBuilder(identityA, mavenid);
+        builderA.addIdentityRequirement("javax.api");
+        builderA.addIdentityRequirement("org.slf4j");
+        ResourceHandle handleA = provisioner.installSharedResource(builderA.getResource());
         try {
             Assert.assertSame(handleA.getModule(), runtime.getModule(identityA));
             Assert.assertEquals("ACTIVE " + identityA, State.ACTIVE, handleA.getModule().getState());
+
+            ResourceIdentity identityC = ResourceIdentity.fromString(RESOURCE_C);
+            ResourceBuilder builderC = provisioner.getContentResourceBuilder(identityC, deployer.getDeployment(RESOURCE_C));
+            ResourceHandle handleC = provisioner.installResource(RESOURCE_C + ".war", builderC.getResource());
+            try {
+                // Make a call to the HttpService endpoint that goes through a Camel route
+                String reqspec = "/service?test=Kermit";
+                String context = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "" : "/" + RESOURCE_C;
+                Assert.assertEquals("Hello Kermit", performCall(context, reqspec));
+            } finally {
+                handleC.uninstall();
+            }
         } finally {
             handleA.uninstall();
         }
@@ -439,6 +460,40 @@ public class ProvisionerServiceTest {
             }
         });
         return archive.getArchive();
+    }
+
+    @Deployment(name = RESOURCE_C, managed = false, testable = false)
+    public static Archive<?> getResourceC() {
+        final WebArchive archive = ShrinkWrap.create(WebArchive.class, RESOURCE_C + ".war");
+        archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
+        archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
+        archive.addClasses(CamelTransformHttpActivator.class, ModuleActivatorBridge.class);
+        archive.setManifest(new Asset() {
+            @Override
+            public InputStream openStream() {
+                if (ArchiveBuilder.getTargetContainer() == RuntimeType.KARAF) {
+                    OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+                    builder.addBundleManifestVersion(2);
+                    builder.addBundleSymbolicName(RESOURCE_C);
+                    builder.addBundleActivator(ModuleActivatorBridge.class);
+                    builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
+                    builder.addManifestHeader(Constants.MODULE_ACTIVATOR, CamelTransformHttpActivator.class.getName());
+                    builder.addImportPackages(ModuleActivatorBridge.class, Runtime.class, Servlet.class, HttpServlet.class, HttpService.class);
+                    builder.addImportPackages(CamelContext.class, DefaultCamelContext.class, RouteBuilder.class, RouteDefinition.class);
+                    builder.addBundleClasspath("WEB-INF/classes");
+                    return builder.openStream();
+                } else {
+                    ManifestBuilder builder = new ManifestBuilder();
+                    builder.addIdentityCapability(RESOURCE_C, Version.emptyVersion);
+                    builder.addManifestHeader(Constants.MODULE_ACTIVATOR, CamelTransformHttpActivator.class.getName());
+                    builder.addManifestHeader("Dependencies", "camel.core.shared");
+                    return builder.openStream();
+                }
+            }
+        });
+        File[] libs = Maven.resolver().loadPomFromFile("pom.xml").resolve("org.apache.felix:org.apache.felix.http.proxy").withoutTransitivity().asFile();
+        archive.addAsLibraries(libs);
+        return archive;
     }
 
     @Deployment(name = RESOURCE_D, managed = false, testable = false)

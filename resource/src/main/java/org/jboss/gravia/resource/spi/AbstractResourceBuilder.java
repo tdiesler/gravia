@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import java.util.Map;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
@@ -36,6 +37,7 @@ import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.resource.spi.AttributeValueHandler.AttributeValue;
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
+import org.jboss.gravia.utils.MavenUtils;
 
 /**
  * An abstract {@link Resource} builder.
@@ -71,6 +73,12 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
     public Capability addIdentityCapability(String symbolicName, Version version) {
         IllegalArgumentAssertion.assertNotNull(symbolicName, "symbolicName");
         return addIdentityCapability(symbolicName, version, null, null);
+    }
+
+    public Capability addIdentityCapability(MavenCoordinates mavenid) {
+        Capability icap = addIdentityCapability(MavenUtils.getSymbolicName(mavenid), MavenUtils.getVersion(mavenid), null, null);
+        icap.getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
+        return icap;
     }
 
     @Override
@@ -142,23 +150,29 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
     }
 
     @Override
-    public Requirement addIdentityRequirement(String symbolicName, String version) {
+    public Requirement addIdentityRequirement(String symbolicName) {
         IllegalArgumentAssertion.assertNotNull(symbolicName, "symbolicName");
-        return addIdentityRequirement(symbolicName, new VersionRange(version), null,  null);
+        return addIdentityRequirement(symbolicName, null, null,  null);
     }
 
     @Override
-    public Requirement addIdentityRequirement(String symbolicName, VersionRange version) {
+    public Requirement addIdentityRequirement(String symbolicName, String range) {
         IllegalArgumentAssertion.assertNotNull(symbolicName, "symbolicName");
-        return addIdentityRequirement(symbolicName, version, null,  null);
+        return addIdentityRequirement(symbolicName, range != null ? new VersionRange(range) : null, null,  null);
     }
 
     @Override
-    public Requirement addIdentityRequirement(String symbolicName, VersionRange version, Map<String, Object> atts, Map<String, String> dirs) {
+    public Requirement addIdentityRequirement(String symbolicName, VersionRange range) {
+        IllegalArgumentAssertion.assertNotNull(symbolicName, "symbolicName");
+        return addIdentityRequirement(symbolicName, range, null,  null);
+    }
+
+    @Override
+    public Requirement addIdentityRequirement(String symbolicName, VersionRange range, Map<String, Object> atts, Map<String, String> dirs) {
         IllegalArgumentAssertion.assertNotNull(symbolicName, "symbolicName");
         Requirement ireq = addRequirement(IdentityNamespace.IDENTITY_NAMESPACE, symbolicName);
-        if (version != null) {
-            ireq.getAttributes().put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
+        if (range != null) {
+            ireq.getAttributes().put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, range);
         }
         if (atts != null) {
             ireq.getAttributes().putAll(atts);
@@ -263,4 +277,5 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
         }
         return resource;
     }
+
 }
