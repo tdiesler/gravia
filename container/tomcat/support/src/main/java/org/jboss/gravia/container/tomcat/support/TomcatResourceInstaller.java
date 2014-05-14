@@ -24,9 +24,7 @@ import static org.jboss.gravia.container.tomcat.support.GraviaTomcatLogger.LOGGE
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.net.URL;
-import java.util.Dictionary;
 
 import org.apache.catalina.User;
 import org.apache.catalina.UserDatabase;
@@ -34,9 +32,9 @@ import org.apache.catalina.ant.DeployTask;
 import org.apache.catalina.ant.UndeployTask;
 import org.apache.catalina.users.MemoryUserDatabase;
 import org.jboss.gravia.container.tomcat.extension.SharedModuleClassLoader;
-import org.jboss.gravia.provision.DefaultResourceHandle;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
+import org.jboss.gravia.provision.spi.AbstractResourceHandle;
 import org.jboss.gravia.provision.spi.AbstractResourceInstaller;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;
 import org.jboss.gravia.resource.Capability;
@@ -52,6 +50,7 @@ import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.jboss.gravia.utils.IOUtils;
+import org.jboss.gravia.utils.IllegalStateAssertion;
 
 /**
  * Service providing the {@link ResourceInstaller}.
@@ -88,23 +87,22 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, Dictionary<String, String> headers) throws Exception {
+    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws Exception {
         ResourceHandle handle;
         if (shared) {
-            handle = installSharedResourceInternal(context, resource, headers);
+            handle = installSharedResourceInternal(context, resource);
         } else {
-            handle = installUnsharedResourceInternal(context, resource, headers);
+            handle = installUnsharedResourceInternal(context, resource);
         }
         return handle;
     }
 
-    private ResourceHandle installSharedResourceInternal(Context context, Resource resource, Dictionary<String, String> headers) throws Exception {
+    private ResourceHandle installSharedResourceInternal(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing shared resource: {}", resource);
 
         ResourceIdentity resid = resource.getIdentity();
         ResourceContent content = resource.adapt(ResourceContent.class);
-        if (content == null)
-            throw new IllegalStateException("Cannot obtain content from: " + resource);
+        IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
 
         // copy resource content
         File targetFile = new File(catalinaLib, resid.getSymbolicName() + "-" + resid.getVersion() + ".jar");
@@ -113,18 +111,22 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
 
         IOUtils.copyStream(content.getContent(), new FileOutputStream(targetFile));
 
+        // Install the shared module
         Module module = installSharedResource(resource, targetFile);
-        Resource modres = module.adapt(Resource.class);
 
-        return new DefaultResourceHandle(modres, module) {
+        // Start the module
+        module.start();
+
+        Resource modres = module.adapt(Resource.class);
+        return new AbstractResourceHandle(modres, module) {
             @Override
             public void uninstall() {
-                // cannot uninstall shared resource
+                LOGGER.info("Cannot uninstall shared resource: {}", getResource());
             }
         };
     }
 
-    private ResourceHandle installUnsharedResourceInternal(Context context, Resource resource, Dictionary<String, String> headers) throws Exception {
+    private ResourceHandle installUnsharedResourceInternal(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing unshared resource: {}", resource);
 
         File tempfile = null;
@@ -132,9 +134,10 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         ContentCapability ccap = (ContentCapability) resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).get(0);
         URL contentURL = ccap.getContentURL();
         if (contentURL == null) {
-            InputStream content = resource.adapt(ResourceContent.class).getContent();
+            ResourceContent content = resource.adapt(ResourceContent.class);
+            IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
             tempfile = new File(catalinaTemp, identity.getSymbolicName() + "-" + identity.getVersion() + ".war");
-            IOUtils.copyStream(content, new FileOutputStream(tempfile));
+            IOUtils.copyStream(content.getContent(), new FileOutputStream(tempfile));
             contentURL = tempfile.toURI().toURL();
         }
 
@@ -162,7 +165,8 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Module module = runtime.getModule(identity);
 
-        return new DefaultResourceHandle(resource, module) {
+        Resource modres = module != null ? module.adapt(Resource.class) : resource;
+        return new AbstractResourceHandle(modres, module) {
             @Override
             public void uninstall() {
                 UndeployTask task = new UndeployTask();

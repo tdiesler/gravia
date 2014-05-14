@@ -20,7 +20,6 @@
 package org.jboss.gravia.provision.internal;
 
 import java.io.InputStream;
-import java.util.Dictionary;
 import java.util.Set;
 
 import javax.management.JMException;
@@ -32,11 +31,13 @@ import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;
+import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -95,23 +96,33 @@ public final class ProvisionerService implements Provisioner {
     }
 
     @Override
-    public ResourceHandle installResource(String runtimeName, InputStream inputStream, Dictionary<String, String> headers) throws ProvisionException {
-        return delegate.installResource(runtimeName, inputStream, headers);
+    public ResourceHandle installResource(ResourceIdentity identity, InputStream inputStream) throws ProvisionException {
+        return delegate.installResource(identity, inputStream);
     }
 
     @Override
-    public ResourceHandle installSharedResource(String runtimeName, InputStream inputStream, Dictionary<String, String> headers) throws ProvisionException {
-        return delegate.installSharedResource(runtimeName, inputStream, headers);
+    public ResourceHandle installSharedResource(ResourceIdentity identity, InputStream inputStream) throws ProvisionException {
+        return delegate.installSharedResource(identity, inputStream);
     }
 
     @Override
-    public ResourceHandle installResource(Resource resource, Dictionary<String, String> headers) throws ProvisionException {
-        return delegate.installResource(resource, headers);
+    public ResourceHandle installResource(ResourceIdentity identity, MavenCoordinates mvnid) throws ProvisionException {
+        return delegate.installResource(identity, mvnid);
     }
 
     @Override
-    public ResourceHandle installSharedResource(Resource resource, Dictionary<String, String> headers) throws ProvisionException {
-        return delegate.installSharedResource(resource, headers);
+    public ResourceHandle installSharedResource(ResourceIdentity identity, MavenCoordinates mvnid) throws ProvisionException {
+        return delegate.installSharedResource(identity, mvnid);
+    }
+
+    @Override
+    public ResourceHandle installResource(Resource resource) throws ProvisionException {
+        return delegate.installResource(resource);
+    }
+
+    @Override
+    public ResourceHandle installSharedResource(Resource resource) throws ProvisionException {
+        return delegate.installSharedResource(resource);
     }
 
     @Reference

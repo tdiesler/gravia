@@ -8,9 +8,9 @@ package org.jboss.test.gravia.repository;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -59,7 +59,7 @@ public class AbstractResourcesReaderTestCase extends AbstractRepositoryTest {
         Assert.assertEquals(2, resources.size());
 
         Resource res = resources.get(0);
-        Assert.assertNull(res.adapt(ResourceContent.class).getContent());
+        Assert.assertNull(res.adapt(ResourceContent.class));
 
         ResourceIdentity resid = res.getIdentity();
         Assert.assertEquals("org.acme.foo.feature", resid.getSymbolicName());
@@ -77,7 +77,7 @@ public class AbstractResourcesReaderTestCase extends AbstractRepositoryTest {
         Assert.assertEquals(new VersionRange("[1.0,2.0)"), req.getAttribute(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE));
 
         res = resources.get(1);
-        Assert.assertNull(res.adapt(ResourceContent.class).getContent());
+        Assert.assertNull(res.adapt(ResourceContent.class));
 
         resid = res.getIdentity();
         Assert.assertEquals("org.acme.foo", resid.getSymbolicName());

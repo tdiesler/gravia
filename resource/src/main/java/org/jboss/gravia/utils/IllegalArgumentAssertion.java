@@ -34,8 +34,28 @@ public final class IllegalArgumentAssertion {
     /**
      * Throws an IllegalArgumentException when the given value is null.
      */
-    public static void assertNotNull(Object value, String name) {
+    public static <T> T assertNotNull(T value, String name) {
         if (value == null)
             throw new IllegalArgumentException("Null " + name);
+
+        return value;
+    }
+
+    /**
+     * Throws an IllegalArgumentException when the given value is not true.
+     */
+    public static Boolean assertTrue(Boolean value, String message) {
+        if (!Boolean.valueOf(value))
+            throw new IllegalArgumentException(message);
+        return value;
+    }
+
+    /**
+     * Throws an IllegalArgumentException when the given value is not false.
+     */
+    public static Boolean assertFalse(Boolean value, String message) {
+        if (Boolean.valueOf(value))
+            throw new IllegalArgumentException(message);
+        return value;
     }
 }

@@ -67,7 +67,6 @@ public final class IllegalStateAssertion {
     public static Boolean assertFalse(Boolean value, String message) {
         if (Boolean.valueOf(value))
             throw new IllegalStateException(message);
-
         return value;
     }
 

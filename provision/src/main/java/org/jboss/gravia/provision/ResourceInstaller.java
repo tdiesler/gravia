@@ -19,7 +19,6 @@
  */
 package org.jboss.gravia.provision;
 
-import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +51,7 @@ public interface ResourceInstaller {
         Map<String, Object> getProperties();
     }
 
-    ResourceHandle installResource(Context context, Resource resource, Dictionary<String, String> headers) throws ProvisionException;
+    ResourceHandle installResource(Context context, Resource resource) throws ProvisionException;
 
-    ResourceHandle installSharedResource(Context context, Resource resource, Dictionary<String, String> headers) throws ProvisionException;
+    ResourceHandle installSharedResource(Context context, Resource resource) throws ProvisionException;
 }

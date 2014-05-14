@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
@@ -41,9 +40,9 @@ import org.jboss.as.server.ServerEnvironment;
 import org.jboss.as.server.ServerEnvironmentService;
 import org.jboss.as.server.Services;
 import org.jboss.as.server.moduleservice.ServiceModuleLoader;
-import org.jboss.gravia.provision.DefaultResourceHandle;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
+import org.jboss.gravia.provision.spi.AbstractResourceHandle;
 import org.jboss.gravia.provision.spi.AbstractResourceInstaller;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;
 import org.jboss.gravia.resource.Capability;
@@ -60,6 +59,7 @@ import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.jboss.gravia.utils.IOUtils;
+import org.jboss.gravia.utils.IllegalStateAssertion;
 import org.jboss.modules.ModuleClassLoader;
 import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoader;
@@ -141,18 +141,18 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, Dictionary<String, String> headers) throws Exception {
+    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws Exception {
         ResourceHandle handle;
         if (shared) {
-            handle = installSharedResourceInternal(context, resource, headers);
+            handle = installSharedResourceInternal(context, resource);
         } else {
-            handle = installUnsharedResourceInternal(context, resource, headers);
+            handle = installUnsharedResourceInternal(context, resource);
         }
         return handle;
     }
 
     @SuppressWarnings("deprecation")
-    private ResourceHandle installSharedResourceInternal(Context context, Resource resource, Dictionary<String, String> headers) throws Exception {
+    private ResourceHandle installSharedResourceInternal(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing shared resource: {}", resource);
 
         ResourceIdentity identity = resource.getIdentity();
@@ -164,16 +164,14 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
             throw new IllegalStateException("Module dir already exists: " + moduleDir);
 
         ResourceContent content = resource.adapt(ResourceContent.class);
-        if (content == null)
-            throw new IllegalStateException("Cannot obtain repository content from: " + resource);
+        IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
 
         // copy resource content
         moduleDir.mkdirs();
         File resFile = new File(moduleDir, symbolicName + "-" + version + ".jar");
         IOUtils.copyStream(content.getContent(), new FileOutputStream(resFile));
 
-        String slot = version != Version.emptyVersion ? version.toString() : "main";
-        ModuleIdentifier modid = ModuleIdentifier.create(symbolicName, slot);
+        ModuleIdentifier modid = ModuleIdentifier.create(symbolicName, version.toString());
 
         // generate module.xml
         File xmlFile = new File(moduleDir, "module.xml");
@@ -200,15 +198,19 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Module module = runtime.installModule(classLoader, resource, null);
 
-        return new DefaultResourceHandle(resource, module) {
+        // Start the module
+        module.start();
+
+        Resource modres = module.adapt(Resource.class);
+        return new AbstractResourceHandle(modres, module) {
             @Override
             public void uninstall() {
-                // cannot uninstall shared resource
+                LOGGER.info("Cannot uninstall shared resource: {}", getResource());
             }
         };
     }
 
-    private ResourceHandle installUnsharedResourceInternal(Context context, Resource resource, Dictionary<String, String> headers) throws Exception {
+    private ResourceHandle installUnsharedResourceInternal(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing unshared resource: {}", resource);
 
         final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
@@ -234,7 +236,7 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
         }
 
         Resource modres = module != null ? module.adapt(Resource.class) : resource;
-        return new DefaultResourceHandle(modres, module) {
+        return new AbstractResourceHandle(modres, module) {
             @Override
             public void uninstall() {
                 try {

@@ -98,27 +98,27 @@ public abstract class AbstractResource implements Resource {
     }
 
     private ResourceContent getResourceContent() {
-        final InputStream result;
+
         List<Capability> ccaps = getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
-        if (ccaps.isEmpty()) {
-            result = null;
-        } else {
-            ContentCapability ccap = ccaps.get(0).adapt(ContentCapability.class);
-            InputStream contentStream = ccap.getContentStream();
-            if (contentStream == null) {
-                URL contentURL = ccap.getContentURL();
-                try {
-                    contentStream = contentURL.openStream();
-                } catch (IOException ex) {
-                    throw new IllegalStateException("Cannot access content URL: " + contentURL, ex);
-                }
+        if (ccaps.isEmpty())
+            return null;
+
+        ContentCapability ccap = ccaps.get(0).adapt(ContentCapability.class);
+        InputStream contentStream = ccap.getContentStream();
+        if (contentStream == null) {
+            URL contentURL = ccap.getContentURL();
+            try {
+                contentStream = contentURL.openStream();
+            } catch (IOException ex) {
+                throw new IllegalStateException("Cannot access content URL: " + contentURL, ex);
             }
-            result = contentStream;
         }
+
+        final InputStream inputStream = contentStream;
         return new ResourceContent() {
             @Override
             public InputStream getContent() {
-                return result;
+                return inputStream;
             }
         };
     }

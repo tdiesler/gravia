@@ -20,8 +20,6 @@
 
 package org.jboss.gravia.provision.spi;
 
-import java.util.Dictionary;
-
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
@@ -40,22 +38,22 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
     public abstract RuntimeEnvironment getEnvironment();
 
     @Override
-    public ResourceHandle installResource(Context context, Resource res, Dictionary<String, String> headers) throws ProvisionException {
-        return installResourceInternal(context, res, isShared(res), headers);
+    public ResourceHandle installResource(Context context, Resource res) throws ProvisionException {
+        return installResourceInternal(context, res, isShared(res));
     }
 
     @Override
-    public ResourceHandle installSharedResource(Context context, Resource res, Dictionary<String, String> headers) throws ProvisionException {
-        return installResourceInternal(context, res, true, headers);
+    public ResourceHandle installSharedResource(Context context, Resource res) throws ProvisionException {
+        return installResourceInternal(context, res, true);
     }
 
-    private synchronized ResourceHandle installResourceInternal(Context context, Resource resource, boolean shared, Dictionary<String, String> headers) throws ProvisionException {
+    private synchronized ResourceHandle installResourceInternal(Context context, Resource resource, boolean shared) throws ProvisionException {
         IllegalArgumentAssertion.assertNotNull(resource, "resource");
         if (context == null) {
             context = new DefaultInstallerContext(resource);
         }
         try {
-            return installResourceProtected(context, resource, shared, headers);
+            return installResourceProtected(context, resource, shared);
         } catch (RuntimeException rte) {
             throw rte;
         } catch (ProvisionException ex) {
@@ -65,7 +63,7 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
         }
     }
 
-    protected abstract ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, Dictionary<String, String> headers) throws Exception;
+    protected abstract ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws Exception;
 
     private boolean isShared(Resource resource) {
         Object attval = resource.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_SHARED_ATTRIBUTE);

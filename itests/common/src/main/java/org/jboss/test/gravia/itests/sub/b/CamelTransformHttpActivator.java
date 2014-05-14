@@ -36,7 +36,7 @@ import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceTracker;
 import org.osgi.service.http.HttpService;
 
-public class CamelTransformActivator implements ModuleActivator {
+public class CamelTransformHttpActivator implements ModuleActivator {
 
     private ServiceTracker<HttpService, HttpService> tracker;
     private HttpService httpService;

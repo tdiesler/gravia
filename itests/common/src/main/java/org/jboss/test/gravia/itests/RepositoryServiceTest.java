@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,17 +33,14 @@ import org.jboss.gravia.resource.IdentityRequirementBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.RuntimeType;
-import org.jboss.gravia.runtime.ServiceReference;
+import org.jboss.gravia.runtime.ServiceLocator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -62,8 +59,6 @@ public class RepositoryServiceTest {
             return new String[] { "camel.core" };
         }
     }
-
-    private Repository repository;
 
     @Deployment
     public static Archive<?> deployment() {
@@ -89,19 +84,10 @@ public class RepositoryServiceTest {
         return archive.getArchive();
     }
 
-    @Before
-    public void setUp() throws Exception {
-        Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        ModuleContext syscontext = runtime.getModuleContext();
-        ServiceReference<Repository> sref = syscontext.getServiceReference(Repository.class);
-        Assert.assertNotNull("Repository reference not null", sref);
-        repository = syscontext.getService(sref);
-        Assert.assertNotNull("Repository not null", repository);
-    }
-
     @Test
     public void testRepositoryContent() throws Exception {
         Requirement freq = new IdentityRequirementBuilder("camel.core.feature", (String) null).getRequirement();
+        Repository repository = ServiceLocator.getRequiredService(Repository.class);
         Collection<Capability> providers = repository.findProviders(freq);
         Assert.assertEquals("One provider", 1, providers.size());
     }

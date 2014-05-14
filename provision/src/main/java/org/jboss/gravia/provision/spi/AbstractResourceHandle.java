@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.provision;
+package org.jboss.gravia.provision.spi;
 
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.resource.Resource;
@@ -30,12 +30,12 @@ import org.jboss.gravia.utils.IllegalArgumentAssertion;
  * @author thomas.diesler@jboss.com
  * @since 06-May-2013
  */
-public class DefaultResourceHandle implements ResourceHandle {
+public abstract class AbstractResourceHandle implements ResourceHandle {
 
     private final Resource resource;
     private final Module module;
 
-    public DefaultResourceHandle(Resource resource, Module module) {
+    public AbstractResourceHandle(Resource resource, Module module) {
         IllegalArgumentAssertion.assertNotNull(resource, "resource");
         this.resource = resource;
         this.module = module;
@@ -49,10 +49,5 @@ public class DefaultResourceHandle implements ResourceHandle {
     @Override
     public Resource getResource() {
         return resource;
-    }
-
-    @Override
-    public void uninstall() {
-        // do nothing
     }
 }

@@ -20,15 +20,16 @@
 package org.jboss.gravia.provision;
 
 import java.io.InputStream;
-import java.util.Dictionary;
 import java.util.Set;
 
+import org.jboss.gravia.repository.MavenCoordinates;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.ContentCapability;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
 
 /**
  * The {@link Provisioner}
@@ -75,14 +76,28 @@ public interface Provisioner {
      *
      * @see Provisioner#installResource(Resource)
      */
-    ResourceHandle installResource(String runtimeName, InputStream inputStream, Dictionary<String, String> headers) throws ProvisionException;
+    ResourceHandle installResource(ResourceIdentity identity, InputStream inputStream) throws ProvisionException;
 
     /**
      * Install a resource to the shared location from the given input stream.
      *
      * @see Provisioner#installSharedResource(Resource)
      */
-    ResourceHandle installSharedResource(String runtimeName, InputStream inputStream, Dictionary<String, String> headers) throws ProvisionException;
+    ResourceHandle installSharedResource(ResourceIdentity identity, InputStream inputStream) throws ProvisionException;
+
+    /**
+     * Install a resource from the given maven coordinates.
+     *
+     * @see Provisioner#installResource(Resource)
+     */
+    ResourceHandle installResource(ResourceIdentity identity, MavenCoordinates mvnid) throws ProvisionException;
+
+    /**
+     * Install a resource to the shared location from the given maven coordinates.
+     *
+     * @see Provisioner#installSharedResource(Resource)
+     */
+    ResourceHandle installSharedResource(ResourceIdentity identity, MavenCoordinates mvnid) throws ProvisionException;
 
     /**
      * Install the given resource.
@@ -91,14 +106,14 @@ public interface Provisioner {
      *
      * The caller must be aware of the environment content and take on resposibility that all
      * dependencies of the installed resource are sattisfied. The {@link Environment}, {@link Resolver} and {@link Repository}
-     * are not used. Instead, it delegates directly to the container specific {@link ResourceInstaller}
+     * are not used. Instead, this method delegates directly to the container specific {@link ResourceInstaller}
      */
-    ResourceHandle installResource(Resource resource, Dictionary<String, String> headers) throws ProvisionException;
+    ResourceHandle installResource(Resource resource) throws ProvisionException;
 
     /**
      * Install the given resource to the shared location.
      *
      * @see Provisioner#installResource(Resource)
      */
-    ResourceHandle installSharedResource(Resource resource, Dictionary<String, String> headers) throws ProvisionException;
+    ResourceHandle installSharedResource(Resource resource) throws ProvisionException;
 }

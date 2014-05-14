@@ -21,12 +21,9 @@ package org.jboss.gravia.provision.internal;
 
 import static org.jboss.gravia.provision.spi.ProvisionLogger.LOGGER;
 
-import java.io.InputStream;
-import java.util.Dictionary;
-
-import org.jboss.gravia.provision.DefaultResourceHandle;
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ResourceHandle;
+import org.jboss.gravia.provision.spi.AbstractResourceHandle;
 import org.jboss.gravia.provision.spi.AbstractResourceInstaller;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;
 import org.jboss.gravia.resource.Resource;
@@ -37,6 +34,7 @@ import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.spi.ThreadResourceAssociation;
+import org.jboss.gravia.utils.IllegalStateAssertion;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -58,35 +56,39 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, Dictionary<String, String> headers) throws ProvisionException {
+    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws ProvisionException {
         LOGGER.info("Installing resource: {}", resource);
-        return installBundleResource(resource, headers);
+        return installBundleResource(resource);
     }
 
-    private ResourceHandle installBundleResource(Resource resource, Dictionary<String, String> headers) throws ProvisionException {
+    private ResourceHandle installBundleResource(Resource resource) throws ProvisionException {
 
         // Install the Bundle
         ResourceIdentity identity = resource.getIdentity();
-        InputStream content = resource.adapt(ResourceContent.class).getContent();
+        ResourceContent content = resource.adapt(ResourceContent.class);
+        IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
+
         Bundle bundle;
         try {
-            bundle = context.installBundle(identity.toString(), content);
+            bundle = context.installBundle(identity.toString(), content.getContent());
         } catch (BundleException ex) {
             throw new ProvisionException(ex);
         }
 
-        // Attempt to start the bundle. This relies on provision ordering.
+        // Start the bundle. This relies on provision ordering.
         ThreadResourceAssociation.putResource(resource);
         try {
             bundle.start();
         } catch (BundleException ex) {
-            // ignore
+            // The start exception must be reported back to the client
+            // WildFly also relies on provision ordering.
+            throw new ProvisionException(ex);
         } finally {
             ThreadResourceAssociation.removeResource();
         }
 
         // Install the bundle as module if it has not already happened
-        // A bundle that could not get resolved will have no associated module
+        // A bundle that could not get resolved will not have an associated module
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Module module = runtime.getModule(identity);
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
@@ -112,17 +114,13 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
         return new BundleResourceHandle(resource, module, bundle);
     }
 
-    static class BundleResourceHandle extends DefaultResourceHandle {
+    static class BundleResourceHandle extends AbstractResourceHandle {
 
         private final Bundle bundle;
 
         BundleResourceHandle(Resource resource, Module module, Bundle bundle) {
-            super(resource, module);
+            super(module.adapt(Resource.class), module);
             this.bundle = bundle;
-        }
-
-        Bundle getBundle() {
-            return bundle;
         }
 
         @Override

@@ -20,11 +20,10 @@
 package org.jboss.gravia.resource;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
+import org.jboss.gravia.utils.ManifestUtils;
 
 /**
  * A manifest {@link Resource} builder.
@@ -38,19 +37,8 @@ public class ManifestResourceBuilder extends DictionaryResourceBuilder {
 
     public ManifestResourceBuilder load(Manifest manifest) {
         IllegalArgumentAssertion.assertNotNull(manifest, "manifest");
-        Dictionary<String, String> headers = getManifestHeaders(manifest);
+        Dictionary<String, String> headers = ManifestUtils.getManifestHeaders(manifest);
         load(headers);
         return this;
-    }
-
-    private Dictionary<String, String> getManifestHeaders(Manifest manifest) {
-        Hashtable<String, String> headers = new Hashtable<String, String>();
-        Attributes mainatts = manifest.getMainAttributes();
-        for (Object key : mainatts.keySet()) {
-            String name = key.toString();
-            String value = mainatts.getValue(name);
-            headers.put(name, value);
-        }
-        return headers;
     }
 }
