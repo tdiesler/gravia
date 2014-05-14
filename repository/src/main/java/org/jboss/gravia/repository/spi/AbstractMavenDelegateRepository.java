@@ -35,11 +35,12 @@ import org.jboss.gravia.repository.MavenDelegateRepository;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.ContentNamespace;
+import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.MavenCoordinates;
-import org.jboss.gravia.resource.MavenResourceBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.runtime.spi.DefaultPropertiesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
@@ -140,7 +141,7 @@ public abstract class AbstractMavenDelegateRepository extends AbstractRepository
 
         Resource result = null;
         if (contentURL != null) {
-            MavenResourceBuilder builder = new MavenResourceBuilder();
+            ResourceBuilder builder = new DefaultResourceBuilder();
             builder.addIdentityCapability(mavenid);
             Capability ccap = builder.addCapability(ContentNamespace.CONTENT_NAMESPACE, null, null);
             ccap.getAttributes().put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, contentURL);
