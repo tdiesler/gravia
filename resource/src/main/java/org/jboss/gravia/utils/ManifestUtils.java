@@ -19,12 +19,12 @@
  */
 package org.jboss.gravia.utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
@@ -53,25 +53,26 @@ public final class ManifestUtils {
             }
         }
         try {
-            return jarStream.getManifest();
+            // {@link JarInputStream} assumes that the manifest is the first entry.
+            // Here we scan all entries in case of a malformed archive
+            Manifest manifest = jarStream.getManifest();
+            if (manifest == null) {
+                try {
+                    JarEntry entry = jarStream.getNextJarEntry();
+                    while (entry != null) {
+                        if (entry.getName().equals(JarFile.MANIFEST_NAME)) {
+                            manifest = new Manifest(jarStream);
+                            break;
+                        }
+                        entry = jarStream.getNextJarEntry();
+                    }
+                } catch (IOException ex) {
+                    return null;
+                }
+            }
+            return manifest;
         } finally {
             IOUtils.safeClose(jarStream);
-        }
-    }
-
-    public static Manifest getManifest(File file) {
-        JarFile jarFile;
-        try {
-            jarFile = new JarFile(file);
-        } catch (IOException ex) {
-            return null;
-        }
-        try {
-            return jarFile.getManifest();
-        } catch (IOException ex) {
-            return null;
-        } finally {
-            IOUtils.safeClose(jarFile);
         }
     }
 
