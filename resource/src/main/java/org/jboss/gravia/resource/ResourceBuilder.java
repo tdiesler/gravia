@@ -129,6 +129,11 @@ public interface ResourceBuilder {
     boolean isValid();
 
     /**
+     * Get the current resource state from the builder
+     */
+    Resource getCurrentResource();
+
+    /**
      * Get the final resource from the builder
      */
     Resource getResource();

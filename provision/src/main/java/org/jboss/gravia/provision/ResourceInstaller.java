@@ -51,7 +51,7 @@ public interface ResourceInstaller {
         Map<String, Object> getProperties();
     }
 
-    ResourceHandle installResource(Context context, Resource resource, String runtimeName) throws ProvisionException;
+    ResourceHandle installResource(Context context, Resource resource) throws ProvisionException;
 
     ResourceHandle installSharedResource(Context context, Resource resource) throws ProvisionException;
 }

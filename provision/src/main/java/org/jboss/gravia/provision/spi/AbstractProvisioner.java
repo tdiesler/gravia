@@ -232,19 +232,21 @@ public abstract class AbstractProvisioner implements Provisioner {
         for (Resource res : context.getResources()) {
             ResourceIdentity identity = res.getIdentity();
             if (!isAbstract(res) && getEnvironment().getResource(identity) == null) {
-                handles.add(installer.installResource(context, res, null));
+                handles.add(installer.installResource(context, res));
             }
         }
         return Collections.unmodifiableSet(handles);
     }
 
     @Override
-    public ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, InputStream inputStream) {
+    public ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, String runtimeName, InputStream inputStream) {
         IllegalArgumentAssertion.assertNotNull(identity, "identity");
+        IllegalArgumentAssertion.assertNotNull(runtimeName, "runtimeName");
         IllegalArgumentAssertion.assertNotNull(inputStream, "inputStream");
 
         ResourceBuilder builder = new DefaultResourceBuilder();
-        builder.addIdentityCapability(identity);
+        Capability icap = builder.addIdentityCapability(identity);
+        icap.getAttributes().put(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, runtimeName);
         builder.addContentCapability(inputStream);
 
         return builder;
@@ -282,11 +284,6 @@ public abstract class AbstractProvisioner implements Provisioner {
     }
 
     @Override
-    public ResourceHandle installResource(String runtimeName, Resource resource) throws ProvisionException {
-        return installResourceInternal(runtimeName, resource, false);
-    }
-
-    @Override
     public ResourceHandle installSharedResource(Resource resource) throws ProvisionException {
         return installResourceInternal(null, resource, true);
     }
@@ -302,7 +299,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         if (shared) {
             handle = installer.installSharedResource(context, resource);
         } else {
-            handle = installer.installResource(context, resource, runtimeName);
+            handle = installer.installResource(context, resource);
         }
         return handle;
     }

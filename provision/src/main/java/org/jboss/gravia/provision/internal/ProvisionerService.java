@@ -97,8 +97,8 @@ public final class ProvisionerService implements Provisioner {
     }
 
     @Override
-    public ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, InputStream inputStream) {
-        return delegate.getContentResourceBuilder(identity, inputStream);
+    public ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, String runtimeName, InputStream inputStream) {
+        return delegate.getContentResourceBuilder(identity, runtimeName, inputStream);
     }
 
     @Override
@@ -109,11 +109,6 @@ public final class ProvisionerService implements Provisioner {
     @Override
     public ResourceHandle installResource(Resource resource) throws ProvisionException {
         return delegate.installResource(resource);
-    }
-
-    @Override
-    public ResourceHandle installResource(String runtimeName, Resource resource) throws ProvisionException {
-        return delegate.installResource(runtimeName, resource);
     }
 
     @Override

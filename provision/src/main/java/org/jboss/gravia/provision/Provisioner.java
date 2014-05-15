@@ -75,7 +75,7 @@ public interface Provisioner {
     /**
      * Get a content resource builder.
      */
-    ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, InputStream inputStream);
+    ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, String runtimeName, InputStream inputStream);
 
     /**
      * Get a maven resource builder.
@@ -92,13 +92,6 @@ public interface Provisioner {
      * are not used. Instead, this method delegates directly to the container specific {@link ResourceInstaller}
      */
     ResourceHandle installResource(Resource resource) throws ProvisionException;
-
-    /**
-     * Install a resource using the given runtime name.
-     *
-     * @see Provisioner#installResource(Resource)
-     */
-    ResourceHandle installResource(String runtimeName, Resource resource) throws ProvisionException;
 
     /**
      * Install the given resource to the shared location.

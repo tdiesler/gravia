@@ -142,18 +142,18 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, String runtimeName) throws Exception {
+    public ResourceHandle installResourceProtected(Context context, String runtimeName, Resource resource, boolean shared) throws Exception {
         ResourceHandle handle;
         if (shared) {
-            handle = installSharedResourceInternal(context, resource);
+            handle = installSharedResourceInternal(context, runtimeName, resource);
         } else {
-            handle = installUnsharedResourceInternal(runtimeName, context, resource);
+            handle = installUnsharedResourceInternal(context, runtimeName, resource);
         }
         return handle;
     }
 
     @SuppressWarnings("deprecation")
-    private ResourceHandle installSharedResourceInternal(Context context, Resource resource) throws Exception {
+    private ResourceHandle installSharedResourceInternal(Context context, String runtimeName, Resource resource) throws Exception {
         LOGGER.info("Installing shared resource: {}", resource);
 
         ResourceIdentity identity = resource.getIdentity();
@@ -169,7 +169,7 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
 
         // copy resource content
         moduleDir.mkdirs();
-        File resFile = new File(moduleDir, symbolicName + "-" + version + ".jar");
+        File resFile = new File(moduleDir, runtimeName);
         IOUtils.copyStream(content.getContent(), new FileOutputStream(resFile));
 
         ModuleIdentifier modid = ModuleIdentifier.create(symbolicName, version.toString());
@@ -211,7 +211,7 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
         };
     }
 
-    private ResourceHandle installUnsharedResourceInternal(String runtimeName, Context context, Resource resource) throws Exception {
+    private ResourceHandle installUnsharedResourceInternal(Context context, String runtimeName, Resource resource) throws Exception {
         LOGGER.info("Installing unshared resource: {}", resource);
 
         final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);

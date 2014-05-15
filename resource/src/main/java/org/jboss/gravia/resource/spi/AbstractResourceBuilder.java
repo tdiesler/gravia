@@ -200,17 +200,24 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
     }
 
     @Override
+    public boolean isValid() {
+        AbstractResource resource = getResourceInternal();
+        return resource.isValid();
+    }
+
+    @Override
+    public Resource getCurrentResource() {
+        AbstractResource resource = getResourceInternal();
+        resource.assertMutable();
+        return resource;
+    }
+
+    @Override
     public Resource getResource() {
         AbstractResource resource = getResourceInternal();
         resource.validate();
         resource.setMutable(false);
         return resource;
-    }
-
-    @Override
-    public boolean isValid() {
-        AbstractResource resource = getResourceInternal();
-        return resource.isValid();
     }
 
     protected String parseParameterizedValue(String line, Map<String, Object> atts, Map<String, String> dirs) {

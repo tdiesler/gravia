@@ -87,25 +87,24 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared, String runtimeName) throws Exception {
+    public ResourceHandle installResourceProtected(Context context, String runtimeName, Resource resource, boolean shared) throws Exception {
         ResourceHandle handle;
         if (shared) {
-            handle = installSharedResourceInternal(context, resource);
+            handle = installSharedResourceInternal(context, runtimeName, resource);
         } else {
-            handle = installUnsharedResourceInternal(runtimeName, context, resource);
+            handle = installUnsharedResourceInternal(context, runtimeName, resource);
         }
         return handle;
     }
 
-    private ResourceHandle installSharedResourceInternal(Context context, Resource resource) throws Exception {
+    private ResourceHandle installSharedResourceInternal(Context context, String runtimeName, Resource resource) throws Exception {
         LOGGER.info("Installing shared resource: {}", resource);
 
-        ResourceIdentity resid = resource.getIdentity();
         ResourceContent content = resource.adapt(ResourceContent.class);
         IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
 
         // copy resource content
-        File targetFile = new File(catalinaLib, resid.getSymbolicName() + "-" + resid.getVersion() + ".jar");
+        File targetFile = new File(catalinaLib, runtimeName);
         if (targetFile.exists())
             throw new IllegalStateException("Module already exists: " + targetFile);
 
@@ -126,7 +125,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         };
     }
 
-    private ResourceHandle installUnsharedResourceInternal(String runtimeName, Context context, Resource resource) throws Exception {
+    private ResourceHandle installUnsharedResourceInternal(Context context, String runtimeName, Resource resource) throws Exception {
         LOGGER.info("Installing unshared resource: {}", resource);
 
         File tempfile = null;
@@ -136,7 +135,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         if (contentURL == null) {
             ResourceContent content = resource.adapt(ResourceContent.class);
             IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
-            tempfile = new File(catalinaTemp, identity.getSymbolicName() + "-" + identity.getVersion() + ".war");
+            tempfile = new File(catalinaTemp, runtimeName);
             IOUtils.copyStream(content.getContent(), new FileOutputStream(tempfile));
             contentURL = tempfile.toURI().toURL();
         }

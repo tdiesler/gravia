@@ -154,7 +154,7 @@ public class ProvisionerServiceTest {
     public void testProvisionStreamResource() throws Exception {
         Provisioner provisioner = ServiceLocator.getRequiredService(Provisioner.class);
         ResourceIdentity identityA = ResourceIdentity.fromString(RESOURCE_A);
-        ResourceBuilder builderA = provisioner.getContentResourceBuilder(identityA, deployer.getDeployment(RESOURCE_A));
+        ResourceBuilder builderA = provisioner.getContentResourceBuilder(identityA, runtimeName(RESOURCE_A), deployer.getDeployment(RESOURCE_A));
         ResourceHandle handle = provisioner.installResource(builderA.getResource());
         try {
             // Verify that the module got installed
@@ -184,9 +184,9 @@ public class ProvisionerServiceTest {
         List<ResourceHandle> handles = new ArrayList<>();
         Provisioner provisioner = ServiceLocator.getRequiredService(Provisioner.class);
         ResourceIdentity identityB = ResourceIdentity.fromString(RESOURCE_B);
-        ResourceBuilder builderB = provisioner.getContentResourceBuilder(identityB, deployer.getDeployment(RESOURCE_B));
+        ResourceBuilder builderB = provisioner.getContentResourceBuilder(identityB, RESOURCE_B + ".jar", deployer.getDeployment(RESOURCE_B));
         ResourceIdentity identityB1 = ResourceIdentity.fromString(RESOURCE_B1);
-        ResourceBuilder builderB1 = provisioner.getContentResourceBuilder(identityB1, deployer.getDeployment(RESOURCE_B1));
+        ResourceBuilder builderB1 = provisioner.getContentResourceBuilder(identityB1, runtimeName(RESOURCE_B1), deployer.getDeployment(RESOURCE_B1));
         handles.add(provisioner.installSharedResource(builderB.getResource()));
         handles.add(provisioner.installResource(builderB1.getResource()));
         try {
@@ -252,6 +252,7 @@ public class ProvisionerServiceTest {
         ResourceIdentity identityA = ResourceIdentity.fromString("camel.core.shared");
         MavenCoordinates mavenid = MavenCoordinates.parse("org.apache.camel:camel-core:jar:2.11.0");
         ResourceBuilder builderA = provisioner.getMavenResourceBuilder(identityA, mavenid);
+        builderA.getCurrentResource().getIdentityCapability().getAttributes().put(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, "camel-core-shared-2.11.0.jar");
         builderA.addIdentityRequirement("javax.api");
         builderA.addIdentityRequirement("org.slf4j");
         ResourceHandle handleA = provisioner.installSharedResource(builderA.getResource());
@@ -260,8 +261,8 @@ public class ProvisionerServiceTest {
             Assert.assertEquals("ACTIVE " + identityA, State.ACTIVE, handleA.getModule().getState());
 
             ResourceIdentity identityC = ResourceIdentity.fromString(RESOURCE_C);
-            ResourceBuilder builderC = provisioner.getContentResourceBuilder(identityC, deployer.getDeployment(RESOURCE_C));
-            ResourceHandle handleC = provisioner.installResource(RESOURCE_C + ".war", builderC.getResource());
+            ResourceBuilder builderC = provisioner.getContentResourceBuilder(identityC, RESOURCE_C + ".war", deployer.getDeployment(RESOURCE_C));
+            ResourceHandle handleC = provisioner.installResource(builderC.getResource());
             try {
                 // Make a call to the HttpService endpoint that goes through a Camel route
                 String reqspec = "/service?test=Kermit";
@@ -413,6 +414,10 @@ public class ProvisionerServiceTest {
         } finally {
             provisioner.getRepository().removeResource(resB.getIdentity());
         }
+    }
+
+    private String runtimeName(String resname) {
+        return resname + (RuntimeType.TOMCAT == RuntimeType.getRuntimeType() ? ".war" : ".jar");
     }
 
     private String performCall(String context, String path) throws Exception {
