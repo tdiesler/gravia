@@ -33,6 +33,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.jboss.arquillian.config.descriptor.api.ContainerDef;
 import org.jboss.arquillian.container.spi.Container;
 import org.jboss.arquillian.container.spi.event.container.AfterStart;
 import org.jboss.arquillian.container.spi.event.container.BeforeDeploy;
@@ -43,6 +44,7 @@ import org.jboss.arquillian.core.api.annotation.ApplicationScoped;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.core.api.annotation.Observes;
 import org.jboss.arquillian.test.spi.context.ClassContext;
+import org.jboss.gravia.arquillian.container.ContainerSetupTask.Context;
 import org.jboss.gravia.repository.RepositoryMBean;
 import org.jboss.gravia.utils.MBeanProxy;
 
@@ -100,9 +102,11 @@ public class ContainerSetupObserver {
         }
 
         MBeanServerConnection server = mbeanServerInstance.get();
-        Map<String, String> props = container.getContainerConfiguration().getContainerProperties();
+        ContainerDef containerConfig = container.getContainerConfiguration();
+        Map<String, String> props = containerConfig.getContainerProperties();
+        Context context = new SetupContext(server, props);
         for (ContainerSetupTask task : setupTasks) {
-            task.setUp(server, props);
+            task.setUp(context);
         }
     }
 
@@ -113,8 +117,9 @@ public class ContainerSetupObserver {
 
             MBeanServerConnection server = mbeanServerInstance.get();
             Map<String, String> props = container.getContainerConfiguration().getContainerProperties();
+            Context context = new SetupContext(server, props);
             for (ContainerSetupTask task : setupTasks) {
-                task.tearDown(server, props);
+                task.tearDown(context);
             }
         }
     }
@@ -140,5 +145,24 @@ public class ContainerSetupObserver {
             LOGGER.warn("Cannot create JMXServiceURL from: {}", jmxServiceURL);
         }
         return mbeanServer;
+    }
+
+    private static final class SetupContext implements Context {
+        private final MBeanServerConnection server;
+        private final Map<String, String> configuration;
+
+        SetupContext(MBeanServerConnection server, Map<String, String> configuration) {
+            this.server = server;
+            this.configuration = configuration;
+        }
+
+        public MBeanServerConnection getMBeanServer() {
+            return server;
+        }
+
+        public Map<String, String> getConfiguration() {
+            return Collections.unmodifiableMap(configuration);
+        }
+
     }
 }

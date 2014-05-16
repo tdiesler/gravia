@@ -208,4 +208,10 @@ public interface Constants  {
      * The property that defines the configurations directory.
      */
     String PROPERTY_CONFIGURATIONS_DIR = "org.jboss.gravia.configurations.dir";
+
+    /**
+     * Service property naming the protocols serviced by a URLStreamHandlerService.
+     * The property's value is a protocol name.
+     */
+    String  URL_HANDLER_PROTOCOL    = "url.handler.protocol";
 }

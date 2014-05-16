@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -289,16 +289,16 @@ public final class BundleContextAdaptor implements BundleContext {
         }
 
         @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+
+        @Override
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (!(obj instanceof BundleListenerAdaptor)) return false;
             BundleListenerAdaptor other = (BundleListenerAdaptor) obj;
             return delegate.equals(other.delegate);
-        }
-
-        @Override
-        public int hashCode() {
-            return delegate.hashCode();
         }
 
         @Override
@@ -324,16 +324,16 @@ public final class BundleContextAdaptor implements BundleContext {
         }
 
         @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+
+        @Override
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (!(obj instanceof ServiceListenerAdaptor)) return false;
             ServiceListenerAdaptor other = (ServiceListenerAdaptor) obj;
             return delegate.equals(other.delegate);
-        }
-
-        @Override
-        public int hashCode() {
-            return delegate.hashCode();
         }
 
         @Override
@@ -397,6 +397,19 @@ public final class BundleContextAdaptor implements BundleContext {
         }
 
         @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (!(obj instanceof ServiceReferenceAdaptor)) return false;
+            ServiceReferenceAdaptor<?> other = (ServiceReferenceAdaptor<?>) obj;
+            return delegate.equals(other.delegate);
+        }
+
+        @Override
         public String toString() {
             return delegate.toString();
         }
@@ -427,6 +440,19 @@ public final class BundleContextAdaptor implements BundleContext {
         }
 
         @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (!(obj instanceof ServiceRegistrationAdaptor)) return false;
+            ServiceRegistrationAdaptor<?> other = (ServiceRegistrationAdaptor<?>) obj;
+            return delegate.equals(other.delegate);
+        }
+
+        @Override
         public String toString() {
             return delegate.toString();
         }
@@ -449,6 +475,19 @@ public final class BundleContextAdaptor implements BundleContext {
         @Override
         public void ungetService(Module module, org.jboss.gravia.runtime.ServiceRegistration<S> registration, S service) {
             delegate.ungetService(new BundleAdaptor(module), new ServiceRegistrationAdaptor<S>(registration), service);
+        }
+
+        @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (!(obj instanceof ServiceFactoryAdaptor)) return false;
+            ServiceFactoryAdaptor<?> other = (ServiceFactoryAdaptor<?>) obj;
+            return delegate.equals(other.delegate);
         }
 
         @Override

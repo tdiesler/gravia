@@ -20,18 +20,13 @@
 
 package org.jboss.gravia.provision.spi;
 
-import java.net.URL;
-import java.util.List;
-
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
-import org.jboss.gravia.resource.Capability;
-import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.IdentityNamespace;
-import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
+import org.jboss.gravia.utils.ResourceUtils;
 
 /**
  * An abstract {@link ResourceInstaller}.
@@ -45,32 +40,12 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
 
     @Override
     public ResourceHandle installResource(Context context, Resource res) throws ProvisionException {
-        return installResourceInternal(context, getRuntimeName(res), res, isShared(res));
+        return installResourceInternal(context, ResourceUtils.getRequiredRuntimeName(res), res, isShared(res));
     }
 
     @Override
     public ResourceHandle installSharedResource(Context context, Resource res) throws ProvisionException {
-        return installResourceInternal(context, getRuntimeName(res), res, true);
-    }
-
-    private String getRuntimeName(Resource res) {
-        Capability icap = res.getIdentityCapability();
-        String runtimeName = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE);
-        if (runtimeName == null) {
-            String mvnatt = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
-            if (mvnatt != null) {
-                MavenCoordinates mavenid = MavenCoordinates.parse(mvnatt);
-                runtimeName = mavenid.getArtifactId() + "-" + mavenid.getVersion() + "." + mavenid.getType();
-            }
-        }
-        if (runtimeName == null) {
-            List<Capability> ccaps = res.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
-            IllegalArgumentAssertion.assertFalse(ccaps.isEmpty(), "Resource has not content capability");
-            URL contentURL = (URL) ccaps.get(0).getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
-            runtimeName = contentURL != null ? contentURL.getFile() : null;
-        }
-        IllegalArgumentAssertion.assertTrue(runtimeName != null, "Cannot obtain runtime name for: " + res);
-        return runtimeName;
+        return installResourceInternal(context, ResourceUtils.getRequiredRuntimeName(res), res, true);
     }
 
     private synchronized ResourceHandle installResourceInternal(Context context, String runtimeName, Resource resource, boolean shared) throws ProvisionException {

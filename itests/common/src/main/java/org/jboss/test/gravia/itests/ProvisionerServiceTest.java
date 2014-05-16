@@ -21,6 +21,7 @@ package org.jboss.test.gravia.itests;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -103,16 +104,27 @@ import org.osgi.service.http.HttpService;
 @ContainerSetup(ProvisionerServiceTest.Setup.class)
 public class ProvisionerServiceTest {
 
-    static final String RESOURCE_A = "stream-resource";
-    static final String RESOURCE_B = "shared-stream-resource";
-    static final String RESOURCE_B1 = "shared-stream-resource-client";
+    static final String RESOURCE_A = "resourceA";
+    static final String RESOURCE_B = "resourceB";
+    static final String RESOURCE_B1 = "resourceB1";
     static final String RESOURCE_C = "resourceC";
     static final String RESOURCE_D = "resourceD";
     static final String RESOURCE_E = "resourceE";
 
     public static class Setup extends ContainerSetupTask {
-        protected String[] getInitialFeatureNames() {
-            return new String[] { "camel.core" };
+
+        Set<ResourceIdentity> identities;
+
+        @Override
+        protected void setUp(Context context) throws Exception {
+            String resname = "META-INF/repository-content/camel.core.feature.xml";
+            URL resurl = getClass().getClassLoader().getResource(resname);
+            identities = addRepositoryContent(context, resurl);
+        }
+
+        @Override
+        protected void tearDown(Context context) throws Exception {
+            removeRepositoryContent(context, identities);
         }
     }
 

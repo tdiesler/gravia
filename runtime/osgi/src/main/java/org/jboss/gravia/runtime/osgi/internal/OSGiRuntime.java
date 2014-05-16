@@ -21,27 +21,38 @@ package org.jboss.gravia.runtime.osgi.internal;
 
 import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 
+import java.io.IOException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.DictionaryResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.ServiceReference;
+import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.ThreadResourceAssociation;
+import org.jboss.gravia.runtime.spi.URLStreamHandlerTracker;
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -49,6 +60,8 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.service.url.AbstractURLStreamHandlerService;
+import org.osgi.service.url.URLStreamHandlerService;
 
 /**
  * The OSGi {@link Runtime}
@@ -60,6 +73,7 @@ public final class OSGiRuntime extends AbstractRuntime {
 
     private final BundleContext syscontext;
     private final BundleListener installListener;
+    private final URLStreamHandlerTracker streamHandlerTracker;
     private final WeakHashMap<Bundle, Module> uninstalled = new WeakHashMap<Bundle, Module>();
 
     public OSGiRuntime(BundleContext syscontext, PropertiesProvider propertiesProvider) {
@@ -81,7 +95,49 @@ public final class OSGiRuntime extends AbstractRuntime {
             throw new IllegalStateException("Cannot install system module", ex);
         }
 
-        installListener = new SynchronousBundleListener() {
+        // Create the {@link URLStreamHandlerTracker}
+        streamHandlerTracker = createURLStreamHandlerTracker(getModuleContext());
+
+        // Create the bundle resolve/uninstall listener
+        installListener = createBundleInstallListener();
+    }
+
+    private URLStreamHandlerTracker createURLStreamHandlerTracker(ModuleContext moduleContext) {
+        URLStreamHandlerTracker tracker = new URLStreamHandlerTracker(moduleContext) {
+
+            private Map<ServiceReference<?>, ServiceRegistration<?>> registrations = new HashMap<>();
+
+            @Override
+            protected void addingHandler(String protocol, ServiceReference<URLStreamHandler> sref, final URLStreamHandler handler) {
+                URLStreamHandlerService service = new AbstractURLStreamHandlerService() {
+                    @Override
+                    public URLConnection openConnection(URL url) throws IOException {
+                        return new URL(null, url.toExternalForm(), handler).openConnection();
+                    }
+                };
+                Dictionary<String, Object> props = new Hashtable<>();
+                for (String key : sref.getPropertyKeys()) {
+                    if (!key.equals(Constants.SERVICE_ID)) {
+                        props.put(key, sref.getProperty(key));
+                    }
+                }
+                ServiceRegistration<URLStreamHandlerService> sreg = getModuleContext().registerService(URLStreamHandlerService.class, service, props);
+                registrations.put(sref, sreg);
+            }
+
+            @Override
+            protected void removingHandler(String protocol, ServiceReference<URLStreamHandler> sref, URLStreamHandler handler) {
+                ServiceRegistration<?> sreg = registrations.remove(sref);
+                if (sreg != null) {
+                    sreg.unregister();
+                }
+            }
+        };
+        return tracker;
+    }
+
+    private SynchronousBundleListener createBundleInstallListener() {
+        return new SynchronousBundleListener() {
             @Override
             public void bundleChanged(BundleEvent event) {
                 int eventType = event.getType();
@@ -99,7 +155,7 @@ public final class OSGiRuntime extends AbstractRuntime {
         };
     }
 
-     Module getModule(Bundle bundle) {
+    Module getModule(Bundle bundle) {
         Module module = super.getModule(bundle.getBundleId());
         if (module == null && bundle.getState() == Bundle.UNINSTALLED) {
             module = uninstalled.get(bundle);
@@ -109,6 +165,9 @@ public final class OSGiRuntime extends AbstractRuntime {
 
     @Override
     public void init() {
+
+        // Start tracking the URLStreamHandler services
+        streamHandlerTracker.open();
 
         // Setup the bundle tracker
         syscontext.addBundleListener(installListener);

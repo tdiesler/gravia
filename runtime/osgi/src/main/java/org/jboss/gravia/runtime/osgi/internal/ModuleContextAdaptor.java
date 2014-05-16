@@ -247,6 +247,11 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         }
 
         @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+
+        @Override
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (!(obj instanceof ModuleListenerAdaptor)) return false;
@@ -254,9 +259,8 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
             return delegate.equals(other.delegate);
         }
 
-        @Override
-        public int hashCode() {
-            return delegate.hashCode();
+        public String toString() {
+            return delegate.toString();
         }
     }
 
@@ -277,6 +281,11 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         }
 
         @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+
+        @Override
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (!(obj instanceof ServiceListenerAdaptor)) return false;
@@ -284,9 +293,8 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
             return delegate.equals(other.delegate);
         }
 
-        @Override
-        public int hashCode() {
-            return delegate.hashCode();
+        public String toString() {
+            return delegate.toString();
         }
     }
 
@@ -324,6 +332,23 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         public int compareTo(Object reference) {
             return new ServiceReferenceAdaptor<S>(delegate).compareTo(reference);
         }
+
+        @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (!(obj instanceof ServiceReferenceAdaptor)) return false;
+            ServiceReferenceAdaptor<?> other = (ServiceReferenceAdaptor<?>) obj;
+            return delegate.equals(other.delegate);
+        }
+
+        public String toString() {
+            return delegate.toString();
+        }
     }
 
     private class ServiceRegistrationAdaptor<S> implements ServiceRegistration<S> {
@@ -349,6 +374,23 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         public void unregister() {
             delegate.unregister();
         }
+
+        @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (!(obj instanceof ServiceRegistrationAdaptor)) return false;
+            ServiceRegistrationAdaptor<?> other = (ServiceRegistrationAdaptor<?>) obj;
+            return delegate.equals(other.delegate);
+        }
+
+        public String toString() {
+            return delegate.toString();
+        }
     }
 
     private class ServiceFactoryAdaptor<S> implements org.osgi.framework.ServiceFactory<S> {
@@ -368,6 +410,23 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         @Override
         public void ungetService(Bundle bundle, org.osgi.framework.ServiceRegistration<S> registration, S service) {
             delegate.ungetService(mappedModule(bundle), new ServiceRegistrationAdaptor<S>(registration), service);
+        }
+
+        @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (!(obj instanceof ServiceFactoryAdaptor)) return false;
+            ServiceFactoryAdaptor<?> other = (ServiceFactoryAdaptor<?>) obj;
+            return delegate.equals(other.delegate);
+        }
+
+        public String toString() {
+            return delegate.toString();
         }
     }
 }

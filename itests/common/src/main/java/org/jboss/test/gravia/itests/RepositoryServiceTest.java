@@ -20,7 +20,9 @@
 package org.jboss.test.gravia.itests;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
+import java.util.Set;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -33,6 +35,7 @@ import org.jboss.gravia.resource.IdentityRequirementBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceLocator;
@@ -55,8 +58,19 @@ import org.junit.runner.RunWith;
 public class RepositoryServiceTest {
 
     public static class Setup extends ContainerSetupTask {
-        protected String[] getInitialFeatureNames() {
-            return new String[] { "camel.core" };
+
+        Set<ResourceIdentity> identities;
+
+        @Override
+        protected void setUp(Context context) throws Exception {
+            String resname = "META-INF/repository-content/camel.core.feature.xml";
+            URL resurl = getClass().getClassLoader().getResource(resname);
+            identities = addRepositoryContent(context, resurl);
+        }
+
+        @Override
+        protected void tearDown(Context context) throws Exception {
+            removeRepositoryContent(context, identities);
         }
     }
 
