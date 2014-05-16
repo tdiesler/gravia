@@ -106,15 +106,6 @@ public class URLStreamHandlerTracker implements URLStreamHandlerFactory {
         // do nothing
     }
 
-    public boolean register() {
-        try {
-            URL.setURLStreamHandlerFactory(this);
-            return true;
-        } catch (Error er) {
-            return false;
-        }
-    }
-
     public void open() {
         tracker.open();
     }

@@ -132,7 +132,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         ResourceIdentity identity = resource.getIdentity();
         ContentCapability ccap = (ContentCapability) resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).get(0);
         URL contentURL = ccap.getContentURL();
-        if (contentURL == null) {
+        if (contentURL == null || !contentURL.toExternalForm().startsWith("file:")) {
             ResourceContent content = resource.adapt(ResourceContent.class);
             IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
             tempfile = new File(catalinaTemp, runtimeName);

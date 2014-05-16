@@ -43,9 +43,7 @@ public class TomcatRuntime extends EmbeddedRuntime {
 
         // Register the URLStreamHandler tracker
         URLStreamHandlerTracker tracker = new URLStreamHandlerTracker(getModuleContext());
-        if (!tracker.register()) {
-            DirContextURLStreamHandlerFactory.addUserFactory(tracker);
-        }
+        DirContextURLStreamHandlerFactory.addUserFactory(tracker);
         tracker.open();
     }
 
