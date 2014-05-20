@@ -56,7 +56,6 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.jboss.gravia.utils.IOUtils;
@@ -135,11 +134,6 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
     @Override
     public ResourceInstaller getValue() throws IllegalStateException {
         return this;
-    }
-
-    @Override
-    public RuntimeType getRuntimeType() {
-        return RuntimeType.WILDFLY;
     }
 
     @Override

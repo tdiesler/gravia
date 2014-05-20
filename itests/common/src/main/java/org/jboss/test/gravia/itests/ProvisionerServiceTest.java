@@ -447,7 +447,7 @@ public class ProvisionerServiceTest {
      */
     @Test
     public void testProvisionMultipleContentCapabilities() throws Exception {
-        List<ResourceHandle> handles = new ArrayList<>();
+
         Provisioner provisioner = ServiceLocator.getRequiredService(Provisioner.class);
 
         DefaultResourceBuilder builderF = new DefaultResourceBuilder();
@@ -464,6 +464,7 @@ public class ProvisionerServiceTest {
         builderG.addContentCapability(deployer.getDeployment(CONTENT_G2), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.WILDFLY.name()));
         builderG.addContentCapability(deployer.getDeployment(CONTENT_G3), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.KARAF.name()));
 
+        List<ResourceHandle> handles = new ArrayList<>();
         handles.add(provisioner.installSharedResource(builderF.getResource()));
         handles.add(provisioner.installResource(builderG.getResource()));
         try {
@@ -681,6 +682,7 @@ public class ProvisionerServiceTest {
         return archive;
     }
 
+    // Shared Tomcat jar
     @Deployment(name = CONTENT_F1, managed = false, testable = false)
     public static Archive<?> getContentF1() {
         JavaArchive archive = ShrinkWrap.create(JavaArchive.class, CONTENT_F1 + ".jar");
@@ -696,6 +698,7 @@ public class ProvisionerServiceTest {
         return archive;
     }
 
+    // Shared Wildfly jar
     @Deployment(name = CONTENT_F2, managed = false, testable = false)
     public static Archive<?> getContentF2() {
         JavaArchive archive = ShrinkWrap.create(JavaArchive.class, CONTENT_F2 + ".jar");
@@ -712,6 +715,7 @@ public class ProvisionerServiceTest {
         return archive;
     }
 
+    // Karaf jar
     @Deployment(name = CONTENT_F3, managed = false, testable = false)
     public static Archive<?> getContentF3() {
         JavaArchive archive = ShrinkWrap.create(JavaArchive.class, CONTENT_F3 + ".jar");
@@ -730,6 +734,7 @@ public class ProvisionerServiceTest {
         return archive;
     }
 
+    // Unshared Tomcat deployment
     @Deployment(name = CONTENT_G1, managed = false, testable = false)
     public static Archive<?> getContentG1() {
         WebArchive archive = ShrinkWrap.create(WebArchive.class, CONTENT_G1 + ".war");
@@ -747,6 +752,7 @@ public class ProvisionerServiceTest {
         return archive;
     }
 
+    // Unshared Wildfly deployment
     @Deployment(name = CONTENT_G2, managed = false, testable = false)
     public static Archive<?> getContentG2() {
         JavaArchive archive = ShrinkWrap.create(JavaArchive.class, CONTENT_G2 + ".jar");
@@ -764,6 +770,7 @@ public class ProvisionerServiceTest {
         return archive;
     }
 
+    // Karaf deployment
     @Deployment(name = CONTENT_G3, managed = false, testable = false)
     public static Archive<?> getContentG3() {
         JavaArchive archive = ShrinkWrap.create(JavaArchive.class, CONTENT_G3 + ".jar");

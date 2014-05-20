@@ -33,7 +33,6 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.spi.ThreadResourceAssociation;
 import org.jboss.gravia.utils.IllegalStateAssertion;
 import org.osgi.framework.Bundle;
@@ -52,11 +51,6 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public RuntimeType getRuntimeType() {
-        return RuntimeType.KARAF;
-    }
-
-    @Override
     public RuntimeEnvironment getEnvironment() {
         return environment;
     }
@@ -72,11 +66,11 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
         // Install the Bundle
         ResourceIdentity identity = resource.getIdentity();
         ResourceContent content = getRequiredResourceContent(resource);
-        IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
+        IllegalStateAssertion.assertNotNull(content.getContent(), "Cannot obtain content from: " + resource);
 
         Bundle bundle;
         try {
-            String location = resource.getIdentity().getCanonicalForm();
+            String location = "resource://" + getRuntimeName(resource, false);
             bundle = context.installBundle(location, content.getContent());
         } catch (BundleException ex) {
             throw new ProvisionException(ex);

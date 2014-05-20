@@ -48,7 +48,6 @@ import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.jboss.gravia.utils.IOUtils;
 import org.jboss.gravia.utils.IllegalStateAssertion;
@@ -80,11 +79,6 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         }
         if (userDatabase.findUser(TOMCAT_USER) == null)
             throw new IllegalStateException("Cannot obtain user: " + TOMCAT_USER);
-    }
-
-    @Override
-    public RuntimeType getRuntimeType() {
-        return RuntimeType.TOMCAT;
     }
 
     @Override

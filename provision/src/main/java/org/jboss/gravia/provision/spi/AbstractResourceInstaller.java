@@ -50,8 +50,6 @@ import org.jboss.gravia.utils.IllegalArgumentAssertion;
  */
 public abstract class AbstractResourceInstaller implements ResourceInstaller {
 
-    public abstract RuntimeType getRuntimeType();
-
     public abstract RuntimeEnvironment getEnvironment();
 
     @Override
