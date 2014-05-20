@@ -30,6 +30,7 @@ import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.repository.RepositoryStorage;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.MavenCoordinates;
@@ -115,7 +116,7 @@ public abstract class AbstractRepository implements Repository {
     @Override
     public Resource addResource(Resource res, MavenCoordinates mavenid) {
         Capability icap = res.getIdentityCapability();
-        String attkey = IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE;
+        String attkey = ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE;
         String attval = (String) icap.getAttributes().get(attkey);
         if (attval != null && !attval.equals(mavenid.toExternalForm()))
             throw new IllegalArgumentException("Resource already contains a " + attkey + " attribute: " + attval);

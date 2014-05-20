@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,12 +37,6 @@ public interface IdentityNamespace extends Namespace {
     String IDENTITY_NAMESPACE = "gravia.identity";
 
     /**
-     * Artifact coordinates may be defined by the simple groupId:artifactId:version form,
-     * or the fully qualified form groupId:artifactId:type:version[:classifier]
-     */
-    String CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE = "maven.identity";
-
-    /**
      * The capability attribute identifying the {@code Version} of the resource
      * if one is specified or {@code 0.0.0} if not specified. The value of this
      * attribute must be of type {@code Version}.
@@ -54,12 +48,6 @@ public interface IdentityNamespace extends Namespace {
      * The default is 'false'.
      */
     String CAPABILITY_SHARED_ATTRIBUTE = "shared";
-
-    /**
-     * The capability attribute defining the runtime name durint deployment.
-     * The default is the identity symbolic name.
-     */
-    String CAPABILITY_RUNTIME_NAME_ATTRIBUTE = "runtime.name";
 
     /**
      * The capability attribute identifying the resource type. If the resource

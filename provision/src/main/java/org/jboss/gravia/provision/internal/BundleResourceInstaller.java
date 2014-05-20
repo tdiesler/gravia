@@ -33,6 +33,7 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.spi.ThreadResourceAssociation;
 import org.jboss.gravia.utils.IllegalStateAssertion;
 import org.osgi.framework.Bundle;
@@ -51,26 +52,32 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
+    public RuntimeType getRuntimeType() {
+        return RuntimeType.KARAF;
+    }
+
+    @Override
     public RuntimeEnvironment getEnvironment() {
         return environment;
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, String runtimeName, Resource resource, boolean shared) throws ProvisionException {
+    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws ProvisionException {
         LOGGER.info("Installing resource: {}", resource);
-        return installBundleResource(runtimeName, resource);
+        return installBundleResource(resource);
     }
 
-    private ResourceHandle installBundleResource(String runtimeName, Resource resource) throws ProvisionException {
+    private ResourceHandle installBundleResource(Resource resource) throws ProvisionException {
 
         // Install the Bundle
         ResourceIdentity identity = resource.getIdentity();
-        ResourceContent content = resource.adapt(ResourceContent.class);
+        ResourceContent content = getRequiredResourceContent(resource);
         IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
 
         Bundle bundle;
         try {
-            bundle = context.installBundle(runtimeName, content.getContent());
+            String location = resource.getIdentity().getCanonicalForm();
+            bundle = context.installBundle(location, content.getContent());
         } catch (BundleException ex) {
             throw new ProvisionException(ex);
         }

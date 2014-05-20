@@ -39,7 +39,6 @@ import org.jboss.gravia.repository.RepositoryWriter;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.ContentCapability;
 import org.jboss.gravia.resource.ContentNamespace;
-import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
@@ -100,7 +99,7 @@ public abstract class AbstractRepositoryStorage extends MemoryRepositoryStorage 
         // Convert to a maven resource if needed
         Capability icap = resource.getIdentityCapability();
         List<Capability> ccaps = resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
-        String mvnatt = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
+        String mvnatt = (String) icap.getAttribute(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
         if (ccaps.isEmpty() && mvnatt != null) {
             MavenCoordinates mvnid = MavenCoordinates.parse(mvnatt);
             Resource mvnres = getMavenResource(mvnid);

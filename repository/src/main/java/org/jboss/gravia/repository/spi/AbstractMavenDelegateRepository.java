@@ -36,7 +36,6 @@ import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
-import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
@@ -111,7 +110,7 @@ public abstract class AbstractMavenDelegateRepository extends AbstractRepository
     @Override
     public Collection<Capability> findProviders(Requirement req) {
 
-        String attval = (String) req.getAttribute(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
+        String attval = (String) req.getAttribute(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
         if (attval == null)
             return Collections.emptyList();
 

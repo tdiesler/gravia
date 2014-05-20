@@ -51,13 +51,13 @@ import org.jboss.gravia.resolver.ResolveContext;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resolver.spi.AbstractEnvironment;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
-import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.DefaultWire;
 import org.jboss.gravia.runtime.DefaultWiring;
@@ -246,7 +246,7 @@ public abstract class AbstractProvisioner implements Provisioner {
 
         ResourceBuilder builder = new DefaultResourceBuilder();
         Capability icap = builder.addIdentityCapability(identity);
-        icap.getAttributes().put(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, runtimeName);
+        icap.getAttributes().put(ContentNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, runtimeName);
         builder.addContentCapability(inputStream);
 
         return builder;
@@ -265,7 +265,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         // Copy the mvn resource to another resource with the given identity
         DefaultResourceBuilder builder = new DefaultResourceBuilder();
         Capability icap = identity != null ? builder.addIdentityCapability(identity) : builder.addIdentityCapability(mavenid);
-        icap.getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
+        icap.getAttributes().put(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
         for (Capability cap : mvnres.getCapabilities(null)) {
             if (!IdentityNamespace.IDENTITY_NAMESPACE.equals(cap.getNamespace())) {
                 builder.addCapability(cap.getNamespace(), cap.getAttributes(), cap.getDirectives());
@@ -290,9 +290,6 @@ public abstract class AbstractProvisioner implements Provisioner {
 
     private synchronized ResourceHandle installResourceInternal(String runtimeName, Resource resource, boolean shared) throws ProvisionException {
         IllegalArgumentAssertion.assertNotNull(resource, "resource");
-
-        ResourceContent content = resource.adapt(ResourceContent.class);
-        IllegalStateAssertion.assertNotNull(content, "Resource has no content: " + resource);
 
         Context context = new DefaultInstallerContext(resource);
         ResourceHandle handle;

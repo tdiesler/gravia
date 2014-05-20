@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.test.gravia.itests.sub.b;
+package org.jboss.test.gravia.itests.sub.a;
 
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
@@ -29,26 +29,21 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceLocator;
-import org.jboss.test.gravia.itests.sub.b1.SimpleModuleState;
+import org.jboss.test.gravia.itests.sub.a1.ModuleStateA;
 
-public class SimpleModuleActivator implements ModuleActivator {
+public class ModuleActivatorA implements ModuleActivator {
 
     @Override
     public void start(final ModuleContext context) throws Exception {
         MBeanServer server = ServiceLocator.getRequiredService(context, MBeanServer.class);
-        SimpleModuleState moduleState = new SimpleModuleState() {
-
-            @Override
-            public String getResourceIdentity() {
-                return context.getModule().getIdentity().getCanonicalForm();
-            }
+        ModuleStateA moduleState = new ModuleStateA() {
 
             @Override
             public String getModuleState() {
                 return context.getModule().getState().toString();
             }
         };
-        StandardMBean mbean = new StandardMBean(moduleState, SimpleModuleState.class);
+        StandardMBean mbean = new StandardMBean(moduleState, ModuleStateA.class);
         server.registerMBean(mbean, getObjectName(context.getModule()));
     }
 

@@ -19,7 +19,7 @@
  */
 package org.jboss.gravia.repository;
 
-import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.IdentityRequirementBuilder;
 import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Requirement;
@@ -35,6 +35,6 @@ public class MavenIdentityRequirementBuilder extends IdentityRequirementBuilder 
 
     public MavenIdentityRequirementBuilder(MavenCoordinates mavenid) {
         super(MavenUtils.getSymbolicName(mavenid), MavenUtils.getVersion(mavenid).toString());
-        getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
+        getAttributes().put(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
     }
 }

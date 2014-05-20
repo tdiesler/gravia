@@ -77,7 +77,7 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
 
     public Capability addIdentityCapability(MavenCoordinates mavenid) {
         Capability icap = addIdentityCapability(MavenUtils.getSymbolicName(mavenid), MavenUtils.getVersion(mavenid), null, null);
-        icap.getAttributes().put(IdentityNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
+        icap.getAttributes().put(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
         return icap;
     }
 

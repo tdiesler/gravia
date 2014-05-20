@@ -190,6 +190,12 @@ public interface Constants  {
     String SERVICE_RANKING = "service.ranking";
 
     /**
+     * Service property naming the protocols serviced by a URLStreamHandlerService.
+     * The property's value is a protocol name.
+     */
+    String URL_HANDLER_PROTOCOL    = "url.handler.protocol";
+
+    /**
      * The property that defines the Maven Repository base URLs.
      */
     String PROPERTY_MAVEN_REPOSITORY_BASE_URLS = "org.jboss.gravia.repository.maven.base.urls";
@@ -208,10 +214,4 @@ public interface Constants  {
      * The property that defines the configurations directory.
      */
     String PROPERTY_CONFIGURATIONS_DIR = "org.jboss.gravia.configurations.dir";
-
-    /**
-     * Service property naming the protocols serviced by a URLStreamHandlerService.
-     * The property's value is a protocol name.
-     */
-    String  URL_HANDLER_PROTOCOL    = "url.handler.protocol";
 }

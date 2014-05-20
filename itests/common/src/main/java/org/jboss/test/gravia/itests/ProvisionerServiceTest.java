@@ -19,6 +19,8 @@
  */
 package org.jboss.test.gravia.itests;
 
+import static org.jboss.gravia.resource.ContentNamespace.CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE;
+
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
@@ -53,8 +55,8 @@ import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
-import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.IdentityRequirementBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.MavenCoordinates;
@@ -81,8 +83,8 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.test.gravia.itests.sub.b.CamelTransformHttpActivator;
-import org.jboss.test.gravia.itests.sub.b.SimpleModuleActivator;
-import org.jboss.test.gravia.itests.sub.b1.SimpleModuleState;
+import org.jboss.test.gravia.itests.sub.b.ModuleActivatorB;
+import org.jboss.test.gravia.itests.sub.b1.ModuleStateB;
 import org.jboss.test.gravia.itests.support.AnnotatedContextListener;
 import org.jboss.test.gravia.itests.support.AnnotatedProxyListener;
 import org.jboss.test.gravia.itests.support.AnnotatedProxyServlet;
@@ -110,6 +112,14 @@ public class ProvisionerServiceTest {
     static final String RESOURCE_C = "resourceC";
     static final String RESOURCE_D = "resourceD";
     static final String RESOURCE_E = "resourceE";
+    static final String RESOURCE_F = "resourceF";
+    static final String CONTENT_F1 = "contentF1";
+    static final String CONTENT_F2 = "contentF2";
+    static final String CONTENT_F3 = "contentF3";
+    static final String RESOURCE_G = "resourceG";
+    static final String CONTENT_G1 = "contentG1";
+    static final String CONTENT_G2 = "contentG2";
+    static final String CONTENT_G3 = "contentG3";
 
     public static class Setup extends ContainerSetupTask {
 
@@ -264,7 +274,7 @@ public class ProvisionerServiceTest {
         ResourceIdentity identityA = ResourceIdentity.fromString("camel.core.shared");
         MavenCoordinates mavenid = MavenCoordinates.parse("org.apache.camel:camel-core:jar:2.11.0");
         ResourceBuilder builderA = provisioner.getMavenResourceBuilder(identityA, mavenid);
-        builderA.getCurrentResource().getIdentityCapability().getAttributes().put(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, "camel-core-shared-2.11.0.jar");
+        builderA.getCurrentResource().getIdentityCapability().getAttributes().put(ContentNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, "camel-core-shared-2.11.0.jar");
         builderA.addIdentityRequirement("javax.api");
         builderA.addIdentityRequirement("org.slf4j");
         ResourceHandle handleA = provisioner.installSharedResource(builderA.getResource());
@@ -321,7 +331,7 @@ public class ProvisionerServiceTest {
             DefaultResourceBuilder builder = new DefaultResourceBuilder();
             ResourceIdentity residB = ResourceIdentity.create(RESOURCE_D, Version.emptyVersion);
             Capability icap = builder.addIdentityCapability(residB);
-            icap.getAttributes().put(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, RESOURCE_D + ".war");
+            icap.getAttributes().put(ContentNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, RESOURCE_D + ".war");
             builder.addContentCapability(deployer.getDeployment(RESOURCE_D));
             Resource resB = builder.getResource();
 
@@ -375,7 +385,7 @@ public class ProvisionerServiceTest {
         // Build a resource that has a dependency on camel.core
         DefaultResourceBuilder builder = new DefaultResourceBuilder();
         Capability icap = builder.addIdentityCapability(RESOURCE_E, Version.emptyVersion);
-        icap.getAttributes().put(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, RESOURCE_E + ".war");
+        icap.getAttributes().put(ContentNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, RESOURCE_E + ".war");
         builder.addContentCapability(deployer.getDeployment(RESOURCE_E));
         builder.addIdentityRequirement("org.apache.camel.core", new VersionRange("[2.11,3.0)"));
         Resource res = builder.getResource();
@@ -428,6 +438,54 @@ public class ProvisionerServiceTest {
         }
     }
 
+    /**
+     * Provision a resource with multiple content capabilities to the container shared location.
+     * Provision another resource with multiple content capabilities that has a class loader dependency on the first.
+     *
+     * The client controlls the resource identities
+     * The installed resources are self sufficient - no additional dependency mapping needed.
+     */
+    @Test
+    public void testProvisionMultipleContentCapabilities() throws Exception {
+        List<ResourceHandle> handles = new ArrayList<>();
+        Provisioner provisioner = ServiceLocator.getRequiredService(Provisioner.class);
+
+        DefaultResourceBuilder builderF = new DefaultResourceBuilder();
+        ResourceIdentity identityF = ResourceIdentity.create(RESOURCE_F, Version.emptyVersion);
+        builderF.addIdentityCapability(identityF);
+        builderF.addContentCapability(deployer.getDeployment(CONTENT_F1), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.TOMCAT.name()));
+        builderF.addContentCapability(deployer.getDeployment(CONTENT_F2), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.WILDFLY.name()));
+        builderF.addContentCapability(deployer.getDeployment(CONTENT_F3), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.KARAF.name()));
+
+        DefaultResourceBuilder builderG = new DefaultResourceBuilder();
+        ResourceIdentity identityG = ResourceIdentity.create(RESOURCE_G, Version.emptyVersion);
+        builderG.addIdentityCapability(identityG);
+        builderG.addContentCapability(deployer.getDeployment(CONTENT_G1), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.TOMCAT.name()));
+        builderG.addContentCapability(deployer.getDeployment(CONTENT_G2), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.WILDFLY.name()));
+        builderG.addContentCapability(deployer.getDeployment(CONTENT_G3), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.KARAF.name()));
+
+        handles.add(provisioner.installSharedResource(builderF.getResource()));
+        handles.add(provisioner.installResource(builderG.getResource()));
+        try {
+            // Verify that the modules got installed
+            Runtime runtime = RuntimeLocator.getRequiredRuntime();
+            for (ResourceHandle handle : handles) {
+                ResourceIdentity identity = handle.getResource().getIdentity();
+                Assert.assertSame(handle.getModule(), runtime.getModule(identity));
+                Assert.assertEquals("ACTIVE " + identity, State.ACTIVE, handle.getModule().getState());
+            }
+            // Verify that the module activator was called
+            Module module = runtime.getModule(identityG);
+            MBeanServer server = ServiceLocator.getRequiredService(MBeanServer.class);
+            Assert.assertTrue("MBean registered", server.isRegistered(getObjectName(module)));
+            Assert.assertEquals("ACTIVE", server.getAttribute(getObjectName(module), "ModuleState"));
+        } finally {
+            for (ResourceHandle handle : handles) {
+                handle.uninstall();
+            }
+        }
+    }
+
     private String runtimeName(String resname) {
         return resname + (RuntimeType.TOMCAT == RuntimeType.getRuntimeType() ? ".war" : ".jar");
     }
@@ -450,7 +508,7 @@ public class ProvisionerServiceTest {
         final ArchiveBuilder archive = new ArchiveBuilder(RESOURCE_A);
         archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(RuntimeType.KARAF, ModuleActivatorBridge.class);
-        archive.addClasses(SimpleModuleActivator.class, SimpleModuleState.class);
+        archive.addClasses(ModuleActivatorB.class, ModuleStateB.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
@@ -459,13 +517,13 @@ public class ProvisionerServiceTest {
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(RESOURCE_A);
                     builder.addBundleActivator(ModuleActivatorBridge.class);
-                    builder.addManifestHeader(Constants.MODULE_ACTIVATOR, SimpleModuleActivator.class.getName());
+                    builder.addManifestHeader(Constants.MODULE_ACTIVATOR, ModuleActivatorB.class.getName());
                     builder.addImportPackages(Runtime.class, Resource.class, ServiceLocator.class, MBeanServer.class);
                     return builder.openStream();
                 } else {
                     ManifestBuilder builder = new ManifestBuilder();
                     builder.addIdentityCapability(RESOURCE_A, Version.emptyVersion);
-                    builder.addManifestHeader(Constants.MODULE_ACTIVATOR, SimpleModuleActivator.class.getName());
+                    builder.addManifestHeader(Constants.MODULE_ACTIVATOR, ModuleActivatorB.class.getName());
                     builder.addManifestHeader("Dependencies", "org.jboss.gravia");
                     return builder.openStream();
                 }
@@ -477,14 +535,14 @@ public class ProvisionerServiceTest {
     @Deployment(name = RESOURCE_B, managed = false, testable = false)
     public static Archive<?> getResourceB() {
         JavaArchive archive = ShrinkWrap.create(JavaArchive.class, RESOURCE_B + ".jar");
-        archive.addClasses(SimpleModuleState.class);
+        archive.addClasses(ModuleStateB.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleManifestVersion(2);
                 builder.addBundleSymbolicName(RESOURCE_B);
-                builder.addExportPackages(SimpleModuleState.class);
+                builder.addExportPackages(ModuleStateB.class);
                 builder.addImportPackages(Runtime.class, Resource.class);
                 return builder.openStream();
             }
@@ -497,7 +555,7 @@ public class ProvisionerServiceTest {
         final ArchiveBuilder archive = new ArchiveBuilder(RESOURCE_B1);
         archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(RuntimeType.KARAF, ModuleActivatorBridge.class);
-        archive.addClasses(SimpleModuleActivator.class);
+        archive.addClasses(ModuleActivatorB.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
@@ -506,14 +564,14 @@ public class ProvisionerServiceTest {
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(RESOURCE_B1);
                     builder.addBundleActivator(ModuleActivatorBridge.class);
-                    builder.addManifestHeader(Constants.MODULE_ACTIVATOR, SimpleModuleActivator.class.getName());
+                    builder.addManifestHeader(Constants.MODULE_ACTIVATOR, ModuleActivatorB.class.getName());
                     builder.addImportPackages(Runtime.class, Resource.class, ServiceLocator.class);
-                    builder.addImportPackages(MBeanServer.class, SimpleModuleState.class);
+                    builder.addImportPackages(MBeanServer.class, ModuleStateB.class);
                     return builder.openStream();
                 } else {
                     ManifestBuilder builder = new ManifestBuilder();
                     builder.addIdentityCapability(RESOURCE_B1, Version.emptyVersion);
-                    builder.addManifestHeader(Constants.MODULE_ACTIVATOR, SimpleModuleActivator.class.getName());
+                    builder.addManifestHeader(Constants.MODULE_ACTIVATOR, ModuleActivatorB.class.getName());
                     builder.addManifestHeader("Dependencies", "org.jboss.gravia," + RESOURCE_B);
                     return builder.openStream();
                 }
@@ -620,6 +678,109 @@ public class ProvisionerServiceTest {
         });
         File[] libs = Maven.resolver().loadPomFromFile("pom.xml").resolve("org.apache.felix:org.apache.felix.http.proxy").withoutTransitivity().asFile();
         archive.addAsLibraries(libs);
+        return archive;
+    }
+
+    @Deployment(name = CONTENT_F1, managed = false, testable = false)
+    public static Archive<?> getContentF1() {
+        JavaArchive archive = ShrinkWrap.create(JavaArchive.class, CONTENT_F1 + ".jar");
+        archive.addClasses(ModuleStateB.class);
+        archive.setManifest(new Asset() {
+            @Override
+            public InputStream openStream() {
+                ManifestBuilder builder = new ManifestBuilder();
+                builder.addIdentityCapability(RESOURCE_F, Version.emptyVersion);
+                return builder.openStream();
+            }
+        });
+        return archive;
+    }
+
+    @Deployment(name = CONTENT_F2, managed = false, testable = false)
+    public static Archive<?> getContentF2() {
+        JavaArchive archive = ShrinkWrap.create(JavaArchive.class, CONTENT_F2 + ".jar");
+        archive.addClasses(ModuleStateB.class);
+        archive.setManifest(new Asset() {
+            @Override
+            public InputStream openStream() {
+                ManifestBuilder builder = new ManifestBuilder();
+                builder.addIdentityCapability(RESOURCE_F, Version.emptyVersion);
+                builder.addManifestHeader("Dependencies", "org.jboss.gravia");
+                return builder.openStream();
+            }
+        });
+        return archive;
+    }
+
+    @Deployment(name = CONTENT_F3, managed = false, testable = false)
+    public static Archive<?> getContentF3() {
+        JavaArchive archive = ShrinkWrap.create(JavaArchive.class, CONTENT_F3 + ".jar");
+        archive.addClasses(ModuleStateB.class);
+        archive.setManifest(new Asset() {
+            @Override
+            public InputStream openStream() {
+                OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+                builder.addBundleManifestVersion(2);
+                builder.addBundleSymbolicName(RESOURCE_F);
+                builder.addExportPackages(ModuleStateB.class);
+                builder.addImportPackages(Runtime.class, Resource.class);
+                return builder.openStream();
+            }
+        });
+        return archive;
+    }
+
+    @Deployment(name = CONTENT_G1, managed = false, testable = false)
+    public static Archive<?> getContentG1() {
+        WebArchive archive = ShrinkWrap.create(WebArchive.class, CONTENT_G1 + ".war");
+        archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
+        archive.addClasses(ModuleActivatorB.class);
+        archive.setManifest(new Asset() {
+            @Override
+            public InputStream openStream() {
+                ManifestBuilder builder = new ManifestBuilder();
+                builder.addIdentityCapability(RESOURCE_G, Version.emptyVersion);
+                builder.addManifestHeader(Constants.MODULE_ACTIVATOR, ModuleActivatorB.class.getName());
+                return builder.openStream();
+            }
+        });
+        return archive;
+    }
+
+    @Deployment(name = CONTENT_G2, managed = false, testable = false)
+    public static Archive<?> getContentG2() {
+        JavaArchive archive = ShrinkWrap.create(JavaArchive.class, CONTENT_G2 + ".jar");
+        archive.addClasses(ModuleActivatorB.class);
+        archive.setManifest(new Asset() {
+            @Override
+            public InputStream openStream() {
+                ManifestBuilder builder = new ManifestBuilder();
+                builder.addIdentityCapability(RESOURCE_G, Version.emptyVersion);
+                builder.addManifestHeader(Constants.MODULE_ACTIVATOR, ModuleActivatorB.class.getName());
+                builder.addManifestHeader("Dependencies", "org.jboss.gravia," + RESOURCE_F);
+                return builder.openStream();
+            }
+        });
+        return archive;
+    }
+
+    @Deployment(name = CONTENT_G3, managed = false, testable = false)
+    public static Archive<?> getContentG3() {
+        JavaArchive archive = ShrinkWrap.create(JavaArchive.class, CONTENT_G3 + ".jar");
+        archive.addClasses(ModuleActivatorBridge.class, ModuleActivatorB.class);
+        archive.setManifest(new Asset() {
+            @Override
+            public InputStream openStream() {
+                OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+                builder.addBundleManifestVersion(2);
+                builder.addBundleSymbolicName(RESOURCE_G);
+                builder.addBundleActivator(ModuleActivatorBridge.class);
+                builder.addManifestHeader(Constants.MODULE_ACTIVATOR, ModuleActivatorB.class.getName());
+                builder.addImportPackages(Runtime.class, Resource.class, ServiceLocator.class);
+                builder.addImportPackages(MBeanServer.class, ModuleStateB.class);
+                return builder.openStream();
+            }
+        });
         return archive;
     }
 }

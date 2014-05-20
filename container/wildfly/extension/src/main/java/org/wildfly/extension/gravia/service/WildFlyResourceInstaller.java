@@ -45,7 +45,6 @@ import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.provision.spi.AbstractResourceHandle;
 import org.jboss.gravia.provision.spi.AbstractResourceInstaller;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;
-import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
@@ -57,9 +56,11 @@ import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.jboss.gravia.utils.IOUtils;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 import org.jboss.gravia.utils.IllegalStateAssertion;
 import org.jboss.modules.ModuleClassLoader;
 import org.jboss.modules.ModuleIdentifier;
@@ -137,34 +138,41 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
     }
 
     @Override
+    public RuntimeType getRuntimeType() {
+        return RuntimeType.WILDFLY;
+    }
+
+    @Override
     public RuntimeEnvironment getEnvironment() {
         return injectedEnvironment.getValue();
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, String runtimeName, Resource resource, boolean shared) throws Exception {
+    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws Exception {
         ResourceHandle handle;
         if (shared) {
-            handle = installSharedResourceInternal(context, runtimeName, resource);
+            handle = installSharedResourceInternal(context, resource);
         } else {
-            handle = installUnsharedResourceInternal(context, runtimeName, resource);
+            handle = installUnsharedResourceInternal(context, resource);
         }
         return handle;
     }
 
     @SuppressWarnings("deprecation")
-    private ResourceHandle installSharedResourceInternal(Context context, String runtimeName, Resource resource) throws Exception {
+    private ResourceHandle installSharedResourceInternal(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing shared resource: {}", resource);
 
+        String runtimeName = getRuntimeName(resource, true);
         ResourceIdentity identity = resource.getIdentity();
         String symbolicName = identity.getSymbolicName();
         Version version = identity.getVersion();
+
         File modulesDir = injectedServerEnvironment.getValue().getModulesDir();
         File moduleDir = new File(modulesDir, symbolicName.replace(".", File.separator) + File.separator + version);
         if (moduleDir.exists())
             throw new IllegalStateException("Module dir already exists: " + moduleDir);
 
-        ResourceContent content = resource.adapt(ResourceContent.class);
+        ResourceContent content = getRequiredResourceContent(resource);
         IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
 
         // copy resource content
@@ -211,9 +219,10 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
         };
     }
 
-    private ResourceHandle installUnsharedResourceInternal(Context context, String runtimeName, Resource resource) throws Exception {
+    private ResourceHandle installUnsharedResourceInternal(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing unshared resource: {}", resource);
 
+        String runtimeName = getRuntimeName(resource, false);
         final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
         final ResourceWrapper wrapper = getWrappedResourceContent(runtimeName, resource, context.getResourceMapping());
 
@@ -252,23 +261,20 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
 
     // Wrap the resource and add a generated jboss-deployment-structure.xml
     private ResourceWrapper getWrappedResourceContent(String runtimeName, Resource resource, Map<Requirement, Resource> mapping) {
-
-        Capability icap = resource.getIdentityCapability();
-        if (runtimeName == null) {
-            String rtnameAtt = (String) icap.getAttribute(IdentityNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE);
-            runtimeName = rtnameAtt != null ? rtnameAtt : resource.getIdentity().getSymbolicName() + ".jar";
-        }
+        IllegalArgumentAssertion.assertNotNull(runtimeName, "runtimeName");
+        IllegalArgumentAssertion.assertNotNull(resource, "resource");
 
         // Do nothing if there is no mapping
         if (mapping == null || mapping.isEmpty()) {
-            InputStream content = resource.adapt(ResourceContent.class).getContent();
+            InputStream content = getRequiredResourceContent(resource).getContent();
             return new ResourceWrapper(runtimeName, runtimeName, content);
         }
 
         // Create content archive
+        InputStream content = getRequiredResourceContent(resource).getContent();
         ConfigurationBuilder config = new ConfigurationBuilder().classLoaders(Collections.singleton(ShrinkWrap.class.getClassLoader()));
         JavaArchive archive = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, runtimeName);
-        archive.as(ZipImporter.class).importFrom(resource.adapt(ResourceContent.class).getContent());
+        archive.as(ZipImporter.class).importFrom(content);
 
         boolean wrapAsSubdeployment = runtimeName.endsWith(".war");
 
@@ -285,7 +291,7 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
         wrapper.addAsManifestResource(structureAsset, "jboss-deployment-structure.xml");
         wrapper.add(archive, "/", ZipExporter.class);
 
-        InputStream content = wrapper.as(ZipExporter.class).exportAsInputStream();
+        content = wrapper.as(ZipExporter.class).exportAsInputStream();
         return new ResourceWrapper(wrapper.getName(), runtimeName, content);
     }
 

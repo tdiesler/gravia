@@ -97,6 +97,9 @@ public abstract class AbstractResource implements Resource {
         return compositeData;
     }
 
+    /**
+     * Get the default content (i.e. from the first content capability)
+     */
     private ResourceContent getResourceContent() {
 
         List<Capability> ccaps = getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
@@ -107,20 +110,27 @@ public abstract class AbstractResource implements Resource {
         InputStream contentStream = ccap.getContentStream();
         if (contentStream == null) {
             URL contentURL = ccap.getContentURL();
-            try {
-                contentStream = contentURL.openStream();
-            } catch (IOException ex) {
-                throw new IllegalStateException("Cannot access content URL: " + contentURL, ex);
+            if (contentURL != null) {
+                try {
+                    contentStream = contentURL.openStream();
+                } catch (IOException ex) {
+                    throw new IllegalStateException("Cannot access content URL: " + contentURL, ex);
+                }
             }
         }
 
-        final InputStream inputStream = contentStream;
-        return new ResourceContent() {
-            @Override
-            public InputStream getContent() {
-                return inputStream;
-            }
-        };
+        ResourceContent resourceContent = null;
+        if (contentStream != null) {
+            final InputStream inputStream = contentStream;
+            resourceContent = new ResourceContent() {
+                @Override
+                public InputStream getContent() {
+                    return inputStream;
+                }
+            };
+        }
+
+        return resourceContent;
     }
 
     @Override
