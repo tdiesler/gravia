@@ -64,37 +64,35 @@ public abstract class ContainerSetupTask {
 
     protected Set<ResourceIdentity> addRepositoryContent(Context context, URL resurl) throws IOException {
         IllegalArgumentAssertion.assertNotNull(context, "context");
-        IllegalArgumentAssertion.assertNotNull(resurl, "resurl");
-
-        RepositoryMBean repository = MBeanProxy.get(context.getMBeanServer(), RepositoryMBean.OBJECT_NAME, RepositoryMBean.class);
-
         Set<ResourceIdentity> result = new HashSet<>();
-        InputStream input = resurl.openStream();
-        try {
-            RepositoryReader reader = new DefaultRepositoryXMLReader(input);
-            Resource auxres = reader.nextResource();
-            while (auxres != null) {
-                ResourceIdentity identity = auxres.getIdentity();
-                if (repository.getResource(identity.getCanonicalForm()) == null) {
-                    repository.addResource(auxres.adapt(CompositeData.class));
-                    result.add(identity);
+        if (resurl != null) {
+            InputStream input = resurl.openStream();
+            RepositoryMBean repository = MBeanProxy.get(context.getMBeanServer(), RepositoryMBean.OBJECT_NAME, RepositoryMBean.class);
+            try {
+                RepositoryReader reader = new DefaultRepositoryXMLReader(input);
+                Resource auxres = reader.nextResource();
+                while (auxres != null) {
+                    ResourceIdentity identity = auxres.getIdentity();
+                    if (repository.getResource(identity.getCanonicalForm()) == null) {
+                        repository.addResource(auxres.adapt(CompositeData.class));
+                        result.add(identity);
+                    }
+                    auxres = reader.nextResource();
                 }
-                auxres = reader.nextResource();
+            } finally {
+                IOUtils.safeClose(input);
             }
-        } finally {
-            IOUtils.safeClose(input);
         }
         return Collections.unmodifiableSet(result);
     }
 
     protected void removeRepositoryContent(Context context, Set<ResourceIdentity> identities) throws IOException {
         IllegalArgumentAssertion.assertNotNull(context, "context");
-        IllegalArgumentAssertion.assertNotNull(identities, "identities");
-
-        RepositoryMBean repository = MBeanProxy.get(context.getMBeanServer(), RepositoryMBean.OBJECT_NAME, RepositoryMBean.class);
-
-        for (ResourceIdentity resid : identities) {
-            repository.removeResource(resid.getCanonicalForm());
+        if (identities != null) {
+            RepositoryMBean repository = MBeanProxy.get(context.getMBeanServer(), RepositoryMBean.OBJECT_NAME, RepositoryMBean.class);
+            for (ResourceIdentity resid : identities) {
+                repository.removeResource(resid.getCanonicalForm());
+            }
         }
     }
 }

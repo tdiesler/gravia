@@ -77,7 +77,7 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
 
     public Capability addIdentityCapability(MavenCoordinates mavenid) {
         Capability icap = addIdentityCapability(MavenUtils.getSymbolicName(mavenid), MavenUtils.getVersion(mavenid), null, null);
-        icap.getAttributes().put(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
+        icap.getAttributes().put(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid);
         return icap;
     }
 
@@ -258,7 +258,7 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
             parts = typespec.split("[<>]");
             typespec = "List<" + (parts.length > 1 ? parts[1].trim() : "String") + ">";
         }
-        AttributeValue attval = AttributeValueHandler.readAttributeValue(typespec, unquote(valstr));
+        AttributeValue attval = AttributeValueHandler.readAttributeValue(key, typespec, unquote(valstr));
         return attval.getValue();
     }
 

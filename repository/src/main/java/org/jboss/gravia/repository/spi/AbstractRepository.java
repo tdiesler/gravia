@@ -117,15 +117,15 @@ public abstract class AbstractRepository implements Repository {
     public Resource addResource(Resource res, MavenCoordinates mavenid) {
         Capability icap = res.getIdentityCapability();
         String attkey = ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE;
-        String attval = (String) icap.getAttributes().get(attkey);
-        if (attval != null && !attval.equals(mavenid.toExternalForm()))
+        MavenCoordinates attval = (MavenCoordinates) icap.getAttributes().get(attkey);
+        if (attval != null && !attval.equals(mavenid))
             throw new IllegalArgumentException("Resource already contains a " + attkey + " attribute: " + attval);
 
         ResourceBuilder builder = new DefaultResourceBuilder();
         for (Capability aux : res.getCapabilities(null)) {
             Capability cap = builder.addCapability(aux.getNamespace(), aux.getAttributes(), aux.getDirectives());
             if (IdentityNamespace.IDENTITY_NAMESPACE.equals(cap.getNamespace())) {
-                cap.getAttributes().put(attkey, mavenid.toExternalForm());
+                cap.getAttributes().put(attkey, mavenid);
             }
         }
         for (Requirement aux : res.getRequirements(null)) {

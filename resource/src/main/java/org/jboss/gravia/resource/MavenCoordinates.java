@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,6 +36,7 @@ public final class MavenCoordinates {
     private final String type;
     private final String version;
     private final String classifier;
+    private final String externalForm;
 
     public static MavenCoordinates parse(String coordinates) {
         MavenCoordinates result;
@@ -69,6 +70,9 @@ public final class MavenCoordinates {
         this.type = (type != null ? type : "jar");
         this.version = version;
         this.classifier = classifier;
+
+        String clstr = classifier != null ? ":" + classifier : "";
+        this.externalForm = groupId + ":" + artifactId + ":" + type + ":" + version + clstr;
     }
 
     public String getGroupId() {
@@ -89,11 +93,6 @@ public final class MavenCoordinates {
 
     public String getClassifier() {
         return classifier;
-    }
-
-    public String toExternalForm() {
-        String clstr = classifier != null ? ":" + classifier : "";
-        return groupId + ":" + artifactId + ":" + type + ":" + version + clstr;
     }
 
     public URL getArtifactURL(URL baseURL) {
@@ -119,16 +118,16 @@ public final class MavenCoordinates {
     public boolean equals(Object obj) {
         if (!(obj instanceof MavenCoordinates)) return false;
         MavenCoordinates other = (MavenCoordinates) obj;
-        return toExternalForm().equals(other.toExternalForm());
+        return externalForm.equals(other.externalForm);
     }
 
     @Override
     public int hashCode() {
-        return toExternalForm().hashCode();
+        return externalForm.hashCode();
     }
 
     @Override
     public String toString() {
-        return "MavenCoordinates[" + toExternalForm() + "]";
+        return externalForm;
     }
 }

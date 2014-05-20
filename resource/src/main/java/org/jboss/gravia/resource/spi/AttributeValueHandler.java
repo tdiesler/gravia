@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,11 +19,14 @@
  */
 package org.jboss.gravia.resource.spi;
 
+import static org.jboss.gravia.resource.ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
 
@@ -36,12 +39,13 @@ import org.jboss.gravia.resource.VersionRange;
 public final class AttributeValueHandler {
 
     public static enum Type {
-        String,
-        Version,
-        VersionRange,
-        Long,
         Double,
+        Long,
+        Maven,
+        String,
         URL,
+        Version,
+        VersionRange
     }
 
     /**
@@ -49,21 +53,66 @@ public final class AttributeValueHandler {
      * 132.5.6 Attribute Element
      */
     public static AttributeValue readAttributeValue(String typespec, String valstr) {
+        return readAttributeValue(null,  typespec, valstr);
+    }
+
+    public static AttributeValue readAttributeValue(String keystr, String typespec, String valstr) {
         boolean listType = false;
         if (typespec != null && typespec.startsWith("List<") && typespec.endsWith(">")) {
             typespec = typespec.substring(5, typespec.length() - 1);
             listType = true;
         }
-        Type type = typespec != null ? Type.valueOf(typespec) : Type.String;
+
+        Type type;
+        if (typespec != null) {
+            type = Type.valueOf(typespec);
+        } else if (CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE.equals(keystr)) {
+            type = Type.Maven;
+        } else {
+            type = Type.String;
+        }
 
         // Whitespace around the list and around commas must be trimmed
         valstr = valstr.trim();
 
         Object value;
         switch (type) {
+            case Double:
+                if (listType) {
+                    List<Double> list = new ArrayList<>();
+                    for (String val : split(valstr)) {
+                        list.add(Double.parseDouble(val.trim()));
+                    }
+                    value = list;
+                } else {
+                    value = Double.parseDouble(valstr);
+                }
+                break;
+            case Long:
+                if (listType) {
+                    List<Long> list = new ArrayList<>();
+                    for (String val : split(valstr)) {
+                        list.add(Long.parseLong(val.trim()));
+                    }
+                    value = list;
+                } else {
+                    value = Long.parseLong(valstr);
+                }
+                break;
+            case Maven:
+                if (listType) {
+                    List<MavenCoordinates> list = new ArrayList<>();
+                    for (String val : split(valstr)) {
+                        list.add(MavenCoordinates.parse(val.trim()));
+                    }
+                    value = list;
+                } else {
+                    value = MavenCoordinates.parse(valstr);
+                }
+                break;
             case String:
                 if (listType) {
-                    List<String> list = new ArrayList<String>();
+                    List<String> list = new ArrayList<>();
                     for (String val : split(valstr)) {
                         list.add(val.trim());
                     }
@@ -72,9 +121,20 @@ public final class AttributeValueHandler {
                     value = valstr;
                 }
                 break;
+            case URL:
+                if (listType) {
+                    List<URL> list = new ArrayList<>();
+                    for (String val : split(valstr)) {
+                        list.add(toURL(val.trim()));
+                    }
+                    value = list;
+                } else {
+                    value = toURL(valstr);
+                }
+                break;
             case Version:
                 if (listType) {
-                    List<Version> list = new ArrayList<Version>();
+                    List<Version> list = new ArrayList<>();
                     for (String val : split(valstr)) {
                         list.add(Version.parseVersion(val.trim()));
                     }
@@ -85,46 +145,13 @@ public final class AttributeValueHandler {
                 break;
             case VersionRange:
                 if (listType) {
-                    List<VersionRange> list = new ArrayList<VersionRange>();
+                    List<VersionRange> list = new ArrayList<>();
                     for (String val : split(valstr)) {
                         list.add(new VersionRange(val.trim()));
                     }
                     value = list;
                 } else {
                     value = new VersionRange(valstr);
-                }
-                break;
-            case Long:
-                if (listType) {
-                    List<Long> list = new ArrayList<Long>();
-                    for (String val : split(valstr)) {
-                        list.add(Long.parseLong(val.trim()));
-                    }
-                    value = list;
-                } else {
-                    value = Long.parseLong(valstr);
-                }
-                break;
-            case Double:
-                if (listType) {
-                    List<Double> list = new ArrayList<Double>();
-                    for (String val : split(valstr)) {
-                        list.add(Double.parseDouble(val.trim()));
-                    }
-                    value = list;
-                } else {
-                    value = Double.parseDouble(valstr);
-                }
-                break;
-            case URL:
-                if (listType) {
-                    List<URL> list = new ArrayList<URL>();
-                    for (String val : split(valstr)) {
-                        list.add(toURL(val.trim()));
-                    }
-                    value = list;
-                } else {
-                    value = toURL(valstr);
                 }
                 break;
             default:
@@ -196,7 +223,13 @@ public final class AttributeValueHandler {
                     valueType = String.class;
                 }
             }
-            Type type = Type.valueOf(valueType.getSimpleName());
+            Type type;
+            if (MavenCoordinates.class == valueType) {
+                type = Type.Maven;
+            } else {
+                String simpleName = valueType.getSimpleName();
+                type = Type.valueOf(simpleName);
+            }
             return new AttributeValue(type, value);
         }
 
@@ -273,16 +306,10 @@ public final class AttributeValueHandler {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
+            if (this == obj) return true;
+            if (!(obj instanceof AttributeValue)) return false;
             AttributeValue other = (AttributeValue) obj;
-            if (type != other.type)
-                return false;
-            return value.equals(other.value);
+            return type.equals(other.type) && value.equals(other.value);
         }
 
         @Override

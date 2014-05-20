@@ -8,9 +8,9 @@ package org.jboss.gravia.repository;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,13 +19,17 @@ package org.jboss.gravia.repository;
  * #L%
  */
 
+import static org.jboss.gravia.resource.ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.spi.AttributeValueHandler;
 import org.jboss.gravia.resource.spi.AttributeValueHandler.AttributeValue;
+import org.jboss.gravia.resource.spi.AttributeValueHandler.Type;
 import org.jboss.test.gravia.repository.AbstractRepositoryTest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -105,5 +109,17 @@ public class AttributeValueTestCase extends AbstractRepositoryTest {
         Assert.assertEquals(AttributeValueHandler.Type.String,  value.getType());
         Assert.assertTrue(value.isListType());
         Assert.assertEquals("[type=List<String>, value=]",  value.toExternalForm());
+    }
+
+    @Test
+    public void testMavenParsing() throws Exception {
+        MavenCoordinates mavenid = MavenCoordinates.parse("org.apache.camel:camel-core:jar:2.11");
+        AttributeValue value = AttributeValueHandler.readAttributeValue("Maven", mavenid.toString());
+        Assert.assertEquals(Type.Maven, value.getType());
+        Assert.assertEquals(mavenid, value.getValue());
+
+        value = AttributeValueHandler.readAttributeValue(CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, null, mavenid.toString());
+        Assert.assertEquals(Type.Maven, value.getType());
+        Assert.assertEquals(mavenid, value.getValue());
     }
 }

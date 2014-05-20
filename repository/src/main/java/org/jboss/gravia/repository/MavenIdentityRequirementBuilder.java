@@ -35,6 +35,6 @@ public class MavenIdentityRequirementBuilder extends IdentityRequirementBuilder 
 
     public MavenIdentityRequirementBuilder(MavenCoordinates mavenid) {
         super(MavenUtils.getSymbolicName(mavenid), MavenUtils.getVersion(mavenid).toString());
-        getAttributes().put(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
+        getAttributes().put(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid);
     }
 }

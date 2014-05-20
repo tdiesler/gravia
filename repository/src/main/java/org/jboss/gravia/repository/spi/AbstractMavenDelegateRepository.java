@@ -110,11 +110,10 @@ public abstract class AbstractMavenDelegateRepository extends AbstractRepository
     @Override
     public Collection<Capability> findProviders(Requirement req) {
 
-        String attval = (String) req.getAttribute(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
-        if (attval == null)
+        MavenCoordinates mavenid = (MavenCoordinates) req.getAttribute(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
+        if (mavenid == null)
             return Collections.emptyList();
 
-        MavenCoordinates mavenid = MavenCoordinates.parse(attval);
         Resource resource = findMavenResource(mavenid);
         if (resource == null)
             return Collections.emptyList();

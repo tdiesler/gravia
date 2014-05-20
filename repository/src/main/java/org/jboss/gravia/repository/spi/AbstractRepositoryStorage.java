@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -99,10 +99,9 @@ public abstract class AbstractRepositoryStorage extends MemoryRepositoryStorage 
         // Convert to a maven resource if needed
         Capability icap = resource.getIdentityCapability();
         List<Capability> ccaps = resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
-        String mvnatt = (String) icap.getAttribute(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
-        if (ccaps.isEmpty() && mvnatt != null) {
-            MavenCoordinates mvnid = MavenCoordinates.parse(mvnatt);
-            Resource mvnres = getMavenResource(mvnid);
+        MavenCoordinates mavenid = (MavenCoordinates) icap.getAttribute(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
+        if (ccaps.isEmpty() && mavenid != null) {
+            Resource mvnres = getMavenResource(mavenid);
             ccaps = mvnres.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
         }
 

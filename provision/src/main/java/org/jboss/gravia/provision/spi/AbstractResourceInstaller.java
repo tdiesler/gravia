@@ -183,9 +183,8 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
 
         // #2 Derive the runtime name from the maven identity
         if (runtimeName == null) {
-            String mvnatt = (String) cap.getAttribute(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
-            if (mvnatt != null) {
-                MavenCoordinates mavenid = MavenCoordinates.parse(mvnatt);
+            MavenCoordinates mavenid = (MavenCoordinates) cap.getAttribute(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
+            if (mavenid != null) {
                 runtimeName = mavenid.getArtifactId() + "-" + mavenid.getVersion() + "." + mavenid.getType();
             }
         }

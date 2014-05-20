@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,14 +19,20 @@
  */
 package org.jboss.gravia.resource.spi;
 
+import static org.jboss.gravia.resource.ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityNamespace;
+import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
+import org.jboss.gravia.utils.IllegalStateAssertion;
 
 /**
  * The abstract implementation of a {@link Capability}.
@@ -115,6 +121,13 @@ public class AbstractCapability implements Capability {
     }
 
     protected void validate() {
+        for (Entry<String, Object> entry : attributes.entrySet()) {
+            String key = entry.getKey();
+            Object val = entry.getValue();
+            if (CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE.equals(key)) {
+                IllegalStateAssertion.assertTrue(val instanceof MavenCoordinates, "Illegal attribute type: " + val);
+            }
+        }
         canonicalName = toString();
     }
 

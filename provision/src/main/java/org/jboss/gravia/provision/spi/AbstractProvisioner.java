@@ -265,7 +265,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         // Copy the mvn resource to another resource with the given identity
         DefaultResourceBuilder builder = new DefaultResourceBuilder();
         Capability icap = identity != null ? builder.addIdentityCapability(identity) : builder.addIdentityCapability(mavenid);
-        icap.getAttributes().put(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid.toExternalForm());
+        icap.getAttributes().put(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE, mavenid);
         for (Capability cap : mvnres.getCapabilities(null)) {
             if (!IdentityNamespace.IDENTITY_NAMESPACE.equals(cap.getNamespace())) {
                 builder.addCapability(cap.getNamespace(), cap.getAttributes(), cap.getDirectives());
