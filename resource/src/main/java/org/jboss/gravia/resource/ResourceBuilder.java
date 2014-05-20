@@ -131,7 +131,7 @@ public interface ResourceBuilder {
     /**
      * Get the current resource state from the builder
      */
-    Resource getCurrentResource();
+    Resource getMutableResource();
 
     /**
      * Get the final resource from the builder

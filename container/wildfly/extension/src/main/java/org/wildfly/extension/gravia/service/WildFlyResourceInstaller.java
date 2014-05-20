@@ -166,7 +166,7 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
         if (moduleDir.exists())
             throw new IllegalStateException("Module dir already exists: " + moduleDir);
 
-        ResourceContent content = getRequiredResourceContent(resource);
+        ResourceContent content = getFirstRelevantResourceContent(resource);
         IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
 
         // copy resource content
@@ -260,12 +260,12 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
 
         // Do nothing if there is no mapping
         if (mapping == null || mapping.isEmpty()) {
-            InputStream content = getRequiredResourceContent(resource).getContent();
+            InputStream content = getFirstRelevantResourceContent(resource).getContent();
             return new ResourceWrapper(runtimeName, runtimeName, content);
         }
 
         // Create content archive
-        InputStream content = getRequiredResourceContent(resource).getContent();
+        InputStream content = getFirstRelevantResourceContent(resource).getContent();
         ConfigurationBuilder config = new ConfigurationBuilder().classLoaders(Collections.singleton(ShrinkWrap.class.getClassLoader()));
         JavaArchive archive = ShrinkWrap.createDomain(config).getArchiveFactory().create(JavaArchive.class, runtimeName);
         archive.as(ZipImporter.class).importFrom(content);

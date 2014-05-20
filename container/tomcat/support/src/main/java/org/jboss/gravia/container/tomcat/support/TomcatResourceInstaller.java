@@ -104,7 +104,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         File targetFile = new File(catalinaLib, getRuntimeName(resource, true));
         IllegalStateAssertion.assertFalse(targetFile.exists(), "Module already exists: " + targetFile);
 
-        ResourceContent content = getRequiredResourceContent(resource);
+        ResourceContent content = getFirstRelevantResourceContent(resource);
         IOUtils.copyStream(content.getContent(), new FileOutputStream(targetFile));
 
         // Install the shared module
@@ -132,7 +132,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         ContentCapability ccap = (ContentCapability) resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).get(0);
         URL contentURL = ccap.getContentURL();
         if (contentURL == null || !contentURL.toExternalForm().startsWith("file:")) {
-            ResourceContent content = getRequiredResourceContent(resource);
+            ResourceContent content = getFirstRelevantResourceContent(resource);
             tempfile = new File(catalinaTemp, runtimeName);
             IOUtils.copyStream(content.getContent(), new FileOutputStream(tempfile));
             contentURL = tempfile.toURI().toURL();

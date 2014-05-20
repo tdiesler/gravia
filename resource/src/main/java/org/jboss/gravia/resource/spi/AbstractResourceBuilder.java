@@ -206,7 +206,7 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
     }
 
     @Override
-    public Resource getCurrentResource() {
+    public Resource getMutableResource() {
         AbstractResource resource = getResourceInternal();
         resource.assertMutable();
         return resource;

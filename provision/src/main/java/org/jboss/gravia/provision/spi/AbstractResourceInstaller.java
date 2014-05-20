@@ -121,7 +121,7 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
         return types;
     }
 
-    protected ResourceContent getRequiredResourceContent(Resource resource) {
+    protected ResourceContent getFirstRelevantResourceContent(Resource resource) {
         for (ContentCapability ccap : getRelevantContentCapabilities(resource)) {
             InputStream contentStream = ccap.getContentStream();
             if (contentStream == null) {

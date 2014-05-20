@@ -274,7 +274,7 @@ public class ProvisionerServiceTest {
         ResourceIdentity identityA = ResourceIdentity.fromString("camel.core.shared");
         MavenCoordinates mavenid = MavenCoordinates.parse("org.apache.camel:camel-core:jar:2.11.0");
         ResourceBuilder builderA = provisioner.getMavenResourceBuilder(identityA, mavenid);
-        builderA.getCurrentResource().getIdentityCapability().getAttributes().put(ContentNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, "camel-core-shared-2.11.0.jar");
+        builderA.getMutableResource().getIdentityCapability().getAttributes().put(ContentNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, "camel-core-shared-2.11.0.jar");
         builderA.addIdentityRequirement("javax.api");
         builderA.addIdentityRequirement("org.slf4j");
         ResourceHandle handleA = provisioner.installSharedResource(builderA.getResource());

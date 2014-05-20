@@ -65,7 +65,7 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
 
         // Install the Bundle
         ResourceIdentity identity = resource.getIdentity();
-        ResourceContent content = getRequiredResourceContent(resource);
+        ResourceContent content = getFirstRelevantResourceContent(resource);
         IllegalStateAssertion.assertNotNull(content.getContent(), "Cannot obtain content from: " + resource);
 
         Bundle bundle;
