@@ -33,6 +33,11 @@ import java.util.Map;
 public interface ResourceBuilder {
 
     /**
+     * Copy the given resource content to the builder
+     */
+    ResourceBuilder fromResource(Resource resource);
+
+    /**
      * Add the identity {@link Capability}.
      */
     Capability addIdentityCapability(ResourceIdentity identity);

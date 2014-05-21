@@ -34,13 +34,12 @@ import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.ContentCapability;
 import org.jboss.gravia.resource.ContentNamespace;
-import org.jboss.gravia.resource.IdentityNamespace;
-import org.jboss.gravia.resource.MavenCoordinates;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
+import org.jboss.gravia.utils.ResourceUtils;
 
 /**
  * An abstract {@link ResourceInstaller}.
@@ -53,22 +52,13 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
     public abstract RuntimeEnvironment getEnvironment();
 
     @Override
-    public ResourceHandle installResource(Context context, Resource res) throws ProvisionException {
-        return installResourceInternal(context, res, isShared(res));
-    }
-
-    @Override
-    public ResourceHandle installSharedResource(Context context, Resource res) throws ProvisionException {
-        return installResourceInternal(context, res, true);
-    }
-
-    private synchronized ResourceHandle installResourceInternal(Context context, Resource resource, boolean shared) throws ProvisionException {
+    public ResourceHandle installResource(Context context, Resource resource) throws ProvisionException {
         IllegalArgumentAssertion.assertNotNull(resource, "resource");
         if (context == null) {
             context = new DefaultInstallerContext(resource);
         }
         try {
-            return installResourceProtected(context, resource, shared);
+            return installResourceProtected(context, resource);
         } catch (RuntimeException rte) {
             throw rte;
         } catch (ProvisionException ex) {
@@ -78,7 +68,7 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
         }
     }
 
-    protected abstract ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws Exception;
+    protected abstract ResourceHandle installResourceProtected(Context context, Resource resource) throws Exception;
 
     /**
      * Get the list of relevant content capabilities
@@ -147,66 +137,33 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
         throw new IllegalStateException("Cannot obtain content from: " + resource);
     }
 
-    protected String getRuntimeName(Resource resource, boolean shared) {
+    protected String getRuntimeName(Resource resource) {
 
         // #1 Try to get the runtime name from the identity capability
-        String runtimeName = getRuntimeName(resource.getIdentityCapability());
+        Capability icap = resource.getIdentityCapability();
+        String runtimeName = (String) icap.getAttribute(ContentNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE);
 
-        // #2 Try to get the runtime name from the content cpabilities
+        // #2 Try to get the runtime name from the content cpability
         if (runtimeName == null) {
             List<ContentCapability> ccaps = getRelevantContentCapabilities(resource);
-            for (int i = 0; runtimeName == null && i < ccaps.size(); i++) {
-                runtimeName = getRuntimeName(ccaps.get(i));
+            if (ccaps.size() == 1) {
+                ContentCapability ccap = ccaps.get(0);
+                runtimeName = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE);
             }
         }
 
         // #3 Use fallback name deriven from the resource identity
         if (runtimeName == null) {
             ResourceIdentity resid = resource.getIdentity();
-            if (shared || isShared(resource)) {
-                runtimeName = resid.getSymbolicName() + ".jar";
+            String qualifiedName = resid.getSymbolicName() + "-" + resid.getVersion();
+            if (ResourceUtils.isShared(resource)) {
+                runtimeName = qualifiedName + ".jar";
             } else if (RuntimeType.TOMCAT == RuntimeType.getRuntimeType()) {
-                runtimeName = resid.getSymbolicName() + ".war";
+                runtimeName = qualifiedName + ".war";
             } else {
-                runtimeName = resid.getSymbolicName() + ".jar";
+                runtimeName = qualifiedName + ".jar";
             }
         }
         return runtimeName;
-    }
-
-    private String getRuntimeName(Capability cap) {
-
-        // #1 Use the explictly defined runtime name
-        String runtimeName = (String) cap.getAttribute(ContentNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE);
-
-        // #2 Derive the runtime name from the maven identity
-        if (runtimeName == null) {
-            MavenCoordinates mavenid = (MavenCoordinates) cap.getAttribute(ContentNamespace.CAPABILITY_MAVEN_IDENTITY_ATTRIBUTE);
-            if (mavenid != null) {
-                runtimeName = mavenid.getArtifactId() + "-" + mavenid.getVersion() + "." + mavenid.getType();
-            }
-        }
-
-        // #3 Derive the runtime name from the content URL
-        if (runtimeName == null) {
-            URL contentURL = (URL) cap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
-            runtimeName = getRuntimeName(contentURL);
-        }
-
-        return runtimeName;
-    }
-
-    private String getRuntimeName(URL contentURL) {
-        String runtimeName = null;
-        if (contentURL != null) {
-            String path = contentURL.getPath();
-            runtimeName = path.substring(path.lastIndexOf('/') + 1);
-        }
-        return runtimeName;
-    }
-
-    private boolean isShared(Resource resource) {
-        Object attval = resource.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_SHARED_ATTRIBUTE);
-        return Boolean.parseBoolean((String) attval);
     }
 }

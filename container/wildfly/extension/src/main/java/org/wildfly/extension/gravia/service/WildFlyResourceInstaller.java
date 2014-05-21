@@ -61,6 +61,7 @@ import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.jboss.gravia.utils.IOUtils;
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
 import org.jboss.gravia.utils.IllegalStateAssertion;
+import org.jboss.gravia.utils.ResourceUtils;
 import org.jboss.modules.ModuleClassLoader;
 import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoader;
@@ -142,9 +143,9 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws Exception {
+    public ResourceHandle installResourceProtected(Context context, Resource resource) throws Exception {
         ResourceHandle handle;
-        if (shared) {
+        if (ResourceUtils.isShared(resource)) {
             handle = installSharedResourceInternal(context, resource);
         } else {
             handle = installUnsharedResourceInternal(context, resource);
@@ -156,50 +157,50 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
     private ResourceHandle installSharedResourceInternal(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing shared resource: {}", resource);
 
-        String runtimeName = getRuntimeName(resource, true);
-        ResourceIdentity identity = resource.getIdentity();
-        String symbolicName = identity.getSymbolicName();
-        Version version = identity.getVersion();
-
-        File modulesDir = injectedServerEnvironment.getValue().getModulesDir();
-        File moduleDir = new File(modulesDir, symbolicName.replace(".", File.separator) + File.separator + version);
-        if (moduleDir.exists())
-            throw new IllegalStateException("Module dir already exists: " + moduleDir);
-
-        ResourceContent content = getFirstRelevantResourceContent(resource);
-        IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
-
-        // copy resource content
-        moduleDir.mkdirs();
-        File resFile = new File(moduleDir, runtimeName);
-        IOUtils.copyStream(content.getContent(), new FileOutputStream(resFile));
+        ResourceIdentity resid = resource.getIdentity();
+        String symbolicName = resid.getSymbolicName();
+        Version version = resid.getVersion();
 
         ModuleIdentifier modid = ModuleIdentifier.create(symbolicName, version.toString());
 
-        // generate module.xml
-        File xmlFile = new File(moduleDir, "module.xml");
-        Map<Requirement, Resource> mapping = context.getResourceMapping();
-        String moduleXML = generateModuleXML(resFile, resource, modid, mapping);
-        OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(xmlFile));
-        osw.write(moduleXML);
-        osw.close();
+        final File modulesDir = injectedServerEnvironment.getValue().getModulesDir();
+        final File moduleDir = new File(modulesDir, symbolicName.replace(".", File.separator) + File.separator + version);
 
-        // generate the main slot
-        File mainDir = new File(moduleDir.getParentFile(), "main");
-        if (!mainDir.exists()) {
-            mainDir.mkdirs();
-            File mainFile = new File(mainDir, "module.xml");
-            moduleXML = generateModuleAliasXML(resource, modid);
-            osw = new OutputStreamWriter(new FileOutputStream(mainFile));
+        if (moduleDir.exists()) {
+            LOGGER.warn("Module already exists: " + moduleDir);
+        } else {
+            File targetFile = new File(moduleDir, symbolicName + "-" + version + ".jar");
+            moduleDir.mkdirs();
+
+            ResourceContent content = getFirstRelevantResourceContent(resource);
+            IllegalStateAssertion.assertNotNull(content, "Cannot obtain content from: " + resource);
+            IOUtils.copyStream(content.getContent(), new FileOutputStream(targetFile));
+
+            // generate module.xml
+            File xmlFile = new File(moduleDir, "module.xml");
+            Map<Requirement, Resource> mapping = context.getResourceMapping();
+            String moduleXML = generateModuleXML(targetFile, resource, modid, mapping);
+            OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(xmlFile));
             osw.write(moduleXML);
             osw.close();
+
+            // generate the main slot
+            File mainDir = new File(moduleDir.getParentFile(), "main");
+            if (!mainDir.exists()) {
+                mainDir.mkdirs();
+                File mainFile = new File(mainDir, "module.xml");
+                moduleXML = generateModuleAliasXML(resource, modid);
+                osw = new OutputStreamWriter(new FileOutputStream(mainFile));
+                osw.write(moduleXML);
+                osw.close();
+            }
         }
 
         // Install the resource as module
         ModuleLoader moduleLoader = org.jboss.modules.Module.getBootModuleLoader();
         ModuleClassLoader classLoader = moduleLoader.loadModule(modid).getClassLoader();
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        Module module = runtime.installModule(classLoader, resource, null);
+        final Module module = runtime.installModule(classLoader, resource, null);
 
         // Start the module
         module.start();
@@ -208,7 +209,7 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
         return new AbstractResourceHandle(modres, module) {
             @Override
             public void uninstall() {
-                LOGGER.info("Cannot uninstall shared resource: {}", getResource());
+                LOGGER.warn("Cannot uninstall shared resource: {}", getResource());
             }
         };
     }
@@ -216,7 +217,7 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
     private ResourceHandle installUnsharedResourceInternal(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing unshared resource: {}", resource);
 
-        String runtimeName = getRuntimeName(resource, false);
+        String runtimeName = getRuntimeName(resource);
         final ServerDeploymentHelper serverDeployer = new ServerDeploymentHelper(serverDeploymentManager);
         final ResourceWrapper wrapper = getWrappedResourceContent(runtimeName, resource, context.getResourceMapping());
 

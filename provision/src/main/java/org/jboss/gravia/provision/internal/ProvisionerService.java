@@ -92,13 +92,23 @@ public final class ProvisionerService implements Provisioner {
     }
 
     @Override
+    public ProvisionResult findResources(Environment env, Set<Requirement> reqs) {
+        return delegate.findResources(env, reqs);
+    }
+
+    @Override
     public Set<ResourceHandle> provisionResources(Set<Requirement> reqs) throws ProvisionException {
         return delegate.provisionResources(reqs);
     }
 
     @Override
-    public ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, String runtimeName, InputStream inputStream) {
-        return delegate.getContentResourceBuilder(identity, runtimeName, inputStream);
+    public void updateResourceWiring(Environment env, ProvisionResult result) {
+        delegate.updateResourceWiring(environment, result);
+    }
+
+    @Override
+    public ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, InputStream inputStream) {
+        return delegate.getContentResourceBuilder(identity, inputStream);
     }
 
     @Override

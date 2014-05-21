@@ -65,6 +65,7 @@ import org.jboss.gravia.runtime.Wire;
 import org.jboss.gravia.runtime.Wiring;
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
 import org.jboss.gravia.utils.IllegalStateAssertion;
+import org.jboss.gravia.utils.ResourceUtils;
 
 /**
  * An abstract {@link Provisioner}
@@ -119,24 +120,22 @@ public abstract class AbstractProvisioner implements Provisioner {
 
     @Override
     public ProvisionResult findResources(Set<Requirement> reqs) {
-        return findResources(getEnvironment(), reqs);
+        return findResources(getEnvironment().cloneEnvironment(), reqs);
     }
 
-    private ProvisionResult findResources(Environment env, Set<Requirement> reqs) {
-        if (env == null)
-            throw new IllegalArgumentException("Null env");
-        if (reqs == null)
-            throw new IllegalArgumentException("Null reqs");
+    @Override
+    public ProvisionResult findResources(Environment env, Set<Requirement> reqs) {
+        IllegalArgumentAssertion.assertNotNull(env, "env");
+        IllegalArgumentAssertion.assertNotNull(reqs, "reqs");
 
         LOGGER.debug("START findResources: {}", reqs);
 
         // Install the unresolved resources into the cloned environment
         List<Resource> unresolved = new ArrayList<Resource>();
-        Environment envclone = env.cloneEnvironment();
         for (Requirement req : reqs) {
             Resource res = req.getResource();
             if (env.getResource(res.getIdentity()) == null) {
-                envclone.addResource(res);
+                env.addResource(res);
                 unresolved.add(res);
             }
         }
@@ -145,13 +144,13 @@ public abstract class AbstractProvisioner implements Provisioner {
         List<Resource> resources = new ArrayList<Resource>();
         Set<Requirement> unstatisfied = new HashSet<Requirement>(reqs);
         Map<Requirement, Resource> mapping = new HashMap<Requirement, Resource>();
-        findResources(envclone, unresolved, mapping, unstatisfied, resources);
+        findResources(env, unresolved, mapping, unstatisfied, resources);
 
         // Remove abstract resources
         Iterator<Resource> itres = resources.iterator();
         while (itres.hasNext()) {
             Resource res = itres.next();
-            if (isAbstract(res)) {
+            if (ResourceUtils.isAbstract(res)) {
                 itres.remove();
             }
         }
@@ -159,10 +158,10 @@ public abstract class AbstractProvisioner implements Provisioner {
         // Sort the provisioner result
         List<Resource> sorted = new ArrayList<Resource>();
         for (Resource res : resources) {
-            sortResultResources(res, mapping, sorted);
+            sortResultResources(res, mapping, resources, sorted);
         }
 
-        ProvisionResult result = new DefaultProvisionResult(sorted, mapping, envclone.getWirings(), unstatisfied);
+        ProvisionResult result = new DefaultProvisionResult(sorted, mapping, env.getWirings(), unstatisfied);
         LOGGER.debug("END findResources");
         LOGGER.debug("  resources: {}", result.getResources());
         LOGGER.debug("  unsatisfied: {}", result.getUnsatisfiedRequirements());
@@ -171,7 +170,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         Set<Resource> mandatory = new LinkedHashSet<Resource>();
         mandatory.addAll(result.getResources());
         try {
-            ResolveContext context = new DefaultResolveContext(envclone, mandatory, null);
+            ResolveContext context = new DefaultResolveContext(env, mandatory, null);
             resolver.resolveAndApply(context).entrySet();
         } catch (ResolutionException ex) {
             LOGGER.warn("Cannot resolve provisioner result", ex);
@@ -184,7 +183,10 @@ public abstract class AbstractProvisioner implements Provisioner {
     public Set<ResourceHandle> provisionResources(Set<Requirement> reqs) throws ProvisionException {
 
         // Find resources
-        ProvisionResult result = findResources(reqs);
+        Environment env = getEnvironment();
+        Environment envclone = env.cloneEnvironment();
+        ProvisionResult result = findResources(envclone, reqs);
+
         Set<Requirement> unsatisfied = result.getUnsatisfiedRequirements();
         if (!unsatisfied.isEmpty()) {
             throw new ProvisionException("Cannot resolve unsatisfied requirements: " + unsatisfied);
@@ -199,6 +201,13 @@ public abstract class AbstractProvisioner implements Provisioner {
         Set<ResourceHandle> handles = installResources(context);
 
         // Update the wirings
+        updateResourceWiring(env, result);
+
+        return handles;
+    }
+
+    @Override
+    public void updateResourceWiring(Environment environment, ProvisionResult result) {
         Map<Resource, Wiring> auxwirings = result.getWirings();
         for (Entry<Resource, Wiring> entry : auxwirings.entrySet()) {
             Resource auxres = entry.getKey();
@@ -222,33 +231,24 @@ public abstract class AbstractProvisioner implements Provisioner {
             AbstractEnvironment absenv = AbstractEnvironment.assertAbstractEnvironment(environment);
             absenv.putWiring(envres, envwiring);
         }
-
-        return handles;
     }
 
     private Set<ResourceHandle> installResources(Context context) throws ProvisionException {
         IllegalArgumentAssertion.assertNotNull(context, "context");
         Set<ResourceHandle> handles = new HashSet<ResourceHandle>();
         for (Resource res : context.getResources()) {
-            ResourceIdentity identity = res.getIdentity();
-            if (!isAbstract(res) && getEnvironment().getResource(identity) == null) {
-                handles.add(installer.installResource(context, res));
-            }
+            handles.add(installer.installResource(context, res));
         }
         return Collections.unmodifiableSet(handles);
     }
 
     @Override
-    public ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, String runtimeName, InputStream inputStream) {
+    public ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, InputStream inputStream) {
         IllegalArgumentAssertion.assertNotNull(identity, "identity");
-        IllegalArgumentAssertion.assertNotNull(runtimeName, "runtimeName");
         IllegalArgumentAssertion.assertNotNull(inputStream, "inputStream");
-
         ResourceBuilder builder = new DefaultResourceBuilder();
-        Capability icap = builder.addIdentityCapability(identity);
-        icap.getAttributes().put(ContentNamespace.CAPABILITY_RUNTIME_NAME_ATTRIBUTE, runtimeName);
+        builder.addIdentityCapability(identity);
         builder.addContentCapability(inputStream);
-
         return builder;
     }
 
@@ -280,25 +280,24 @@ public abstract class AbstractProvisioner implements Provisioner {
 
     @Override
     public ResourceHandle installResource(Resource resource) throws ProvisionException {
-        return installResourceInternal(null, resource, false);
+        return installResourceInternal(resource);
     }
 
     @Override
     public ResourceHandle installSharedResource(Resource resource) throws ProvisionException {
-        return installResourceInternal(null, resource, true);
+        if (!ResourceUtils.isShared(resource)) {
+            ResourceBuilder builder = new DefaultResourceBuilder().fromResource(resource);
+            Capability icap = builder.getMutableResource().getIdentityCapability();
+            icap.getAttributes().put(IdentityNamespace.CAPABILITY_SHARED_ATTRIBUTE, Boolean.TRUE);
+            resource = builder.getResource();
+        }
+        return installResourceInternal(resource);
     }
 
-    private synchronized ResourceHandle installResourceInternal(String runtimeName, Resource resource, boolean shared) throws ProvisionException {
+    private synchronized ResourceHandle installResourceInternal(Resource resource) throws ProvisionException {
         IllegalArgumentAssertion.assertNotNull(resource, "resource");
-
         Context context = new DefaultInstallerContext(resource);
-        ResourceHandle handle;
-        if (shared) {
-            handle = installer.installSharedResource(context, resource);
-        } else {
-            handle = installer.installResource(context, resource);
-        }
-        return handle;
+        return installer.installResource(context, resource);
     }
 
     private Capability findTargetCapability(Capability auxcap) {
@@ -333,21 +332,16 @@ public abstract class AbstractProvisioner implements Provisioner {
 
     // Sort mapping targets higher in the list. This should result in resource installations
     // without dependencies on resources from the same provioner result set.
-    private void sortResultResources(Resource res, Map<Requirement, Resource> mapping, List<Resource> result) {
+    private void sortResultResources(Resource res, Map<Requirement, Resource> mapping, List<Resource> resources, List<Resource> result) {
         if (!result.contains(res)) {
             for (Requirement req : res.getRequirements(null)) {
                 Resource target = mapping.get(req);
-                if (target != null) {
-                    sortResultResources(target, mapping, result);
+                if (target != null && resources.contains(target)) {
+                    sortResultResources(target, mapping, resources, result);
                 }
             }
             result.add(res);
         }
-    }
-
-    private boolean isAbstract(Resource res) {
-        Object attval = res.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE);
-        return IdentityNamespace.TYPE_ABSTRACT.equals(attval);
     }
 
     private void findResources(Environment env, List<Resource> unresolved, Map<Requirement, Resource> mapping, Set<Requirement> unstatisfied, List<Resource> resources) {
@@ -410,7 +404,7 @@ public abstract class AbstractProvisioner implements Provisioner {
             Iterator<Capability> itcap = providers.iterator();
             while (itcap.hasNext()) {
                 Capability cap = itcap.next();
-                if (isAbstract(cap.getResource())) {
+                if (ResourceUtils.isAbstract(cap.getResource())) {
                     itcap.remove();
                 }
             }

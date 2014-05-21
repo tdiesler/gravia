@@ -54,6 +54,7 @@ public interface IdentityNamespace extends Namespace {
      * has no type then the value {@link #TYPE_UNKNOWN unknown} must be used for
      * the attribute.
      *
+     * @see #TYPE_ABSTRACT
      * @see #TYPE_BUNDLE
      * @see #TYPE_MODULE
      * @see #TYPE_UNKNOWN

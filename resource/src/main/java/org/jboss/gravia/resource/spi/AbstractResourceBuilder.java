@@ -58,6 +58,17 @@ public abstract class AbstractResourceBuilder implements ResourceBuilder {
     protected abstract AbstractRequirement createRequirement(AbstractResource resource, String namespace, Map<String, Object> attributes, Map<String, String> directives);
 
     @Override
+    public ResourceBuilder fromResource(Resource res) {
+        for (Capability cap : res.getCapabilities(null)) {
+            addCapability(cap.getNamespace(), cap.getAttributes(), cap.getDirectives());
+        }
+        for (Requirement req : res.getRequirements(null)) {
+            addRequirement(req.getNamespace(), req.getAttributes(), req.getDirectives());
+        }
+        return this;
+    }
+
+    @Override
     public Capability addIdentityCapability(ResourceIdentity identity) {
         IllegalArgumentAssertion.assertNotNull(identity, "identity");
         return addIdentityCapability(identity.getSymbolicName(), identity.getVersion());

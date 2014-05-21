@@ -56,7 +56,7 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws ProvisionException {
+    public ResourceHandle installResourceProtected(Context context, Resource resource) throws ProvisionException {
         LOGGER.info("Installing resource: {}", resource);
         return installBundleResource(resource);
     }
@@ -64,13 +64,13 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
     private ResourceHandle installBundleResource(Resource resource) throws ProvisionException {
 
         // Install the Bundle
-        ResourceIdentity identity = resource.getIdentity();
+        ResourceIdentity resid = resource.getIdentity();
         ResourceContent content = getFirstRelevantResourceContent(resource);
         IllegalStateAssertion.assertNotNull(content.getContent(), "Cannot obtain content from: " + resource);
 
         Bundle bundle;
         try {
-            String location = "resource://" + getRuntimeName(resource, false);
+            String location = "resource#" + resid;
             bundle = context.installBundle(location, content.getContent());
         } catch (BundleException ex) {
             throw new ProvisionException(ex);
@@ -91,7 +91,7 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
         // Install the bundle as module if it has not already happened
         // A bundle that could not get resolved will not have an associated module
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        Module module = runtime.getModule(identity);
+        Module module = runtime.getModule(resid);
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         if (module == null && wiring != null) {
             try {
@@ -106,7 +106,7 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
         // event because the Bundle's class loader is not (yet) available
         // We manually add the resource to the {@link RuntimeEnvironment}
         // [TODO] Revisit {@link ModuleListener} handling for OSGi
-        Resource envres = environment.getResource(identity);
+        Resource envres = environment.getResource(resid);
         if (envres == null && module != null) {
             RuntimeEnvironment runtimeEnv = RuntimeEnvironment.assertRuntimeEnvironment(environment);
             runtimeEnv.addRuntimeResource(resource);

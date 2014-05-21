@@ -67,15 +67,26 @@ public interface Provisioner {
     ProvisionResult findResources(Set<Requirement> reqs);
 
     /**
+     * Perform a no-impact analysis of whether a set of requirements
+     * can be sattisfied in the given environment with the current repository content.
+     */
+    ProvisionResult findResources(Environment environment, Set<Requirement> reqs);
+
+    /**
      * Provision the needed delta to sattisfy the given set of requirements.
      * This performs a no-impact analysis of whether the given set of requirements can be sattisfied first.
      */
     Set<ResourceHandle> provisionResources(Set<Requirement> reqs) throws ProvisionException;
 
     /**
+     * Update the resource wiring in the given environment
+     */
+    void updateResourceWiring(Environment environment, ProvisionResult result);
+
+    /**
      * Get a content resource builder.
      */
-    ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, String runtimeName, InputStream inputStream);
+    ResourceBuilder getContentResourceBuilder(ResourceIdentity identity, InputStream inputStream);
 
     /**
      * Get a maven resource builder.

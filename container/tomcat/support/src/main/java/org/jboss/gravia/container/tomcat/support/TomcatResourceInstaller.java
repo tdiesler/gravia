@@ -45,12 +45,13 @@ import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
+import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.jboss.gravia.utils.IOUtils;
-import org.jboss.gravia.utils.IllegalStateAssertion;
+import org.jboss.gravia.utils.ResourceUtils;
 
 /**
  * Service providing the {@link ResourceInstaller}.
@@ -87,9 +88,9 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
     }
 
     @Override
-    public ResourceHandle installResourceProtected(Context context, Resource resource, boolean shared) throws Exception {
+    public ResourceHandle installResourceProtected(Context context, Resource resource) throws Exception {
         ResourceHandle handle;
-        if (shared) {
+        if (ResourceUtils.isShared(resource)) {
             handle = installSharedResourceInternal(context, resource);
         } else {
             handle = installUnsharedResourceInternal(context, resource);
@@ -100,15 +101,21 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
     private ResourceHandle installSharedResourceInternal(Context context, Resource resource) throws Exception {
         LOGGER.info("Installing shared resource: {}", resource);
 
-        // copy resource content
-        File targetFile = new File(catalinaLib, getRuntimeName(resource, true));
-        IllegalStateAssertion.assertFalse(targetFile.exists(), "Module already exists: " + targetFile);
+        ResourceIdentity resid = resource.getIdentity();
+        String symbolicName = resid.getSymbolicName();
+        Version version = resid.getVersion();
 
-        ResourceContent content = getFirstRelevantResourceContent(resource);
-        IOUtils.copyStream(content.getContent(), new FileOutputStream(targetFile));
+        // copy resource content
+        final File targetFile = new File(catalinaLib, symbolicName + "-" + version + ".jar");
+        if (targetFile.exists()) {
+            LOGGER.warn("Module already exists: " + targetFile);
+        } else {
+            ResourceContent content = getFirstRelevantResourceContent(resource);
+            IOUtils.copyStream(content.getContent(), new FileOutputStream(targetFile));
+        }
 
         // Install the shared module
-        Module module = installSharedResource(resource, targetFile);
+        final Module module = installSharedResource(resource, targetFile);
 
         // Start the module
         module.start();
@@ -117,7 +124,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         return new AbstractResourceHandle(modres, module) {
             @Override
             public void uninstall() {
-                LOGGER.info("Cannot uninstall shared resource: {}", getResource());
+                LOGGER.warn("Cannot uninstall shared resource: {}", getResource());
             }
         };
     }
@@ -127,7 +134,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
 
         File tempfile = null;
         ResourceIdentity identity = resource.getIdentity();
-        String runtimeName = getRuntimeName(resource, true);
+        String runtimeName = getRuntimeName(resource);
 
         ContentCapability ccap = (ContentCapability) resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).get(0);
         URL contentURL = ccap.getContentURL();

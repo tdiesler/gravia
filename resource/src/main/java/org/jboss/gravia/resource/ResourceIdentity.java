@@ -71,18 +71,16 @@ public final class ResourceIdentity {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof ResourceIdentity))
-            return false;
-        if (obj == this)
-            return true;
-        ResourceIdentity other = (ResourceIdentity) obj;
-        return canonicalForm.equals(other.canonicalForm);
+    public int hashCode() {
+        return canonicalForm.hashCode();
     }
 
     @Override
-    public int hashCode() {
-        return canonicalForm.hashCode();
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (!(obj instanceof ResourceIdentity)) return false;
+        ResourceIdentity other = (ResourceIdentity) obj;
+        return canonicalForm.equals(other.canonicalForm);
     }
 
     @Override

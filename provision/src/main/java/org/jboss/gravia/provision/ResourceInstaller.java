@@ -52,6 +52,4 @@ public interface ResourceInstaller {
     }
 
     ResourceHandle installResource(Context context, Resource resource) throws ProvisionException;
-
-    ResourceHandle installSharedResource(Context context, Resource resource) throws ProvisionException;
 }
