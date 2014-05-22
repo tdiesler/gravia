@@ -20,6 +20,7 @@
 package org.jboss.gravia.runtime.spi;
 
 import static org.jboss.gravia.Constants.URL_HANDLER_PROTOCOL;
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 
 import java.io.IOException;
 import java.net.URL;
@@ -29,7 +30,6 @@ import java.net.URLStreamHandlerFactory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jboss.gravia.Constants;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceTracker;
@@ -47,7 +47,9 @@ import org.jboss.gravia.utils.IllegalStateAssertion;
  */
 public class URLStreamHandlerTracker implements URLStreamHandlerFactory {
 
-    private final Map<String, URLStreamHandlerProxy> handlers = new ConcurrentHashMap<>();
+    // The VM maitains a static mapping of protocol to handler. We register a proxy that can get updated
+    private static final Map<String, URLStreamHandlerProxy> handlers = new ConcurrentHashMap<>();
+
     private final ServiceTracker<?, ?> tracker;
 
     /**
@@ -62,15 +64,12 @@ public class URLStreamHandlerTracker implements URLStreamHandlerFactory {
                 String protocol = getRequiredProtocol(sref);
                 URLStreamHandlerProxy proxy = handlers.get(protocol);
                 if (proxy == null) {
-                    proxy = new URLStreamHandlerProxy(sref, handler);
+                    proxy = new URLStreamHandlerProxy(protocol, sref, handler);
                     handlers.put(protocol, proxy);
-                    addingHandler(protocol, sref, handler);
                 } else {
-                    if (getRanking(proxy.getServiceReference()) < getRanking(sref)) {
-                        proxy.update(sref, handler);
-                        addingHandler(protocol, sref, handler);
-                    }
+                    proxy.update(sref, handler);
                 }
+                addingHandler(protocol, sref, handler);
                 return handler;
             }
 
@@ -89,8 +88,6 @@ public class URLStreamHandlerTracker implements URLStreamHandlerFactory {
                                 break;
                             }
                         }
-                    } else {
-                        handlers.remove(protocol);
                     }
                 }
                 super.removedService(sref, handler);
@@ -111,13 +108,13 @@ public class URLStreamHandlerTracker implements URLStreamHandlerFactory {
     }
 
     public void close() {
-        handlers.clear();
         tracker.close();
     }
 
     @Override
     public URLStreamHandler createURLStreamHandler(String protocol) {
-        return handlers.get(protocol);
+        URLStreamHandlerProxy proxy = handlers.get(protocol);
+        return proxy != null && proxy.getDelegate() != null ? proxy : null;
     }
 
     private String getProtocol(ServiceReference<URLStreamHandler> sref) {
@@ -130,11 +127,6 @@ public class URLStreamHandlerTracker implements URLStreamHandlerFactory {
         return protocol;
     }
 
-    int getRanking(ServiceReference<?> sref) {
-        Integer ranking = (Integer) sref.getProperty(Constants.SERVICE_RANKING);
-        return ranking != null ? ranking.intValue() : 0;
-    }
-
     /**
      * The URL class caches the handler associated with a given protocol.
      * We therfore need to provide a proxy that can get updated as
@@ -144,14 +136,18 @@ public class URLStreamHandlerTracker implements URLStreamHandlerFactory {
      */
     static class URLStreamHandlerProxy extends URLStreamHandler {
 
+        private final String protocol;
         private ServiceReference<URLStreamHandler> sref;
         private URLStreamHandler delegate;
 
-        URLStreamHandlerProxy(ServiceReference<URLStreamHandler> sref, URLStreamHandler delegate) {
-            update(sref, delegate);
+        URLStreamHandlerProxy(String protocol, ServiceReference<URLStreamHandler> sref, URLStreamHandler delegate) {
+            this.protocol = protocol;
+            this.delegate = delegate;
+            this.sref = sref;
         }
 
         synchronized void update(ServiceReference<URLStreamHandler> sref, URLStreamHandler delegate) {
+            LOGGER.debug("Update URLStreamHandler for '{}' with: {}", protocol, delegate);
             this.delegate = delegate;
             this.sref = sref;
         }
