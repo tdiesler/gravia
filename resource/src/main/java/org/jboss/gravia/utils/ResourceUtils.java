@@ -35,11 +35,25 @@ public final class ResourceUtils {
     private ResourceUtils() {
     }
 
+    /**
+     * A resource is abstract if it has a 'type' attribute with value 'abstract' or 'reference'
+     */
     public static boolean isAbstract(Resource res) {
         Object attval = res.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE);
-        return IdentityNamespace.TYPE_ABSTRACT.equals(attval);
+        return isReference(res) || IdentityNamespace.TYPE_ABSTRACT.equals(attval);
     }
 
+    /**
+     * A reference resource has a 'type' attribute with value 'reference'
+     */
+    public static boolean isReference(Resource res) {
+        Object attval = res.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE);
+        return IdentityNamespace.TYPE_REFERENCE.equals(attval);
+    }
+
+    /**
+     * A shared resource has a 'shared' attribute with value 'true'
+     */
     public static boolean isShared(Resource resource) {
         Object attval = resource.getIdentityCapability().getAttribute(IdentityNamespace.CAPABILITY_SHARED_ATTRIBUTE);
         return Boolean.parseBoolean(attval != null ? attval.toString() : null);

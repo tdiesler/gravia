@@ -87,6 +87,14 @@ public interface IdentityNamespace extends Namespace {
 
     /**
      * The attribute value identifying the resource
+     * {@link #CAPABILITY_TYPE_ATTRIBUTE type} as a reference resource.
+     *
+     * @see #CAPABILITY_TYPE_ATTRIBUTE
+     */
+    String TYPE_REFERENCE = "reference";
+
+    /**
+     * The attribute value identifying the resource
      * {@link #CAPABILITY_TYPE_ATTRIBUTE type} as unknown.
      *
      * @see #CAPABILITY_TYPE_ATTRIBUTE
