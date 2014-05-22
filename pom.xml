@@ -29,7 +29,7 @@
     <artifactId>gravia</artifactId>
     <packaging>pom</packaging>
 
-    <version>1.1.0.Beta21-SNAPSHOT</version>
+    <version>1.1.0.Beta21</version>
 
     <description>Fuse Portable Runtime</description>
     <url>https://github.com/tdiesler/gravia/wiki</url>
@@ -45,7 +45,7 @@
         <connection>scm:git:git://github.com/tdiesler/gravia.git</connection>
         <developerConnection>scm:git:git@github.com:tdiesler/gravia.git</developerConnection>
         <url>http://github.com/tdiesler/gravia</url>
-        <tag>HEAD</tag>
+        <tag>1.1.0.Beta21</tag>
     </scm>
 
     <!-- Licenses -->
