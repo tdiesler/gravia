@@ -42,11 +42,11 @@ public final class MavenCoordinates {
         MavenCoordinates result;
         String[] parts = coordinates.split(":");
         if (parts.length == 3) {
-            result = new MavenCoordinates(parts[0], parts[1], null, parts[2], null);
+            result = new MavenCoordinates(parts[0], parts[1], parts[2], null, null);
         } else if (parts.length == 4) {
-            result = new MavenCoordinates(parts[0], parts[1], parts[2], parts[3], null);
+            result = new MavenCoordinates(parts[0], parts[1], parts[3], parts[2], null);
         } else if (parts.length == 5) {
-            result = new MavenCoordinates(parts[0], parts[1], parts[2], parts[3], parts[4]);
+            result = new MavenCoordinates(parts[0], parts[1], parts[4], parts[2], parts[3]);
         } else {
             throw new IllegalArgumentException("Invalid coordinates: " + coordinates);
         }
@@ -54,10 +54,10 @@ public final class MavenCoordinates {
     }
 
     public static MavenCoordinates create(String groupId, String artifactId, String version, String type, String classifier) {
-        return new MavenCoordinates(groupId, artifactId, type, version, classifier);
+        return new MavenCoordinates(groupId, artifactId, version, type, classifier);
     }
 
-    private MavenCoordinates(String groupId, String artifactId, String type, String version, String classifier) {
+    private MavenCoordinates(String groupId, String artifactId, String version, String type, String classifier) {
         if (groupId == null)
             throw new IllegalArgumentException("Null groupId");
         if (artifactId == null)
@@ -72,7 +72,7 @@ public final class MavenCoordinates {
         this.classifier = classifier;
 
         String clstr = classifier != null ? ":" + classifier : "";
-        this.externalForm = groupId + ":" + artifactId + ":" + type + ":" + version + clstr;
+        this.externalForm = groupId + ":" + artifactId + ":" + type + clstr + ":" + version;
     }
 
     public String getGroupId() {
