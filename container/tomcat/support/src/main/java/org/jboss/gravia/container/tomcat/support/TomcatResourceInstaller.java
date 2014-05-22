@@ -43,6 +43,7 @@ import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.resource.Version;
@@ -120,17 +121,20 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         // Start the module
         module.start();
 
-        Resource modres = module.adapt(Resource.class);
+        final Resource modres = module.adapt(Resource.class);
         return new AbstractResourceHandle(modres, module) {
             @Override
             public void uninstall() {
-                LOGGER.warn("Cannot uninstall shared resource: {}", getResource());
+                LOGGER.info("Uninstall shared resource: {}", modres);
+                SharedModuleClassLoader.removeSharedModule(modres);
+                module.uninstall();
+                targetFile.delete();
             }
         };
     }
 
     private ResourceHandle installUnsharedResourceInternal(Context context, Resource resource) throws Exception {
-        LOGGER.info("Installing unshared resource: {}", resource);
+        LOGGER.info("Install unshared resource: {}", resource);
 
         File tempfile = null;
         ResourceIdentity identity = resource.getIdentity();
@@ -185,7 +189,7 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
     private Module installSharedResource(Resource resource, File targetFile) throws Exception {
 
         // Get a resource copy with updated content capability
-        DefaultResourceBuilder builder = new DefaultResourceBuilder();
+        ResourceBuilder builder = new DefaultResourceBuilder();
         for (Capability cap : resource.getCapabilities(null)) {
             String namespace = cap.getNamespace();
             if (!ContentNamespace.CONTENT_NAMESPACE.equals(namespace)) {

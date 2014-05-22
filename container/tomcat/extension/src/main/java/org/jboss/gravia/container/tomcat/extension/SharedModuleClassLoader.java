@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.ContentCapability;
 import org.jboss.gravia.resource.ContentNamespace;
@@ -55,19 +56,40 @@ public final class SharedModuleClassLoader extends ClassLoader {
     }
 
     public static void addSharedModule(Resource resource) {
-        IllegalArgumentAssertion.assertNotNull(resource, "resource");
-
-        List<Capability> ccaps = resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
-        if (ccaps.isEmpty())
-            throw new IllegalArgumentException("Cannot obtain content capability from: " + resource);
-
-        ContentCapability ccap = (ContentCapability) ccaps.get(0);
-        URL contentURL = ccap.getContentURL();
-        if (contentURL == null)
-            throw new IllegalArgumentException("Cannot obtain content URL from: " + ccap);
-
+        URL contentURL = getRequiredContentURL(resource);
         synchronized (urls) {
             urls.add(contentURL);
         }
+    }
+
+    public static void removeSharedModule(Resource resource) {
+        URL contentURL = getContentURL(resource);
+        if (contentURL != null) {
+            synchronized (urls) {
+                urls.remove(contentURL);
+            }
+        }
+    }
+
+    private static URL getContentURL(Resource resource) {
+        IllegalArgumentAssertion.assertNotNull(resource, "resource");
+
+        List<Capability> ccaps = resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
+        if (ccaps.size() != 1)
+            return null;
+
+        return ccaps.get(0).adapt(ContentCapability.class).getContentURL();
+    }
+
+    private static URL getRequiredContentURL(Resource resource) {
+        IllegalArgumentAssertion.assertNotNull(resource, "resource");
+
+        List<Capability> ccaps = resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE);
+        IllegalArgumentAssertion.assertFalse(ccaps.isEmpty(), "Cannot obtain content capability from: " + resource);
+        IllegalArgumentAssertion.assertFalse(ccaps.size() > 1, "Cannot process multiple content capabilities in: " + resource);
+
+        URL contentURL = ccaps.get(0).adapt(ContentCapability.class).getContentURL();
+        IllegalArgumentAssertion.assertTrue(contentURL != null, "Cannot obtain content URL from: " + resource);
+        return contentURL;
     }
 }
