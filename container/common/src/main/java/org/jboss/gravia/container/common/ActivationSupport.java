@@ -64,15 +64,23 @@ public final class ActivationSupport {
             }
         };
         for (String name : configsDir.list(filter)) {
-            LOGGER.info("Loading configuration: " + name);
+            boolean factoryConfiguration = false;
             String pid = name.substring(0, name.length() - 4);
+            if (pid.contains("-")) {
+                pid = pid.substring(0, pid.indexOf("-"));
+                factoryConfiguration = true;
+                LOGGER.info("Loading factory configuration: " + pid);
+            } else {
+                LOGGER.info("Loading configuration: " + pid);
+            }
+
             try {
                 FileInputStream fis = new FileInputStream(new File(configsDir, name));
                 Properties props = new Properties();
                 props.load(fis);
                 fis.close();
                 if (!props.isEmpty()) {
-                    Configuration config = configAdmin.getConfiguration(pid, null);
+                    Configuration config = factoryConfiguration ? configAdmin.createFactoryConfiguration(pid, null) : configAdmin.getConfiguration(pid, null);
                     config.update((Hashtable) props);
                 }
             } catch (IOException ex) {
