@@ -61,14 +61,18 @@ public final class ConfigurationAdminPlugin extends AbstractRuntimePlugin {
                 URL specurl = new URL(urlspec);
                 String path = specurl.getPath();
                 String pid = path.substring(path.lastIndexOf('/') + 1);
+                boolean factoryConfiguration = false;
                 if (pid.endsWith(".cfg")) {
                     pid = pid.substring(0, pid.length() - 4);
+                    if (pid.contains("-")) {
+                        pid = pid.substring(0, pid.indexOf("-"));
+                        factoryConfiguration = true;
+                    }
                 }
-
                 Properties props = new Properties();
                 props.load(specurl.openStream());
 
-                Configuration config = configAdmin.getConfiguration(pid, null);
+                Configuration config = factoryConfiguration ? configAdmin.createFactoryConfiguration(pid, null) : configAdmin.getConfiguration(pid, null);
                 config.update(propsToMap(props));
             }
         }
