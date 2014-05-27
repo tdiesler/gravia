@@ -45,38 +45,54 @@ import org.jboss.gravia.utils.IllegalArgumentAssertion;
  *
  * @ThreadSafe
  */
-public class DefaultPropertiesProvider implements PropertiesProvider {
+public class DefaultPropertiesProvider extends CompositePropertiesProvider implements PropertiesProvider {
 
-    private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
-    private final boolean systemPropertyDelegation;
+    private final PropertiesProvider delegate;
 
     public DefaultPropertiesProvider() {
-        this(new HashMap<String, Object>(), true);
+        this(new HashMap<String, Object>());
     }
 
-    public DefaultPropertiesProvider(Properties props, boolean sysprops) {
-        this(propsToMap(props), sysprops);
+    public DefaultPropertiesProvider(final Properties properties) {
+        this(propsToMap(properties));
     }
 
-    public DefaultPropertiesProvider(Map<String, Object> props, boolean sysprops) {
-        IllegalArgumentAssertion.assertNotNull(props, "props");
-        systemPropertyDelegation = sysprops;
+    public DefaultPropertiesProvider(final Map<String, Object> properties) {
+        this(properties, true);
+    }
+
+    public DefaultPropertiesProvider(final Properties properties, final boolean systemPropertyDelegation) {
+        this(propsToMap(properties), systemPropertyDelegation, null);
+    }
+
+    public DefaultPropertiesProvider(final Map<String, Object> properties, final boolean systemPropertyDelegation) {
+        this(properties, systemPropertyDelegation, null);
+    }
+
+    public DefaultPropertiesProvider(final Properties properties, final boolean systemPropertyDelegation, final String environmentVariablePrefix) {
+        this(propsToMap(properties), systemPropertyDelegation, environmentVariablePrefix);
+    }
+
+    public DefaultPropertiesProvider(Map<String, Object> properties, final boolean systemPropertyDelegation, final String environmentVariablePrefix) {
+        IllegalArgumentAssertion.assertNotNull(properties, "props");
         properties.putAll(propsToMap(getDefaultProperties()));
-        properties.putAll(props);
+        this.delegate = new SubstitutionPropertiesProvider(
+                new CompositePropertiesProvider(
+                        new MapPropertiesProvider(properties),
+                        systemPropertyDelegation ? new SystemPropertiesProvider() : new MapPropertiesProvider(),
+                        new EnvPropertiesProvider(environmentVariablePrefix)
+                )
+        );
     }
 
     @Override
     public Object getProperty(String key) {
-        return getProperty(key, null);
+        return delegate.getProperty(key, null);
     }
 
     @Override
     public Object getProperty(String key, Object defaultValue) {
-        Object value = properties.get(key);
-        if (value == null && systemPropertyDelegation) {
-            value = SecurityActions.getSystemProperty(key, null);
-        }
-        return value != null ? value : defaultValue;
+       return delegate.getProperty(key, defaultValue);
     }
 
     private static Properties getDefaultProperties() {

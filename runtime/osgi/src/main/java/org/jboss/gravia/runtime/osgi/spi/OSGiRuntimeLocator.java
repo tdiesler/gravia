@@ -39,7 +39,7 @@ public final class OSGiRuntimeLocator {
     }
 
     public static Runtime createRuntime(BundleContext syscontext) {
-        PropertiesProvider propsProvider = new BundleContextPropertiesProvider(syscontext);
+        PropertiesProvider propsProvider = new OSGiPropertiesProvider(syscontext);
         return RuntimeLocator.createRuntime(new OSGiRuntimeFactory(syscontext), propsProvider);
     }
 

@@ -22,6 +22,7 @@ package org.jboss.gravia.runtime.osgi.internal;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.osgi.spi.BundleContextPropertiesProvider;
+import org.jboss.gravia.runtime.osgi.spi.OSGiPropertiesProvider;
 import org.jboss.gravia.runtime.osgi.spi.OSGiRuntimeFactory;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.osgi.framework.BundleActivator;
@@ -38,7 +39,7 @@ public final class OSGiRuntimeActivator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         BundleContext syscontext = context.getBundle(0).getBundleContext();
-        PropertiesProvider propsProvider = new BundleContextPropertiesProvider(syscontext);
+        PropertiesProvider propsProvider = new OSGiPropertiesProvider(syscontext);
         Runtime runtime = RuntimeLocator.createRuntime(new OSGiRuntimeFactory(syscontext), propsProvider);
         runtime.init();
     }

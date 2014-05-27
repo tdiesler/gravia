@@ -45,6 +45,20 @@ class SecurityActions {
         }
     }
 
+    static String getEnv(final String key, final String defaultValue) {
+        if (System.getSecurityManager() == null) {
+            String value = System.getenv(key);
+            return value != null ? value : defaultValue;
+        } else {
+            return AccessController.doPrivileged(new PrivilegedAction<String>() {
+                public String run() {
+                    String value = System.getenv(key);
+                    return value != null ? value : defaultValue;
+                }
+            });
+        }
+    }
+
     static void setSystemProperty(final String key, final String value) {
         if (System.getSecurityManager() == null) {
             System.setProperty(key, value);
