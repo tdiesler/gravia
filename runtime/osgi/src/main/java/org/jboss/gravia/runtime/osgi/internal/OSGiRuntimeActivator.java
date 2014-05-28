@@ -21,7 +21,6 @@ package org.jboss.gravia.runtime.osgi.internal;
 
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.osgi.spi.BundleContextPropertiesProvider;
 import org.jboss.gravia.runtime.osgi.spi.OSGiPropertiesProvider;
 import org.jboss.gravia.runtime.osgi.spi.OSGiRuntimeFactory;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
