@@ -24,9 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ResourceHandle;
@@ -78,37 +76,11 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
         for (Capability cap : resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE)) {
             String includedTypes = cap.getDirective(ContentNamespace.CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE);
             String excludedTypes = cap.getDirective(ContentNamespace.CAPABILITY_EXCLUDE_RUNTIME_TYPE_DIRECTIVE);
-            if (includedTypes == null && excludedTypes == null) {
+            if (RuntimeType.isRuntimeRelevant(includedTypes, excludedTypes)) {
                 ccaps.add(cap.adapt(ContentCapability.class));
-            } else {
-                Set<RuntimeType> types = new HashSet<>();
-                if (includedTypes == null) {
-                    types.add(RuntimeType.getRuntimeType());
-                }
-
-                // Add all included runtime types
-                types.addAll(getRuntimeTypes(includedTypes));
-
-                // Remove all excluded runtime types
-                types.removeAll(getRuntimeTypes(excludedTypes));
-
-                // Content is relevant when the current runtime type is included
-                if (types.contains(RuntimeType.getRuntimeType())) {
-                    ccaps.add(cap.adapt(ContentCapability.class));
-                }
             }
         }
         return ccaps;
-    }
-
-    private Set<RuntimeType> getRuntimeTypes(String directive) {
-        Set<RuntimeType> types = new HashSet<>();
-        if (directive != null) {
-            for (String typespec : directive.split(",")) {
-                types.add(RuntimeType.valueOf(typespec.toUpperCase()));
-            }
-        }
-        return types;
     }
 
     protected ResourceContent getFirstRelevantResourceContent(Resource resource) {

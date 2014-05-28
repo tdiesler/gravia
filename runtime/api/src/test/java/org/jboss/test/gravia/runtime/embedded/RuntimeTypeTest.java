@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,5 +46,18 @@ public class RuntimeTypeTest {
         Assert.assertSame(RuntimeType.OTHER, RuntimeType.getRuntimeType("foo"));
         Assert.assertSame(RuntimeType.OTHER, RuntimeType.getRuntimeType(""));
         Assert.assertSame(RuntimeType.OTHER, RuntimeType.getRuntimeType((String) null));
+    }
+
+    @Test
+    public void testRuntimeRelevant() {
+
+        Assert.assertTrue(RuntimeType.isRuntimeRelevant(RuntimeType.KARAF, null, null));
+        Assert.assertTrue(RuntimeType.isRuntimeRelevant(RuntimeType.KARAF, "karaf", null));
+        Assert.assertFalse(RuntimeType.isRuntimeRelevant(RuntimeType.KARAF, "karaf", "karaf"));
+        Assert.assertFalse(RuntimeType.isRuntimeRelevant(RuntimeType.KARAF, null, "karaf"));
+
+        Assert.assertTrue(RuntimeType.isRuntimeRelevant(RuntimeType.KARAF, "karaf,foo", null));
+        Assert.assertTrue(RuntimeType.isRuntimeRelevant(RuntimeType.KARAF, "foo,karaf", null));
+        Assert.assertTrue(RuntimeType.isRuntimeRelevant(RuntimeType.KARAF, "foo, karaf", null));
     }
 }
