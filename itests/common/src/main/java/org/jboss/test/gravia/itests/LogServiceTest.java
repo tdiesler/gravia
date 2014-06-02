@@ -24,7 +24,6 @@ import java.io.InputStream;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
-import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
@@ -68,7 +67,6 @@ public class LogServiceTest  {
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(archive.getName());
                     builder.addBundleVersion("1.0.0");
-                    builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
                     builder.addImportPackages(RuntimeLocator.class, LogService.class, LoggerFactory.class, Resource.class);
                     return builder.openStream();
                 } else {

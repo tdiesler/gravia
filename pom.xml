@@ -72,6 +72,7 @@
     <properties>
         <version.apache.ant>1.7.0</version.apache.ant>
         <version.apache.camel>2.11.0</version.apache.camel>
+        <version.apache.commons.compress>1.8</version.apache.commons.compress>
         <version.apache.felix.configadmin>1.8.0</version.apache.felix.configadmin>
         <version.apache.felix.eventadmin>1.3.0</version.apache.felix.eventadmin>
         <version.apache.felix.log>1.0.1</version.apache.felix.log>
@@ -113,6 +114,7 @@
     <!-- Modules -->
     <modules>
         <module>arquillian</module>
+        <module>process</module>
         <module>provision</module>
         <module>resource</module>
         <module>resolver</module>
@@ -136,6 +138,11 @@
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-core</artifactId>
                 <version>${version.apache.camel}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${version.apache.commons.compress}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>

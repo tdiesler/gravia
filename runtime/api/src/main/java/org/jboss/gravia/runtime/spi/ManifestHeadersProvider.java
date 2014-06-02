@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,10 @@
 package org.jboss.gravia.runtime.spi;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.jar.Attributes;
-import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
+import org.jboss.gravia.utils.ManifestUtils;
 
 /**
  * Provides Moduel headers from a manifest
@@ -35,26 +33,19 @@ import org.jboss.gravia.utils.IllegalArgumentAssertion;
  *
  * @ThreadSafe
  */
-public final class ManifestHeadersProvider {
+public final class ManifestHeadersProvider implements HeadersProvider {
 
-    private final Manifest manifest;
+    private final Dictionary<String, String> headers;
 
     public ManifestHeadersProvider(Manifest manifest) {
         IllegalArgumentAssertion.assertNotNull(manifest, "manifest");
-        this.manifest = manifest;
+        headers = ManifestUtils.getManifestHeaders(manifest);
     }
 
     /**
      * Return a mutable dictionary of manifest headers
      */
     public Dictionary<String, String> getHeaders() {
-        Hashtable<String, String> headers = new Hashtable<String, String>();
-        Attributes mainAttributes = manifest.getMainAttributes();
-        for (Object key : mainAttributes.keySet()) {
-            Name name = (Name) key;
-            String value = mainAttributes.getValue(name);
-            headers.put(name.toString(), value);
-        }
         return headers;
     }
 }

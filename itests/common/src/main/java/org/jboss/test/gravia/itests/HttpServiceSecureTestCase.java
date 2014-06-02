@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
-import org.jboss.gravia.Constants;
 import org.jboss.gravia.container.tomcat.extension.UserDatabaseLoginModule;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
@@ -98,7 +97,6 @@ public class HttpServiceSecureTestCase {
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(archive.getName());
                     builder.addBundleVersion("1.0.0");
-                    builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
                     builder.addImportPackages(RuntimeLocator.class, Servlet.class, HttpServlet.class, HttpService.class);
                     builder.addImportPackages(Subject.class, Callback.class, LoginContext.class);
                     builder.addImportPackage("org.apache.karaf.jaas.config");

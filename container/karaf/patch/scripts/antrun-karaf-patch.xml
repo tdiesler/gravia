@@ -49,6 +49,9 @@
 	</copy>
   	
   	<!-- Copy to system -->
+    <copy todir="${karaf.patch.dir}/system/org/apache/commons/commons-compress/${version.apache.commons.compress}" overwrite="true">
+        <fileset file="${deploy.artifacts.lib}/commons-compress-*.jar" />
+    </copy>
     <copy todir="${karaf.patch.dir}/system/org/apache/felix/org.apache.felix.eventadmin/${version.apache.felix.eventadmin}" overwrite="true">
         <fileset file="${deploy.artifacts.lib}/org.apache.felix.eventadmin-*.jar" />
     </copy>
@@ -65,12 +68,15 @@
         <fileset file="${deploy.artifacts.lib}/arquillian-osgi-bundle-*.jar" />
     </copy>
     <copy todir="${karaf.patch.dir}/system/org/jboss/gravia/${project.version}" overwrite="true">
-        <fileset file="${deploy.artifacts.lib}/gravia-provision-*.jar" />
-        <fileset file="${deploy.artifacts.lib}/gravia-repository-*.jar" />
-        <fileset file="${deploy.artifacts.lib}/gravia-resolver-*.jar" />
-        <fileset file="${deploy.artifacts.lib}/gravia-resource-*.jar" />
-        <fileset file="${deploy.artifacts.lib}/gravia-runtime-api-*.jar" />
-        <fileset file="${deploy.artifacts.lib}/gravia-runtime-osgi-*.jar" />
+        <fileset dir="${deploy.artifacts.lib}">
+			<include name="gravia-process-*.jar" />
+			<include name="gravia-provision-*.jar" />
+			<include name="gravia-repository-*.jar" />
+			<include name="gravia-resolver-*.jar" />
+			<include name="gravia-resource-*.jar" />
+			<include name="gravia-runtime-api-*.jar" />
+			<include name="gravia-runtime-osgi-*.jar" />
+        </fileset>
     </copy>
   	
     <copy file="${karaf.source.dir}/etc/startup.properties" todir="${karaf.patch.dir}/etc" overwrite="true"/>
@@ -78,6 +84,7 @@
 #
 # Gravia Integration
 # 
+org/apache/commons/commons-compress/${version.apache.commons.compress}/commons-compress-${version.apache.commons.compress}.jar=40
 org/apache/felix/org.apache.felix.eventadmin/${version.apache.felix.eventadmin}/org.apache.felix.eventadmin-${version.apache.felix.eventadmin}.jar=40
 org/apache/felix/org.apache.felix.http/${version.apache.felix.http}/org.apache.felix.http.bundle-${version.apache.felix.http}.jar=40
 org/apache/felix/org.apache.felix.metatype/${version.apache.felix.metatype}/org.apache.felix.metatype-${version.apache.felix.metatype}.jar=40
@@ -88,6 +95,7 @@ org/jboss/gravia/${project.version}/gravia-runtime-osgi-${project.version}.jar=4
 org/jboss/gravia/${project.version}/gravia-repository-${project.version}.jar=41
 org/jboss/gravia/${project.version}/gravia-resolver-${project.version}.jar=41
 org/jboss/gravia/${project.version}/gravia-provision-${project.version}.jar=42
+org/jboss/gravia/${project.version}/gravia-process-api-${project.version}.jar=42
     	
 #
 # Arquillian OSGi Integration

@@ -26,7 +26,6 @@ import java.util.Set;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.gravia.Constants;
 import org.jboss.gravia.arquillian.container.ContainerSetup;
 import org.jboss.gravia.arquillian.container.ContainerSetupTask;
 import org.jboss.gravia.repository.Repository;
@@ -85,7 +84,6 @@ public class RepositoryServiceTest {
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(archive.getName());
                     builder.addBundleVersion("1.0.0");
-                    builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
                     builder.addImportPackages(Runtime.class, Resource.class, Repository.class);
                     return builder.openStream();
                 } else {

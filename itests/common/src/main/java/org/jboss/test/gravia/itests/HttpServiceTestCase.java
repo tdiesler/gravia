@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
-import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -87,7 +86,6 @@ public class HttpServiceTestCase {
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName("http-service");
                     builder.addBundleVersion("1.0.0");
-                    builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
                     builder.addImportPackages(RuntimeLocator.class, Servlet.class, HttpServlet.class, HttpService.class);
                     builder.addBundleClasspath("WEB-INF/classes");
                     return builder.openStream();

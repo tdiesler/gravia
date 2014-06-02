@@ -24,7 +24,6 @@ import java.io.InputStream;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
-import org.jboss.gravia.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
@@ -61,7 +60,6 @@ public class WebappBundleModuleLifecycleTest {
                 builder.addBundleManifestVersion(2);
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
-                builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
                 builder.addImportPackages(RuntimeLocator.class);
                 builder.addBundleClasspath("WEB-INF/classes");
                 return builder.openStream();

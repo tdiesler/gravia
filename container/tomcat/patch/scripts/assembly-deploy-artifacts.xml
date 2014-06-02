@@ -36,8 +36,10 @@
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>*:ant:jar</include>
+                <include>*:commons-compress:jar</include>
                 <include>*:gravia-container-tomcat-extension:jar</include>
                 <include>*:gravia-container-tomcat-webapp:war</include>
+                <include>*:gravia-process-api:jar</include>
                 <include>*:gravia-provision:jar</include>
                 <include>*:gravia-resolver:jar</include>
                 <include>*:gravia-resource:jar</include>

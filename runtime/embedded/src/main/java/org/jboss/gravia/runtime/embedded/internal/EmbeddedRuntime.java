@@ -40,6 +40,7 @@ import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
+import org.jboss.gravia.runtime.spi.ClassLoaderEntriesProvider;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
@@ -126,7 +127,7 @@ public class EmbeddedRuntime extends AbstractRuntime {
 
     @Override
     protected ModuleEntriesProvider getDefaultEntriesProvider(Module module, Attachable context) {
-        return null;
+        return new ClassLoaderEntriesProvider(module);
     }
 
     @Override

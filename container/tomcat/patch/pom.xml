@@ -59,6 +59,12 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-process-api</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-provision</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>

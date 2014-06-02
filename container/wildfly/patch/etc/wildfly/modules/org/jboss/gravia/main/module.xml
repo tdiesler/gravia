@@ -26,6 +26,7 @@
     </properties>
 
     <resources>
+        <resource-root path="gravia-process-api-@project.version@.jar"/>
         <resource-root path="gravia-provision-@project.version@.jar"/>
         <resource-root path="gravia-repository-@project.version@.jar"/>
         <resource-root path="gravia-resolver-@project.version@.jar"/>
@@ -40,6 +41,7 @@
     </resources>
 
     <exports>
+        <include path="org/jboss/gravia/process"/>
         <include path="org/jboss/gravia/provision"/>
         <include path="org/jboss/gravia/resource"/>
         <include path="org/jboss/gravia/resolver"/>
@@ -50,6 +52,7 @@
     <dependencies>
         <module name="javax.api"/>
         <module name="javax.servlet.api"/>
+        <module name="org.apache.commons.compress"/>
         <module name="org.osgi.core"/>
         <module name="org.osgi.enterprise"/>
         <module name="org.slf4j"/>
