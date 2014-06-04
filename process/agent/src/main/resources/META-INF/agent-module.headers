@@ -1,2 +1,0 @@
-Gravia-Identity: ${project.artifactId};version=${project.version}
-Service-Component: OSGI-INF/org.jboss.gravia.agent.ControllerService.xml

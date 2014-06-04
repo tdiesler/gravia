@@ -47,7 +47,6 @@
         <fileset dir="${etc.dir}/wildfly" />
 		<filterset>
 	        <filter token="project.version" value="${project.version}" />
-	        <filter token="version.apache.commons.compress" value="${version.apache.commons.compress}" />
 	        <filter token="version.apache.felix.configadmin" value="${version.apache.felix.configadmin}" />
 	        <filter token="version.apache.felix.http" value="${version.apache.felix.http}" />
 	        <filter token="version.apache.felix.log" value="${version.apache.felix.log}" />
@@ -58,11 +57,6 @@
     </copy>
   	
   	<!-- Copy module resources-->
-    <copy todir="${wildfly.patch.dir}/modules/org/apache/commons/compress/main" overwrite="true">
-        <fileset dir="${deploy.artifacts.lib}">
-        	<include name="commons-compress-*"/>
-        </fileset>
-    </copy>
     <copy todir="${wildfly.patch.dir}/modules/org/jboss/gravia/main" overwrite="true">
         <fileset dir="${deploy.artifacts.lib}">
 			<include name="org.apache.felix.configadmin-*.jar" />
@@ -70,7 +64,6 @@
 			<include name="org.apache.felix.log-*.jar" />
 			<include name="org.apache.felix.metatype-*.jar" />
 			<include name="org.apache.felix.scr-*.jar" />
-			<include name="gravia-process-*.jar" />
 			<include name="gravia-provision-*.jar" />
 			<include name="gravia-repository-*.jar" />
 			<include name="gravia-resolver-*.jar" />
