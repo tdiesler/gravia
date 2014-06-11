@@ -42,6 +42,7 @@ import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
 import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
 
 /**
  * [TODO]
@@ -142,15 +143,22 @@ final class EmbeddedModule extends AbstractModule {
 
             // #5 The {@link ModuleActivator#start(ModuleContext)} method if one is specified, is called.
             try {
-                String className = getHeaders().get(Constants.MODULE_ACTIVATOR);
-                if (className != null) {
+                String moduleActivatorName = getHeaders().get(Constants.MODULE_ACTIVATOR);
+                String bundleActivatorName = getHeaders().get("Bundle-Activator");
+                if (moduleActivatorName != null || bundleActivatorName != null) {
                     ModuleActivator moduleActivator;
                     synchronized (MODULE_ACTIVATOR_KEY) {
                         moduleActivator = getAttachment(MODULE_ACTIVATOR_KEY);
                         if (moduleActivator == null) {
-                            Object result = loadClass(className).newInstance();
-                            moduleActivator = (ModuleActivator) result;
-                            putAttachment(MODULE_ACTIVATOR_KEY, moduleActivator);
+                            if (moduleActivatorName != null) {
+                                Object result = loadClass(moduleActivatorName).newInstance();
+                                moduleActivator = (ModuleActivator) result;
+                                putAttachment(MODULE_ACTIVATOR_KEY, moduleActivator);
+                            } else if (bundleActivatorName != null) {
+                                Object result = loadClass(bundleActivatorName).newInstance();
+                                moduleActivator = new ModuleActivatorBridge((BundleActivator) result);
+                                putAttachment(MODULE_ACTIVATOR_KEY, moduleActivator);
+                            }
                         }
                     }
                     if (moduleActivator != null) {

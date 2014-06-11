@@ -29,7 +29,7 @@ import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
-import org.jboss.gravia.runtime.ModuleActivatorBridge;
+import org.jboss.gravia.runtime.BundleActivatorBridge;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
@@ -76,14 +76,14 @@ public class ModuleLifecycleTestCase {
     @StartLevelAware(autostart = true)
     public static JavaArchive deployment() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example-bundle");
-        archive.addClasses(ModuleActivatorBridge.class, SimpleModuleActivator.class);
+        archive.addClasses(BundleActivatorBridge.class, SimpleModuleActivator.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
-                builder.addBundleActivator(ModuleActivatorBridge.class);
+                builder.addBundleActivator(BundleActivatorBridge.class);
                 builder.addImportPackages(OSGiRuntimeLocator.class, Module.class, OSGiRuntimeLocator.class, Resource.class);
                 builder.addManifestHeader(Constants.MODULE_ACTIVATOR, SimpleModuleActivator.class.getName());
                 return builder.openStream();

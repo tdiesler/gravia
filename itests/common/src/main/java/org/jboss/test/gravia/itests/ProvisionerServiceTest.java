@@ -68,7 +68,7 @@ import org.jboss.gravia.resource.Version;
 import org.jboss.gravia.resource.VersionRange;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Module.State;
-import org.jboss.gravia.runtime.ModuleActivatorBridge;
+import org.jboss.gravia.runtime.BundleActivatorBridge;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.RuntimeType;
@@ -507,7 +507,7 @@ public class ProvisionerServiceTest {
     public static Archive<?> getResourceA() {
         final ArchiveBuilder archive = new ArchiveBuilder(RESOURCE_A);
         archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class, WebAppContextListener.class);
-        archive.addClasses(RuntimeType.KARAF, ModuleActivatorBridge.class);
+        archive.addClasses(RuntimeType.KARAF, BundleActivatorBridge.class);
         archive.addClasses(ModuleActivatorA.class, ModuleStateA.class);
         archive.setManifest(new Asset() {
             @Override
@@ -516,7 +516,7 @@ public class ProvisionerServiceTest {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(RESOURCE_A);
-                    builder.addBundleActivator(ModuleActivatorBridge.class);
+                    builder.addBundleActivator(BundleActivatorBridge.class);
                     builder.addManifestHeader(Constants.MODULE_ACTIVATOR, ModuleActivatorA.class.getName());
                     builder.addImportPackages(Runtime.class, Resource.class, ServiceLocator.class, MBeanServer.class);
                     return builder.openStream();
@@ -554,7 +554,7 @@ public class ProvisionerServiceTest {
     public static Archive<?> getResourceB1() {
         final ArchiveBuilder archive = new ArchiveBuilder(RESOURCE_B1);
         archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class, WebAppContextListener.class);
-        archive.addClasses(RuntimeType.KARAF, ModuleActivatorBridge.class);
+        archive.addClasses(RuntimeType.KARAF, BundleActivatorBridge.class);
         archive.addClasses(ModuleActivatorB.class);
         archive.setManifest(new Asset() {
             @Override
@@ -563,7 +563,7 @@ public class ProvisionerServiceTest {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(RESOURCE_B1);
-                    builder.addBundleActivator(ModuleActivatorBridge.class);
+                    builder.addBundleActivator(BundleActivatorBridge.class);
                     builder.addManifestHeader(Constants.MODULE_ACTIVATOR, ModuleActivatorB.class.getName());
                     builder.addImportPackages(Runtime.class, Resource.class, ServiceLocator.class);
                     builder.addImportPackages(MBeanServer.class, ModuleStateB.class);
@@ -585,7 +585,7 @@ public class ProvisionerServiceTest {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, RESOURCE_C + ".war");
         archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
         archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
-        archive.addClasses(CamelTransformHttpActivator.class, ModuleActivatorBridge.class);
+        archive.addClasses(CamelTransformHttpActivator.class, BundleActivatorBridge.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
@@ -593,9 +593,9 @@ public class ProvisionerServiceTest {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(RESOURCE_C);
-                    builder.addBundleActivator(ModuleActivatorBridge.class);
+                    builder.addBundleActivator(BundleActivatorBridge.class);
                     builder.addManifestHeader(Constants.MODULE_ACTIVATOR, CamelTransformHttpActivator.class.getName());
-                    builder.addImportPackages(ModuleActivatorBridge.class, Runtime.class, Servlet.class, HttpServlet.class, HttpService.class);
+                    builder.addImportPackages(BundleActivatorBridge.class, Runtime.class, Servlet.class, HttpServlet.class, HttpService.class);
                     builder.addImportPackages(CamelContext.class, DefaultCamelContext.class, RouteBuilder.class, RouteDefinition.class);
                     builder.addBundleClasspath("WEB-INF/classes");
                     return builder.openStream();
@@ -618,7 +618,7 @@ public class ProvisionerServiceTest {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, RESOURCE_D + ".war");
         archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
         archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
-        archive.addClasses(CamelTransformHttpActivator.class, ModuleActivatorBridge.class);
+        archive.addClasses(CamelTransformHttpActivator.class, BundleActivatorBridge.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
@@ -626,9 +626,9 @@ public class ProvisionerServiceTest {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(RESOURCE_D);
-                    builder.addBundleActivator(ModuleActivatorBridge.class);
+                    builder.addBundleActivator(BundleActivatorBridge.class);
                     builder.addManifestHeader(Constants.MODULE_ACTIVATOR, CamelTransformHttpActivator.class.getName());
-                    builder.addImportPackages(ModuleActivatorBridge.class, Runtime.class, Servlet.class, HttpServlet.class, HttpService.class);
+                    builder.addImportPackages(BundleActivatorBridge.class, Runtime.class, Servlet.class, HttpServlet.class, HttpService.class);
                     builder.addImportPackages(CamelContext.class, DefaultCamelContext.class, RouteBuilder.class, RouteDefinition.class);
                     builder.addBundleClasspath("WEB-INF/classes");
                     return builder.openStream();
@@ -651,7 +651,7 @@ public class ProvisionerServiceTest {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, RESOURCE_E + ".war");
         archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
         archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
-        archive.addClasses(CamelTransformHttpActivator.class, ModuleActivatorBridge.class);
+        archive.addClasses(CamelTransformHttpActivator.class, BundleActivatorBridge.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
@@ -659,9 +659,9 @@ public class ProvisionerServiceTest {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(RESOURCE_E);
-                    builder.addBundleActivator(ModuleActivatorBridge.class);
+                    builder.addBundleActivator(BundleActivatorBridge.class);
                     builder.addManifestHeader(Constants.MODULE_ACTIVATOR, CamelTransformHttpActivator.class.getName());
-                    builder.addImportPackages(ModuleActivatorBridge.class, Runtime.class, Servlet.class, HttpServlet.class, HttpService.class);
+                    builder.addImportPackages(BundleActivatorBridge.class, Runtime.class, Servlet.class, HttpServlet.class, HttpService.class);
                     builder.addImportPackages(CamelContext.class, DefaultCamelContext.class, RouteBuilder.class, RouteDefinition.class);
                     builder.addBundleClasspath("WEB-INF/classes");
                     return builder.openStream();
@@ -770,14 +770,14 @@ public class ProvisionerServiceTest {
     @Deployment(name = CONTENT_G3, managed = false, testable = false)
     public static Archive<?> getContentG3() {
         JavaArchive archive = ShrinkWrap.create(JavaArchive.class, CONTENT_G3 + ".jar");
-        archive.addClasses(ModuleActivatorBridge.class, ModuleActivatorB.class);
+        archive.addClasses(BundleActivatorBridge.class, ModuleActivatorB.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleManifestVersion(2);
                 builder.addBundleSymbolicName(RESOURCE_G);
-                builder.addBundleActivator(ModuleActivatorBridge.class);
+                builder.addBundleActivator(BundleActivatorBridge.class);
                 builder.addManifestHeader(Constants.MODULE_ACTIVATOR, ModuleActivatorB.class.getName());
                 builder.addImportPackages(Runtime.class, Resource.class, ServiceLocator.class);
                 builder.addImportPackages(MBeanServer.class, ModuleStateB.class);

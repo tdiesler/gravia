@@ -24,16 +24,12 @@ import java.io.InputStream;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
-import org.jboss.gravia.Constants;
-import org.jboss.gravia.runtime.BundleActivatorBridge;
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -42,21 +38,24 @@ import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
 /**
- * Test simple module lifecycle
+ * Test simple bundle lifecycle
  *
  * @author thomas.diesler@jboss.com
- * @since 01-Oct-2013
+ * @since 11-Jun-2014
  */
 @RunWith(Arquillian.class)
-public class ModuleLifecycleTest {
+public class BundleLifecycleTest {
 
     @Deployment
     @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
-        final ArchiveBuilder archive = new ArchiveBuilder("simple-module");
-        archive.addClasses(ModuleLifecycleTest.class, Activator.class);
+        final ArchiveBuilder archive = new ArchiveBuilder("simple-bundle");
+        archive.addClasses(BundleLifecycleTest.class, Activator.class);
         archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class);
         archive.setManifest(new Asset() {
             @Override
@@ -65,8 +64,7 @@ public class ModuleLifecycleTest {
                 builder.addBundleManifestVersion(2);
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
-                builder.addBundleActivator(BundleActivatorBridge.class);
-                builder.addManifestHeader(Constants.MODULE_ACTIVATOR, Activator.class.getName());
+                builder.addBundleActivator(Activator.class);
                 builder.addImportPackages(RuntimeLocator.class);
                 return builder.openStream();
             }
@@ -101,17 +99,17 @@ public class ModuleLifecycleTest {
         }
     }
 
-    public static class Activator implements ModuleActivator {
+    public static class Activator implements BundleActivator {
 
         ServiceRegistration<String> sreg;
 
         @Override
-        public void start(ModuleContext context) throws Exception {
+        public void start(BundleContext context) throws Exception {
             sreg = context.registerService(String.class, new String("Hello"), null);
         }
 
         @Override
-        public void stop(ModuleContext context) throws Exception {
+        public void stop(BundleContext context) throws Exception {
             sreg.unregister();
         }
     }
