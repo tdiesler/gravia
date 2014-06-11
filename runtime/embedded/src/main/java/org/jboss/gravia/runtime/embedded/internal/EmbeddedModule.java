@@ -143,6 +143,7 @@ final class EmbeddedModule extends AbstractModule {
 
             // #5 The {@link ModuleActivator#start(ModuleContext)} method if one is specified, is called.
             try {
+                Boolean graviaEnabled = Boolean.parseBoolean(getHeaders().get(Constants.GRAVIA_ENABLED));
                 String moduleActivatorName = getHeaders().get(Constants.MODULE_ACTIVATOR);
                 String bundleActivatorName = getHeaders().get("Bundle-Activator");
                 if (moduleActivatorName != null || bundleActivatorName != null) {
@@ -154,7 +155,7 @@ final class EmbeddedModule extends AbstractModule {
                                 Object result = loadClass(moduleActivatorName).newInstance();
                                 moduleActivator = (ModuleActivator) result;
                                 putAttachment(MODULE_ACTIVATOR_KEY, moduleActivator);
-                            } else if (bundleActivatorName != null) {
+                            } else if (bundleActivatorName != null && graviaEnabled) {
                                 Object result = loadClass(bundleActivatorName).newInstance();
                                 moduleActivator = new ModuleActivatorBridge((BundleActivator) result);
                                 putAttachment(MODULE_ACTIVATOR_KEY, moduleActivator);

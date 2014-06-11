@@ -24,6 +24,7 @@ import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -34,6 +35,7 @@ import javax.management.MBeanServerFactory;
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.Resource;
+import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
@@ -65,9 +67,13 @@ public class EmbeddedRuntime extends AbstractRuntime {
         storageHandler = new RuntimeStorageHandler(propertiesProvider, true);
 
         // Install system module
-        Resource resource = new DefaultResourceBuilder().addIdentityCapability(getSystemIdentity()).getResource();
+        ResourceIdentity sysid = getSystemIdentity();
+        Resource resource = new DefaultResourceBuilder().addIdentityCapability(sysid).getResource();
         try {
-            installModule(EmbeddedRuntime.class.getClassLoader(), resource, null, context);
+            Dictionary<String, String> headers = new Hashtable<>();
+            headers.put("Bundle-SymbolicName", sysid.getSymbolicName());
+            headers.put("Bundle-Version", sysid.getVersion().toString());
+            installModule(EmbeddedRuntime.class.getClassLoader(), resource, headers, context);
         } catch (ModuleException ex) {
             throw new IllegalStateException("Cannot install system module", ex);
         }
@@ -118,7 +124,7 @@ public class EmbeddedRuntime extends AbstractRuntime {
 
         AbstractModule module;
         if (resource != null && resource.getIdentity().equals(getSystemIdentity())) {
-            module = new SystemModule(this, classLoader, resource);
+            module = new SystemModule(this, classLoader, resource, headers);
         } else {
             module = new EmbeddedModule(this, classLoader, resource, headers);
         }

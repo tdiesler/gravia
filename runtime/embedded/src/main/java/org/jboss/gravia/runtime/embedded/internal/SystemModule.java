@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@
 package org.jboss.gravia.runtime.embedded.internal;
 
 import java.io.File;
+import java.util.Dictionary;
 
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
@@ -36,10 +37,10 @@ import org.osgi.framework.Bundle;
  * @author thomas.diesler@jboss.com
  * @since 22-Oct-2013
  */
-public final class SystemModule extends AbstractModule {
+final class SystemModule extends AbstractModule {
 
-    protected SystemModule(AbstractRuntime runtime, ClassLoader classLoader, Resource resource) {
-        super(runtime, classLoader, resource, null);
+    SystemModule(AbstractRuntime runtime, ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) {
+        super(runtime, classLoader, resource, headers);
     }
 
     @Override

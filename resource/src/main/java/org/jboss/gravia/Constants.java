@@ -32,6 +32,12 @@ package org.jboss.gravia;
 public interface Constants  {
 
     /**
+     * Manifest header to mark an OSGi Bundle as Gravia enabled.
+     * The module identity is derived from the Bundle-SymbolicName and Bundle-Version.
+     */
+    public static final String GRAVIA_ENABLED = "Gravia-Enabled";
+
+    /**
      * Manifest header that defines the module's identitiy.
      */
     public static final String GRAVIA_IDENTITY_CAPABILITY = "Gravia-Identity";

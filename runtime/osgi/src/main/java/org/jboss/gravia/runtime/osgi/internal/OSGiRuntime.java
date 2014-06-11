@@ -83,14 +83,15 @@ public final class OSGiRuntime extends AbstractRuntime {
         this.syscontext = syscontext;
 
         // Assert system bundle
-        if (syscontext.getBundle().getBundleId() != 0)
-            throw new IllegalArgumentException("Not the system bundle: " + syscontext.getBundle());
+        Bundle sysbundle = syscontext.getBundle();
+        if (sysbundle.getBundleId() != 0)
+            throw new IllegalArgumentException("Not the system bundle: " + sysbundle);
 
         // Install system module
         try {
             Resource resource = new DefaultResourceBuilder().addIdentityCapability(getSystemIdentity()).getResource();
-            BundleWiring wiring = syscontext.getBundle().adapt(BundleWiring.class);
-            installModule(wiring.getClassLoader(), resource, null, null);
+            BundleWiring wiring = sysbundle.adapt(BundleWiring.class);
+            installModule(wiring.getClassLoader(), resource, sysbundle.getHeaders(), null);
         } catch (ModuleException ex) {
             throw new IllegalStateException("Cannot install system module", ex);
         }

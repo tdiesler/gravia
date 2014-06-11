@@ -24,6 +24,7 @@ import java.io.InputStream;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
@@ -65,6 +66,7 @@ public class BundleLifecycleTest {
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
                 builder.addBundleActivator(Activator.class);
+                builder.addManifestHeader(Constants.GRAVIA_ENABLED, Boolean.TRUE.toString());
                 builder.addImportPackages(RuntimeLocator.class);
                 return builder.openStream();
             }
@@ -79,9 +81,15 @@ public class BundleLifecycleTest {
         Module modA = runtime.getModule(getClass().getClassLoader());
         Assert.assertEquals(Module.State.ACTIVE, modA.getState());
 
-        ModuleContext context = modA.getModuleContext();
-        ServiceReference<String> sref = context.getServiceReference(String.class);
+        String symbolicName = modA.getHeaders().get("Bundle-SymbolicName");
+        Assert.assertEquals("simple-bundle", symbolicName);
 
+        ModuleContext context = modA.getModuleContext();
+        Module sysmodule = runtime.getModule(0);
+        symbolicName = sysmodule.getHeaders().get("Bundle-SymbolicName");
+        Assert.assertNotNull("System bundle symbolic name not null", symbolicName);
+
+        ServiceReference<String> sref = context.getServiceReference(String.class);
         String service = context.getService(sref);
         Assert.assertEquals("Hello", service);
 

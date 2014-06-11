@@ -81,9 +81,15 @@ public class ModuleLifecycleTest {
         Module modA = runtime.getModule(getClass().getClassLoader());
         Assert.assertEquals(Module.State.ACTIVE, modA.getState());
 
-        ModuleContext context = modA.getModuleContext();
-        ServiceReference<String> sref = context.getServiceReference(String.class);
+        String symbolicName = modA.getHeaders().get("Bundle-SymbolicName");
+        Assert.assertEquals("simple-module", symbolicName);
 
+        ModuleContext context = modA.getModuleContext();
+        Module sysmodule = runtime.getModule(0);
+        symbolicName = sysmodule.getHeaders().get("Bundle-SymbolicName");
+        Assert.assertNotNull("System bundle symbolic name not null", symbolicName);
+
+        ServiceReference<String> sref = context.getServiceReference(String.class);
         String service = context.getService(sref);
         Assert.assertEquals("Hello", service);
 
