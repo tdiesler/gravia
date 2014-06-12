@@ -39,7 +39,10 @@ import org.jboss.gravia.resource.VersionRange;
 public final class AttributeValueHandler {
 
     public static enum Type {
+        Boolean,
         Double,
+        Float,
+        Integer,
         Long,
         Maven,
         String,
@@ -77,6 +80,17 @@ public final class AttributeValueHandler {
 
         Object value;
         switch (type) {
+            case Boolean:
+                if (listType) {
+                    List<Boolean> list = new ArrayList<>();
+                    for (String val : split(valstr)) {
+                        list.add(Boolean.parseBoolean(val.trim()));
+                    }
+                    value = list;
+                } else {
+                    value = Boolean.parseBoolean(valstr);
+                }
+                break;
             case Double:
                 if (listType) {
                     List<Double> list = new ArrayList<>();
@@ -86,6 +100,28 @@ public final class AttributeValueHandler {
                     value = list;
                 } else {
                     value = Double.parseDouble(valstr);
+                }
+                break;
+            case Float:
+                if (listType) {
+                    List<Float> list = new ArrayList<>();
+                    for (String val : split(valstr)) {
+                        list.add(Float.parseFloat(val.trim()));
+                    }
+                    value = list;
+                } else {
+                    value = Float.parseFloat(valstr);
+                }
+                break;
+            case Integer:
+                if (listType) {
+                    List<Integer> list = new ArrayList<>();
+                    for (String val : split(valstr)) {
+                        list.add(Integer.parseInt(val.trim()));
+                    }
+                    value = list;
+                } else {
+                    value = Integer.parseInt(valstr);
                 }
                 break;
             case Long:
