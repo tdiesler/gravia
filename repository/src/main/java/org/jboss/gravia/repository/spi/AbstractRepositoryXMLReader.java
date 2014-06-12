@@ -108,6 +108,8 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
                     continue;
             }
         }
+        assertEndElement(reader, Element.RESOURCE.getLocalName());
+
         return builder.getResource();
     }
 
@@ -125,6 +127,7 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
         Map<String, Object> atts = new HashMap<String, Object>();
         Map<String, String> dirs = new HashMap<String, String>();
         readAttributesAndDirectives(reader, atts, dirs);
+        assertEndElement(reader, Element.CAPABILITY.getLocalName());
         return builder.addCapability(namespace, atts, dirs);
     }
 
@@ -133,6 +136,7 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
         Map<String, Object> atts = new HashMap<String, Object>();
         Map<String, String> dirs = new HashMap<String, String>();
         readAttributesAndDirectives(reader, atts, dirs);
+        assertEndElement(reader, Element.REQUIREMENT.getLocalName());
         return builder.addRequirement(namespace, atts, dirs);
     }
 
@@ -158,17 +162,20 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
         String typespec = reader.getAttributeValue(null, Attribute.TYPE.toString());
         AttributeValue value = AttributeValueHandler.readAttributeValue(name, typespec, valstr);
         attributes.put(name, value.getValue());
-        assertEndElement(reader);
+        assertEndElement(reader, Element.ATTRIBUTE.getLocalName());
     }
 
     private static void readDirectiveElement(XMLStreamReader reader, Map<String, String> directives) throws XMLStreamException {
         String name = reader.getAttributeValue(null, Attribute.NAME.toString());
         String value = reader.getAttributeValue(null, Attribute.VALUE.toString());
         directives.put(name, value);
-        assertEndElement(reader);
+        assertEndElement(reader, Element.DIRECTIVE.getLocalName());
     }
 
-    public static void assertEndElement(XMLStreamReader reader) throws XMLStreamException {
-        IllegalStateAssertion.assertEquals(END_ELEMENT, reader.nextTag(), "End element expected, but was: " + reader.getLocalName());
+    public static void assertEndElement(XMLStreamReader reader, String localName) throws XMLStreamException {
+        if (reader.getEventType() != END_ELEMENT || !localName.equals(reader.getLocalName())) {
+            IllegalStateAssertion.assertEquals(END_ELEMENT, reader.nextTag(), "End of <" + localName + "> expected, but was start of: " + reader.getLocalName());
+            IllegalStateAssertion.assertEquals(localName, reader.getLocalName(), "End of <" + localName + "> expected, but was end of: " + reader.getLocalName());
+        }
     }
 }
