@@ -19,8 +19,10 @@ package org.jboss.gravia.repository;
  * #L%
  */
 
+import java.io.IOException;
 import java.util.Map;
 
+import org.jboss.gravia.resource.ContentCapability;
 import org.jboss.gravia.resource.Resource;
 
 /**
@@ -30,6 +32,12 @@ import org.jboss.gravia.resource.Resource;
  * @since 21-May-2012
  */
 public interface RepositoryWriter {
+
+    public interface ContentHandler {
+
+        Map<String, Object> process(ContentCapability capability) throws IOException;
+
+    }
 
     void writeRepositoryElement(Map<String, String> attributes);
 

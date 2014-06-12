@@ -34,10 +34,14 @@ import org.jboss.gravia.repository.Namespace100;
 import org.jboss.gravia.repository.Namespace100.Attribute;
 import org.jboss.gravia.repository.Namespace100.Element;
 import org.jboss.gravia.repository.RepositoryReader;
+import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.spi.AttributeValueHandler;
 import org.jboss.gravia.resource.spi.AttributeValueHandler.AttributeValue;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
+import org.jboss.gravia.utils.IllegalStateAssertion;
 
 /**
  * Read repository contnet from XML.
@@ -51,8 +55,7 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
     private final XMLStreamReader reader;
 
     public AbstractRepositoryXMLReader(InputStream inputStream) {
-        if (inputStream == null)
-            throw new IllegalArgumentException("Null inputStream");
+        IllegalArgumentAssertion.assertNotNull(inputStream, "inputStream");
         reader = createXMLStreamReader(inputStream);
         try {
             reader.require(START_DOCUMENT, null, null);
@@ -78,19 +81,34 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
     @Override
     public Resource nextResource() {
         try {
-            while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
-                Element element = Element.forName(reader.getLocalName());
-                switch (element) {
-                    case RESOURCE:
-                        return readResourceElement(reader);
-                    default:
-                        continue;
-                }
-            }
+            return nextResource(reader, createResourceBuilder());
         } catch (XMLStreamException ex) {
             throw new IllegalStateException("Cannot read resource element: " + reader.getLocation(), ex);
         }
-        return null;
+    }
+
+    public static Resource nextResource(XMLStreamReader reader, ResourceBuilder builder) throws XMLStreamException {
+
+        if (!reader.hasNext() || reader.nextTag() == END_ELEMENT)
+            return null;
+
+        Element element = Element.forName(reader.getLocalName());
+        IllegalStateAssertion.assertEquals(Element.RESOURCE, element, "Expected resource element, but got: " + element);
+
+        while (reader.hasNext() && reader.nextTag() == START_ELEMENT) {
+            element = Element.forName(reader.getLocalName());
+            switch (element) {
+                case CAPABILITY:
+                    readCapability(reader, builder);
+                    break;
+                case REQUIREMENT:
+                    readRequirement(reader, builder);
+                    break;
+                default:
+                    continue;
+            }
+        }
+        return builder.getResource();
     }
 
     @Override
@@ -102,42 +120,24 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
         }
     }
 
-    private Resource readResourceElement(XMLStreamReader reader) throws XMLStreamException {
-        ResourceBuilder builder = createResourceBuilder();
-        while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
-            Element element = Element.forName(reader.getLocalName());
-            switch (element) {
-                case CAPABILITY:
-                    readCapabilityElement(reader, builder);
-                    break;
-                case REQUIREMENT:
-                    readRequirementElement(reader, builder);
-                    break;
-                default:
-                    continue;
-            }
-        }
-        return builder.getResource();
-    }
-
-    private void readCapabilityElement(XMLStreamReader reader, ResourceBuilder builder) throws XMLStreamException {
+    private static Capability readCapability(XMLStreamReader reader, ResourceBuilder builder) throws XMLStreamException {
         String namespace = reader.getAttributeValue(null, Attribute.NAMESPACE.toString());
         Map<String, Object> atts = new HashMap<String, Object>();
         Map<String, String> dirs = new HashMap<String, String>();
         readAttributesAndDirectives(reader, atts, dirs);
-        builder.addCapability(namespace, atts, dirs);
+        return builder.addCapability(namespace, atts, dirs);
     }
 
-    private void readRequirementElement(XMLStreamReader reader, ResourceBuilder builder) throws XMLStreamException {
+    private static Requirement readRequirement(XMLStreamReader reader, ResourceBuilder builder) throws XMLStreamException {
         String namespace = reader.getAttributeValue(null, Attribute.NAMESPACE.toString());
         Map<String, Object> atts = new HashMap<String, Object>();
         Map<String, String> dirs = new HashMap<String, String>();
         readAttributesAndDirectives(reader, atts, dirs);
-        builder.addRequirement(namespace, atts, dirs);
+        return builder.addRequirement(namespace, atts, dirs);
     }
 
-    private void readAttributesAndDirectives(XMLStreamReader reader, Map<String, Object> atts, Map<String, String> dirs) throws XMLStreamException {
-        while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
+    public static void readAttributesAndDirectives(XMLStreamReader reader, Map<String, Object> atts, Map<String, String> dirs) throws XMLStreamException {
+        while (reader.hasNext() && reader.nextTag() == START_ELEMENT) {
             Element element = Element.forName(reader.getLocalName());
             switch (element) {
                 case ATTRIBUTE:
@@ -147,26 +147,28 @@ public abstract class AbstractRepositoryXMLReader implements RepositoryReader {
                     readDirectiveElement(reader, dirs);
                     break;
                 default:
-                    continue;
+                    throw new IllegalArgumentException("Unsupported element: " + reader.getLocalName());
             }
         }
     }
 
-    private void readAttributeElement(XMLStreamReader reader, Map<String, Object> attributes) throws XMLStreamException {
+    private static void readAttributeElement(XMLStreamReader reader, Map<String, Object> attributes) throws XMLStreamException {
         String name = reader.getAttributeValue(null, Attribute.NAME.toString());
         String valstr = reader.getAttributeValue(null, Attribute.VALUE.toString());
         String typespec = reader.getAttributeValue(null, Attribute.TYPE.toString());
         AttributeValue value = AttributeValueHandler.readAttributeValue(name, typespec, valstr);
         attributes.put(name, value.getValue());
-        while (reader.hasNext() && reader.nextTag() != END_ELEMENT)
-            ;
+        assertEndElement(reader);
     }
 
-    private void readDirectiveElement(XMLStreamReader reader, Map<String, String> directives) throws XMLStreamException {
+    private static void readDirectiveElement(XMLStreamReader reader, Map<String, String> directives) throws XMLStreamException {
         String name = reader.getAttributeValue(null, Attribute.NAME.toString());
         String value = reader.getAttributeValue(null, Attribute.VALUE.toString());
         directives.put(name, value);
-        while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
-        }
+        assertEndElement(reader);
+    }
+
+    public static void assertEndElement(XMLStreamReader reader) throws XMLStreamException {
+        IllegalStateAssertion.assertEquals(END_ELEMENT, reader.nextTag(), "End element expected, but was: " + reader.getLocalName());
     }
 }

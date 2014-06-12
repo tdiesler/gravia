@@ -19,6 +19,7 @@
  */
 package org.jboss.gravia.repository.spi;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,10 +33,13 @@ import org.jboss.gravia.repository.RepositoryWriter;
 import org.jboss.gravia.repository.Namespace100.Attribute;
 import org.jboss.gravia.repository.Namespace100.Element;
 import org.jboss.gravia.resource.Capability;
+import org.jboss.gravia.resource.ContentCapability;
+import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.spi.AttributeValueHandler;
 import org.jboss.gravia.resource.spi.AttributeValueHandler.AttributeValue;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
 
 /**
@@ -49,8 +53,7 @@ public abstract class AbstractRepositoryXMLWriter implements RepositoryWriter {
     private final XMLStreamWriter writer;
 
     public AbstractRepositoryXMLWriter(OutputStream outputStream) {
-        if (outputStream == null)
-            throw new IllegalArgumentException("Null outputStream");
+        IllegalArgumentAssertion.assertNotNull(outputStream, "outputStream");
         writer = createXMLStreamWriter(outputStream);
     }
 
@@ -74,25 +77,53 @@ public abstract class AbstractRepositoryXMLWriter implements RepositoryWriter {
     @Override
     public void writeResource(Resource resource) {
         try {
+            writeResource(writer, resource, null);
+        } catch (IOException ex) {
+            throw new RepositoryStorageException("Cannot write resource", ex);
+        }
+    }
+
+    public static void writeResource(XMLStreamWriter writer, Resource resource, ContentHandler contentHandler) throws IOException {
+        try {
             writer.writeStartElement(Element.RESOURCE.getLocalName());
             for (Capability cap : resource.getCapabilities(null)) {
-                writer.writeStartElement(Element.CAPABILITY.getLocalName());
-                writer.writeAttribute(Attribute.NAMESPACE.getLocalName(), cap.getNamespace());
-                writeAttributes(cap.getAttributes());
-                writeDirectives(cap.getDirectives());
-                writer.writeEndElement();
+                if (ContentNamespace.CONTENT_NAMESPACE.equals(cap.getNamespace())) {
+                    writeContentCapability(writer, cap.adapt(ContentCapability.class), contentHandler);
+                } else {
+                    writeCapability(writer, cap);
+                }
             }
             for (Requirement req : resource.getRequirements(null)) {
-                writer.writeStartElement(Element.REQUIREMENT.getLocalName());
-                writer.writeAttribute(Attribute.NAMESPACE.getLocalName(), req.getNamespace());
-                writeAttributes(req.getAttributes());
-                writeDirectives(req.getDirectives());
-                writer.writeEndElement();
+                writeRequirement(writer, req);
             }
             writer.writeEndElement();
         } catch (XMLStreamException ex) {
             throw new IllegalStateException("Cannot initialize repository writer", ex);
         }
+    }
+
+    public static void writeCapability(XMLStreamWriter writer, Capability cap) throws IOException, XMLStreamException {
+        writer.writeStartElement(Element.CAPABILITY.getLocalName());
+        writer.writeAttribute(Attribute.NAMESPACE.getLocalName(), cap.getNamespace());
+        writeAttributes(writer, cap.getAttributes());
+        writeDirectives(writer, cap.getDirectives());
+        writer.writeEndElement();
+    }
+
+    public static void writeContentCapability(XMLStreamWriter writer, ContentCapability ccap, ContentHandler contentHandler) throws IOException, XMLStreamException {
+        writer.writeStartElement(Element.CAPABILITY.getLocalName());
+        writer.writeAttribute(Attribute.NAMESPACE.getLocalName(), ccap.getNamespace());
+        writeAttributes(writer, contentHandler != null ? contentHandler.process(ccap) : ccap.getAttributes());
+        writeDirectives(writer, ccap.getDirectives());
+        writer.writeEndElement();
+    }
+
+    public static void writeRequirement(XMLStreamWriter writer, Requirement req) throws XMLStreamException {
+        writer.writeStartElement(Element.REQUIREMENT.getLocalName());
+        writer.writeAttribute(Attribute.NAMESPACE.getLocalName(), req.getNamespace());
+        writeAttributes(writer, req.getAttributes());
+        writeDirectives(writer, req.getDirectives());
+        writer.writeEndElement();
     }
 
     @Override
@@ -106,7 +137,7 @@ public abstract class AbstractRepositoryXMLWriter implements RepositoryWriter {
         }
     }
 
-    private void writeAttributes(Map<String, Object> attributes) throws XMLStreamException {
+    private static void writeAttributes(XMLStreamWriter writer, Map<String, Object> attributes) throws XMLStreamException {
         for (Entry<String, Object> entry : attributes.entrySet()) {
             AttributeValue attval = AttributeValue.create(entry.getValue());
             writer.writeStartElement(Element.ATTRIBUTE.getLocalName());
@@ -124,7 +155,7 @@ public abstract class AbstractRepositoryXMLWriter implements RepositoryWriter {
         }
     }
 
-    private void writeDirectives(Map<String, String> directives) throws XMLStreamException {
+    private static void writeDirectives(XMLStreamWriter writer, Map<String, String> directives) throws XMLStreamException {
         for (Entry<String, String> entry : directives.entrySet()) {
             writer.writeStartElement(Element.DIRECTIVE.getLocalName());
             writer.writeAttribute(Attribute.NAME.getLocalName(), entry.getKey());
