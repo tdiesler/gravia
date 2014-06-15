@@ -83,8 +83,8 @@ public class RuntimeService extends AbstractService<Runtime> {
 
         // Gravia integration properties
         properties.setProperty(Constants.RUNTIME_STORAGE_CLEAN, Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT);
-        properties.setProperty(Constants.RUNTIME_STORAGE, storageDir.getAbsolutePath());
-        properties.setProperty(Constants.PROPERTY_CONFIGURATIONS_DIR, configsDir.getAbsolutePath());
+        properties.setProperty(Constants.RUNTIME_STORAGE_DIR, storageDir.getAbsolutePath());
+        properties.setProperty(Constants.RUNTIME_CONFIGURATIONS_DIR, configsDir.getAbsolutePath());
         properties.setProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, repositoryDir.getAbsolutePath());
         properties.setProperty(Constants.RUNTIME_TYPE, RuntimeType.WILDFLY.toString());
 

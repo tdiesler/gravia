@@ -84,11 +84,11 @@ public class TomcatPropertiesProvider implements PropertiesProvider {
         }
         properties.setProperty(Constants.RUNTIME_STORAGE_CLEAN, storageClean);
 
-        String storageDir = servletContext.getInitParameter(Constants.RUNTIME_STORAGE);
+        String storageDir = servletContext.getInitParameter(Constants.RUNTIME_STORAGE_DIR);
         if (storageDir == null) {
             storageDir = new File(catalinaWork, Constants.RUNTIME_STORAGE_DEFAULT).getAbsolutePath();
         }
-        properties.setProperty(Constants.RUNTIME_STORAGE, storageDir);
+        properties.setProperty(Constants.RUNTIME_STORAGE_DIR, storageDir);
 
         String repositoryDir = servletContext.getInitParameter(Constants.PROPERTY_REPOSITORY_STORAGE_DIR);
         if (repositoryDir == null) {
@@ -96,11 +96,11 @@ public class TomcatPropertiesProvider implements PropertiesProvider {
         }
         properties.setProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, repositoryDir);
 
-        String configsDir = servletContext.getInitParameter(Constants.PROPERTY_CONFIGURATIONS_DIR);
+        String configsDir = servletContext.getInitParameter(Constants.RUNTIME_CONFIGURATIONS_DIR);
         if (configsDir == null) {
             configsDir = new File(catalinaConf, "gravia" + File.separator + "configs").getAbsolutePath();
         }
-        properties.setProperty(Constants.PROPERTY_CONFIGURATIONS_DIR, configsDir);
+        properties.setProperty(Constants.RUNTIME_CONFIGURATIONS_DIR, configsDir);
 
         return properties;
     }

@@ -149,7 +149,7 @@ public class EmbeddedRuntime extends AbstractRuntime {
     }
 
     protected void loadInitialConfigurations(ModuleContext syscontext) {
-        String configs = (String) getProperty(Constants.PROPERTY_CONFIGURATIONS_DIR);
+        String configs = (String) getProperty(Constants.RUNTIME_CONFIGURATIONS_DIR);
         if (configs != null) {
             File configsDir = new File(configs);
             initConfigurationAdmin(syscontext, configsDir);

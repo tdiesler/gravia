@@ -78,14 +78,6 @@ public interface Constants  {
     String GRAVIA_PROPERTIES = "gravia.properties";
 
     /**
-     * Runtime property specifying a comma seperated list of URLs each
-     * pointing to a resource that containes ConfigurationAdmin properties.
-     * <p>
-     * The resource name is expected to end in *.cfg and also names the PID
-     */
-    String RUNTIME_CONFIGURATIONS = "org.jboss.gravia.runtime.configurations";
-
-    /**
      * Runtime property specifying the persistent storage area used
      * by the runtime. The value of this property must be a valid file path in
      * the file system to a directory. If the specified directory does not exist
@@ -98,7 +90,7 @@ public interface Constants  {
      * If this property is not set, the runtime should use a reasonable
      * platform default for the persistent storage area.
      */
-    String RUNTIME_STORAGE = "org.jboss.gravia.runtime.storage";
+    String RUNTIME_STORAGE_DIR = "org.jboss.gravia.runtime.storage.dir";
 
     /**
      * Runtime property specifying if and when the persistent
@@ -106,6 +98,11 @@ public interface Constants  {
      * set, then the runtime storage area must not be cleaned.
      */
     String RUNTIME_STORAGE_CLEAN = "org.jboss.gravia.runtime.storage.clean";
+
+    /**
+     * The property that defines the configurations directory.
+     */
+    String RUNTIME_CONFIGURATIONS_DIR = "org.jboss.gravia.runtime.configurations.dir";
 
     /**
      * Specifies that the runtime storage area must be cleaned before the
@@ -209,9 +206,4 @@ public interface Constants  {
      * The property that defines the repository storage file.
      */
     String PROPERTY_REPOSITORY_STORAGE_FILE = "org.jboss.gravia.repository.storage.file";
-
-    /**
-     * The property that defines the configurations directory.
-     */
-    String PROPERTY_CONFIGURATIONS_DIR = "org.jboss.gravia.configurations.dir";
 }

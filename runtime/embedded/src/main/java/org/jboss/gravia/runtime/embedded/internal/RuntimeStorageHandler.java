@@ -43,7 +43,7 @@ final class RuntimeStorageHandler {
     RuntimeStorageHandler(PropertiesProvider props, boolean firstInit) {
 
         // Create the storage area
-        String dirName = (String) props.getProperty(org.jboss.gravia.Constants.RUNTIME_STORAGE);
+        String dirName = (String) props.getProperty(org.jboss.gravia.Constants.RUNTIME_STORAGE_DIR);
         if (dirName == null) {
             try {
                 File storageDir = new File("." + File.separator + org.jboss.gravia.Constants.RUNTIME_STORAGE_DEFAULT);
