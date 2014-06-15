@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.ServiceLocator;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
 import org.jboss.test.gravia.runtime.embedded.sub.d.ServiceD;
@@ -63,7 +64,7 @@ public class ConfigurationAdminTestCase extends AbstractEmbeddedRuntimeTest {
         ServiceD srvD = contextD.getService(srefD);
         Assert.assertEquals("ServiceD#1:ServiceD1#1:null:Hello", srvD.doStuff("Hello"));
 
-        ConfigurationAdmin configAdmin = getConfigurationAdmin(modD1);
+        ConfigurationAdmin configAdmin = ServiceLocator.getRequiredService(modD1.getModuleContext(), ConfigurationAdmin.class);
         Configuration config = configAdmin.getConfiguration(ServiceD1.class.getName());
         Assert.assertNotNull("Config not null", config);
         Assert.assertNull("Config is empty, but was: " + config.getProperties(), config.getProperties());

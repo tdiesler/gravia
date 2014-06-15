@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,6 @@ package org.jboss.test.gravia.runtime.embedded.support;
 
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.embedded.internal.EmbeddedRuntime;
@@ -32,7 +31,6 @@ import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeFactory;
 import org.junit.After;
 import org.junit.Before;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Abstract embedded runtome test.
@@ -69,10 +67,5 @@ public abstract class AbstractEmbeddedRuntimeTest {
 
     public Runtime getRuntime() {
         return runtime;
-    }
-
-    public ConfigurationAdmin getConfigurationAdmin(Module module) {
-        ModuleContext context = module.getModuleContext();
-        return context.getService(context.getServiceReference(ConfigurationAdmin.class));
     }
 }

@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.ServiceLocator;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceTracker;
 import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
@@ -71,7 +72,7 @@ public class ConfigurationModifiedTestCase extends AbstractEmbeddedRuntimeTest {
         ServiceC srvC = contextC.getService(srefC);
         Assert.assertEquals("ServiceC#1:null", srvC.doStuff());
 
-        ConfigurationAdmin configAdmin = getConfigurationAdmin(modC);
+        ConfigurationAdmin configAdmin = ServiceLocator.getRequiredService(contextC, ConfigurationAdmin.class);
         Configuration config = configAdmin.getConfiguration(ServiceC.PID, null);
         Dictionary<String, Object> props = config.getProperties();
         Assert.assertNull("Config is empty, but was: " + props, props);
