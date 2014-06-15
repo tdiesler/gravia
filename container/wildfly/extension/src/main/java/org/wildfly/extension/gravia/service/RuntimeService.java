@@ -26,7 +26,6 @@ import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.server.ServerEnvironment;
 import org.jboss.as.server.ServerEnvironmentService;
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.container.common.ActivationSupport;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.RuntimeType;
@@ -63,10 +62,6 @@ public class RuntimeService extends AbstractService<Runtime> {
         PropertiesProvider propsProvider = new DefaultPropertiesProvider(getRuntimeProperties(), true);
         Runtime runtime = RuntimeLocator.createRuntime(new WildFlyRuntimeFactory(), propsProvider);
         runtime.init();
-
-        // Initialize ConfigurationAdmin content
-        Object configsDir = propsProvider.getProperty(Constants.PROPERTY_CONFIGURATIONS_DIR);
-        ActivationSupport.initConfigurationAdmin(new File((String) configsDir));
     }
 
     @Override

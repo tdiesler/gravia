@@ -59,14 +59,14 @@ import org.junit.runner.RunWith;
  * @since 16-May-2014
  */
 @RunWith(Arquillian.class)
-public class URLStreamHandlerTestCase {
+public class URLStreamHandlerTest {
 
     @Deployment
     @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("url-handler-test");
         archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class);
-        archive.addClasses(URLStreamHandlerTestCase.class);
+        archive.addClasses(URLStreamHandlerTest.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {

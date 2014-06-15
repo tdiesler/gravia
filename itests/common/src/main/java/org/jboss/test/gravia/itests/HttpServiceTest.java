@@ -66,7 +66,7 @@ import org.osgi.service.http.HttpService;
  * @since 28-Nov-2013
  */
 @RunWith(Arquillian.class)
-public class HttpServiceTestCase {
+public class HttpServiceTest {
 
     static StringAsset STRING_ASSET = new StringAsset("Hello from Resource");
 

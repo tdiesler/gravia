@@ -19,7 +19,6 @@
  */
 package org.jboss.gravia.container.tomcat.webapp;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,8 +27,6 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-import org.jboss.gravia.Constants;
-import org.jboss.gravia.container.common.ActivationSupport;
 import org.jboss.gravia.container.tomcat.support.TomcatPropertiesProvider;
 import org.jboss.gravia.container.tomcat.support.TomcatResourceInstaller;
 import org.jboss.gravia.container.tomcat.support.TomcatRuntimeFactory;
@@ -62,10 +59,6 @@ public class GraviaTomcatActivator implements ServletContextListener {
         TomcatPropertiesProvider propsProvider = new TomcatPropertiesProvider(servletContext);
         Runtime runtime = RuntimeLocator.createRuntime(new TomcatRuntimeFactory(servletContext), propsProvider);
         runtime.init();
-
-        // Initialize ConfigurationAdmin content
-        Object configsDir = propsProvider.getProperty(Constants.PROPERTY_CONFIGURATIONS_DIR);
-        ActivationSupport.initConfigurationAdmin(new File((String) configsDir));
 
         // Register the {@link RuntimeEnvironment}, {@link ResourceInstaller} services
         registerServices(servletContext, runtime);

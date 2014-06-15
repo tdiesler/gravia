@@ -21,17 +21,23 @@ package org.jboss.gravia.runtime.embedded.internal;
 
 import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.ServiceLoader;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.Resource;
@@ -39,6 +45,7 @@ import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
+import org.jboss.gravia.runtime.ServiceLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.AbstractRuntime;
@@ -47,6 +54,9 @@ import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeEventsManager;
 import org.jboss.gravia.runtime.spi.RuntimePlugin;
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
 
 /**
@@ -85,13 +95,31 @@ public class EmbeddedRuntime extends AbstractRuntime {
 
         // Register the LogService
         ModuleContext syscontext = adapt(ModuleContext.class);
-        systemServices.add(syscontext.registerService(LogService.class.getName(), new EmbeddedLogServiceFactory(), null));
+        systemServices.add(registerLogService(syscontext));
 
         // Register the MBeanServer service
-        MBeanServer mbeanServer = findOrCreateMBeanServer();
-        systemServices.add(syscontext.registerService(MBeanServer.class, mbeanServer, null));
+        systemServices.add(registerMBeanServer(syscontext));
 
         // Install the plugin modules
+        List<Module> pluginModules = installPluginModules();
+
+        // Start the plugin modules
+        startPluginModules(pluginModules);
+
+        // Load initial configurations
+        loadInitialConfigurations(syscontext);
+    }
+
+    protected ServiceRegistration<?> registerLogService(ModuleContext syscontext) {
+        return syscontext.registerService(LogService.class.getName(), new EmbeddedLogServiceFactory(), null);
+    }
+
+    protected ServiceRegistration<MBeanServer> registerMBeanServer(ModuleContext syscontext) {
+        MBeanServer mbeanServer = findOrCreateMBeanServer();
+        return syscontext.registerService(MBeanServer.class, mbeanServer, null);
+    }
+
+    protected List<Module> installPluginModules() {
         List<Module> pluginModules = new ArrayList<Module>();
         ClassLoader classLoader = getClass().getClassLoader();
         ServiceLoader<RuntimePlugin> services = ServiceLoader.load(RuntimePlugin.class, EmbeddedRuntime.class.getClassLoader());
@@ -107,14 +135,24 @@ public class EmbeddedRuntime extends AbstractRuntime {
                 LOGGER.error("Cannot load plugin: " + plugin.getClass().getName(), ex);
             }
         }
+        return pluginModules;
+    }
 
-        // Start the plugin modules
+    protected void startPluginModules(List<Module> pluginModules) {
         for (Module module : pluginModules) {
             try {
                 module.start();
             } catch (ModuleException ex) {
                 LOGGER.error("Cannot start plugin: " + module, ex);
             }
+        }
+    }
+
+    protected void loadInitialConfigurations(ModuleContext syscontext) {
+        String configs = (String) getProperty(Constants.PROPERTY_CONFIGURATIONS_DIR);
+        if (configs != null) {
+            File configsDir = new File(configs);
+            initConfigurationAdmin(syscontext, configsDir);
         }
     }
 
@@ -176,6 +214,45 @@ public class EmbeddedRuntime extends AbstractRuntime {
             }
             LOGGER.debug("Using the platform MBeanServer");
             return ManagementFactory.getPlatformMBeanServer();
+        }
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void initConfigurationAdmin(ModuleContext syscontext, File configsDir) {
+        IllegalArgumentAssertion.assertTrue(configsDir.isDirectory(), "configsDir");
+
+        ConfigurationAdmin configAdmin = ServiceLocator.getRequiredService(ConfigurationAdmin.class);
+
+        LOGGER.info("Loading ConfigurationAdmin content from: " + configsDir);
+        FilenameFilter filter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".cfg");
+            }
+        };
+        for (String name : configsDir.list(filter)) {
+            boolean factoryConfiguration = false;
+            String pid = name.substring(0, name.length() - 4);
+            if (pid.contains("-")) {
+                pid = pid.substring(0, pid.indexOf("-"));
+                factoryConfiguration = true;
+                LOGGER.info("Loading factory configuration: " + pid);
+            } else {
+                LOGGER.info("Loading configuration: " + pid);
+            }
+
+            try {
+                FileInputStream fis = new FileInputStream(new File(configsDir, name));
+                Properties props = new Properties();
+                props.load(fis);
+                fis.close();
+                if (!props.isEmpty()) {
+                    Configuration config = factoryConfiguration ? configAdmin.createFactoryConfiguration(pid, null) : configAdmin.getConfiguration(pid, null);
+                    config.update((Hashtable) props);
+                }
+            } catch (IOException ex) {
+                throw new IllegalStateException(ex);
+            }
         }
     }
 }

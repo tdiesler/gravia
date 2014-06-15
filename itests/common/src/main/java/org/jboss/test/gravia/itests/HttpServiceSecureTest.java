@@ -75,7 +75,7 @@ import org.slf4j.Logger;
  * @since 03-Dec-2013
  */
 @RunWith(Arquillian.class)
-public class HttpServiceSecureTestCase {
+public class HttpServiceSecureTest {
 
     static StringAsset STRING_ASSET = new StringAsset("Hello from Resource");
 
