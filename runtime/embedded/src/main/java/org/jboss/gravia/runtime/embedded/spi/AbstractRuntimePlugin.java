@@ -24,6 +24,7 @@ import java.util.Dictionary;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.jboss.gravia.Constants;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -33,7 +34,6 @@ import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.spi.RuntimeLogger;
 import org.jboss.gravia.runtime.spi.RuntimePlugin;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.Constants;
 
 /**
  * An abstract {@link RuntimePlugin}
@@ -66,11 +66,9 @@ public abstract class AbstractRuntimePlugin implements RuntimePlugin, ModuleActi
         } catch (Exception ex) {
             throw new ModuleException("Cannot load plugin manifest: " + urlpath, ex);
         }
+
         Dictionary<String, String> headers = new ManifestHeadersProvider(manifest).getHeaders();
-        String symbolicName = headers.get(Constants.BUNDLE_SYMBOLICNAME);
-        String version = headers.get(Constants.BUNDLE_VERSION);
-        headers.put(org.jboss.gravia.Constants.GRAVIA_IDENTITY_CAPABILITY, symbolicName + ";version=" + version);
-        headers.put(org.jboss.gravia.Constants.MODULE_ACTIVATOR, getClass().getName());
+        headers.put(Constants.MODULE_ACTIVATOR, getClass().getName());
         return runtime.installModule(classLoader, headers);
     }
 

@@ -82,6 +82,7 @@ public class HttpServiceSecureTest {
     @Deployment
     @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
+        final RuntimeType targetContainer = ArchiveBuilder.getTargetContainer();
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, "http-service-secure.war");
         archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
         archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
@@ -92,7 +93,7 @@ public class HttpServiceSecureTest {
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
-                if (ArchiveBuilder.getTargetContainer() == RuntimeType.KARAF) {
+                if (targetContainer == RuntimeType.KARAF) {
                     OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                     builder.addBundleManifestVersion(2);
                     builder.addBundleSymbolicName(archive.getName());
@@ -113,8 +114,11 @@ public class HttpServiceSecureTest {
                 }
             }
         });
-        File[] libs = Maven.resolver().loadPomFromFile("pom.xml").resolve("org.apache.felix:org.apache.felix.http.proxy").withoutTransitivity().asFile();
-        archive.addAsLibraries(libs);
+        if (targetContainer == RuntimeType.TOMCAT || targetContainer == RuntimeType.WILDFLY) {
+            String artefact = "org.apache.felix:org.apache.felix.http.proxy";
+            File[] libs = Maven.resolver().loadPomFromFile("pom.xml").resolve(artefact).withoutTransitivity().asFile();
+            archive.addAsLibraries(libs);
+        }
         return archive;
     }
 
