@@ -24,7 +24,7 @@
 <web-app>
 
     <listener>
-        <listener-class>org.jboss.gravia.container.tomcat.webapp.GraviaRuntimeActivator</listener-class>
+        <listener-class>org.jboss.gravia.container.wildfly.webapp.GraviaRuntimeActivator</listener-class>
     </listener>
     <listener>
         <listener-class>org.apache.felix.http.proxy.ProxyListener</listener-class>
@@ -40,7 +40,7 @@
     </servlet>
     <servlet>
         <servlet-name>gravia</servlet-name>
-        <servlet-class>org.jboss.gravia.container.tomcat.webapp.GraviaServlet</servlet-class>
+        <servlet-class>org.jboss.gravia.container.wildfly.webapp.GraviaServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 

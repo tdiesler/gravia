@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.container.tomcat.webapp;
+package org.jboss.gravia.container.common;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -38,12 +38,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 
 /**
- * Register Gravia system services.
+ * Register the system HttpService.
  *
  * @author thomas.diesler@jboss.com
- * @since 27-Nov-2013
+ * @since 16-Jun-2014
  */
-public class GraviaHttpServiceActivator implements ServletContextListener {
+public class HttpServiceActivator implements ServletContextListener {
 
     private ServiceTracker<HttpService, HttpService> tracker;
     private static final String SYSTEM_ALIAS = "/system";

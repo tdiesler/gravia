@@ -82,6 +82,9 @@
        	</fileset>
     </copy>
 	
+    <copy file="${deploy.artifacts.lib}/gravia-container-wildfly-webapp-${project.version}.war" 
+    	tofile="${wildfly.patch.dir}/standalone/deployments/gravia.war" overwrite="true"/>
+  	
   	<!-- Build the wildfly patch -->
   	<tar destfile="${output.dir}/${project.artifactId}-${project.version}.tar.gz" basedir="${wildfly.patch.dir}" compression="gzip"/>
   	
