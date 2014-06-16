@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.jboss.gravia</groupId>
         <artifactId>gravia-container-tomcat</artifactId>
-        <version>1.1.0.Beta30-SNAPSHOT</version>
+        <version>1.1.0.Beta30</version>
     </parent>
 
     <artifactId>gravia-container-tomcat-webapp</artifactId>
