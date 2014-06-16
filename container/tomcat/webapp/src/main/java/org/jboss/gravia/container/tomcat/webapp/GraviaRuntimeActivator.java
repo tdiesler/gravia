@@ -25,7 +25,6 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 
 import org.jboss.gravia.container.tomcat.support.TomcatPropertiesProvider;
 import org.jboss.gravia.container.tomcat.support.TomcatResourceInstaller;
@@ -39,6 +38,8 @@ import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.WebAppContextListener;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 /**
  * Activates the {@link Runtime} as part of the web app lifecycle.
@@ -46,8 +47,7 @@ import org.jboss.gravia.runtime.WebAppContextListener;
  * @author thomas.diesler@jboss.com
  * @since 27-Nov-2013
  */
-@WebListener
-public class GraviaTomcatActivator implements ServletContextListener {
+public class GraviaRuntimeActivator implements ServletContextListener {
 
     private Set<ServiceRegistration<?>> registrations = new HashSet<ServiceRegistration<?>>();
 
@@ -72,6 +72,11 @@ public class GraviaTomcatActivator implements ServletContextListener {
         } catch (ModuleException ex) {
             throw new IllegalStateException(ex);
         }
+
+        // HttpService integration
+        Module sysmodule = runtime.getModuleContext().getModule();
+        BundleContext bundleContext = sysmodule.adapt(Bundle.class).getBundleContext();
+        servletContext.setAttribute(BundleContext.class.getName(), bundleContext);
     }
 
     private void registerServices(ServletContext servletContext, Runtime runtime) {

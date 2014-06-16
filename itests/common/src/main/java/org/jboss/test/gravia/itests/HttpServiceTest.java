@@ -19,7 +19,6 @@
  */
 package org.jboss.test.gravia.itests;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -40,21 +39,17 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.RuntimeType;
+import org.jboss.gravia.runtime.ServiceLocator;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.WebAppContextListener;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
-import org.jboss.shrinkwrap.api.asset.StringAsset;
-import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.test.gravia.itests.support.AnnotatedContextListener;
-import org.jboss.test.gravia.itests.support.AnnotatedProxyListener;
-import org.jboss.test.gravia.itests.support.AnnotatedProxyServlet;
 import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.jboss.test.gravia.itests.support.HttpRequest;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.service.http.HttpService;
@@ -68,17 +63,13 @@ import org.osgi.service.http.HttpService;
 @RunWith(Arquillian.class)
 public class HttpServiceTest {
 
-    static StringAsset STRING_ASSET = new StringAsset("Hello from Resource");
-
     @Deployment
     @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
         final RuntimeType targetContainer = ArchiveBuilder.getTargetContainer();
-        final WebArchive archive = ShrinkWrap.create(WebArchive.class, "http-service.war");
-        archive.addClasses(AnnotatedProxyServlet.class, AnnotatedProxyListener.class);
+        final ArchiveBuilder archive = new ArchiveBuilder("http-service");
         archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(HttpRequest.class);
-        archive.addAsResource(STRING_ASSET, "res/message.txt");
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
@@ -97,59 +88,80 @@ public class HttpServiceTest {
                 }
             }
         });
-        if (targetContainer == RuntimeType.TOMCAT || targetContainer == RuntimeType.WILDFLY) {
-            String artefact = "org.apache.felix:org.apache.felix.http.proxy";
-            File[] libs = Maven.resolver().loadPomFromFile("pom.xml").resolve(artefact).withoutTransitivity().asFile();
-            archive.addAsLibraries(libs);
-        }
-        return archive;
+        return archive.getArchive();
     }
 
     @Test
-    public void testServletAccess() throws Exception {
+    public void testHttpServiceClassLoading() throws Exception {
+
+        Assume.assumeTrue(RuntimeType.getRuntimeType() == RuntimeType.WILDFLY);
+
+        // Get the org.jboss.gravia class loader
+        ClassLoader classLoader = RuntimeType.class.getClassLoader();
+        Assert.assertTrue("Unexpected: " + classLoader, classLoader.toString().contains("org.jboss.gravia"));
+
+        // Load the HttpService through module org.jboss.gravia
+        Class<?> serviceClass = classLoader.loadClass(HttpService.class.getName());
+        String loaderName = serviceClass.getClassLoader().toString();
+
+        // Assert that the loaded class comes from org.osgi.enterprise
+        Assert.assertTrue("Unexpected: " + loaderName, loaderName.contains("org.osgi.enterprise"));
+    }
+
+    @Test
+    public void testSystemService() throws Exception {
+        Assume.assumeTrue(RuntimeType.getRuntimeType() != RuntimeType.KARAF);
+        Assert.assertEquals("gravia-system", performCall("/gravia/system"));
+    }
+
+    @Test
+    public void testServletThroughSystemContext() throws Exception {
+
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Module module = runtime.getModule(getClass().getClassLoader());
+
+        HttpService httpService = ServiceLocator.getRequiredService(HttpService.class);
+        String reqspec = "/gravia/servlet?test=module";
+
+        // Verify that the alias is not yet available
+        assertNotAvailable(reqspec);
+
+        // Register the test servlet and make a call
+        String servletAlias = getRuntimeAwareAlias("/servlet");
+        httpService.registerServlet(servletAlias, new HttpServiceServlet(module), null, null);
+        Assert.assertEquals("http-service:1.0.0", performCall(reqspec));
+
+        // Unregister the servlet alias
+        httpService.unregister(servletAlias);
+        assertNotAvailable(reqspec);
+
+        // Verify that the alias is not available any more
+        assertNotAvailable(reqspec);
+    }
+
+    @Test
+    public void testServletThroughModuleContext() throws Exception {
+
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Module module = runtime.getModule(getClass().getClassLoader());
+
         ModuleContext context = module.getModuleContext();
         ServiceReference<HttpService> sref = context.getServiceReference(HttpService.class);
         HttpService httpService = context.getService(sref);
-        String reqspec = "/service?test=param&param=Kermit";
+
+        String reqspec = "/gravia/servlet?test=module";
         try {
             // Verify that the alias is not yet available
             assertNotAvailable(reqspec);
 
             // Register the test servlet and make a call
-            httpService.registerServlet("/service", new HttpServiceServlet(module), null, null);
-            Assert.assertEquals("Hello: Kermit", performCall(reqspec));
+            String servletAlias = getRuntimeAwareAlias("/servlet");
+            httpService.registerServlet(servletAlias, new HttpServiceServlet(module), null, null);
+            Assert.assertEquals("http-service:1.0.0", performCall(reqspec));
 
             // Unregister the servlet alias
-            httpService.unregister("/service");
+            httpService.unregister(servletAlias);
             assertNotAvailable(reqspec);
-
-            // Verify that the alias is not available any more
-            assertNotAvailable(reqspec);
-        } finally {
-            context.ungetService(sref);
-        }
-    }
-
-    @Test
-    public void testResourceAccess() throws Exception {
-        Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        Module module = runtime.getModule(getClass().getClassLoader());
-        ModuleContext context = module.getModuleContext();
-        ServiceReference<HttpService> sref = context.getServiceReference(HttpService.class);
-        HttpService httpService = context.getService(sref);
-        String reqspec = "/resource/message.txt";
-        try {
-            // Verify that the alias is not yet available
-            assertNotAvailable(reqspec);
-
-            // Register the test resource and make a call
-            httpService.registerResources("/resource", "/res", null);
-            Assert.assertEquals("Hello from Resource", performCall(reqspec));
-
-            // Unregister the servlet alias
-            httpService.unregister("/resource");
 
             // Verify that the alias is not available any more
             assertNotAvailable(reqspec);
@@ -167,14 +179,18 @@ public class HttpServiceTest {
         }
     }
 
+    private String getRuntimeAwareAlias(String alias) {
+        String context = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "/gravia" : "";
+        return context + alias;
+    }
+
     private String performCall(String path) throws Exception {
         return performCall(path, null, 2, TimeUnit.SECONDS);
     }
 
     private String performCall(String path, Map<String, String> headers, long timeout, TimeUnit unit) throws Exception {
         Object port = RuntimeLocator.getRequiredRuntime().getProperty("org.osgi.service.http.port", "8080");
-        String context = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "" : "/http-service";
-        return HttpRequest.get("http://localhost:" + port + context + path, headers, timeout, unit);
+        return HttpRequest.get("http://localhost:" + port + path, headers, timeout, unit);
     }
 
     @SuppressWarnings("serial")
@@ -197,7 +213,7 @@ public class HttpServiceTest {
                 String key = req.getParameter("init");
                 String value = getInitParameter(key);
                 out.print(key + "=" + value);
-            } else if ("instance".equals(type)) {
+            } else if ("module".equals(type)) {
                 out.print(module.getIdentity());
             } else {
                 throw new IllegalArgumentException("Invalid 'test' parameter: " + type);

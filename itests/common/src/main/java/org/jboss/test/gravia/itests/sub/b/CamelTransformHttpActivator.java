@@ -32,6 +32,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
+import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceTracker;
 import org.osgi.service.http.HttpService;
@@ -75,16 +76,21 @@ public class CamelTransformHttpActivator implements ModuleActivator {
             tracker.close();
         }
         if (httpService != null) {
-            httpService.unregister("/service");
+            httpService.unregister(getRuntimeAwareAlias("/service"));
         }
     }
 
     private void registerHttpServiceServlet(HttpService httpService) {
         try {
-            httpService.registerServlet("/service", new HttpServiceServlet(camelctx), null, null);
+            httpService.registerServlet(getRuntimeAwareAlias("/service"), new HttpServiceServlet(camelctx), null, null);
         } catch (Exception ex) {
             throw new IllegalStateException("Cannot register HttpServiceServlet", ex);
         }
+    }
+
+    private String getRuntimeAwareAlias(String alias) {
+        String context = RuntimeType.getRuntimeType() == RuntimeType.KARAF ? "/gravia" : "";
+        return context + alias;
     }
 
     @SuppressWarnings("serial")

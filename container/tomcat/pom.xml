@@ -37,6 +37,7 @@
     <name>Gravia :: Container :: Tomcat</name>
     
     <modules>
+        <module>distro</module>
         <module>extension</module>
         <module>patch</module>
         <module>support</module>
