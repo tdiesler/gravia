@@ -89,7 +89,7 @@
         <version.jboss.osgi.metadata>4.0.0.CR1</version.jboss.osgi.metadata>
         <version.jboss.shrinkwrap>1.1.2</version.jboss.shrinkwrap>
         <version.jboss.shrinkwrap.resolver>2.0.0</version.jboss.shrinkwrap.resolver>
-        <version.jboss.wildfly>8.1.0.CR1</version.jboss.wildfly>
+        <version.jboss.wildfly>8.1.0.Final</version.jboss.wildfly>
         <version.junit>4.11</version.junit>
         <version.log4j>1.2.16</version.log4j>
         <version.mockito>1.8.4</version.mockito>
