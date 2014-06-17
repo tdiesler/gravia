@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.container.wildfly.webapp;
+package org.jboss.gravia.container.common;
 
 import java.io.IOException;
 import java.io.Writer;

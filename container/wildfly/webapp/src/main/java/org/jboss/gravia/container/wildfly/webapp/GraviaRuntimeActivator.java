@@ -19,9 +19,6 @@
  */
 package org.jboss.gravia.container.wildfly.webapp;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -29,7 +26,6 @@ import javax.servlet.ServletContextListener;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.ServiceRegistration;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -40,8 +36,6 @@ import org.osgi.framework.BundleContext;
  * @since 27-Nov-2013
  */
 public class GraviaRuntimeActivator implements ServletContextListener {
-
-    private Set<ServiceRegistration<?>> registrations = new HashSet<ServiceRegistration<?>>();
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
@@ -57,8 +51,5 @@ public class GraviaRuntimeActivator implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent event) {
-        for (ServiceRegistration<?> sreg : registrations) {
-            sreg.unregister();
-        }
     }
 }

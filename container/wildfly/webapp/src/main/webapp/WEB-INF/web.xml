@@ -40,7 +40,7 @@
     </servlet>
     <servlet>
         <servlet-name>gravia</servlet-name>
-        <servlet-class>org.jboss.gravia.container.wildfly.webapp.GraviaServlet</servlet-class>
+        <servlet-class>org.jboss.gravia.container.common.GraviaServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
