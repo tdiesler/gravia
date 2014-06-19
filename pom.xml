@@ -211,19 +211,24 @@
                 <version>${version.jboss.arquillian.core}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss.arquillian.test</groupId>
-                <artifactId>arquillian-test-spi</artifactId>
+                <groupId>org.jboss.arquillian.junit</groupId>
+                <artifactId>arquillian-junit-container</artifactId>
                 <version>${version.jboss.arquillian.core}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.arquillian.junit</groupId>
-                <artifactId>arquillian-junit-container</artifactId>
+                <artifactId>arquillian-junit-standalone</artifactId>
                 <version>${version.jboss.arquillian.core}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.arquillian.osgi</groupId>
                 <artifactId>arquillian-osgi-bundle</artifactId>
                 <version>${version.jboss.arquillian.osgi}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.test</groupId>
+                <artifactId>arquillian-test-spi</artifactId>
+                <version>${version.jboss.arquillian.core}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.arquillian.testenricher</groupId>

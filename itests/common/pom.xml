@@ -37,11 +37,6 @@
 
     <dependencies>
         <dependency>
-	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-arquillian-container</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-provision</artifactId>
             <version>${project.version}</version>
@@ -95,6 +90,12 @@
         </dependency>
         
         <!-- Provided Dependencies -->
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-arquillian-container-managed</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.junit</groupId>
             <artifactId>arquillian-junit-container</artifactId>

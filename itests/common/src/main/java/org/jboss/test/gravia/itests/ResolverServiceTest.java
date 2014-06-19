@@ -23,6 +23,7 @@ import java.io.InputStream;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.gravia.itests.support.ArchiveBuilder;
 import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -33,7 +34,6 @@ import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
-import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

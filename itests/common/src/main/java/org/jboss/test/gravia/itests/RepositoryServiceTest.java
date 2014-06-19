@@ -27,7 +27,8 @@ import java.util.Set;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.gravia.arquillian.container.ContainerSetup;
-import org.jboss.gravia.arquillian.container.ContainerSetupTask;
+import org.jboss.gravia.arquillian.container.managed.ManagedSetupTask;
+import org.jboss.gravia.itests.support.ArchiveBuilder;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.IdentityRequirementBuilder;
@@ -41,7 +42,6 @@ import org.jboss.gravia.runtime.ServiceLocator;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
-import org.jboss.test.gravia.itests.support.ArchiveBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,19 +56,19 @@ import org.junit.runner.RunWith;
 @ContainerSetup(RepositoryServiceTest.Setup.class)
 public class RepositoryServiceTest {
 
-    public static class Setup extends ContainerSetupTask {
+    public static class Setup extends ManagedSetupTask {
 
         Set<ResourceIdentity> identities;
 
         @Override
-        protected void setUp(Context context) throws Exception {
+        protected void beforeDeploy(ManagedContext context) throws Exception {
             String resname = "META-INF/repository-content/camel.core.feature.xml";
             URL resurl = getClass().getClassLoader().getResource(resname);
             identities = addRepositoryContent(context, resurl);
         }
 
         @Override
-        protected void tearDown(Context context) throws Exception {
+        protected void beforeStop(ManagedContext context) throws Exception {
             removeRepositoryContent(context, identities);
         }
     }
