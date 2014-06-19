@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.gravia.arquillian.container.ContainerSetup;
-import org.jboss.gravia.itests.support.embedded.EmbeddedSetup;
+import org.jboss.gravia.arquillian.container.embedded.EmbeddedSetupTask;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
@@ -38,7 +38,7 @@ import org.junit.runner.RunWith;
  * @since 18-Jun-2014
  */
 @RunWith(Arquillian.class)
-@ContainerSetup(EmbeddedSetup.class)
+@ContainerSetup(EmbeddedSetupTask.class)
 public class ModuleLifecycleTest {
 
     @Test

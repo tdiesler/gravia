@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.itests.support.embedded;
+package org.jboss.gravia.arquillian.container.embedded;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,15 +38,17 @@ import org.junit.Assert;
  * @author thomas.diesler@jboss.com
  * @since 18-Jun-2014
  */
-public class EmbeddedSetup extends SetupTask {
+public class EmbeddedSetupTask extends SetupTask {
+
+    public static final String[] moduleNames = new String[] { "gravia-provision", "gravia-resolver", "gravia-repository" };
 
     protected EmbeddedTestSupport getEmbeddedTestSupport() {
         return new EmbeddedTestSupport();
     }
 
-    protected List<URL> getInitialModules() throws IOException {
+    protected List<URL> getInitialModuleLocations() throws IOException {
         List<URL> modules = new ArrayList<>();
-        for (String modname : new String[] { "gravia-provision", "gravia-resolver", "gravia-repository" }) {
+        for (String modname : moduleNames) {
             File modfile = Paths.get("target", "modules", modname + ".jar").toFile();
             modules.add(modfile.toURI().toURL());
         }
@@ -61,7 +63,7 @@ public class EmbeddedSetup extends SetupTask {
             // Install and start the bootstrap modules
             EmbeddedTestSupport support = getEmbeddedTestSupport();
             runtime = support.getEmbeddedRuntime();
-            for (URL url : getInitialModules()) {
+            for (URL url : getInitialModuleLocations()) {
                 ClassLoader classLoader = EmbeddedTestSupport.class.getClassLoader();
                 support.installAndStartModule(classLoader, url);
             }

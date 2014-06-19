@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.itests.support.embedded;
+package org.jboss.gravia.arquillian.container.embedded;
 
 import static org.jboss.gravia.runtime.spi.EnvPropertiesProvider.DEFAULT_ENV_PREFIX;
 import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
