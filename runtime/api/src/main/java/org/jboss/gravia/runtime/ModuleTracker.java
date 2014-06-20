@@ -16,6 +16,8 @@
 
 package org.jboss.gravia.runtime;
 
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.gravia.runtime.Module.State;
+import org.jboss.gravia.runtime.spi.RuntimeLogger;
 
 /**
  * The {@code ModuleTracker} class simplifies tracking modules much like the
@@ -132,7 +135,7 @@ public class ModuleTracker<T> implements ModuleTrackerCustomizer<T> {
                 return;
             }
             if (DEBUG) {
-                System.out.println("ModuleTracker.open");
+                LOGGER.debug("ModuleTracker.open");
             }
             t = new Tracked();
             synchronized (t) {
@@ -176,7 +179,7 @@ public class ModuleTracker<T> implements ModuleTrackerCustomizer<T> {
                 return;
             }
             if (DEBUG) {
-                System.out.println("ModuleTracker.close");
+                LOGGER.debug("ModuleTracker.close");
             }
             outgoing.close();
             modules = getModules();
@@ -434,7 +437,7 @@ public class ModuleTracker<T> implements ModuleTrackerCustomizer<T> {
             final Module module = event.getModule();
             final State state = module.getState();
             if (DEBUG) {
-                System.out.println("ModuleTracker.Tracked.moduleChanged[" + state + "]: " + module);
+                LOGGER.debug("ModuleTracker.Tracked.moduleChanged[" + state + "]: " + module);
             }
 
             if (states.contains(state)) {

@@ -115,7 +115,6 @@ public class ArchiveBuilder  {
     }
 
     public Archive<?> getArchive() {
-        //System.out.println(archive.toString(true));
         return archive;
     }
 }

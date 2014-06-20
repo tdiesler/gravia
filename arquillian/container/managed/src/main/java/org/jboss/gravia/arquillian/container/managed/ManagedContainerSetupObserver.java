@@ -83,7 +83,6 @@ public class ManagedContainerSetupObserver extends SetupObserver<ManagedSetupTas
     }
 
     public void handleAfterStart(@Observes AfterStart event, Container container) throws Throwable {
-        System.out.println(this + " handleAfterStart");
 
         // Provide {@link MBeanServerConnection} and {@link RepositoryMBean}
         MBeanServerConnection mbeanServer = getMBeanServerConnection(container);
@@ -98,7 +97,6 @@ public class ManagedContainerSetupObserver extends SetupObserver<ManagedSetupTas
 
     public void handleBeforeDeploy(@Observes BeforeDeploy event, Container container) throws Throwable {
         List<ManagedSetupTask> setupTasks = getSetupTasks();
-        System.out.println(this + " handleBeforeDeploy " + setupTasks);
         if (!setupTasks.isEmpty()) {
             ClassContext classContext = classContextInstance.get();
             ObjectStore suiteStore = suiteContextInstance.get().getObjectStore();
@@ -113,12 +111,10 @@ public class ManagedContainerSetupObserver extends SetupObserver<ManagedSetupTas
     }
 
     public void handleAfterDeploy(@Observes AfterDeploy event, Container container) throws Throwable {
-        System.out.println(this + " handleAfterDeploy");
     }
 
     public void handleBeforeStop(@Observes BeforeStop event, Container container) throws Throwable {
         List<ManagedSetupTask> setupTasks = getSetupTasks();
-        System.out.println(this + " handleBeforeDeploy " + setupTasks);
         if (!setupTasks.isEmpty()) {
             ObjectStore suiteStore = suiteContextInstance.get().getObjectStore();
             MBeanServerConnection server = mbeanServerInstance.get();
@@ -131,7 +127,6 @@ public class ManagedContainerSetupObserver extends SetupObserver<ManagedSetupTas
     }
 
     public void handleAfterStop(@Observes AfterStop event, Container container) throws Throwable {
-        System.out.println(this + " handleAfterStop");
     }
 
     private MBeanServerConnection getMBeanServerConnection(Container container) throws IOException {

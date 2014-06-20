@@ -1,6 +1,6 @@
 /*
  * #%L
- * Gravia :: Integration Tests :: Karaf
+ * Gravia :: Arquillian :: Container
  * %%
  * Copyright (C) 2010 - 2014 JBoss by Red Hat
  * %%
@@ -19,14 +19,16 @@
  */
 package org.jboss.gravia.arquillian.container.embedded;
 
-import org.jboss.gravia.arquillian.container.SetupTask;
+import org.jboss.arquillian.core.spi.context.ObjectStore;
 
 /**
- * Test simple embedded test setup
+ * A plugin point that is called from the {@link EmbeddedSetupObserver}
+ * as part of the {@link BeforeSuite} processing
  *
- * @author thomas.diesler@jboss.com
+ * @author Thomas.Diesler@jboss.com
  * @since 18-Jun-2014
  */
-public class EmbeddedSetupTask extends SetupTask {
+public interface EmbeddedRuntimeSetup {
 
+    void setupEmbeddedRuntime(ObjectStore suiteStore) throws Exception;
 }

@@ -73,9 +73,7 @@ public class SetupObserver<T extends SetupTask> {
                 }
                 classContext.getObjectStore().add(TaskList.class, taskList);
 
-                // All all tasks to the suite store
-                SuiteContext suiteContext = suiteContextInstance.get();
-                ObjectStore suiteStore = suiteContext.getObjectStore();
+                ObjectStore suiteStore = getSuiteObjectStore();
                 suiteStore.get(TaskList.class).addAll(taskList);
             }
         }
@@ -88,15 +86,18 @@ public class SetupObserver<T extends SetupTask> {
         return (C) new AbstractSetupContext(suiteStore, classStore);
     }
 
-    public void handleBeforeSuite(@Observes BeforeSuite event) throws Throwable {
-        System.out.println(this + " handleBeforeSuite");
+    protected ObjectStore getSuiteObjectStore() {
         SuiteContext suiteContext = suiteContextInstance.get();
-        suiteContext.getObjectStore().add(TaskList.class, new TaskList<>());
+        return suiteContext.getObjectStore();
+    }
+
+    public void handleBeforeSuite(@Observes BeforeSuite event) throws Throwable {
+        ObjectStore objectStore = getSuiteObjectStore();
+        objectStore.add(TaskList.class, new TaskList<>());
     }
 
     public void handleBeforeClass(@Observes BeforeClass event) throws Throwable {
         List<T> setupTasks = getSetupTasks();
-        System.out.println(this + " handleBeforeClass " + setupTasks);
         if (!setupTasks.isEmpty()) {
             ClassContext classContext = classContextInstance.get();
             ObjectStore suiteStore = suiteContextInstance.get().getObjectStore();
@@ -110,7 +111,6 @@ public class SetupObserver<T extends SetupTask> {
 
     public void handleAfterClass(@Observes AfterClass event) throws Throwable {
         List<T> setupTasks = getSetupTasks();
-        System.out.println(this + " handleAfterClass " + setupTasks);
         if (!setupTasks.isEmpty()) {
             ClassContext classContext = classContextInstance.get();
             ObjectStore classStore = classContext.getObjectStore();
@@ -126,7 +126,6 @@ public class SetupObserver<T extends SetupTask> {
     public void handleAfterSuite(@Observes AfterSuite event) throws Throwable {
         SuiteContext suiteContext = suiteContextInstance.get();
         TaskList<T> setupTasks = suiteContext.getObjectStore().get(TaskList.class);
-        System.out.println(this + " handleAfterSuite " + setupTasks);
         if (!setupTasks.isEmpty()) {
             ObjectStore suiteStore = suiteContext.getObjectStore();
             SetupContext context = new AbstractSetupContext(suiteStore, null);

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,8 +50,6 @@ public class ManifestResourceBuilderTestCase {
         manifestbuilder.addGenericCapabilities("test; effective:=\"resolve\"; test =\"aName\"; version : Version=\"1.0\"; long :Long=\"100\"; double: Double=\"1.001\"; string:String =\"aString\"; version.list:List < Version > = \"1.0, 1.1, 1.2\"; long.list : List  <Long  >=\"1, 2, 3, 4\"; double.list: List<  Double>= \"1.001, 1.002, 1.003\"; string.list :List<String  >= \"aString,bString,cString\"; string.list2:List=\"a\\\"quote,a\\,comma, aSpace ,\\start,\\,start,end\\\",end\\,\"; string.list3 :List<String>= \" aString , bString , cString \"");
         manifestbuilder.addGenericCapabilities("test.multiple; attr=\"value1\"", "test.multiple; attr=\"value2\"", "test.no.attrs");
         Manifest manifest = manifestbuilder.getManifest();
-
-        //manifest.write(System.out);
 
         ManifestResourceBuilder builder = new ManifestResourceBuilder();
         Resource resource = builder.load(manifest).getResource();

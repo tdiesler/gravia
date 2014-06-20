@@ -83,7 +83,7 @@
         <version.apache.karaf>2.3.3</version.apache.karaf>
         <version.apache.tomcat>7.0.42</version.apache.tomcat>
         <version.javax.servlet30.api>3.0.1</version.javax.servlet30.api>
-        <version.jboss.arquillian.core>1.1.2.Final-wildfly-1</version.jboss.arquillian.core>
+        <version.jboss.arquillian.core>1.1.2.Final</version.jboss.arquillian.core>
         <version.jboss.arquillian.osgi>2.1.0.CR15</version.jboss.arquillian.osgi>
         <version.jboss.arquillian.tomcat>1.0.0.CR6</version.jboss.arquillian.tomcat>
         <version.jboss.osgi.metadata>4.0.0.CR1</version.jboss.osgi.metadata>
@@ -213,11 +213,6 @@
             <dependency>
                 <groupId>org.jboss.arquillian.junit</groupId>
                 <artifactId>arquillian-junit-container</artifactId>
-                <version>${version.jboss.arquillian.core}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.junit</groupId>
-                <artifactId>arquillian-junit-standalone</artifactId>
                 <version>${version.jboss.arquillian.core}</version>
             </dependency>
             <dependency>

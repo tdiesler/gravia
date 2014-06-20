@@ -20,14 +20,15 @@
 package org.jboss.test.gravia.itests.embedded;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.gravia.arquillian.container.ContainerSetup;
-import org.jboss.gravia.arquillian.container.embedded.EmbeddedSetupTask;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -38,11 +39,29 @@ import org.junit.runner.RunWith;
  * @since 18-Jun-2014
  */
 @RunWith(Arquillian.class)
-@ContainerSetup(EmbeddedSetupTask.class)
 public class ModuleLifecycleTest {
+
+    static AtomicInteger callCount = new AtomicInteger();
+
+    @BeforeClass
+    public static void beforeClass() {
+        Assert.assertEquals(1, callCount.incrementAndGet());
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Set<Module> modules = runtime.getModules();
+        Assert.assertEquals("Expected 7 modules: " + modules, 7, modules.size());
+    }
+
+    @Before
+    public void setUp() {
+        Assert.assertEquals(2, callCount.incrementAndGet());
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        Set<Module> modules = runtime.getModules();
+        Assert.assertEquals("Expected 7 modules: " + modules, 7, modules.size());
+    }
 
     @Test
     public void testModuleLifecycle() throws Exception {
+        Assert.assertEquals(3, callCount.incrementAndGet());
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Set<Module> modules = runtime.getModules();
         Assert.assertEquals("Expected 7 modules: " + modules, 7, modules.size());

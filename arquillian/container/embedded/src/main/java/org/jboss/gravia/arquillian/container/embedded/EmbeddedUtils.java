@@ -20,12 +20,10 @@
 package org.jboss.gravia.arquillian.container.embedded;
 
 import static org.jboss.gravia.runtime.spi.EnvPropertiesProvider.DEFAULT_ENV_PREFIX;
-import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -33,7 +31,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.rmi.registry.LocateRegistry;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -41,11 +38,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
-
-import javax.management.MBeanServer;
-import javax.management.remote.JMXConnectorServer;
-import javax.management.remote.JMXConnectorServerFactory;
-import javax.management.remote.JMXServiceURL;
 
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
@@ -85,9 +77,13 @@ import org.jboss.gravia.utils.ManifestUtils;
  * @author thomas.diesler@jboss.com
  * @since 18-Oct-2013
  */
-public class EmbeddedTestSupport {
+public class EmbeddedUtils {
 
-    public Runtime getEmbeddedRuntime() {
+    // Hide ctor
+    private EmbeddedUtils() {
+    }
+
+    public static Runtime getEmbeddedRuntime() {
         Runtime runtime;
         synchronized (RuntimeLocator.class) {
             runtime = RuntimeLocator.getRuntime();
@@ -122,51 +118,16 @@ public class EmbeddedTestSupport {
                 EmbeddedResourceInstaller resourceInstaller = new EmbeddedResourceInstaller(environment);
                 syscontext.registerService(RuntimeEnvironment.class, environment, null);
                 syscontext.registerService(ResourceInstaller.class, resourceInstaller, null);
-
-                // Create the JMXConnectorServer
-                try {
-                    JMXConnectorServer connectorServer = createJMXConnectorServer();
-                    connectorServer.start();
-                    String jmxServerUrl = connectorServer.getAddress().toString();
-                    LOGGER.info("JMX server URL: " + jmxServerUrl);
-                } catch (IOException ex) {
-                    throw new IllegalStateException(ex);
-                }
-
-                // Add initial runtime resources
-                String resname = "environment.xml";
-                URL resurl = EmbeddedTestSupport.class.getClassLoader().getResource(resname);
-                if (resurl != null) {
-                    InputStream input = null;
-                    try {
-                        input = resurl.openStream();
-                        environment.initDefaultContent(input);
-                    } catch (IOException ex) {
-                        throw new IllegalStateException(ex);
-                    } finally {
-                        IOUtils.safeClose(input);
-                    }
-                }
             }
         }
         return runtime;
     }
 
-    public JMXConnectorServer createJMXConnectorServer() throws IOException {
-        ServerSocket server = new ServerSocket(0);
-        int port = server.getLocalPort();
-        server.close();
-        LocateRegistry.createRegistry(port);
-        JMXServiceURL serviceURL = new JMXServiceURL("service:jmx:rmi://localhost:" + port + "/jndi/rmi://localhost:" + port + "/jmxrmi");
-        MBeanServer mbeanServer = ServiceLocator.getRequiredService(MBeanServer.class);
-        return JMXConnectorServerFactory.newJMXConnectorServer(serviceURL, null, mbeanServer);
-    }
-
-    public Module installAndStartModule(ClassLoader classLoader, File location) throws ModuleException, IOException {
+    public static Module installAndStartModule(ClassLoader classLoader, File location) throws ModuleException, IOException {
         return installAndStartModule(classLoader, location.toURI().toURL());
     }
 
-    public Module installAndStartModule(ClassLoader classLoader, URL location) throws ModuleException, IOException {
+    public static Module installAndStartModule(ClassLoader classLoader, URL location) throws ModuleException, IOException {
         JarInputStream input = new JarInputStream(location.openStream());
         try {
             Manifest manifest = input.getManifest();
@@ -177,28 +138,28 @@ public class EmbeddedTestSupport {
         }
     }
 
-    public Module installAndStartModule(ClassLoader classLoader, String symbolicName, String version) throws ModuleException {
+    public static Module installAndStartModule(ClassLoader classLoader, String symbolicName, String version) throws ModuleException {
         ResourceIdentity.create(symbolicName, version);
         Resource resource = new DefaultResourceBuilder().addIdentityCapability(symbolicName, version).getResource();
         return installAndStartModule(classLoader, resource);
     }
 
-    public Module installAndStartModule(ClassLoader classLoader, ResourceIdentity identity) throws ModuleException {
+    public static Module installAndStartModule(ClassLoader classLoader, ResourceIdentity identity) throws ModuleException {
         Resource resource = new DefaultResourceBuilder().addIdentityCapability(identity).getResource();
         return installAndStartModule(classLoader, resource);
     }
 
-    public Module installAndStartModule(ClassLoader classLoader, Resource resource) throws ModuleException {
+    public static Module installAndStartModule(ClassLoader classLoader, Resource resource) throws ModuleException {
         return installAndStartModule(classLoader, resource, null);
     }
 
-    public Module installAndStartModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) throws ModuleException {
+    public static Module installAndStartModule(ClassLoader classLoader, Resource resource, Dictionary<String, String> headers) throws ModuleException {
         Module module = getEmbeddedRuntime().installModule(classLoader, resource, headers);
         module.start();
         return module;
     }
 
-    public Set<ResourceIdentity> addRepositoryContent(URL resurl) throws IOException {
+    public static Set<ResourceIdentity> addRepositoryContent(URL resurl) throws IOException {
         IllegalArgumentAssertion.assertNotNull(resurl, "resurl");
         Repository repository = ServiceLocator.getRequiredService(Repository.class);
 
@@ -221,7 +182,7 @@ public class EmbeddedTestSupport {
         return Collections.unmodifiableSet(result);
     }
 
-    public void removeRepositoryContent(Set<ResourceIdentity> identities) throws IOException {
+    public static void removeRepositoryContent(Set<ResourceIdentity> identities) throws IOException {
         if (identities != null) {
             Repository repository = ServiceLocator.getRequiredService(Repository.class);
             for (ResourceIdentity resid : identities) {
@@ -230,11 +191,11 @@ public class EmbeddedTestSupport {
         }
     }
 
-    public void deleteDirectory(String directory) throws IOException {
+    public static void deleteDirectory(String directory) throws IOException {
         deleteDirectory(Paths.get(directory));
     }
 
-    public void deleteDirectory(Path directory) throws IOException {
+    public static void deleteDirectory(Path directory) throws IOException {
         Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
@@ -250,7 +211,7 @@ public class EmbeddedTestSupport {
         });
     }
 
-    final class EmbeddedResourceInstaller extends AbstractResourceInstaller {
+    public static class EmbeddedResourceInstaller extends AbstractResourceInstaller {
 
         private final RuntimeEnvironment environment;
 

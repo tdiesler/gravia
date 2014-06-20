@@ -16,12 +16,15 @@
 
 package org.jboss.gravia.runtime;
 
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
+
 import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.jboss.gravia.Constants;
+import org.jboss.gravia.runtime.spi.RuntimeLogger;
 
 /**
  * The {@code ServiceTracker} class simplifies using services from the
@@ -254,7 +257,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
                 return;
             }
             if (DEBUG) {
-                System.out.println("ServiceTracker.open: " + filter);
+                LOGGER.debug("ServiceTracker.open: " + filter);
             }
             t = trackAllServices ? new AllTracked() : new Tracked();
             synchronized (t) {
@@ -325,7 +328,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
                 return;
             }
             if (DEBUG) {
-                System.out.println("ServiceTracker.close: " + filter);
+                LOGGER.debug("ServiceTracker.close: " + filter);
             }
             outgoing.close();
             references = getServiceReferences();
@@ -347,7 +350,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
         }
         if (DEBUG) {
             if ((cachedReference == null) && (cachedService == null)) {
-                System.out.println("ServiceTracker.close[cached cleared]: " + filter);
+                LOGGER.debug("ServiceTracker.close[cached cleared]: " + filter);
             }
         }
     }
@@ -527,12 +530,12 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
         ServiceReference<S> reference = cachedReference;
         if (reference != null) {
             if (DEBUG) {
-                System.out.println("ServiceTracker.getServiceReference[cached]: " + filter);
+                LOGGER.debug("ServiceTracker.getServiceReference[cached]: " + filter);
             }
             return reference;
         }
         if (DEBUG) {
-            System.out.println("ServiceTracker.getServiceReference: " + filter);
+            LOGGER.debug("ServiceTracker.getServiceReference: " + filter);
         }
         ServiceReference<S>[] references = getServiceReferences();
         int length = (references == null) ? 0 : references.length;
@@ -640,12 +643,12 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
         T service = cachedService;
         if (service != null) {
             if (DEBUG) {
-                System.out.println("ServiceTracker.getService[cached]: " + filter);
+                LOGGER.debug("ServiceTracker.getService[cached]: " + filter);
             }
             return service;
         }
         if (DEBUG) {
-            System.out.println("ServiceTracker.getService: " + filter);
+            LOGGER.debug("ServiceTracker.getService: " + filter);
         }
         ServiceReference<S> reference = getServiceReference();
         if (reference == null) {
@@ -729,7 +732,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
         cachedReference = null; /* clear cached value */
         cachedService = null; /* clear cached value */
         if (DEBUG) {
-            System.out.println("ServiceTracker.modified: " + filter);
+            LOGGER.debug("ServiceTracker.modified: " + filter);
         }
     }
 
@@ -854,7 +857,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
             }
             final ServiceReference<S> reference = (ServiceReference<S>) event.getServiceReference();
             if (DEBUG) {
-                System.out.println("ServiceTracker.Tracked.serviceChanged[" + event.getType() + "]: " + reference);
+                LOGGER.debug("ServiceTracker.Tracked.serviceChanged[" + event.getType() + "]: " + reference);
             }
 
             switch (event.getType()) {
