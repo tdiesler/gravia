@@ -53,7 +53,7 @@ public final class ResourceIdentity {
 
     private ResourceIdentity(String symbolicName, Version version) {
         IllegalArgumentAssertion.assertNotNull(symbolicName, "symbolicName");
-        this.symbolicName = symbolicName;
+        this.symbolicName = symbolicName.trim();
         this.version = version != null ? version : Version.emptyVersion;
         this.canonicalForm = symbolicName + ":" + version;
     }
