@@ -45,7 +45,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 
 /**
- * [TODO]
+ * The embedded module
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013

@@ -105,7 +105,6 @@ public class BundleResourceInstaller extends AbstractResourceInstaller {
         // Installing a bundle does not trigger a {@link ModuleEvent#INSTALLED}
         // event because the Bundle's class loader is not (yet) available
         // We manually add the resource to the {@link RuntimeEnvironment}
-        // [TODO] Revisit {@link ModuleListener} handling for OSGi
         Resource envres = environment.getResource(resid);
         if (envres == null && module != null) {
             RuntimeEnvironment runtimeEnv = RuntimeEnvironment.assertRuntimeEnvironment(environment);

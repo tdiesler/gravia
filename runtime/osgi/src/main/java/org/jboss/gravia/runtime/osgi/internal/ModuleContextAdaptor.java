@@ -47,7 +47,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.SynchronousBundleListener;
 
 /**
- * [TODO]
+ * The embedded Module context
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013

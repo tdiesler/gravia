@@ -37,19 +37,11 @@
     <name>Gravia :: Container :: Tomcat</name>
     
     <modules>
+        <module>distro</module>
         <module>extension</module>
         <module>patch</module>
         <module>support</module>
         <module>webapp</module>
     </modules>
 
-    <!-- Profiles -->
-    <profiles>
-        <profile>
-            <id>distro</id>
-            <modules>
-                <module>distro</module>
-            </modules>
-        </profile>
-    </profiles>
 </project>

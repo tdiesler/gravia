@@ -127,7 +127,7 @@ final class ServiceState<S> implements ServiceRegistration<S>, ServiceReference<
 
         S result = null;
 
-        // [TODO] Remove workaround for Endless loop on class defined failed
+        // [TODO] #46 Remove workaround for Endless loop on class defined failed
         // https://issues.jboss.org/browse/LOGMGR-88
         ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         try {
