@@ -55,7 +55,7 @@ public final class ResourceIdentity {
         IllegalArgumentAssertion.assertNotNull(symbolicName, "symbolicName");
         this.symbolicName = symbolicName.trim();
         this.version = version != null ? version : Version.emptyVersion;
-        this.canonicalForm = symbolicName + ":" + version;
+        this.canonicalForm = this.symbolicName + ":" + this.version;
     }
 
     public String getSymbolicName() {
