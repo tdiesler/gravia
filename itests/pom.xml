@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.jboss.gravia</groupId>
         <artifactId>gravia</artifactId>
-        <version>1.1.0.Beta32-SNAPSHOT</version>
+        <version>1.1.0.Beta32</version>
     </parent>
 
     <name>Gravia :: Integration Tests</name>
