@@ -34,15 +34,15 @@ import org.osgi.framework.BundleContext;
  */
 public final class OSGiRuntimeFactory implements RuntimeFactory {
 
-    private final BundleContext syscontext;
+    private final BundleContext context;
 
-    public OSGiRuntimeFactory(BundleContext syscontext) {
-        IllegalArgumentAssertion.assertNotNull(syscontext, "syscontext");
-        this.syscontext = syscontext;
+    public OSGiRuntimeFactory(BundleContext context) {
+        IllegalArgumentAssertion.assertNotNull(context, "context");
+        this.context = context;
     }
 
     @Override
     public Runtime createRuntime(PropertiesProvider props) {
-        return new OSGiRuntime(syscontext, props);
+        return new OSGiRuntime(context, props);
     }
 }

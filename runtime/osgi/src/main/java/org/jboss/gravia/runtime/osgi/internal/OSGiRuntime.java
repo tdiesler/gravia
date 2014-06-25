@@ -71,23 +71,19 @@ import org.osgi.service.url.URLStreamHandlerService;
  */
 public final class OSGiRuntime extends AbstractRuntime {
 
-    private final BundleContext syscontext;
+    private final BundleContext context;
     private final BundleListener installListener;
     private final URLStreamHandlerTracker streamHandlerTracker;
     private final WeakHashMap<Bundle, Module> uninstalled = new WeakHashMap<Bundle, Module>();
 
-    public OSGiRuntime(BundleContext syscontext, PropertiesProvider propertiesProvider) {
+    public OSGiRuntime(BundleContext context, PropertiesProvider propertiesProvider) {
         super(propertiesProvider);
 
-        IllegalArgumentAssertion.assertNotNull(syscontext, "syscontext");
-        this.syscontext = syscontext;
-
-        // Assert system bundle
-        Bundle sysbundle = syscontext.getBundle();
-        if (sysbundle.getBundleId() != 0)
-            throw new IllegalArgumentException("Not the system bundle: " + sysbundle);
+        IllegalArgumentAssertion.assertNotNull(context, "context");
+        this.context = context;
 
         // Install system module
+        Bundle sysbundle = context.getBundle(0);
         try {
             Resource resource = new DefaultResourceBuilder().addIdentityCapability(getSystemIdentity()).getResource();
             BundleWiring wiring = sysbundle.adapt(BundleWiring.class);
@@ -168,22 +164,22 @@ public final class OSGiRuntime extends AbstractRuntime {
     public void init() {
 
         // Register the Runtime service
-        syscontext.registerService(Runtime.class, this, null);
+        context.registerService(Runtime.class, this, null);
 
         // Start tracking the URLStreamHandler services
         streamHandlerTracker.open();
 
         // Setup the bundle tracker
-        syscontext.addBundleListener(installListener);
+        context.addBundleListener(installListener);
 
         // Install already existing bundles
-        for (Bundle bundle : syscontext.getBundles()) {
+        for (Bundle bundle : context.getBundles()) {
             installModule(bundle);
         }
     }
 
     BundleContext getSystemContext() {
-        return syscontext;
+        return context.getBundle(0).getBundleContext();
     }
 
     @Override
@@ -248,7 +244,7 @@ public final class OSGiRuntime extends AbstractRuntime {
 
         @Override
         public List<String> getEntryPaths(String path) {
-            Bundle bundle = syscontext.getBundle(module.getModuleId());
+            Bundle bundle = context.getBundle(module.getModuleId());
             Enumeration<String> paths = bundle.getEntryPaths(path);
             List<String> result = new ArrayList<String>();
             if (paths != null) {
@@ -262,13 +258,13 @@ public final class OSGiRuntime extends AbstractRuntime {
 
         @Override
         public URL getEntry(String path) {
-            Bundle bundle = syscontext.getBundle(module.getModuleId());
+            Bundle bundle = context.getBundle(module.getModuleId());
             return bundle.getEntry(path);
         }
 
         @Override
         public List<URL> findEntries(String path, String filePattern, boolean recurse) {
-            Bundle bundle = syscontext.getBundle(module.getModuleId());
+            Bundle bundle = context.getBundle(module.getModuleId());
             Enumeration<URL> paths = bundle.findEntries(path, filePattern, recurse);
             List<URL> result = new ArrayList<URL>();
             if (paths != null) {

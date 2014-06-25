@@ -37,9 +37,8 @@ public final class OSGiRuntimeActivator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        BundleContext syscontext = context.getBundle(0).getBundleContext();
-        PropertiesProvider propsProvider = new OSGiPropertiesProvider(syscontext);
-        Runtime runtime = RuntimeLocator.createRuntime(new OSGiRuntimeFactory(syscontext), propsProvider);
+        PropertiesProvider propsProvider = new OSGiPropertiesProvider(context);
+        Runtime runtime = RuntimeLocator.createRuntime(new OSGiRuntimeFactory(context), propsProvider);
         runtime.init();
     }
 
