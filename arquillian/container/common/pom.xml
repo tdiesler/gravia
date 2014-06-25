@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.jboss.gravia</groupId>
         <artifactId>gravia-arquillian-container</artifactId>
-        <version>1.1.0.Beta34-SNAPSHOT</version>
+        <version>1.1.0.Beta34</version>
     </parent>
 
     <name>Gravia :: Arquillian :: Container :: Common</name>
