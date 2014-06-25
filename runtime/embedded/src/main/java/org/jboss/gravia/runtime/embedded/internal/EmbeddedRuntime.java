@@ -45,6 +45,7 @@ import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.ModuleException;
+import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.ServiceLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.gravia.runtime.spi.AbstractModule;
@@ -93,8 +94,11 @@ public class EmbeddedRuntime extends AbstractRuntime {
     public void init() {
         assertNoShutdown();
 
-        // Register the LogService
+        // Register the Runtime
         ModuleContext syscontext = adapt(ModuleContext.class);
+        systemServices.add(registerRuntimeService(syscontext));
+
+        // Register the LogService
         systemServices.add(registerLogService(syscontext));
 
         // Register the MBeanServer service
@@ -108,6 +112,10 @@ public class EmbeddedRuntime extends AbstractRuntime {
 
         // Load initial configurations
         loadInitialConfigurations(syscontext);
+    }
+
+    private ServiceRegistration<?> registerRuntimeService(ModuleContext syscontext) {
+        return syscontext.registerService(Runtime.class, this, null);
     }
 
     protected ServiceRegistration<?> registerLogService(ModuleContext syscontext) {

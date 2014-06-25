@@ -34,6 +34,7 @@ import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.RuntimeType;
+import org.jboss.gravia.runtime.ServiceLocator;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
 import org.jboss.osgi.metadata.OSGiManifestBuilder;
@@ -77,7 +78,9 @@ public class ModuleLifecycleTest {
     @Test
     public void testModuleLifecycle() throws Exception {
 
-        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        // Verify that the Runtime service is registered
+        Runtime runtime = ServiceLocator.getRequiredService(Runtime.class);
+
         Module modA = runtime.getModule(getClass().getClassLoader());
         Assert.assertEquals(Module.State.ACTIVE, modA.getState());
 

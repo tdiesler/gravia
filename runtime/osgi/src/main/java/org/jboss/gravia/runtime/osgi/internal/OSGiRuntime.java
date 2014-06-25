@@ -167,6 +167,9 @@ public final class OSGiRuntime extends AbstractRuntime {
     @Override
     public void init() {
 
+        // Register the Runtime service
+        syscontext.registerService(Runtime.class, this, null);
+
         // Start tracking the URLStreamHandler services
         streamHandlerTracker.open();
 
