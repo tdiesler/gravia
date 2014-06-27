@@ -19,8 +19,13 @@
  */
 package org.jboss.gravia.container.tomcat.support;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import javax.servlet.ServletContext;
 
+import org.apache.catalina.UserDatabase;
+import org.apache.catalina.users.MemoryUserDatabase;
 import org.apache.naming.resources.DirContextURLStreamHandlerFactory;
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.runtime.Module;
@@ -29,6 +34,7 @@ import org.jboss.gravia.runtime.embedded.internal.EmbeddedRuntime;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.URLStreamHandlerTracker;
+import org.jboss.gravia.utils.IllegalStateAssertion;
 
 /**
  * The Tomcat {@link Runtime}
@@ -38,6 +44,10 @@ import org.jboss.gravia.runtime.spi.URLStreamHandlerTracker;
  */
 public class TomcatRuntime extends EmbeddedRuntime {
 
+    public final static String TOMCAT_USER = "tomcat";
+
+    private final UserDatabase userDatabase;
+
     public TomcatRuntime(PropertiesProvider propertiesProvider, Attachable context) {
         super(propertiesProvider, context);
 
@@ -45,11 +55,27 @@ public class TomcatRuntime extends EmbeddedRuntime {
         URLStreamHandlerTracker tracker = new URLStreamHandlerTracker(getModuleContext());
         DirContextURLStreamHandlerFactory.addUserFactory(tracker);
         tracker.open();
+
+        try {
+            userDatabase = new MemoryUserDatabase();
+            userDatabase.open();
+        } catch (Exception ex) {
+            throw new IllegalStateException("Cannot open user database", ex);
+        }
+        IllegalStateAssertion.assertNotNull(userDatabase.findUser(TOMCAT_USER), "Cannot obtain user: " + TOMCAT_USER);
     }
 
     @Override
     protected ModuleEntriesProvider getDefaultEntriesProvider(Module module, Attachable context) {
         ServletContext servletContext = context.getAttachment(WebAppContextListener.SERVLET_CONTEXT_KEY);
         return servletContext != null ? new ServletContextEntriesProvider(servletContext) : null;
+    }
+
+    public Path getCatalinaHome() {
+        return Paths.get((String) getProperty("catalina.home"));
+    }
+
+    public UserDatabase getUserDatabase() {
+        return userDatabase;
     }
 }

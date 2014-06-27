@@ -25,12 +25,11 @@ import static org.jboss.gravia.container.tomcat.support.GraviaTomcatLogger.LOGGE
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URL;
+import java.nio.file.Path;
 
 import org.apache.catalina.User;
-import org.apache.catalina.UserDatabase;
 import org.apache.catalina.ant.DeployTask;
 import org.apache.catalina.ant.UndeployTask;
-import org.apache.catalina.users.MemoryUserDatabase;
 import org.jboss.gravia.container.tomcat.extension.SharedModuleClassLoader;
 import org.jboss.gravia.provision.ResourceHandle;
 import org.jboss.gravia.provision.ResourceInstaller;
@@ -62,25 +61,12 @@ import org.jboss.gravia.utils.ResourceUtils;
  */
 public class TomcatResourceInstaller extends AbstractResourceInstaller {
 
-    private final static File catalinaHome = new File(SecurityActions.getSystemProperty("catalina.home", null));
-    private final static File catalinaLib = new File(catalinaHome.getPath() + File.separator + "lib");
-    private final static File catalinaTemp = new File(catalinaHome.getPath() + File.separator + "temp");
-
-    private final static String TOMCAT_USER = "tomcat";
-
-    private final UserDatabase userDatabase;
     private final RuntimeEnvironment environment;
+    private final TomcatRuntime runtime;
 
     public TomcatResourceInstaller(RuntimeEnvironment environment) {
+        this.runtime = (TomcatRuntime) RuntimeLocator.getRequiredRuntime();
         this.environment = environment;
-        try {
-            userDatabase = new MemoryUserDatabase();
-            userDatabase.open();
-        } catch (Exception ex) {
-            throw new IllegalStateException("Cannot open user database", ex);
-        }
-        if (userDatabase.findUser(TOMCAT_USER) == null)
-            throw new IllegalStateException("Cannot obtain user: " + TOMCAT_USER);
     }
 
     @Override
@@ -107,7 +93,8 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         Version version = resid.getVersion();
 
         // copy resource content
-        final File targetFile = new File(catalinaLib, symbolicName + "-" + version + ".jar");
+        Path catalinaLib = runtime.getCatalinaHome().resolve("lib");
+        final File targetFile = catalinaLib.resolve(symbolicName + "-" + version + ".jar").toFile();
         if (targetFile.exists()) {
             LOGGER.warn("Module already exists: " + targetFile);
         } else {
@@ -140,18 +127,19 @@ public class TomcatResourceInstaller extends AbstractResourceInstaller {
         ResourceIdentity identity = resource.getIdentity();
         String runtimeName = getRuntimeName(resource);
 
+        Path catalinaTemp = runtime.getCatalinaHome().resolve("temp");
         ContentCapability ccap = (ContentCapability) resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).get(0);
         URL contentURL = ccap.getContentURL();
         if (contentURL == null || !contentURL.toExternalForm().startsWith("file:")) {
             ResourceContent content = getFirstRelevantResourceContent(resource);
-            tempfile = new File(catalinaTemp, runtimeName);
+            tempfile = catalinaTemp.resolve(runtimeName).toFile();
             IOUtils.copyStream(content.getContent(), new FileOutputStream(tempfile));
             contentURL = tempfile.toURI().toURL();
         }
 
         // Get contextPath, username, password
         final String contextPath = getContextPath(resource);
-        final User user = userDatabase.findUser(TOMCAT_USER);
+        final User user = runtime.getUserDatabase().findUser(TomcatRuntime.TOMCAT_USER);
         final String password = user.getPassword();
 
         NamedResourceAssociation.putResource(contextPath, resource);

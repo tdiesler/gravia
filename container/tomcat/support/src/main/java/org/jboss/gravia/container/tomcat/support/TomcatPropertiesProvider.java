@@ -50,13 +50,6 @@ public class TomcatPropertiesProvider implements PropertiesProvider {
         this.servletContext = servletContext;
     }
 
-    public File getCatalinaHome() {
-        return catalinaHome;
-    }
-
-    public File getCatalinaWork() {
-        return catalinaWork;
-    }
     public Object getProperty(String key) {
         return getInternalPropertiesProvider().getProperty(key);
     }
