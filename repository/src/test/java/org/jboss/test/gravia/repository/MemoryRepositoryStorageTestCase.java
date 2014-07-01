@@ -30,11 +30,9 @@ import org.jboss.gravia.resource.IdentityNamespace;
 import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.RequirementBuilder;
 import org.jboss.gravia.resource.Resource;
-import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 /**
  * Test the {@link MemoryRepositoryStorage}
@@ -48,7 +46,7 @@ public class MemoryRepositoryStorageTestCase extends AbstractRepositoryTest {
 
     @Before
     public void setUp() throws Exception {
-        storage = new MemoryRepositoryStorage(Mockito.mock(PropertiesProvider.class), null);
+        storage = new MemoryRepositoryStorage(null);
         RepositoryReader reader = getRepositoryReader("xml/sample-repository.xml");
         storage.addResource(reader.nextResource());
     }

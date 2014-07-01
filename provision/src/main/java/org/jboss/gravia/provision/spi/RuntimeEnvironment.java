@@ -19,16 +19,19 @@
  */
 package org.jboss.gravia.provision.spi;
 
+import static org.jboss.gravia.runtime.spi.RuntimeLogger.LOGGER;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.jboss.gravia.Constants;
+import org.jboss.gravia.repository.DefaultRepositoryStorage;
 import org.jboss.gravia.repository.DefaultRepositoryXMLReader;
 import org.jboss.gravia.repository.RepositoryReader;
 import org.jboss.gravia.resolver.Environment;
@@ -48,6 +51,7 @@ import org.jboss.gravia.runtime.ModuleListener;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.SynchronousModuleListener;
+import org.jboss.gravia.runtime.spi.RuntimePropertiesProvider;
 import org.jboss.gravia.utils.IOUtils;
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
@@ -123,13 +127,14 @@ public class RuntimeEnvironment extends AbstractEnvironment {
 
     public RuntimeEnvironment initDefaultContent() {
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        File repositoryDir = new File((String) runtime.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR));
-        File environmentXML = new File(repositoryDir, "environment.xml");
+        RuntimePropertiesProvider propertyProvider = new RuntimePropertiesProvider(runtime);
+		Path storagePath = DefaultRepositoryStorage.getRepositoryStoragePath(propertyProvider);
+        File environmentXML = storagePath.resolve("environment.xml").toFile();
         try {
             InputStream content = new FileInputStream(environmentXML);
             initDefaultContent(content);
         } catch (FileNotFoundException ex) {
-            // ignore
+        	LOGGER.warn("Cannot obtain inital runtime environment content from: {}" , environmentXML);
         }
         return this;
     }

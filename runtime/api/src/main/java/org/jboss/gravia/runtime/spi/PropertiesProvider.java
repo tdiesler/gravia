@@ -41,6 +41,17 @@ public interface PropertiesProvider {
     /**
      * Returns the value of the specified property. If the key is not found in
      * the Runtime properties, the system properties are then searched. The
+     * method throws an {@link IllegalStateException} if the property is not found.
+     *
+     * @param key The name of the requested property.
+     * @return The value of the requested property
+     * @throws IllegalStateException if the property is undefined.
+     */
+    Object getRequiredProperty(String key);
+    
+    /**
+     * Returns the value of the specified property. If the key is not found in
+     * the Runtime properties, the system properties are then searched. The
      * method returns provided default value if the property is not found.
      *
      * @param key The name of the requested property.

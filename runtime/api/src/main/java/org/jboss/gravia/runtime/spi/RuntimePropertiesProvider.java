@@ -52,6 +52,11 @@ public class RuntimePropertiesProvider implements PropertiesProvider {
     }
 
     @Override
+	public Object getRequiredProperty(String key) {
+		return runtime.getRequiredProperty(key);
+	}
+    
+    @Override
     public Object getProperty(String key, Object defaultValue) {
         return runtime.getProperty(key, defaultValue);
     }

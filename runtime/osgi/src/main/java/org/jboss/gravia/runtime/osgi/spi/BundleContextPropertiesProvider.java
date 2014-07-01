@@ -20,6 +20,7 @@
 package org.jboss.gravia.runtime.osgi.spi;
 
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
+import org.jboss.gravia.utils.IllegalStateAssertion;
 import org.osgi.framework.BundleContext;
 
 
@@ -43,6 +44,13 @@ public final class BundleContextPropertiesProvider implements PropertiesProvider
     }
 
     @Override
+	public Object getRequiredProperty(String key) {
+        Object value = bundleContext.getProperty(key);
+        IllegalStateAssertion.assertNotNull(value, "Cannot obtain property: " + key);
+		return value;
+	}
+
+	@Override
     public Object getProperty(String key, Object defaultValue) {
         Object value = bundleContext.getProperty(key);
         return value != null ? value : defaultValue;

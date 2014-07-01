@@ -19,6 +19,8 @@
  */
 package org.jboss.gravia.repository;
 
+import static org.jboss.gravia.repository.spi.RepositoryLogger.LOGGER;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,6 +29,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
@@ -36,6 +40,9 @@ import org.jboss.gravia.repository.spi.RepositoryContentHelper;
 import org.jboss.gravia.resource.ContentNamespace;
 import org.jboss.gravia.resource.DefaultResourceBuilder;
 import org.jboss.gravia.resource.ResourceBuilder;
+import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 /**
@@ -53,19 +60,31 @@ public class DefaultRepositoryStorage extends AbstractRepositoryStorage {
     private final File repoFile;
 
     public DefaultRepositoryStorage(PropertiesProvider propertyProvider, Repository repository) {
-        super(propertyProvider, repository);
+        super(repository);
 
         String filename = (String) propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_FILE, REPOSITORY_XML_NAME);
-        String dirname = (String) propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, null);
-        if (dirname == null)
-            throw new IllegalArgumentException("Cannot obtain property: " + Constants.PROPERTY_REPOSITORY_STORAGE_DIR);
+        Path storagePath = getRepositoryStoragePath(propertyProvider);
 
-        storageDir = new File(dirname).getAbsoluteFile();
-        repoFile = new File(dirname + File.separator + filename).getAbsoluteFile();
+        storageDir = storagePath.toFile();
+        repoFile = storagePath.resolve(filename).toFile();
 
         initRepositoryStorage();
     }
 
+    public static Path getRepositoryStoragePath(PropertiesProvider propertyProvider) {
+    	Runtime runtime = RuntimeLocator.getRuntime();
+        String dirname = (String) propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR);
+        if (dirname == null && runtime != null) {
+        	Module sysmodule = runtime.getModuleContext().getModule();
+			dirname = sysmodule.getDataFile("repository").getPath();
+        }
+        if (dirname == null) {
+        	dirname = Paths.get("repository").toString();
+        	LOGGER.warn("Cannot obtain repository storage configuration, using: {}", dirname);
+        }
+    	return Paths.get(dirname);
+    }
+    
     @Override
     public RepositoryReader getPersistentRepositoryReader() throws RepositoryStorageException {
         try {

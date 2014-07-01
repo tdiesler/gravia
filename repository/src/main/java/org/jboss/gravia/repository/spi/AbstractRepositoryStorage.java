@@ -45,7 +45,6 @@ import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 /**
  * A simple {@link RepositoryStorage} that uses
@@ -58,8 +57,8 @@ public abstract class AbstractRepositoryStorage extends MemoryRepositoryStorage 
 
     private final AtomicLong increment = new AtomicLong();
 
-    public AbstractRepositoryStorage(PropertiesProvider propertyProvider, Repository repository) {
-        super(propertyProvider, repository);
+    public AbstractRepositoryStorage(Repository repository) {
+        super(repository);
     }
 
     public void initRepositoryStorage() throws RepositoryStorageException {

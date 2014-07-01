@@ -30,6 +30,7 @@ import org.jboss.gravia.provision.ProvisionResult;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.provision.ResourceInstaller;
 import org.jboss.gravia.repository.DefaultRepository;
+import org.jboss.gravia.repository.DefaultRepositoryStorage;
 import org.jboss.gravia.repository.MavenIdentityRequirementBuilder;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryStorage;
@@ -71,7 +72,8 @@ public class ProvisionerTestCase {
         environment = new DefaultEnvironment("TestEnv");
         Resolver resolver = new DefaultResolver();
         PropertiesProvider propertyProvider = Mockito.mock(PropertiesProvider.class);
-        Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
+        Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR)).thenReturn(storageDir.getPath());
+        Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_FILE, DefaultRepositoryStorage.REPOSITORY_XML_NAME)).thenReturn(DefaultRepositoryStorage.REPOSITORY_XML_NAME);
         repository = new DefaultRepository(propertyProvider);
         ResourceInstaller installer = Mockito.mock(ResourceInstaller.class);
         provisioner = new DefaultProvisioner(environment, resolver, repository, installer);

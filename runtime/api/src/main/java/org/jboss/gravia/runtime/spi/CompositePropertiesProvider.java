@@ -19,6 +19,8 @@
  */
 package org.jboss.gravia.runtime.spi;
 
+import org.jboss.gravia.utils.IllegalStateAssertion;
+
 /**
  * A Composite {@link org.jboss.gravia.runtime.spi.PropertiesProvider}.
  */
@@ -35,6 +37,13 @@ public class CompositePropertiesProvider implements PropertiesProvider {
         return getProperty(key, null);
     }
 
+    @Override
+	public Object getRequiredProperty(String key) {
+        Object value = getProperty(key, null);
+        IllegalStateAssertion.assertNotNull(value, "Cannot obtain property: " + key);
+		return value;
+	}
+    
     @Override
     public Object getProperty(String key, Object defaultValue) {
         Object result = null;

@@ -32,7 +32,6 @@ import org.jboss.gravia.resource.DefaultMatchPolicy;
 import org.jboss.gravia.resource.DefaultResourceStore;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
-import org.jboss.gravia.runtime.spi.PropertiesProvider;
 
 /**
  * A {@link RepositoryStorage} that maintains its state in local memory
@@ -45,7 +44,7 @@ public class MemoryRepositoryStorage extends DefaultResourceStore implements Rep
     private final AtomicLong increment = new AtomicLong();
     private final Repository repository;
 
-    public MemoryRepositoryStorage(PropertiesProvider propertyProvider, Repository repository) {
+    public MemoryRepositoryStorage(Repository repository) {
         super(MemoryRepositoryStorage.class.getSimpleName(), new DefaultMatchPolicy());
         this.repository = repository;
     }

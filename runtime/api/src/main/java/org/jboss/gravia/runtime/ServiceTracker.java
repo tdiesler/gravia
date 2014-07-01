@@ -24,7 +24,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.runtime.spi.RuntimeLogger;
+import org.osgi.framework.InvalidSyntaxException;
 
 /**
  * The {@code ServiceTracker} class simplifies using services from the

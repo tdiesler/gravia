@@ -44,6 +44,7 @@ import org.jboss.gravia.runtime.ModuleEvent;
 import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
+import org.jboss.gravia.utils.IllegalStateAssertion;
 
 /**
  * The abstract base implementation for a {@link Runtime}
@@ -75,6 +76,13 @@ public abstract class AbstractRuntime implements Runtime {
         return properties.getProperty(key);
     }
 
+    @Override
+    public Object getRequiredProperty(String propName) {
+    	Object result = properties.getProperty(propName);
+        IllegalStateAssertion.assertNotNull(result, "Cannot obtain required property: " + propName);
+        return result;
+    }
+    
     @Override
     public final Object getProperty(String key, Object defaultValue) {
         return properties.getProperty(key, defaultValue);

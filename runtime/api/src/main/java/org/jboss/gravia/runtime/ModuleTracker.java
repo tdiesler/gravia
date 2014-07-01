@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.gravia.runtime.Module.State;
-import org.jboss.gravia.runtime.spi.RuntimeLogger;
 
 /**
  * The {@code ModuleTracker} class simplifies tracking modules much like the

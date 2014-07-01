@@ -77,7 +77,8 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
         repository = Mockito.mock(Repository.class);
         Mockito.when(repository.getName()).thenReturn("MockedRepo");
         propertyProvider = Mockito.mock(PropertiesProvider.class);
-        Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
+        Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR)).thenReturn(storageDir.getPath());
+        Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_FILE, DefaultRepositoryStorage.REPOSITORY_XML_NAME)).thenReturn(DefaultRepositoryStorage.REPOSITORY_XML_NAME);
         storage = new DefaultRepositoryStorage(propertyProvider, repository);
 
         // Write the bundle to the location referenced by repository-testA.xml

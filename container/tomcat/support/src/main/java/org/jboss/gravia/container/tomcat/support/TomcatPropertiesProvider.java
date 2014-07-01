@@ -29,6 +29,7 @@ import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.spi.DefaultPropertiesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
+import org.jboss.gravia.utils.IllegalStateAssertion;
 
 /**
  * The Tomcat {@link PropertiesProvider}
@@ -51,9 +52,16 @@ public class TomcatPropertiesProvider implements PropertiesProvider {
     }
 
     public Object getProperty(String key) {
-        return getInternalPropertiesProvider().getProperty(key);
+        return getProperty(key, null);
     }
 
+    @Override
+	public Object getRequiredProperty(String key) {
+        Object value = getProperty(key, null);
+        IllegalStateAssertion.assertNotNull(value, "Cannot obtain property: " + key);
+		return value;
+	}
+    
     public Object getProperty(String key, Object defaultValue) {
         return getInternalPropertiesProvider().getProperty(key, defaultValue);
     }

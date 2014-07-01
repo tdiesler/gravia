@@ -19,6 +19,8 @@
  */
 package org.jboss.gravia.runtime.spi;
 
+import org.jboss.gravia.utils.IllegalStateAssertion;
+
 /**
  * A {@link org.jboss.gravia.runtime.spi.PropertiesProvider} that is backed by System Properties.
  */
@@ -29,6 +31,13 @@ public class SystemPropertiesProvider implements PropertiesProvider {
         return getProperty(key, null);
     }
 
+    @Override
+	public Object getRequiredProperty(String key) {
+        Object value = getProperty(key, null);
+        IllegalStateAssertion.assertNotNull(value, "Cannot obtain property: " + key);
+		return value;
+	}
+    
     @Override
     public Object getProperty(String key, Object defaultValue) {
         String value = SecurityActions.getSystemProperty(key, null);

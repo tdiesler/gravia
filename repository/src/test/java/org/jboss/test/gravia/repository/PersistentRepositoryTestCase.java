@@ -32,6 +32,7 @@ import java.util.jar.Manifest;
 
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.repository.DefaultRepository;
+import org.jboss.gravia.repository.DefaultRepositoryStorage;
 import org.jboss.gravia.repository.MavenIdentityRequirementBuilder;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.repository.RepositoryStorage;
@@ -75,7 +76,8 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
         storageDir = new File("./target/repository");
         deleteRecursive(storageDir);
         PropertiesProvider propertyProvider = Mockito.mock(PropertiesProvider.class);
-        Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, null)).thenReturn(storageDir.getPath());
+        Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR)).thenReturn(storageDir.getPath());
+        Mockito.when(propertyProvider.getProperty(Constants.PROPERTY_REPOSITORY_STORAGE_FILE, DefaultRepositoryStorage.REPOSITORY_XML_NAME)).thenReturn(DefaultRepositoryStorage.REPOSITORY_XML_NAME);
         repository = new DefaultRepository(propertyProvider);
 
         // Write the bundle to the location referenced by repository-testA.xml
