@@ -26,7 +26,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.jboss.gravia.container.tomcat.support.TomcatPropertiesProvider;
+import org.jboss.gravia.container.tomcat.support.ServletContextPropertiesProvider;
 import org.jboss.gravia.container.tomcat.support.TomcatResourceInstaller;
 import org.jboss.gravia.container.tomcat.support.TomcatRuntimeFactory;
 import org.jboss.gravia.provision.ResourceInstaller;
@@ -56,7 +56,7 @@ public class GraviaRuntimeActivator implements ServletContextListener {
 
         // Create the runtime
         ServletContext servletContext = event.getServletContext();
-        TomcatPropertiesProvider propsProvider = new TomcatPropertiesProvider(servletContext);
+        ServletContextPropertiesProvider propsProvider = new ServletContextPropertiesProvider(servletContext);
         Runtime runtime = RuntimeLocator.createRuntime(new TomcatRuntimeFactory(servletContext), propsProvider);
         runtime.init();
 

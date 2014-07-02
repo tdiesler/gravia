@@ -32,12 +32,12 @@ import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
 
 /**
- * The Tomcat {@link PropertiesProvider}
- * 
+ * A {@link PropertiesProvider} that delegates to the ServletContext
+ *
  * @author thomas.diesler@jboss.com
  * @since 17-Jan-2014
  */
-public class TomcatPropertiesProvider extends AbstractPropertiesProvider {
+public class ServletContextPropertiesProvider extends AbstractPropertiesProvider {
 
 	private final static File catalinaHome = new File(SecurityActions.getSystemProperty("catalina.home", null));
 	private final static File catalinaConf = new File(catalinaHome, "conf");
@@ -46,7 +46,7 @@ public class TomcatPropertiesProvider extends AbstractPropertiesProvider {
 	private final ServletContext servletContext;
 	private PropertiesProvider delegate;
 
-	public TomcatPropertiesProvider(ServletContext servletContext) {
+	public ServletContextPropertiesProvider(ServletContext servletContext) {
 		IllegalArgumentAssertion.assertNotNull(servletContext, "servletContext");
 		this.servletContext = servletContext;
 	}
