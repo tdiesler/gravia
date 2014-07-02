@@ -26,83 +26,72 @@ import javax.servlet.ServletContext;
 
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.runtime.RuntimeType;
+import org.jboss.gravia.runtime.spi.AbstractPropertiesProvider;
 import org.jboss.gravia.runtime.spi.DefaultPropertiesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
-import org.jboss.gravia.utils.IllegalStateAssertion;
 
 /**
  * The Tomcat {@link PropertiesProvider}
- *
+ * 
  * @author thomas.diesler@jboss.com
  * @since 17-Jan-2014
  */
-public class TomcatPropertiesProvider implements PropertiesProvider {
+public class TomcatPropertiesProvider extends AbstractPropertiesProvider {
 
-    private final static File catalinaHome = new File(SecurityActions.getSystemProperty("catalina.home", null));
-    private final static File catalinaConf = new File(catalinaHome, "conf");
-    private final static File catalinaWork = new File(catalinaHome, "work");
+	private final static File catalinaHome = new File(SecurityActions.getSystemProperty("catalina.home", null));
+	private final static File catalinaConf = new File(catalinaHome, "conf");
+	private final static File catalinaWork = new File(catalinaHome, "work");
 
-    private final ServletContext servletContext;
-    private PropertiesProvider delegate;
+	private final ServletContext servletContext;
+	private PropertiesProvider delegate;
 
-    public TomcatPropertiesProvider(ServletContext servletContext) {
-        IllegalArgumentAssertion.assertNotNull(servletContext, "servletContext");
-        this.servletContext = servletContext;
-    }
-
-    public Object getProperty(String key) {
-        return getProperty(key, null);
-    }
-
-    @Override
-	public Object getRequiredProperty(String key) {
-        Object value = getProperty(key, null);
-        IllegalStateAssertion.assertNotNull(value, "Cannot obtain property: " + key);
-		return value;
+	public TomcatPropertiesProvider(ServletContext servletContext) {
+		IllegalArgumentAssertion.assertNotNull(servletContext, "servletContext");
+		this.servletContext = servletContext;
 	}
-    
-    public Object getProperty(String key, Object defaultValue) {
-        return getInternalPropertiesProvider().getProperty(key, defaultValue);
-    }
 
-    private synchronized PropertiesProvider getInternalPropertiesProvider() {
-        if (delegate == null) {
-            Properties properties = initialProperties(servletContext);
-            delegate = new DefaultPropertiesProvider(properties, true);
-        }
-        return delegate;
-    }
+	public Object getProperty(String key, Object defaultValue) {
+		return getInternalPropertiesProvider().getProperty(key, defaultValue);
+	}
 
-    protected Properties initialProperties(ServletContext servletContext) {
+	private synchronized PropertiesProvider getInternalPropertiesProvider() {
+		if (delegate == null) {
+			Properties properties = initialProperties(servletContext);
+			delegate = new DefaultPropertiesProvider(properties, true);
+		}
+		return delegate;
+	}
 
-        Properties properties = new Properties();
-        properties.setProperty(Constants.RUNTIME_TYPE, RuntimeType.TOMCAT.toString());
+	protected Properties initialProperties(ServletContext servletContext) {
 
-        String storageClean = servletContext.getInitParameter(Constants.RUNTIME_STORAGE_CLEAN);
-        if (storageClean == null) {
-            storageClean = Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT;
-        }
-        properties.setProperty(Constants.RUNTIME_STORAGE_CLEAN, storageClean);
+		Properties properties = new Properties();
+		properties.setProperty(Constants.RUNTIME_TYPE, RuntimeType.TOMCAT.toString());
 
-        String storageDir = servletContext.getInitParameter(Constants.RUNTIME_STORAGE_DIR);
-        if (storageDir == null) {
-            storageDir = new File(catalinaWork, Constants.RUNTIME_STORAGE_DEFAULT).getAbsolutePath();
-        }
-        properties.setProperty(Constants.RUNTIME_STORAGE_DIR, storageDir);
+		String storageClean = servletContext.getInitParameter(Constants.RUNTIME_STORAGE_CLEAN);
+		if (storageClean == null) {
+			storageClean = Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT;
+		}
+		properties.setProperty(Constants.RUNTIME_STORAGE_CLEAN, storageClean);
 
-        String repositoryDir = servletContext.getInitParameter(Constants.PROPERTY_REPOSITORY_STORAGE_DIR);
-        if (repositoryDir == null) {
-            repositoryDir = new File(catalinaWork, "repository").getAbsolutePath();
-        }
-        properties.setProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, repositoryDir);
+		String storageDir = servletContext.getInitParameter(Constants.RUNTIME_STORAGE_DIR);
+		if (storageDir == null) {
+			storageDir = new File(catalinaWork, Constants.RUNTIME_STORAGE_DEFAULT).getAbsolutePath();
+		}
+		properties.setProperty(Constants.RUNTIME_STORAGE_DIR, storageDir);
 
-        String configsDir = servletContext.getInitParameter(Constants.RUNTIME_CONFIGURATIONS_DIR);
-        if (configsDir == null) {
-            configsDir = new File(catalinaConf, "gravia" + File.separator + "configs").getAbsolutePath();
-        }
-        properties.setProperty(Constants.RUNTIME_CONFIGURATIONS_DIR, configsDir);
+		String repositoryDir = servletContext.getInitParameter(Constants.PROPERTY_REPOSITORY_STORAGE_DIR);
+		if (repositoryDir == null) {
+			repositoryDir = new File(catalinaWork, "repository").getAbsolutePath();
+		}
+		properties.setProperty(Constants.PROPERTY_REPOSITORY_STORAGE_DIR, repositoryDir);
 
-        return properties;
-    }
+		String configsDir = servletContext.getInitParameter(Constants.RUNTIME_CONFIGURATIONS_DIR);
+		if (configsDir == null) {
+			configsDir = new File(catalinaConf, "gravia" + File.separator + "configs").getAbsolutePath();
+		}
+		properties.setProperty(Constants.RUNTIME_CONFIGURATIONS_DIR, configsDir);
+
+		return properties;
+	}
 }

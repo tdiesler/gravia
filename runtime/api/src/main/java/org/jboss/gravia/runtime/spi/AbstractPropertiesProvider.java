@@ -19,35 +19,28 @@
  */
 package org.jboss.gravia.runtime.spi;
 
-import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.RuntimeLocator;
+import org.jboss.gravia.utils.IllegalStateAssertion;
+
 
 /**
- * A properties provider that delegates to the runtime.
+ * An properties provider.
  *
  * @author thomas.diesler@jboss.com
- * @since 27-Sep-2013
- *
+ * @since 02-Jun-2013
+ * 
  * @ThreadSafe
  */
-public class RuntimePropertiesProvider extends AbstractPropertiesProvider {
+public abstract class AbstractPropertiesProvider implements PropertiesProvider {
 
-    private final Runtime runtime;
-
-    public RuntimePropertiesProvider() {
-        this.runtime = RuntimeLocator.getRequiredRuntime();
-    }
-
-    public RuntimePropertiesProvider(Runtime runtime) {
-        this.runtime = runtime;
-    }
-
-    public Runtime getRuntime() {
-        return runtime;
+    @Override
+    public Object getProperty(String key) {
+        return getProperty(key, null);
     }
 
     @Override
-    public Object getProperty(String key, Object defaultValue) {
-        return runtime.getProperty(key, defaultValue);
-    }
+	public Object getRequiredProperty(String key) {
+        Object value = getProperty(key, null);
+        IllegalStateAssertion.assertNotNull(value, "Cannot obtain property: " + key);
+		return value;
+	}
 }

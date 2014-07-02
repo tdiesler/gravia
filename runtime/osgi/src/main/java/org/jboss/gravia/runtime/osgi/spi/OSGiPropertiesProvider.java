@@ -19,50 +19,31 @@
  */
 package org.jboss.gravia.runtime.osgi.spi;
 
+import org.jboss.gravia.runtime.spi.AbstractPropertiesProvider;
 import org.jboss.gravia.runtime.spi.CompositePropertiesProvider;
 import org.jboss.gravia.runtime.spi.EnvPropertiesProvider;
-import org.jboss.gravia.runtime.spi.MapPropertiesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.SubstitutionPropertiesProvider;
-import org.jboss.gravia.runtime.spi.SystemPropertiesProvider;
-import org.jboss.gravia.utils.IllegalStateAssertion;
 import org.osgi.framework.BundleContext;
 
 /**
- * The default {@link org.jboss.gravia.runtime.spi.PropertiesProvider} for OSGi runtimes.
+ * The default {@link PropertiesProvider} for OSGi runtimes.
  */
-public class OSGiPropertiesProvider implements PropertiesProvider {
+public class OSGiPropertiesProvider extends AbstractPropertiesProvider {
 
     private final PropertiesProvider delegate;
 
     public OSGiPropertiesProvider(BundleContext bundleContext) {
-        this(bundleContext, true);
+        this(bundleContext, null);
     }
 
-    public OSGiPropertiesProvider(BundleContext bundleContext, boolean systemPropertyDelegation) {
-        this(bundleContext, systemPropertyDelegation, null);
-    }
-
-    public OSGiPropertiesProvider(BundleContext bundleContext, boolean systemPropertyDelegation, String environmentVariablePrefix) {
+    public OSGiPropertiesProvider(BundleContext bundleContext, String environmentVariablePrefix) {
         this.delegate = new SubstitutionPropertiesProvider(new CompositePropertiesProvider(
                 new BundleContextPropertiesProvider(bundleContext),
-                systemPropertyDelegation ? new SystemPropertiesProvider() : new MapPropertiesProvider(),
                 new EnvPropertiesProvider(environmentVariablePrefix)
         ));
     }
 
-    @Override
-    public Object getProperty(String key) {
-        return delegate.getProperty(key);
-    }
-
-    @Override
-	public Object getRequiredProperty(String key) {
-        Object value = getProperty(key, null);
-        IllegalStateAssertion.assertNotNull(value, "Cannot obtain property: " + key);
-		return value;
-	}
-    
     @Override
     public Object getProperty(String key, Object defaultValue) {
         return delegate.getProperty(key, defaultValue);

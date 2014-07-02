@@ -19,12 +19,11 @@
  */
 package org.jboss.gravia.runtime.spi;
 
-import org.jboss.gravia.utils.IllegalStateAssertion;
 
 /**
  * A {@link org.jboss.gravia.runtime.spi.PropertiesProvider} backed by Environmental Variables.
  */
-public class EnvPropertiesProvider implements PropertiesProvider {
+public class EnvPropertiesProvider extends AbstractPropertiesProvider {
 
     public static final String DEFAULT_ENV_PREFIX = "GRAVIA_";
     private static final String ENV_REPLACE_PATTERN = "-|\\.";
@@ -39,18 +38,6 @@ public class EnvPropertiesProvider implements PropertiesProvider {
         this.environmentVariablePrefix = environmentVariablePrefix != null ? environmentVariablePrefix : DEFAULT_ENV_PREFIX;
     }
 
-    @Override
-    public Object getProperty(String key) {
-        return getProperty(key, null);
-    }
-
-    @Override
-	public Object getRequiredProperty(String key) {
-        Object value = getProperty(key, null);
-        IllegalStateAssertion.assertNotNull(value, "Cannot obtain property: " + key);
-		return value;
-	}
-    
     @Override
     public Object getProperty(String key, Object defaultValue) {
         String envVar =  SecurityActions.getEnv(toEnvVariable(environmentVariablePrefix, key), null);

@@ -25,12 +25,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jboss.gravia.utils.IllegalStateAssertion;
-
 /**
- * A {@link org.jboss.gravia.runtime.spi.PropertiesProvider} that is applying placeholder substitution based on the property values of an external  {@link org.jboss.gravia.runtime.spi.PropertiesProvider}.
+ * A {@link PropertiesProvider} that is applying placeholder substitution based on the property values of an external {@link PropertiesProvider}.
  */
-public class SubstitutionPropertiesProvider implements PropertiesProvider {
+public class SubstitutionPropertiesProvider extends AbstractPropertiesProvider {
 
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([a-zA-Z0-9\\.\\-]+)}");
     private static final String BOX_FORMAT = "\\$\\{%s\\}";
@@ -41,18 +39,6 @@ public class SubstitutionPropertiesProvider implements PropertiesProvider {
         this.delegate = delegate;
     }
 
-    @Override
-    public Object getProperty(String key) {
-        return getProperty(key, null);
-    }
-
-    @Override
-	public Object getRequiredProperty(String key) {
-        Object value = getProperty(key, null);
-        IllegalStateAssertion.assertNotNull(value, "Cannot obtain property: " + key);
-		return value;
-	}
-    
     @Override
     public Object getProperty(String key, Object defaultValue) {
         Object rawValue = delegate.getProperty(key, defaultValue);

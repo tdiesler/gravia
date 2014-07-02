@@ -44,7 +44,7 @@ import org.jboss.gravia.utils.IllegalArgumentAssertion;
  *
  * @ThreadSafe
  */
-public class DefaultPropertiesProvider extends CompositePropertiesProvider implements PropertiesProvider {
+public class DefaultPropertiesProvider extends CompositePropertiesProvider {
 
     private final PropertiesProvider delegate;
 

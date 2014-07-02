@@ -19,40 +19,26 @@
  */
 package org.jboss.gravia.runtime.spi;
 
-import org.jboss.gravia.utils.IllegalStateAssertion;
-
 /**
  * A Composite {@link org.jboss.gravia.runtime.spi.PropertiesProvider}.
  */
-public class CompositePropertiesProvider implements PropertiesProvider {
+public class CompositePropertiesProvider extends AbstractPropertiesProvider {
 
-    private final PropertiesProvider[] delegates;
+	private final PropertiesProvider[] delegates;
 
-    public CompositePropertiesProvider(PropertiesProvider... delegates) {
-        this.delegates = delegates;
-    }
-
-    @Override
-    public Object getProperty(String key) {
-        return getProperty(key, null);
-    }
-
-    @Override
-	public Object getRequiredProperty(String key) {
-        Object value = getProperty(key, null);
-        IllegalStateAssertion.assertNotNull(value, "Cannot obtain property: " + key);
-		return value;
+	public CompositePropertiesProvider(PropertiesProvider... delegates) {
+		this.delegates = delegates;
 	}
-    
-    @Override
-    public Object getProperty(String key, Object defaultValue) {
-        Object result = null;
-        for (PropertiesProvider delegate : delegates) {
-            result = delegate.getProperty(key);
-            if (result != null) {
-                return result;
-            }
-        }
-        return defaultValue;
-    }
+
+	@Override
+	public Object getProperty(String key, Object defaultValue) {
+		Object result = null;
+		for (PropertiesProvider delegate : delegates) {
+			result = delegate.getProperty(key);
+			if (result != null) {
+				return result;
+			}
+		}
+		return defaultValue;
+	}
 }

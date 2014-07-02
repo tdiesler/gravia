@@ -19,8 +19,8 @@
  */
 package org.jboss.gravia.runtime.osgi.spi;
 
+import org.jboss.gravia.runtime.spi.AbstractPropertiesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
-import org.jboss.gravia.utils.IllegalStateAssertion;
 import org.osgi.framework.BundleContext;
 
 
@@ -30,25 +30,13 @@ import org.osgi.framework.BundleContext;
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013
  */
-public final class BundleContextPropertiesProvider implements PropertiesProvider {
+public final class BundleContextPropertiesProvider extends AbstractPropertiesProvider {
 
     private final BundleContext bundleContext;
 
     public BundleContextPropertiesProvider(BundleContext context) {
         this.bundleContext = context;
     }
-
-    @Override
-    public Object getProperty(String key) {
-        return getProperty(key, null);
-    }
-
-    @Override
-	public Object getRequiredProperty(String key) {
-        Object value = bundleContext.getProperty(key);
-        IllegalStateAssertion.assertNotNull(value, "Cannot obtain property: " + key);
-		return value;
-	}
 
 	@Override
     public Object getProperty(String key, Object defaultValue) {

@@ -19,61 +19,49 @@
  */
 package org.jboss.gravia.runtime.spi;
 
-import org.jboss.gravia.utils.IllegalArgumentAssertion;
-import org.jboss.gravia.utils.IllegalStateAssertion;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
+
 /**
- * A {@link org.jboss.gravia.runtime.spi.PropertiesProvider} backed by a {@link java.util.Map}.
+ * A {@link org.jboss.gravia.runtime.spi.PropertiesProvider} backed by a
+ * {@link java.util.Map}.
  */
-public class MapPropertiesProvider implements PropertiesProvider {
+public class MapPropertiesProvider extends AbstractPropertiesProvider {
 
-    private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
+	private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
 
-    public MapPropertiesProvider() {
-        this(new HashMap<String, Object>());
-    }
-
-    public MapPropertiesProvider(Properties props) {
-        this(propsToMap(props));
-    }
-
-    public MapPropertiesProvider(Map<String, Object> props) {
-        IllegalArgumentAssertion.assertNotNull(props, "props");
-        properties.putAll(props);
-    }
-
-    @Override
-    public Object getProperty(String key) {
-        return getProperty(key, null);
-    }
-
-    @Override
-	public Object getRequiredProperty(String key) {
-        Object value = getProperty(key, null);
-        IllegalStateAssertion.assertNotNull(value, "Cannot obtain property: " + key);
-		return value;
+	public MapPropertiesProvider() {
+		this(new HashMap<String, Object>());
 	}
-    
-    @Override
-    public Object getProperty(String key, Object defaultValue) {
-        Object value = properties.get(key);
-        return value != null ? value : defaultValue;
-    }
 
-    private static Map<String, Object> propsToMap(Properties props) {
-        Map<String, Object> result = new HashMap<String, Object>();
-        synchronized (props) {
-            for (Map.Entry<Object, Object> entry : props.entrySet()) {
-                String key = entry.getKey().toString();
-                Object value = entry.getValue();
-                result.put(key, value);
-            }
-        }
-        return result;
-    }
+	public MapPropertiesProvider(Properties props) {
+		this(propsToMap(props));
+	}
+
+	public MapPropertiesProvider(Map<String, Object> props) {
+		IllegalArgumentAssertion.assertNotNull(props, "props");
+		properties.putAll(props);
+	}
+
+	@Override
+	public Object getProperty(String key, Object defaultValue) {
+		Object value = properties.get(key);
+		return value != null ? value : defaultValue;
+	}
+
+	private static Map<String, Object> propsToMap(Properties props) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		synchronized (props) {
+			for (Map.Entry<Object, Object> entry : props.entrySet()) {
+				String key = entry.getKey().toString();
+				Object value = entry.getValue();
+				result.put(key, value);
+			}
+		}
+		return result;
+	}
 }
