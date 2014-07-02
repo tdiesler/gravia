@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -159,7 +160,7 @@ public class EmbeddedRuntime extends AbstractRuntime {
     protected void loadInitialConfigurations(ModuleContext syscontext) {
         String configs = (String) getProperty(Constants.RUNTIME_CONFIGURATIONS_DIR);
         if (configs != null) {
-            File configsDir = new File(configs);
+            File configsDir = Paths.get(configs).toFile();
             initConfigurationAdmin(syscontext, configsDir);
         }
     }
@@ -227,7 +228,7 @@ public class EmbeddedRuntime extends AbstractRuntime {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void initConfigurationAdmin(ModuleContext syscontext, File configsDir) {
-        IllegalArgumentAssertion.assertTrue(configsDir.isDirectory(), "configsDir");
+        IllegalArgumentAssertion.assertTrue(configsDir.isDirectory(), "Invalid configuration directory: " + configsDir);
 
         ConfigurationAdmin configAdmin = ServiceLocator.getRequiredService(ConfigurationAdmin.class);
 
