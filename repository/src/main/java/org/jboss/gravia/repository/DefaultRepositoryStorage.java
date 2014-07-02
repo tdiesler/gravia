@@ -79,7 +79,7 @@ public class DefaultRepositoryStorage extends AbstractRepositoryStorage {
 			dirname = sysmodule.getDataFile("repository").getPath();
         }
         if (dirname == null) {
-        	dirname = Paths.get("repository").toString();
+        	dirname = Paths.get("repository").toAbsolutePath().toString();
         	LOGGER.warn("Cannot obtain repository storage configuration, using: {}", dirname);
         }
     	return Paths.get(dirname);

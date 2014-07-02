@@ -161,7 +161,7 @@ public class EmbeddedRuntime extends AbstractRuntime {
         String configs = (String) getProperty(Constants.RUNTIME_CONFIGURATIONS_DIR);
         if (configs != null) {
             File configsDir = Paths.get(configs).toFile();
-            initConfigurationAdmin(syscontext, configsDir);
+            initConfigurationAdmin(syscontext, configsDir.getAbsoluteFile());
         }
     }
 
