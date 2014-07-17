@@ -21,9 +21,9 @@ package org.jboss.gravia.container.tomcat.support;
 
 import javax.servlet.ServletContext;
 
+import org.jboss.gravia.container.tomcat.WebAppContextListener;
 import org.jboss.gravia.resource.spi.AttachableSupport;
 import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.WebAppContextListener;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.RuntimeFactory;
 

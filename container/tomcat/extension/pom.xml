@@ -42,19 +42,26 @@
             <artifactId>gravia-resource</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
+        <!-- Provided Dependencies -->
         <dependency>
             <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-runtime-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.enterprise</artifactId>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>tomcat-catalina</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>tomcat-catalina</artifactId>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.enterprise</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

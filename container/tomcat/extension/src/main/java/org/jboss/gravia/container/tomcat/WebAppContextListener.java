@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.runtime;
+package org.jboss.gravia.container.tomcat;
 
 import java.io.IOException;
 import java.net.URL;
@@ -34,6 +34,10 @@ import org.jboss.gravia.resource.ManifestResourceBuilder;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceBuilder;
 import org.jboss.gravia.resource.spi.AttachableSupport;
+import org.jboss.gravia.runtime.Module;
+import org.jboss.gravia.runtime.ModuleException;
+import org.jboss.gravia.runtime.Runtime;
+import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.spi.NamedResourceAssociation;
 import org.osgi.framework.Bundle;

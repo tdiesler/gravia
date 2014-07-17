@@ -26,6 +26,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.jboss.gravia.container.tomcat.WebAppContextListener;
 import org.jboss.gravia.container.tomcat.support.ServletContextPropertiesProvider;
 import org.jboss.gravia.container.tomcat.support.TomcatResourceInstaller;
 import org.jboss.gravia.container.tomcat.support.TomcatRuntimeFactory;
@@ -37,7 +38,6 @@ import org.jboss.gravia.runtime.ModuleException;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.ServiceRegistration;
-import org.jboss.gravia.runtime.WebAppContextListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
