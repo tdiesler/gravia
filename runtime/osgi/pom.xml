@@ -180,6 +180,9 @@
 							org.jboss.gravia.runtime.osgi;version="${project.version}",
                             org.jboss.gravia.runtime.osgi.spi;version="${project.version}",
 						</Export-Package>
+						<Provide-Capability>
+						    osgi.service;effective:=active;objectClass="org.jboss.gravia.runtime.Runtime"
+						</Provide-Capability>
 					</instructions>
 				</configuration>
 			</plugin>
