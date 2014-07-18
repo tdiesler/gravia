@@ -106,6 +106,10 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Activator>org.jboss.gravia.provision.internal.ProvisionerActivator</Bundle-Activator>
+                        <Provide-Capability>
+                            osgi.service;effective:=active;objectClass="org.jboss.gravia.provision.ResourceInstaller",
+                            osgi.service;effective:=active;objectClass="org.jboss.gravia.provision.spi.RuntimeEnvironment"
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>
