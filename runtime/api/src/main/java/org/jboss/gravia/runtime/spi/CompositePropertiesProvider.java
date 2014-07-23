@@ -41,4 +41,8 @@ public class CompositePropertiesProvider extends AbstractPropertiesProvider {
 		}
 		return defaultValue;
 	}
+
+    PropertiesProvider[] getDelegates() {
+        return delegates;
+    }
 }

@@ -22,8 +22,10 @@ package org.jboss.gravia.runtime.osgi.spi;
 import org.jboss.gravia.runtime.spi.AbstractPropertiesProvider;
 import org.jboss.gravia.runtime.spi.CompositePropertiesProvider;
 import org.jboss.gravia.runtime.spi.EnvPropertiesProvider;
+import org.jboss.gravia.runtime.spi.MapPropertiesProvider;
 import org.jboss.gravia.runtime.spi.PropertiesProvider;
 import org.jboss.gravia.runtime.spi.SubstitutionPropertiesProvider;
+import org.jboss.gravia.runtime.spi.SystemPropertiesProvider;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -38,10 +40,16 @@ public class OSGiPropertiesProvider extends AbstractPropertiesProvider {
     }
 
     public OSGiPropertiesProvider(BundleContext bundleContext, String environmentVariablePrefix) {
-        this.delegate = new SubstitutionPropertiesProvider(new CompositePropertiesProvider(
-                new BundleContextPropertiesProvider(bundleContext),
-                new EnvPropertiesProvider(environmentVariablePrefix)
-        ));
+        PropertiesProvider system = new SystemPropertiesProvider();
+        PropertiesProvider env =  environmentVariablePrefix != null ? new EnvPropertiesProvider(environmentVariablePrefix) : new EnvPropertiesProvider(system);
+
+        this.delegate = new SubstitutionPropertiesProvider(
+                new CompositePropertiesProvider(
+                        new BundleContextPropertiesProvider(bundleContext),
+                        system,
+                        env
+                )
+        );
     }
 
     @Override
