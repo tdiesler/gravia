@@ -19,6 +19,9 @@
  */
 package org.jboss.gravia.runtime.spi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -28,45 +31,91 @@ import java.util.regex.Pattern;
 /**
  * A {@link PropertiesProvider} that is applying placeholder substitution based on the property values of an external {@link PropertiesProvider}.
  */
-public class SubstitutionPropertiesProvider extends AbstractPropertiesProvider {
+public class SubstitutionPropertiesProvider extends CompositePropertiesProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubstitutionPropertiesProvider.class);
 
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([a-zA-Z0-9\\.\\-]+)}");
     private static final String BOX_FORMAT = "\\$\\{%s\\}";
+    private static final String UNESCAPED_BOX_FORMAT = "${%s}";
 
-    private final PropertiesProvider delegate;
+    public SubstitutionPropertiesProvider(PropertiesProvider... delegates) {
+        super(delegates);
+    }
 
-    public SubstitutionPropertiesProvider(PropertiesProvider delegate) {
-        this.delegate = delegate;
+    @Override
+    public Object getProperty(String key) {
+        return getProperty(key, null);
     }
 
     @Override
     public Object getProperty(String key, Object defaultValue) {
-        Object rawValue = delegate.getProperty(key, defaultValue);
-        if (rawValue == null) {
-            return defaultValue;
-        } else {
-            return substitute(String.valueOf(rawValue), delegate, new HashSet<String>());
+        for (PropertiesProvider provider : getDelegates()) {
+            try {
+                Object rawValue = provider.getProperty(key);
+                if (rawValue != null && !isCyclicReference(key, rawValue)) {
+                    return substitute(String.valueOf(rawValue), new HashSet<String>());
+                }
+            } catch (Exception e) {
+                LOGGER.debug("Skipping properties provider:{}, due to:{}", provider, e.getMessage());
+            }
         }
+        return defaultValue;
     }
 
-    private static String substitute(String str, PropertiesProvider provider, Set<String> visited) {
+
+    /**
+     * Substitutes placeholders in the specified string, taking loops into consideration.
+     * It uses the delegating property providers to resolve the placeholders.
+     * @param str          The string that contains one or more placeholders.
+     * @param visited      The placeholders that are considered visited (use for loop detection).
+     * @return             The substituted string, if all placeholders have been successfully resolved.
+     *                     Returns null if str contains a single unresolved placeholder (to allow falling back to
+     *                     the default value).
+     *                     In case of partial success (some placeholder resolved) it returns the result using a empty
+     *                     string for all the unresolved ones.
+     */
+    private String substitute(String str, Set<String> visited) {
         String result = str;
         Matcher matcher = PLACEHOLDER_PATTERN.matcher(str);
         CopyOnWriteArraySet<String> copyOfVisited = new CopyOnWriteArraySet<>(visited);
         while (matcher.find()) {
             String name = matcher.group(1);
-            String replacement = "";
+            String replacement = null;
             String toReplace = String.format(BOX_FORMAT, name);
-            if (provider.getProperty(name) != null && !visited.contains(name)) {
-                replacement = String.valueOf(provider.getProperty(name));
-                replacement = replacement != null ? replacement : "";
-                if (PLACEHOLDER_PATTERN.matcher(replacement).matches()) {
-                    copyOfVisited.add(name);
-                    replacement = substitute(replacement, provider, copyOfVisited);
+            for (PropertiesProvider provider : getDelegates()) {
+                if (provider.getProperty(name) != null && !visited.contains(name)) {
+                    Object rawValue = provider.getProperty(name);
+                    if (isCyclicReference(name, rawValue)) {
+                        continue;
+                    }
+                    replacement = String.valueOf(rawValue);
+                    if (PLACEHOLDER_PATTERN.matcher(replacement).matches()) {
+                        copyOfVisited.add(name);
+                        replacement = substitute(replacement, copyOfVisited);
+                    }
                 }
             }
-            result = result.replaceAll(toReplace, Matcher.quoteReplacement(replacement));
+            if (replacement != null) {
+                result = result.replaceAll(toReplace, Matcher.quoteReplacement(replacement));
+            } else if (!str.equals(toReplace.replace("\\",""))) {
+                result = result.replaceAll(toReplace, "");
+            } else {
+                result = null;
+            }
         }
         return result;
+    }
+
+    /**
+     * Checks if the value is a placeholder reference to the key.
+     * @param key       The key.
+     * @param value     The value.
+     * @return          True if a cycle is detected or false.
+     */
+    private static boolean isCyclicReference(String key, Object value) {
+        if (!(value instanceof String)) {
+            return false;
+        } else return String.format(UNESCAPED_BOX_FORMAT, key).equals(value);
     }
 }

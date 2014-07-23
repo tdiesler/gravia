@@ -68,6 +68,21 @@
 					</instructions>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <environmentVariables>
+                        <GRAVIA_ENV1>gravia.value1</GRAVIA_ENV1>
+                        <GRAVIA_ENV2>gravia.value2</GRAVIA_ENV2>
+                        <CUSTOM_ENV1>custom.value1</CUSTOM_ENV1>
+                        <CUSTOM_ENV2>custom.value2</CUSTOM_ENV2>
+                    </environmentVariables>
+                    <systemProperties>
+                        <env1>system.value1</env1>
+                    </systemProperties>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 </project>
