@@ -75,11 +75,14 @@ public class DefaultPropertiesProvider extends CompositePropertiesProvider {
     public DefaultPropertiesProvider(Map<String, Object> properties, final boolean systemPropertyDelegation, final String environmentVariablePrefix) {
         IllegalArgumentAssertion.assertNotNull(properties, "props");
         properties.putAll(propsToMap(getDefaultProperties()));
-        this.delegate = new SubstitutionPropertiesProvider(
+        PropertiesProvider system = systemPropertyDelegation ? new SystemPropertiesProvider() : new MapPropertiesProvider();
+        PropertiesProvider env =  environmentVariablePrefix != null ? new EnvPropertiesProvider(environmentVariablePrefix) : new EnvPropertiesProvider(system);
+
+                this.delegate = new SubstitutionPropertiesProvider(
                 new CompositePropertiesProvider(
                         new MapPropertiesProvider(properties),
-                        systemPropertyDelegation ? new SystemPropertiesProvider() : new MapPropertiesProvider(),
-                        new EnvPropertiesProvider(environmentVariablePrefix)
+                        system,
+                        env
                 )
         );
     }

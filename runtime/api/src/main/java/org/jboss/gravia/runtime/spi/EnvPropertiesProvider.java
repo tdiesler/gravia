@@ -20,11 +20,14 @@
 package org.jboss.gravia.runtime.spi;
 
 
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
+
 /**
  * A {@link org.jboss.gravia.runtime.spi.PropertiesProvider} backed by Environmental Variables.
  */
 public class EnvPropertiesProvider extends AbstractPropertiesProvider {
 
+    public static final String ENV_PREFIX_KEY = "environment.prefix";
     public static final String DEFAULT_ENV_PREFIX = "GRAVIA_";
     private static final String ENV_REPLACE_PATTERN = "-|\\.";
 
@@ -34,8 +37,18 @@ public class EnvPropertiesProvider extends AbstractPropertiesProvider {
         this(DEFAULT_ENV_PREFIX);
     }
 
+    public EnvPropertiesProvider(PropertiesProvider source) {
+        this(String.valueOf(source.getProperty(ENV_PREFIX_KEY)));
+    }
+
     public EnvPropertiesProvider(String environmentVariablePrefix) {
-        this.environmentVariablePrefix = environmentVariablePrefix != null ? environmentVariablePrefix : DEFAULT_ENV_PREFIX;
+        IllegalArgumentAssertion.assertNotNull(environmentVariablePrefix, "Environmental variable prefix");
+        this.environmentVariablePrefix = environmentVariablePrefix;
+    }
+
+    @Override
+    public Object getProperty(String key) {
+        return getProperty(key, null);
     }
 
     @Override
