@@ -19,15 +19,22 @@
  */
 package org.jboss.gravia.runtime.spi;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.jboss.gravia.utils.IllegalArgumentAssertion;
+
 /**
- * A Composite {@link org.jboss.gravia.runtime.spi.PropertiesProvider}.
+ * A Composite {@link PropertiesProvider}.
  */
 public class CompositePropertiesProvider extends AbstractPropertiesProvider {
 
-	private final PropertiesProvider[] delegates;
+	private final List<PropertiesProvider> delegates;
 
 	public CompositePropertiesProvider(PropertiesProvider... delegates) {
-		this.delegates = delegates;
+		IllegalArgumentAssertion.assertNotNull(delegates, "delegates");
+		this.delegates = Arrays.asList(delegates);
 	}
 
 	@Override
@@ -42,7 +49,7 @@ public class CompositePropertiesProvider extends AbstractPropertiesProvider {
 		return defaultValue;
 	}
 
-    PropertiesProvider[] getDelegates() {
-        return delegates;
+    List<PropertiesProvider> getDelegates() {
+        return Collections.unmodifiableList(delegates);
     }
 }
