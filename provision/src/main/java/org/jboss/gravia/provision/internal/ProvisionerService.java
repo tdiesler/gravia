@@ -22,8 +22,6 @@ package org.jboss.gravia.provision.internal;
 import java.io.InputStream;
 import java.util.Set;
 
-import javax.management.JMException;
-
 import org.jboss.gravia.provision.DefaultProvisioner;
 import org.jboss.gravia.provision.ProvisionException;
 import org.jboss.gravia.provision.ProvisionResult;
@@ -62,7 +60,7 @@ public final class ProvisionerService implements Provisioner {
     private Provisioner delegate;
 
     @Activate
-    void activate(BundleContext context) throws JMException {
+    void activate(BundleContext context) {
         delegate = new DefaultProvisioner(environment, resolver, repository, installer);
     }
 
