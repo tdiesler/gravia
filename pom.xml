@@ -100,11 +100,12 @@
         <version-apache-felix-scr-plugin>1.15.0</version-apache-felix-scr-plugin>
         <version-maven-antrun-plugin>1.7</version-maven-antrun-plugin>
         <version-maven-assembly-plugin>2.4</version-maven-assembly-plugin>
-        <version-maven-compiler-plugin>3.1</version-maven-compiler-plugin>
         <version-maven-bundle-plugin>2.3.4</version-maven-bundle-plugin>
+        <version-maven-compiler-plugin>3.1</version-maven-compiler-plugin>
+        <version-maven-enforcer-plugin>1.3.1</version-maven-enforcer-plugin>
         <version-maven-javadoc-plugin>2.9.1</version-maven-javadoc-plugin>
         <version-maven-release-plugin>2.5</version-maven-release-plugin>
-        <version-maven-source-plugin>2.2.1</version-maven-source-plugin>
+        <version-maven-source-plugin>2.3</version-maven-source-plugin>
         <version-maven-surefire-plugin>2.16</version-maven-surefire-plugin>
 
         <surefire.system.args>-ea</surefire.system.args>
@@ -403,9 +404,15 @@
                         <target>1.7</target>
                     </configuration>
                 </plugin>
+	            <plugin>
+	                <groupId>org.apache.maven.plugins</groupId>
+	                <artifactId>maven-enforcer-plugin</artifactId>
+	                <version>${version-maven-enforcer-plugin}</version>
+	            </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
+	                <version>${version-maven-javadoc-plugin}</version>
                     <configuration>
                         <!-- Default configuration for all reports -->
                         <excludePackageNames>*.gravia.container.*:*.extension.gravia:*.internal:*.embedded.osgi:*.test</excludePackageNames>
@@ -478,6 +485,8 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        
+        <!-- Plugins -->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -495,7 +504,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.3.1</version>
                 <executions>
                     <execution>
                         <id>enforce-versions</id>
