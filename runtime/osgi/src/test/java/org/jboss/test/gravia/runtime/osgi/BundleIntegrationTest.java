@@ -66,7 +66,7 @@ import org.osgi.framework.wiring.BundleWiring;
 @RunWith(Arquillian.class)
 public class BundleIntegrationTest {
 
-    private static final String BUNDLE_A = "bundleA";
+    private static final String BUNDLE_B = "bundleB";
 
     @ArquillianResource
     Deployer deployer;
@@ -124,70 +124,70 @@ public class BundleIntegrationTest {
         rtcontext.addModuleListener(listener);
 
         // Install the Bundle
-        InputStream input = deployer.getDeployment(BUNDLE_A);
-        Bundle bundleA = bundleContext.installBundle(BUNDLE_A, input);
+        InputStream input = deployer.getDeployment(BUNDLE_B);
+        Bundle bundleB = bundleContext.installBundle(BUNDLE_B, input);
         Assert.assertTrue("No module events", events.isEmpty());
-        Module moduleA = runtime.getModule(bundleA.getBundleId());
-        Assert.assertNull("Module null", moduleA);
+        Module moduleB = runtime.getModule(bundleB.getBundleId());
+        Assert.assertNull("Module null", moduleB);
 
         // Resolve the Bundle
-        URL resURL = bundleA.getResource(JarFile.MANIFEST_NAME);
+        URL resURL = bundleB.getResource(JarFile.MANIFEST_NAME);
         Assert.assertNotNull("Manifest not null", resURL);
-        Assert.assertEquals("Bundle RESOLVED", Bundle.RESOLVED, bundleA.getState());
+        Assert.assertEquals("Bundle RESOLVED", Bundle.RESOLVED, bundleB.getState());
 
         // Verify that the Module is available
-        moduleA = runtime.getModule(bundleA.getBundleId());
-        Assert.assertNotNull("Module not null", moduleA);
-        Assert.assertEquals(Module.State.INSTALLED, moduleA.getState());
-        ModuleContext contextA = moduleA.getModuleContext();
-        Assert.assertNull("ModuleContext null", contextA);
+        moduleB = runtime.getModule(bundleB.getBundleId());
+        Assert.assertNotNull("Module not null", moduleB);
+        Assert.assertEquals(Module.State.INSTALLED, moduleB.getState());
+        ModuleContext contextB = moduleB.getModuleContext();
+        Assert.assertNull("ModuleContext null", contextB);
 
         // Verify Module events
         Assert.assertEquals("Module events", 1, events.size());
-        Assert.assertEquals("bundleA:1.0.0:INSTALLED", events.get(0));
+        Assert.assertEquals("bundleB:1.0.0:INSTALLED", events.get(0));
 
         // Start the Bundle
-        bundleA.start();
-        Assert.assertEquals("Bundle ACTIVE", Bundle.ACTIVE, bundleA.getState());
-        Assert.assertEquals(Module.State.ACTIVE, moduleA.getState());
-        contextA = moduleA.getModuleContext();
-        Assert.assertNotNull("ModuleContext not null", contextA);
-        sref = contextA.getServiceReference(String.class);
+        bundleB.start();
+        Assert.assertEquals("Bundle ACTIVE", Bundle.ACTIVE, bundleB.getState());
+        Assert.assertEquals(Module.State.ACTIVE, moduleB.getState());
+        contextB = moduleB.getModuleContext();
+        Assert.assertNotNull("ModuleContext not null", contextB);
+        sref = contextB.getServiceReference(String.class);
         Assert.assertNotNull("ServiceReference not null", sref);
-        Assert.assertEquals("bundleA:1.0.0", contextA.getService(sref));
+        Assert.assertEquals("bundleB:1.0.0", contextB.getService(sref));
 
         // Verify Module events
         Assert.assertEquals("Module events", 3, events.size());
-        Assert.assertEquals("bundleA:1.0.0:STARTING", events.get(1));
-        Assert.assertEquals("bundleA:1.0.0:STARTED", events.get(2));
+        Assert.assertEquals("bundleB:1.0.0:STARTING", events.get(1));
+        Assert.assertEquals("bundleB:1.0.0:STARTED", events.get(2));
 
         // Stop the Bundle
-        bundleA.stop();
-        Assert.assertEquals("Bundle RESOLVED", Bundle.RESOLVED, bundleA.getState());
-        Assert.assertEquals(Module.State.INSTALLED, moduleA.getState());
-        contextA = moduleA.getModuleContext();
-        Assert.assertNull("ModuleContext null", contextA);
+        bundleB.stop();
+        Assert.assertEquals("Bundle RESOLVED", Bundle.RESOLVED, bundleB.getState());
+        Assert.assertEquals(Module.State.INSTALLED, moduleB.getState());
+        contextB = moduleB.getModuleContext();
+        Assert.assertNull("ModuleContext null", contextB);
         sref = rtcontext.getServiceReference(String.class);
         Assert.assertNull("ServiceReference null", sref);
 
         // Verify Module events
         Assert.assertEquals("Module events", 5, events.size());
-        Assert.assertEquals("bundleA:1.0.0:STOPPING", events.get(3));
-        Assert.assertEquals("bundleA:1.0.0:STOPPED", events.get(4));
+        Assert.assertEquals("bundleB:1.0.0:STOPPING", events.get(3));
+        Assert.assertEquals("bundleB:1.0.0:STOPPED", events.get(4));
 
         // Uninstall the Bundle
-        bundleA.uninstall();
-        Assert.assertEquals("Bundle UNINSTALLED", Bundle.UNINSTALLED, bundleA.getState());
-        Assert.assertEquals(Module.State.UNINSTALLED, moduleA.getState());
+        bundleB.uninstall();
+        Assert.assertEquals("Bundle UNINSTALLED", Bundle.UNINSTALLED, bundleB.getState());
+        Assert.assertEquals(Module.State.UNINSTALLED, moduleB.getState());
 
         // Verify Module events
         Assert.assertEquals("Module events", 6, events.size());
-        Assert.assertEquals("bundleA:1.0.0:UNINSTALLED", events.get(5));
+        Assert.assertEquals("bundleB:1.0.0:UNINSTALLED", events.get(5));
     }
 
-    @Deployment(name = BUNDLE_A, testable = false, managed = false)
-    public static Archive<?> bundleA() {
-        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, BUNDLE_A);
+    @Deployment(name = BUNDLE_B, testable = false, managed = false)
+    public static Archive<?> bundleB() {
+        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, BUNDLE_B);
         archive.addClasses(SimpleBundleActivator.class);
         archive.setManifest(new Asset() {
             @Override

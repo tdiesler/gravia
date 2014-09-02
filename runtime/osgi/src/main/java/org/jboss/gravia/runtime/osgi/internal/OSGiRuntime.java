@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.resource.Attachable;
@@ -74,7 +73,6 @@ public final class OSGiRuntime extends AbstractRuntime {
     private final BundleContext context;
     private final BundleListener installListener;
     private final URLStreamHandlerTracker streamHandlerTracker;
-    private final WeakHashMap<Bundle, Module> uninstalled = new WeakHashMap<Bundle, Module>();
 
     public OSGiRuntime(BundleContext context, PropertiesProvider propertiesProvider) {
         super(propertiesProvider);
@@ -142,22 +140,13 @@ public final class OSGiRuntime extends AbstractRuntime {
                 if (eventType == BundleEvent.RESOLVED) {
                     installModule(bundle);
                 } else if (eventType == BundleEvent.UNINSTALLED) {
-                    Module module = getModule(bundle);
+                    Module module = getModule(bundle.getBundleId());
                     if (module != null) {
-                        uninstalled.put(bundle, module);
                         uninstallModule(module);
                     }
                 }
             }
         };
-    }
-
-    Module getModule(Bundle bundle) {
-        Module module = super.getModule(bundle.getBundleId());
-        if (module == null && bundle.getState() == Bundle.UNINSTALLED) {
-            module = uninstalled.get(bundle);
-        }
-        return module;
     }
 
     @Override

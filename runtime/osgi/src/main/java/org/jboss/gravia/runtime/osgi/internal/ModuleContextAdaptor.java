@@ -189,7 +189,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
 
     private Module mappedModule(Bundle bundle) {
         OSGiRuntime runtime = (OSGiRuntime) getModule().adapt(Runtime.class);
-        return runtime.getModule(bundle);
+        return runtime.getModule(bundle.getBundleId());
     }
 
     @SuppressWarnings("unchecked")
