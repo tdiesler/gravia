@@ -42,8 +42,8 @@ import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.jboss.test.gravia.runtime.osgi.sub.b1.B1;
-import org.jboss.test.gravia.runtime.osgi.sub.b2.B2;
+import org.jboss.test.gravia.runtime.osgi.sub.a.AttachedType;
+import org.jboss.test.gravia.runtime.osgi.sub.a.OSGiTestHelper;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,17 +51,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleReference;
 
 /**
- * Test Bundle.update();
+ * Test fragment deployment;
  *
  * @author Thomas.Diesler@jboss.com
  */
 @RunWith(Arquillian.class)
-public class BundleUpdateTestCase {
+public class FragmentTest {
 
-    private static final String BUNDLE_REV0 = "bundle-rev0";
-    private static final String BUNDLE_REV1 = "bundle-rev1";
+    static final String GOOD_BUNDLE = "good-bundle";
+    static final String GOOD_FRAGMENT = "good-fragment";
 
     @ArquillianResource
     Deployer deployer;
@@ -82,7 +83,8 @@ public class BundleUpdateTestCase {
 
     @Deployment
     public static JavaArchive create() {
-        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "bundle-update-test");
+        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "fragment-test");
+        archive.addClasses(OSGiTestHelper.class);
         archive.setManifest(new Asset() {
             public InputStream openStream() {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
@@ -96,7 +98,8 @@ public class BundleUpdateTestCase {
     }
 
     @Test
-    public void testUpdateBundle() throws Exception {
+    public void testAttachedFragment() throws Exception {
+
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
         ModuleContext rtcontext = runtime.getModuleContext();
 
@@ -113,92 +116,102 @@ public class BundleUpdateTestCase {
         };
         rtcontext.addModuleListener(listener);
 
-        InputStream input = deployer.getDeployment(BUNDLE_REV0);
-        Bundle bundle = bundleContext.installBundle(BUNDLE_REV0, input);
+        // Deploy the fragment
+        InputStream input = deployer.getDeployment(GOOD_FRAGMENT);
+        Bundle fragment = bundleContext.installBundle(GOOD_FRAGMENT, input);
         try {
             Assert.assertTrue(events.isEmpty());
-
-            bundle.start();
-            assertLoadClass(bundle, "org.jboss.test.gravia.runtime.osgi.sub.b1.B1");
-            assertLoadClassFail(bundle, "org.jboss.test.gravia.runtime.osgi.sub.b2.B2");
-
-            Assert.assertEquals(3, events.size());
-            Assert.assertEquals("update-test:1.0.0:INSTALLED", events.remove(0));
-            Assert.assertEquals("update-test:1.0.0:STARTING", events.remove(0));
-            Assert.assertEquals("update-test:1.0.0:STARTED", events.remove(0));
-
-            InputStream is = deployer.getDeployment(BUNDLE_REV1);
-            bundle.update(is);
-            assertLoadClass(bundle, "org.jboss.test.gravia.runtime.osgi.sub.b2.B2");
-            assertLoadClassFail(bundle, "org.jboss.test.gravia.runtime.osgi.sub.b1.B1");
-
-            Assert.assertEquals(6, events.size());
-            Assert.assertEquals("update-test:1.0.0:STOPPING", events.remove(0));
-            Assert.assertEquals("update-test:1.0.0:STOPPED", events.remove(0));
-            Assert.assertEquals("update-test:1.0.0:UNINSTALLED", events.remove(0));
-            Assert.assertEquals("update-test:1.0.0:INSTALLED", events.remove(0));
-            Assert.assertEquals("update-test:1.0.0:STARTING", events.remove(0));
-            Assert.assertEquals("update-test:1.0.0:STARTED", events.remove(0));
+            
+            // Deploy the bundle
+            input = deployer.getDeployment(GOOD_BUNDLE);
+            Bundle host = bundleContext.installBundle("bundle-host-attached", input);
+            try {
+                Class<?> clazz = OSGiTestHelper.assertLoadClass(host, "org.jboss.test.gravia.runtime.osgi.sub.a.AttachedType");
+                Assert.assertSame(host, ((BundleReference) clazz.getClassLoader()).getBundle());
+                Assert.assertEquals(1, events.size());
+                Assert.assertEquals("good-bundle:0.0.0:INSTALLED", events.remove(0));
+            } finally {
+                host.uninstall();
+                Assert.assertEquals(1, events.size());
+                Assert.assertEquals("good-bundle:0.0.0:UNINSTALLED", events.remove(0));
+            }
         } finally {
-            bundle.uninstall();
+            fragment.uninstall();
+            Assert.assertTrue(events.isEmpty());
         }
-
-        Assert.assertEquals(3, events.size());
-        Assert.assertEquals("update-test:1.0.0:STOPPING", events.remove(0));
-        Assert.assertEquals("update-test:1.0.0:STOPPED", events.remove(0));
-        Assert.assertEquals("update-test:1.0.0:UNINSTALLED", events.remove(0));
     }
 
-    private static Class<?> assertLoadClass(Bundle bundle, String className) {
+    @Test
+    public void testUnattachedFragment() throws Exception {
+
+        Runtime runtime = RuntimeLocator.getRequiredRuntime();
+        ModuleContext rtcontext = runtime.getModuleContext();
+
+        final List<String> events = new ArrayList<String>();
+        ModuleListener listener = new SynchronousModuleListener() {
+            @Override
+            public void moduleChanged(ModuleEvent event) {
+                Module module = event.getModule();
+                String modid = module.getIdentity().toString();
+                String evtid = ConstantsHelper.moduleEvent(event.getType());
+                String message = modid + ":" + evtid;
+                events.add(message);
+            }
+        };
+        rtcontext.addModuleListener(listener);
+
+        // Deploy the bundle
+        InputStream input = deployer.getDeployment(GOOD_BUNDLE);
+        Bundle host = bundleContext.installBundle("bundle-host", input);
         try {
-            return bundle.loadClass(className);
-        } catch (ClassNotFoundException ex) {
-            String message = "Unexpected ClassNotFoundException for: " + bundle.getSymbolicName() + " loads " + className;
-            Assert.fail(message);
-            return null;
+            Assert.assertTrue(events.isEmpty());
+            OSGiTestHelper.assertLoadClassFail(host, "org.jboss.test.gravia.runtime.osgi.sub.a.AttachedType");
+            Assert.assertEquals(1, events.size());
+            Assert.assertEquals("good-bundle:0.0.0:INSTALLED", events.remove(0));
+            
+            // Deploy the fragment
+            input = deployer.getDeployment(GOOD_FRAGMENT);
+            Bundle fragment = bundleContext.installBundle(GOOD_FRAGMENT, input);
+            try {
+                OSGiTestHelper.assertLoadClassFail(host, "org.jboss.test.gravia.runtime.osgi.sub.a.AttachedType");
+                Assert.assertTrue(events.isEmpty());
+            } finally {
+                fragment.uninstall();
+                Assert.assertTrue(events.isEmpty());
+            }
+        } finally {
+            host.uninstall();
+            Assert.assertEquals(1, events.size());
+            Assert.assertEquals("good-bundle:0.0.0:UNINSTALLED", events.remove(0));
         }
     }
 
-    private static void assertLoadClassFail(Bundle bundle, String className) {
-        try {
-            Class<?> clazz = bundle.loadClass(className);
-            String message = bundle.getSymbolicName() + " loads " + className;
-            Assert.fail("ClassNotFoundException expected for: " + message + "\nLoaded from " + clazz.getClassLoader());
-        } catch (ClassNotFoundException ex) {
-            // expected
-        }
-    }
-
-    @Deployment(name = BUNDLE_REV0, managed = false, testable = false)
-    public static JavaArchive getInitialBundle() {
-        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, BUNDLE_REV0);
-        archive.addClass(B1.class);
+    @Deployment(name = GOOD_BUNDLE, managed = false, testable = false)
+    public static JavaArchive getGoodBundleArchive() {
+        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, GOOD_BUNDLE);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleManifestVersion(2);
-                builder.addBundleSymbolicName("update-test");
-                builder.addBundleVersion("1.0.0");
-                builder.addExportPackages(B1.class);
+                builder.addBundleSymbolicName(archive.getName());
                 return builder.openStream();
             }
         });
         return archive;
     }
 
-    @Deployment(name = BUNDLE_REV1, managed = false, testable = false)
-    public static JavaArchive getUpdatedBundle() {
-        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, BUNDLE_REV1);
-        archive.addClass(B2.class);
+    @Deployment(name = GOOD_FRAGMENT, managed = false, testable = false)
+    public static JavaArchive getGoodFragmentArchive() {
+        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, GOOD_FRAGMENT);
+        archive.addClasses(AttachedType.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleManifestVersion(2);
-                builder.addBundleSymbolicName("update-test");
-                builder.addBundleVersion("2.0.0");
-                builder.addExportPackages(B2.class);
+                builder.addBundleSymbolicName(archive.getName());
+                builder.addFragmentHost(GOOD_BUNDLE);
                 return builder.openStream();
             }
         });
