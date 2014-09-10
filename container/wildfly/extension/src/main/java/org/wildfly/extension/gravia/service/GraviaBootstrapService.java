@@ -79,11 +79,21 @@ public class GraviaBootstrapService extends AbstractService<Void> {
     @Override
     public void start(final StartContext startContext) throws StartException {
         LOGGER.info("Activating Gravia Subsystem");
-
         Runtime runtime = injectedRuntime.getValue();
-        ModuleContext syscontext = runtime.getModuleContext();
+        installExtensionModule(startContext, runtime);
+        installGraviaServices(startContext, runtime);
+    }
 
-        // Install and start this as a {@link Module}
+    @Override
+    public void stop(StopContext context) {
+        uninstallGraviaServices();
+        uninstallExtensionModule();
+    }
+
+    /**
+     * Install and start the gravia extension as a {@link Module}
+     */
+    public void installExtensionModule(StartContext startContext, Runtime runtime) throws StartException {
         ModuleClassLoader classLoader = (ModuleClassLoader) getClass().getClassLoader();
         try {
             URL extensionURL = null;
@@ -112,23 +122,34 @@ public class GraviaBootstrapService extends AbstractService<Void> {
         } catch (Exception ex) {
             throw new StartException(ex);
         }
+    }
 
-        // Open service trackers for {@link Resolver}, {@link Repository}, {@link Provisioner}
+    /**
+     * Uninstall the gravia extension module
+     */
+    public void uninstallExtensionModule() {
+        if (module != null) {
+            module.uninstall();
+        }
+    }
+    
+    /**
+     * Open service trackers for {@link Resolver}, {@link Repository}, {@link Provisioner}
+     */
+    public void installGraviaServices(final StartContext startContext, Runtime runtime) {
+        ModuleContext syscontext = runtime.getModuleContext();
         trackers = new HashSet<ServiceTracker<?, ?>>();
         trackers.add(resolverTracker(syscontext, startContext.getChildTarget()));
         trackers.add(repositoryTracker(syscontext, startContext.getChildTarget()));
         trackers.add(provisionerTracker(syscontext, startContext.getChildTarget()));
     }
 
-    @Override
-    public void stop(StopContext context) {
-        // Close the service trackers
+    /**
+     * Close the service trackers for {@link Resolver}, {@link Repository}, {@link Provisioner}
+     */
+    public void uninstallGraviaServices() {
         for (ServiceTracker<?, ?> tracker : trackers) {
             tracker.close();
-        }
-        // Uninstall the bootstrap module
-        if (module != null) {
-            module.uninstall();
         }
     }
 

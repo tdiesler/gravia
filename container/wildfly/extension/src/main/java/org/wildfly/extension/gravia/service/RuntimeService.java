@@ -21,6 +21,7 @@ package org.wildfly.extension.gravia.service;
 
 import java.io.File;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.server.ServerEnvironment;
@@ -37,6 +38,7 @@ import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
+import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.InjectedValue;
 import org.wildfly.extension.gravia.GraviaConstants;
 
@@ -49,6 +51,7 @@ import org.wildfly.extension.gravia.GraviaConstants;
 public class RuntimeService extends AbstractService<Runtime> {
 
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
+    private Runtime runtime;
 
     public ServiceController<Runtime> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
         ServiceBuilder<Runtime> builder = serviceTarget.addService(GraviaConstants.RUNTIME_SERVICE_NAME, this);
@@ -59,21 +62,33 @@ public class RuntimeService extends AbstractService<Runtime> {
 
     @Override
     public void start(StartContext startContext) throws StartException {
-        PropertiesProvider propsProvider = new DefaultPropertiesProvider(getRuntimeProperties(), true);
-        Runtime runtime = RuntimeLocator.createRuntime(new WildFlyRuntimeFactory(), propsProvider);
+        PropertiesProvider propsProvider = new DefaultPropertiesProvider(initialProperties(), true);
+        runtime = RuntimeLocator.createRuntime(new WildFlyRuntimeFactory(), propsProvider);
         runtime.init();
     }
 
     @Override
+    public void stop(StopContext context) {
+        try {
+            runtime.shutdown();
+            runtime.awaitShutdown(10, TimeUnit.SECONDS);
+        } catch (InterruptedException ex) {
+            // ignore
+        } finally {
+            RuntimeLocator.releaseRuntime();
+        }
+    }
+
+    @Override
     public Runtime getValue() throws IllegalStateException {
-        return RuntimeLocator.getRequiredRuntime();
+        return runtime;
     }
 
     protected ServerEnvironment getServerEnvironment() {
         return injectedServerEnvironment.getValue();
     }
 
-    protected Properties getRuntimeProperties() {
+    protected Properties initialProperties() {
 
         Properties properties = new Properties();
         ServerEnvironment serverEnv = getServerEnvironment();
