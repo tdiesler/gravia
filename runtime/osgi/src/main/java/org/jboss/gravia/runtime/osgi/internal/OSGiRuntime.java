@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,7 @@ public final class OSGiRuntime extends AbstractRuntime {
     private final BundleContext context;
     private final BundleListener installListener;
     private final URLStreamHandlerTracker streamHandlerTracker;
+    private final Map<Long, Module> uninstalled = new HashMap<Long, Module>();
 
     public OSGiRuntime(BundleContext context, PropertiesProvider propertiesProvider) {
         super(propertiesProvider);
@@ -131,7 +133,7 @@ public final class OSGiRuntime extends AbstractRuntime {
         return tracker;
     }
 
-    private SynchronousBundleListener createBundleInstallListener() {
+    private BundleListener createBundleInstallListener() {
         return new SynchronousBundleListener() {
             @Override
             public void bundleChanged(BundleEvent event) {
@@ -140,13 +142,33 @@ public final class OSGiRuntime extends AbstractRuntime {
                 if (eventType == BundleEvent.RESOLVED) {
                     installModule(bundle);
                 } else if (eventType == BundleEvent.UNINSTALLED) {
-                    Module module = getModule(bundle.getBundleId());
+                    Module module = getModule(bundle);
                     if (module != null) {
-                        uninstallModule(module);
+                        synchronized (uninstalled) {
+                            uninstalled.put(bundle.getBundleId(), module);
+                            uninstallModule(module);
+                        }
                     }
                 }
             }
         };
+    }
+
+    Module getModule(Bundle bundle) {
+        Module module = super.getModule(bundle.getBundleId());
+        if (module == null && bundle.getState() == Bundle.UNINSTALLED) {
+            synchronized (uninstalled) {
+                module = uninstalled.get(bundle.getBundleId());
+                
+                // Cleanup uninstalled modules for which there is no bundle any more
+                for (Long bundleId : new HashSet<Long>(uninstalled.keySet())) {
+                    if (context.getBundle(bundleId) == null) {
+                        uninstalled.remove(bundleId);
+                    }
+                }
+            }
+        }
+        return module;
     }
 
     @Override
