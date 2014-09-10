@@ -24,6 +24,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jboss.gravia.utils.IllegalStateAssertion;
+
 /**
  * Locate a service in the {@link Runtime}
  *
@@ -55,8 +57,7 @@ public final class ServiceLocator {
 
     public static <T> T getRequiredService(ModuleContext moduleContext, Class<T> type) {
         T service = getService(moduleContext, type);
-        if (service == null)
-            throw new IllegalStateException("Service not available: " + type.getName());
+        IllegalStateAssertion.assertNotNull(service, "Service not available: " + type.getName());
         return service;
     }
 
@@ -88,12 +89,12 @@ public final class ServiceLocator {
 
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<T> serviceRef = new AtomicReference<T>();
-        final Filter filter = filterspec != null ? moduleContext.createFilter(filterspec) : null;
+        final Filter serviceFilter = filterspec != null ? moduleContext.createFilter(filterspec) : null;
         ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(moduleContext, type, null) {
             @Override
             public T addingService(ServiceReference<T> sref) {
                 T service = super.addingService(sref);
-                if (filter == null || filter.match(sref)) {
+                if (serviceFilter == null || serviceFilter.match(sref)) {
                     serviceRef.set(moduleContext.getService(sref));
                     latch.countDown();
                 }
@@ -103,8 +104,8 @@ public final class ServiceLocator {
         tracker.open();
         try {
             if (!latch.await(timeout, unit)) {
-                String srvspec = (type != null ? type.getName() : "") + (filter != null ? filter : "");
-                throw new RuntimeException("Cannot obtain service: " + srvspec);
+                String srvspec = (type != null ? type.getName() : "") + (serviceFilter != null ? serviceFilter : "");
+                throw new IllegalStateException("Cannot obtain service: " + srvspec);
             }
             return serviceRef.get();
         } catch (InterruptedException ex) {
