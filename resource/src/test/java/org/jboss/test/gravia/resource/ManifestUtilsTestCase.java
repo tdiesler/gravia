@@ -21,7 +21,6 @@ package org.jboss.test.gravia.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
 import org.jboss.gravia.resource.ManifestBuilder;
@@ -42,14 +41,6 @@ import org.junit.Test;
  * @since 27-Jan-2012
  */
 public class ManifestUtilsTestCase {
-
-    @Test
-    @SuppressWarnings("resource")
-    public void testJarStream() throws IOException {
-        InputStream input = getArchive().as(ZipExporter.class).exportAsInputStream();
-        Manifest manifest = new JarInputStream(input).getManifest();
-        Assert.assertNotNull(manifest);
-    }
 
     @Test
     public void testManifestUtils() throws IOException {
