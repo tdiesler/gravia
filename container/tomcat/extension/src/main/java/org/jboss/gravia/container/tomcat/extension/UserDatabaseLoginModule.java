@@ -20,7 +20,6 @@
 package org.jboss.gravia.container.tomcat.extension;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -132,34 +131,5 @@ public class UserDatabaseLoginModule implements LoginModule {
         subject.getPrincipals().remove(userPrincipal);
         subject.getPrincipals().remove(rolePrincipal);
         return true;
-    }
-
-    private static class UserPrincipal implements Principal {
-
-        private final String name;
-
-        public UserPrincipal(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-    }
-
-    private static class RolePrincipal implements Principal {
-
-        private final String name;
-
-        public RolePrincipal(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
     }
 }

@@ -68,12 +68,6 @@ public class ServletContextPropertiesProvider extends AbstractPropertiesProvider
 		Properties properties = new Properties();
 		properties.setProperty(Constants.RUNTIME_TYPE, RuntimeType.TOMCAT.toString());
 
-		String storageClean = servletContext.getInitParameter(Constants.RUNTIME_STORAGE_CLEAN);
-		if (storageClean == null) {
-			storageClean = Constants.RUNTIME_STORAGE_CLEAN_ONFIRSTINIT;
-		}
-		properties.setProperty(Constants.RUNTIME_STORAGE_CLEAN, storageClean);
-
 		String storageDir = servletContext.getInitParameter(Constants.RUNTIME_STORAGE_DIR);
 		if (storageDir == null) {
 			storageDir = new File(catalinaWork, Constants.RUNTIME_STORAGE_DEFAULT).getAbsolutePath();
