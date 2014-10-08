@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jboss.gravia</groupId>
         <artifactId>gravia-itests</artifactId>
-        <version>1.1.0.Beta42</version>
+        <version>1.1.0.Beta43-SNAPSHOT</version>
     </parent>
 
     <name>Gravia :: Integration Tests :: Tomcat</name>
