@@ -30,6 +30,7 @@ import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.server.ServerEnvironment;
 import org.jboss.as.server.ServerEnvironmentService;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;
+import org.jboss.gravia.resolver.DefaultEnvironment;
 import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.resource.Capability;
 import org.jboss.gravia.resource.DefaultMatchPolicy;
@@ -107,6 +108,7 @@ public class EnvironmentService extends AbstractService<Environment> {
     static class SystemResourceStore implements ResourceStore {
 
         private final File modulesDir;
+        private final ResourceStore cachedResources = new DefaultEnvironment("SystemCache");
 
         SystemResourceStore(File modulesDir) {
             this.modulesDir = modulesDir;
@@ -139,76 +141,93 @@ public class EnvironmentService extends AbstractService<Environment> {
 
         @Override
         public Resource getResource(ResourceIdentity identity) {
-            String symbolicName = identity.getSymbolicName();
-            Version version = identity.getVersion();
-            String modname = symbolicName + (version != Version.emptyVersion ? ":" + version : "");
-            ModuleIdentifier modid = ModuleIdentifier.fromString(modname);
-            try {
-                ModuleLoader moduleLoader = Module.getBootModuleLoader();
-                moduleLoader.loadModule(modid);
-            } catch (ModuleLoadException ex) {
-                return null;
-            }
-            DefaultResourceBuilder builder = new DefaultResourceBuilder();
-            Capability icap = builder.addIdentityCapability(symbolicName, version);
-            icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
-            return builder.getResource();
-        }
-
-        @Override
-        public Set<Capability> findProviders(Requirement requirement) {
-            String symbolicName = (String) requirement.getAttribute(IdentityNamespace.IDENTITY_NAMESPACE);
-            VersionRange versionRange = (VersionRange) requirement.getAttribute(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
-
-            Set<Capability> result = new HashSet<Capability>();
-
-            // Find the module versions that match
-            File moduleDir = new File(modulesDir, symbolicName.replace(".", File.separator));
-            if (versionRange != null && moduleDir.isDirectory()) {
-                for (File file : moduleDir.listFiles()) {
-                    if (!file.isDirectory() || file.getName().equals("main")) {
-                        continue;
-                    }
-                    Version version;
-                    try {
-                        version = new Version(file.getName());
-                    } catch (Throwable th) {
-                        continue;
-                    }
-                    if (!versionRange.includes(version)) {
-                        continue;
-                    }
-                    String modname = symbolicName + ":" + version;
+            synchronized (cachedResources) {
+                Resource resource = cachedResources.getResource(identity);
+                if (resource == null) {
+                    String symbolicName = identity.getSymbolicName();
+                    Version version = identity.getVersion();
+                    String modname = symbolicName + (version != Version.emptyVersion ? ":" + version : "");
                     ModuleIdentifier modid = ModuleIdentifier.fromString(modname);
+                    ModuleLoader moduleLoader = Module.getBootModuleLoader();
                     try {
-                        ModuleLoader moduleLoader = Module.getBootModuleLoader();
                         moduleLoader.loadModule(modid);
                     } catch (ModuleLoadException ex) {
-                        continue;
+                        return null;
                     }
                     DefaultResourceBuilder builder = new DefaultResourceBuilder();
                     Capability icap = builder.addIdentityCapability(symbolicName, version);
                     icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
-                    result.add(builder.getResource().getIdentityCapability());
+                    icap.getAttributes().put(ModuleIdentifier.class.getName(), modid);
+                    resource = cachedResources.addResource(builder.getResource());
                 }
+                return resource;
             }
+        }
 
-            // Add the main module
-            if (result.isEmpty()) {
-                ModuleIdentifier modid = ModuleIdentifier.fromString(symbolicName);
-                try {
-                    ModuleLoader moduleLoader = Module.getBootModuleLoader();
-                    moduleLoader.loadModule(modid);
-
-                    DefaultResourceBuilder builder = new DefaultResourceBuilder();
-                    Capability icap = builder.addIdentityCapability(symbolicName, Version.emptyVersion);
-                    icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
-                    result.add(builder.getResource().getIdentityCapability());
-                } catch (ModuleLoadException ex) {
-                    // ignore
+        @Override
+        public Set<Capability> findProviders(Requirement requirement) {
+            synchronized (cachedResources) {
+                
+                Set<Capability> result = cachedResources.findProviders(requirement);
+                if (!result.isEmpty()) {
+                    return result;
                 }
+                
+                ModuleLoader moduleLoader = Module.getBootModuleLoader();
+                
+                result = new HashSet<Capability>();
+                String symbolicName = (String) requirement.getAttribute(IdentityNamespace.IDENTITY_NAMESPACE);
+                VersionRange versionRange = (VersionRange) requirement.getAttribute(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+
+                // Find the module versions that match
+                File moduleDir = new File(modulesDir, symbolicName.replace(".", File.separator));
+                if (versionRange != null && moduleDir.isDirectory()) {
+                    for (File file : moduleDir.listFiles()) {
+                        if (!file.isDirectory() || file.getName().equals("main")) {
+                            continue;
+                        }
+                        Version version;
+                        try {
+                            version = new Version(file.getName());
+                        } catch (Throwable th) {
+                            continue;
+                        }
+                        if (!versionRange.includes(version)) {
+                            continue;
+                        }
+                        String modname = symbolicName + ":" + version;
+                        ModuleIdentifier modid = ModuleIdentifier.fromString(modname);
+                        try {
+                            moduleLoader.loadModule(modid);
+                        } catch (ModuleLoadException ex) {
+                            continue;
+                        }
+                        DefaultResourceBuilder builder = new DefaultResourceBuilder();
+                        Capability icap = builder.addIdentityCapability(symbolicName, version);
+                        icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
+                        icap.getAttributes().put(ModuleIdentifier.class.getName(), modid);
+                        Resource resource = cachedResources.addResource(builder.getResource());
+                        result.add(resource.getIdentityCapability());
+                    }
+                }
+
+                // Add the main module
+                if (result.isEmpty()) {
+                    ModuleIdentifier modid = ModuleIdentifier.fromString(symbolicName);
+                    try {
+                        moduleLoader.loadModule(modid);
+                        DefaultResourceBuilder builder = new DefaultResourceBuilder();
+                        Capability icap = builder.addIdentityCapability(symbolicName, Version.emptyVersion);
+                        icap.getAttributes().put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, IdentityNamespace.TYPE_ABSTRACT);
+                        icap.getAttributes().put(ModuleIdentifier.class.getName(), modid);
+                        Resource resource = cachedResources.addResource(builder.getResource());
+                        result.add(resource.getIdentityCapability());
+                    } catch (ModuleLoadException ex) {
+                        // ignore
+                    }
+                }
+                return Collections.unmodifiableSet(result);
             }
-            return Collections.unmodifiableSet(result);
         }
     }
 }

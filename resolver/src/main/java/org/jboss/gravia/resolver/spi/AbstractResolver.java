@@ -179,7 +179,7 @@ public abstract class AbstractResolver implements Resolver {
                     itreqs.remove();
                 }
             }
-            throw new ResolutionException("Requirements map to candidates in disconnetced spaces", null, manreqs);
+            throw new ResolutionException("Requirements map to candidates in disconnected spaces", null, manreqs);
         }
         return null;
     }

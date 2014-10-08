@@ -164,14 +164,13 @@ public abstract class AbstractProvisioner implements Provisioner {
         ProvisionResult result = new DefaultProvisionResult(sorted, mapping, env.getWirings(), unstatisfied);
         LOGGER.debug("END findResources");
         LOGGER.debug("  resources: {}", result.getResources());
-        LOGGER.debug("  unsatisfied: {}", result.getUnsatisfiedRequirements());
 
         // Sanity check that we can resolve all result resources
         Set<Resource> mandatory = new LinkedHashSet<Resource>();
         mandatory.addAll(result.getResources());
         try {
             ResolveContext context = new DefaultResolveContext(env, mandatory, null);
-            resolver.resolveAndApply(context).entrySet();
+            resolver.resolveAndApply(context);
         } catch (ResolutionException ex) {
             LOGGER.warn("Cannot resolve provisioner result", ex);
         }
@@ -354,7 +353,7 @@ public abstract class AbstractProvisioner implements Provisioner {
         boolean envModified = false;
         Set<Resource> installable = new HashSet<Resource>();
 
-        LOGGER.debug("Finding unsatisfied reqs");
+        LOGGER.debug("Finding {} unsatisfied reqs", unstatisfied.size());
 
         Iterator<Requirement> itun = unstatisfied.iterator();
         while (itun.hasNext()) {
@@ -362,6 +361,7 @@ public abstract class AbstractProvisioner implements Provisioner {
 
             // Ignore requirements that are already in the environment
             if (!env.findProviders(req).isEmpty()) {
+                LOGGER.debug("Found in environment: {}", req);
                 continue;
             }
 
@@ -377,9 +377,9 @@ public abstract class AbstractProvisioner implements Provisioner {
         // Install the resources that match the unsatisfied reqs
         for (Resource res : installable) {
             if (!resources.contains(res)) {
-                Collection<Requirement> reqs = res.getRequirements(null);
-                LOGGER.debug("Adding %d unsatisfied reqs", reqs.size());
-                unstatisfied.addAll(reqs);
+                Collection<Requirement> unsat = res.getRequirements(null);
+                LOGGER.debug("Adding {} unsatisfied reqs", unsat.size());
+                unstatisfied.addAll(unsat);
                 env.addResource(res);
                 resources.add(res);
                 envModified = true;
@@ -395,7 +395,6 @@ public abstract class AbstractProvisioner implements Provisioner {
     private Capability findProviderInRepository(Requirement req) {
 
         // Find the providers in the repository
-        LOGGER.debug("Find in repository: {}", req);
         Collection<Capability> providers = repository.findProviders(req);
 
         // Remove abstract resources
@@ -413,14 +412,14 @@ public abstract class AbstractProvisioner implements Provisioner {
         Capability cap = null;
         if (providers.size() == 1) {
             cap = providers.iterator().next();
-            LOGGER.debug(" Found one: {}", cap);
+            LOGGER.debug("Found in repository: {}", cap);
         } else if (providers.size() > 1) {
             List<Capability> sorted = new ArrayList<Capability>(providers);
             preferencePolicy.sort(sorted);
-            LOGGER.debug(" Found multiple: {}", sorted);
+            LOGGER.debug("Found multiple in repository: {}", sorted);
             cap = sorted.get(0);
         } else {
-            LOGGER.debug(" Not found: {}", req);
+            LOGGER.debug("Not found: {}", req);
         }
         return cap;
     }
@@ -442,7 +441,7 @@ public abstract class AbstractProvisioner implements Provisioner {
             unstatisfied.clear();
         } catch (ResolutionException ex) {
             for (Requirement req : ex.getUnresolvedRequirements()) {
-                LOGGER.debug(" unresolved: {}", req);
+                LOGGER.debug("Unresolved: {}", req);
             }
         }
     }
