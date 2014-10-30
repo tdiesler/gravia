@@ -178,18 +178,18 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
     @Override
     public <S> S getService(ServiceReference<S> reference) {
         ServiceReferenceAdaptor<S> adaptor = (ServiceReferenceAdaptor<S>) reference;
-        return bundleContext.getService(adaptor.delegate);
+        return adaptor != null ? bundleContext.getService(adaptor.delegate) : null;
     }
 
     @Override
     public boolean ungetService(ServiceReference<?> reference) {
         ServiceReferenceAdaptor<?> adaptor = (ServiceReferenceAdaptor<?>) reference;
-        return bundleContext.ungetService(adaptor.delegate);
+        return adaptor != null ? bundleContext.ungetService(adaptor.delegate) : false;
     }
 
-    private Module mappedModule(Bundle bundle) {
+    private Module mappedModule(Bundle bundle, boolean all) {
         OSGiRuntime runtime = (OSGiRuntime) getModule().adapt(Runtime.class);
-        return runtime.getModule(bundle.getBundleId());
+        return runtime.getModuleInternal(bundle.getBundleId(), all);
     }
 
     @SuppressWarnings("unchecked")
@@ -238,7 +238,8 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         @Override
         public void bundleChanged(BundleEvent event) {
             Integer bndtype = event.getType();
-            Module module = mappedModule(event.getBundle());
+            Bundle bundle = event.getBundle();
+            Module module = mappedModule(bundle, bndtype == BundleEvent.UNRESOLVED);
             Integer modtype = eventMapping.get(bndtype);
             if (module != null && modtype != null) {
                 ModuleEvent moduleEvent = new ModuleEvent(modtype, module);
@@ -320,7 +321,7 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
         @Override
         public Module getModule() {
             Bundle bundle = delegate.getBundle();
-            return mappedModule(bundle);
+            return mappedModule(bundle, false);
         }
 
         @Override
@@ -404,12 +405,12 @@ final class ModuleContextAdaptor extends AbstractModuleContext {
 
         @Override
         public S getService(Bundle bundle, org.osgi.framework.ServiceRegistration<S> registration) {
-            return delegate.getService(mappedModule(bundle), new ServiceRegistrationAdaptor<S>(registration));
+            return delegate.getService(mappedModule(bundle, false), new ServiceRegistrationAdaptor<S>(registration));
         }
 
         @Override
         public void ungetService(Bundle bundle, org.osgi.framework.ServiceRegistration<S> registration, S service) {
-            delegate.ungetService(mappedModule(bundle), new ServiceRegistrationAdaptor<S>(registration), service);
+            delegate.ungetService(mappedModule(bundle, false), new ServiceRegistrationAdaptor<S>(registration), service);
         }
 
         @Override

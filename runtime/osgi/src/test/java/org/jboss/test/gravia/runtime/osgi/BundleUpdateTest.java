@@ -138,17 +138,17 @@ public class BundleUpdateTest {
             Assert.assertEquals("update-test:1.0.0:STOPPING", events.remove(0));
             Assert.assertEquals("update-test:1.0.0:STOPPED", events.remove(0));
             Assert.assertEquals("update-test:1.0.0:UNINSTALLED", events.remove(0));
-            Assert.assertEquals("update-test:1.0.0:INSTALLED", events.remove(0));
-            Assert.assertEquals("update-test:1.0.0:STARTING", events.remove(0));
-            Assert.assertEquals("update-test:1.0.0:STARTED", events.remove(0));
+            Assert.assertEquals("update-test:2.0.0:INSTALLED", events.remove(0));
+            Assert.assertEquals("update-test:2.0.0:STARTING", events.remove(0));
+            Assert.assertEquals("update-test:2.0.0:STARTED", events.remove(0));
         } finally {
             bundle.uninstall();
         }
 
         Assert.assertEquals(3, events.size());
-        Assert.assertEquals("update-test:1.0.0:STOPPING", events.remove(0));
-        Assert.assertEquals("update-test:1.0.0:STOPPED", events.remove(0));
-        Assert.assertEquals("update-test:1.0.0:UNINSTALLED", events.remove(0));
+        Assert.assertEquals("update-test:2.0.0:STOPPING", events.remove(0));
+        Assert.assertEquals("update-test:2.0.0:STOPPED", events.remove(0));
+        Assert.assertEquals("update-test:2.0.0:UNINSTALLED", events.remove(0));
     }
 
     @Deployment(name = BUNDLE_REV0, managed = false, testable = false)

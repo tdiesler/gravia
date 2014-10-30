@@ -61,7 +61,7 @@ import org.osgi.service.component.ComponentContext;
  * @since 04-Oct-2013
  */
 @RunWith(Arquillian.class)
-public class ConfigurationAdminTestCase  {
+public class ConfigurationAdminTest  {
 
     static final String BUNDLE_D = "bundleD";
     static final String BUNDLE_D1 = "bundleD1";
@@ -154,7 +154,7 @@ public class ConfigurationAdminTestCase  {
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
                 builder.addExportPackages(ServiceD.class);
-                builder.addImportPackages(Runtime.class, ComponentContext.class);
+                builder.addImportPackages(Runtime.class, ComponentContext.class, ConfigurationAdmin.class);
                 builder.addImportPackages(ServiceD1.class);
                 builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_D + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.d.ServiceD.xml");
@@ -176,7 +176,7 @@ public class ConfigurationAdminTestCase  {
                 builder.addBundleManifestVersion(2);
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleVersion("1.0.0");
-                builder.addImportPackages(Runtime.class, ComponentContext.class);
+                builder.addImportPackages(Runtime.class, ComponentContext.class, ConfigurationAdmin.class);
                 builder.addExportPackages(ServiceD1.class);
                 builder.addManifestHeader(Constants.GRAVIA_IDENTITY_CAPABILITY, BUNDLE_D1 + ";version=1.0.0");
                 builder.addManifestHeader("Service-Component", "OSGI-INF/org.jboss.test.gravia.runtime.osgi.sub.d1.ServiceD1.xml");

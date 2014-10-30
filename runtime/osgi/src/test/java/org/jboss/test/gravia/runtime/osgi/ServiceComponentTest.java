@@ -54,7 +54,7 @@ import org.osgi.service.component.ComponentContext;
  * @since 04-Oct-2013
  */
 @RunWith(Arquillian.class)
-public class ServiceComponentTestCase  {
+public class ServiceComponentTest  {
 
     static final String BUNDLE_A = "bundleA";
     static final String BUNDLE_A1 = "bundleA1";
@@ -85,7 +85,7 @@ public class ServiceComponentTestCase  {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
-                builder.addImportPackages(OSGiRuntimeLocator.class, Module.class);
+                builder.addImportPackages(OSGiRuntimeLocator.class, Module.class, ComponentContext.class);
                 builder.addDynamicImportPackages(ServiceA.class, OSGiRuntimeLocator.class);
                 return builder.openStream();
             }

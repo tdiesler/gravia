@@ -21,7 +21,10 @@ package org.jboss.test.gravia.runtime.osgi;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.jboss.arquillian.container.test.api.Deployer;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -52,14 +55,17 @@ import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleReference;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.wiring.FrameworkWiring;
 
 /**
- * Test fragment deployment
+ * Test bundle refresh
  *
  * @author Thomas.Diesler@jboss.com
  */
 @RunWith(Arquillian.class)
-public class FragmentTest {
+public class BundleRefreshTest {
 
     static final String GOOD_BUNDLE = "good-bundle";
     static final String GOOD_FRAGMENT = "good-fragment";
@@ -83,14 +89,14 @@ public class FragmentTest {
 
     @Deployment
     public static JavaArchive create() {
-        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "fragment-test");
+        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "refresh-test");
         archive.addClasses(OSGiTestHelper.class);
         archive.setManifest(new Asset() {
             public InputStream openStream() {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
-                builder.addImportPackages(OSGiRuntimeLocator.class, Runtime.class, Resource.class);
+                builder.addImportPackages(OSGiRuntimeLocator.class, Runtime.class, Resource.class, FrameworkWiring.class);
                 return builder.openStream();
             }
         });
@@ -130,59 +136,50 @@ public class FragmentTest {
                 Assert.assertSame(host, ((BundleReference) clazz.getClassLoader()).getBundle());
                 Assert.assertEquals(1, events.size());
                 Assert.assertEquals("good-bundle:0.0.0:INSTALLED", events.remove(0));
+                
+                Module modHostA = runtime.getModule(host.getBundleId());
+                Assert.assertNotNull("Host module not null", modHostA);
+                
+                final CountDownLatch latch = new CountDownLatch(1);
+                FrameworkListener fwrkListener = new FrameworkListener() {
+                    @Override
+                    public void frameworkEvent(FrameworkEvent event) {
+                        if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
+                            latch.countDown();
+                        }
+                    }
+                };
+                FrameworkWiring frmkWiring = bundleContext.getBundle().adapt(FrameworkWiring.class);
+                frmkWiring.refreshBundles(Collections.singleton(host), fwrkListener);
+                
+                Assert.assertTrue(latch.await(3, TimeUnit.SECONDS));
+
+                Assert.assertEquals(1, events.size());
+                Assert.assertEquals("good-bundle:0.0.0:UNINSTALLED", events.remove(0));
+                
+                // The host was not started, so it is not resolved after refresh
+                Module modHostB = runtime.getModule(host.getBundleId());
+                Assert.assertNull("Host module null", modHostB);
+                
+                host.start();
+                modHostB = runtime.getModule(host.getBundleId());
+                Assert.assertNotNull("Host module not null", modHostB);
+                Assert.assertNotSame(modHostA, modHostB);
+                
+                Assert.assertEquals(3, events.size());
+                Assert.assertEquals("good-bundle:0.0.0:INSTALLED", events.remove(0));
+                Assert.assertEquals("good-bundle:0.0.0:STARTING", events.remove(0));
+                Assert.assertEquals("good-bundle:0.0.0:STARTED", events.remove(0));
             } finally {
                 host.uninstall();
-                Assert.assertEquals(1, events.size());
+                Assert.assertEquals(3, events.size());
+                Assert.assertEquals("good-bundle:0.0.0:STOPPING", events.remove(0));
+                Assert.assertEquals("good-bundle:0.0.0:STOPPED", events.remove(0));
                 Assert.assertEquals("good-bundle:0.0.0:UNINSTALLED", events.remove(0));
             }
         } finally {
             fragment.uninstall();
             Assert.assertTrue(events.isEmpty());
-        }
-    }
-
-    @Test
-    public void testUnattachedFragment() throws Exception {
-
-        Runtime runtime = RuntimeLocator.getRequiredRuntime();
-        ModuleContext rtcontext = runtime.getModuleContext();
-
-        final List<String> events = new ArrayList<String>();
-        ModuleListener listener = new SynchronousModuleListener() {
-            @Override
-            public void moduleChanged(ModuleEvent event) {
-                Module module = event.getModule();
-                String modid = module.getIdentity().toString();
-                String evtid = ConstantsHelper.moduleEvent(event.getType());
-                String message = modid + ":" + evtid;
-                events.add(message);
-            }
-        };
-        rtcontext.addModuleListener(listener);
-
-        // Deploy the bundle
-        InputStream input = deployer.getDeployment(GOOD_BUNDLE);
-        Bundle host = bundleContext.installBundle("bundle-host", input);
-        try {
-            Assert.assertTrue(events.isEmpty());
-            OSGiTestHelper.assertLoadClassFail(host, "org.jboss.test.gravia.runtime.osgi.sub.a.AttachedType");
-            Assert.assertEquals(1, events.size());
-            Assert.assertEquals("good-bundle:0.0.0:INSTALLED", events.remove(0));
-            
-            // Deploy the fragment
-            input = deployer.getDeployment(GOOD_FRAGMENT);
-            Bundle fragment = bundleContext.installBundle(GOOD_FRAGMENT, input);
-            try {
-                OSGiTestHelper.assertLoadClassFail(host, "org.jboss.test.gravia.runtime.osgi.sub.a.AttachedType");
-                Assert.assertTrue(events.isEmpty());
-            } finally {
-                fragment.uninstall();
-                Assert.assertTrue(events.isEmpty());
-            }
-        } finally {
-            host.uninstall();
-            Assert.assertEquals(1, events.size());
-            Assert.assertEquals("good-bundle:0.0.0:UNINSTALLED", events.remove(0));
         }
     }
 

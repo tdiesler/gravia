@@ -56,7 +56,7 @@ import org.osgi.framework.BundleContext;
  * @since 01-Oct-2013
  */
 @RunWith(Arquillian.class)
-public class ModuleLifecycleTestCase {
+public class ModuleLifecycleTest {
 
     @ArquillianResource
     BundleContext bundleContext;

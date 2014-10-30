@@ -75,6 +75,7 @@ public final class OSGiRuntime extends AbstractRuntime {
     private final BundleListener installListener;
     private final URLStreamHandlerTracker streamHandlerTracker;
     private final Map<Long, Module> uninstalled = new HashMap<Long, Module>();
+    private final Map<Long, Module> unresolved = new HashMap<Long, Module>();
 
     public OSGiRuntime(BundleContext context, PropertiesProvider propertiesProvider) {
         super(propertiesProvider);
@@ -139,14 +140,27 @@ public final class OSGiRuntime extends AbstractRuntime {
             public void bundleChanged(BundleEvent event) {
                 int eventType = event.getType();
                 Bundle bundle = event.getBundle();
-                if (eventType == BundleEvent.RESOLVED) {
-                    installModule(bundle);
-                } else if (eventType == BundleEvent.UNINSTALLED) {
-                    Module module = getModule(bundle);
-                    if (module != null) {
-                        synchronized (uninstalled) {
-                            uninstalled.put(bundle.getBundleId(), module);
-                            uninstallModule(module);
+                if (!isFragment(bundle)) {
+                    if (eventType == BundleEvent.RESOLVED) {
+                        installModule(bundle);
+                    } else if (eventType == BundleEvent.UNRESOLVED) {
+                        Module module = getModule(bundle);
+                        if (module != null) {
+                            synchronized (unresolved) {
+                                unresolved.put(bundle.getBundleId(), module);
+                                uninstallModule(module);
+                            }
+                        }
+                    } else if (eventType == BundleEvent.UNINSTALLED) {
+                        Module module = getModule(bundle);
+                        if (module != null) {
+                            synchronized (unresolved) {
+                                unresolved.remove(bundle.getBundleId());
+                            }
+                            synchronized (uninstalled) {
+                                uninstalled.put(bundle.getBundleId(), module);
+                                uninstallModule(module);
+                            }
                         }
                     }
                 }
@@ -154,6 +168,26 @@ public final class OSGiRuntime extends AbstractRuntime {
         };
     }
 
+    private boolean isFragment(Bundle bundle) {
+        String host = bundle.getHeaders().get("Fragment-Host");
+        return host != null;
+    }
+    
+    Module getModuleInternal(long id, boolean all) {
+        Module module = getModule(id);
+        if (all && module == null) {
+            synchronized (unresolved) {
+                module = unresolved.get(id);
+            }
+        }
+        if (all && module == null) {
+            synchronized (uninstalled) {
+                module = uninstalled.get(id);
+            }
+        }
+        return module;
+    }
+    
     Module getModule(Bundle bundle) {
         Module module = super.getModule(bundle.getBundleId());
         if (module == null && bundle.getState() == Bundle.UNINSTALLED) {
