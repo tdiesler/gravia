@@ -33,12 +33,12 @@ import org.jboss.gravia.resource.Requirement;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.RuntimeLocator;
 import org.jboss.gravia.runtime.spi.RuntimePropertiesProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * The {@link Repository} component.
@@ -50,10 +50,10 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 public final class RepositoryService implements Repository {
 
     private Repository delegate;
+    private Runtime runtime;
 
     @Activate
     void activate(BundleContext context) throws JMException {
-        Runtime runtime = RuntimeLocator.getRequiredRuntime();
         delegate = new DefaultRepository(new RuntimePropertiesProvider(runtime));
     }
 
@@ -100,5 +100,14 @@ public final class RepositoryService implements Repository {
     @Override
     public Repository getFallbackRepository() {
         return delegate.getFallbackRepository();
+    }
+
+    @Reference
+    void bindRuntime(Runtime runtime) {
+        this.runtime = runtime;
+    }
+    
+    void unbindRuntime(Runtime runtime) {
+        this.runtime = null;
     }
 }
