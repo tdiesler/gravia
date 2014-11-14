@@ -161,7 +161,11 @@ public class EmbeddedRuntime extends AbstractRuntime {
         String configs = (String) getProperty(Constants.RUNTIME_CONFIGURATIONS_DIR);
         if (configs != null) {
             File configsDir = Paths.get(configs).toFile();
-            initConfigurationAdmin(syscontext, configsDir.getAbsoluteFile());
+            if (configsDir.isDirectory()) {
+                initConfigurationAdmin(syscontext, configsDir.getAbsoluteFile());
+            } else {
+                LOGGER.warn("Invalid configuration directory: {}", configsDir);
+            }
         }
     }
 
@@ -232,7 +236,7 @@ public class EmbeddedRuntime extends AbstractRuntime {
 
         ConfigurationAdmin configAdmin = ServiceLocator.getRequiredService(ConfigurationAdmin.class);
 
-        LOGGER.info("Loading ConfigurationAdmin content from: " + configsDir);
+        LOGGER.info("Loading ConfigurationAdmin content from: {}", configsDir);
         FilenameFilter filter = new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -245,9 +249,9 @@ public class EmbeddedRuntime extends AbstractRuntime {
             if (pid.contains("-")) {
                 pid = pid.substring(0, pid.indexOf("-"));
                 factoryConfiguration = true;
-                LOGGER.info("Loading factory configuration: " + pid);
+                LOGGER.info("Loading factory configuration: {}", pid);
             } else {
-                LOGGER.info("Loading configuration: " + pid);
+                LOGGER.info("Loading configuration: {}", pid);
             }
 
             try {
