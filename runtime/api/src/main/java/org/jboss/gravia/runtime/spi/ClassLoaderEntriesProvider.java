@@ -42,6 +42,11 @@ public final class ClassLoaderEntriesProvider implements ModuleEntriesProvider {
         classLoader = module.adapt(ClassLoader.class);
     }
 
+    public ClassLoaderEntriesProvider(ClassLoader classLoader) {
+        IllegalArgumentAssertion.assertNotNull(classLoader, "classLoader");
+        this.classLoader = classLoader;
+    }
+
     @Override
     public URL getEntry(String path) {
         // flawed because of parent first access
