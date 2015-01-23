@@ -115,6 +115,7 @@
     <!-- Modules -->
     <modules>
         <module>arquillian</module>
+        <module>jmx</module>
         <module>provision</module>
         <module>resource</module>
         <module>resolver</module>
