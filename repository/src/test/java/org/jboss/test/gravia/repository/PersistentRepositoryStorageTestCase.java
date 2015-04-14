@@ -8,9 +8,9 @@ package org.jboss.test.gravia.repository;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -134,7 +134,7 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
         ContentCapability ccap = ccaps.get(0).adapt(ContentCapability.class);
         Assert.assertEquals(digest, ccap.getDigest());
         Assert.assertEquals("application/java-archive", ccap.getMimeType());
-        Assert.assertEquals(new Long(392), ccap.getSize());
+        Assert.assertTrue(0 < ccap.getSize());
         File contentFile = new File(ccap.getContentURL().getPath()).getCanonicalFile();
         Assert.assertTrue("File exists: " + contentFile, contentFile.exists());
         Assert.assertTrue("Path starts with: " + storageDir.getPath(), contentFile.getPath().startsWith(storageDir.getPath()));
@@ -203,8 +203,8 @@ public class PersistentRepositoryStorageTestCase extends AbstractRepositoryTest 
         Assert.assertEquals(digest, cap.getAttribute(ContentNamespace.CONTENT_NAMESPACE));
         Assert.assertEquals("application/java-archive", ccap.getMimeType());
         Assert.assertEquals("application/java-archive", cap.getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE));
-        Assert.assertEquals(new Long(392), ccap.getSize());
-        Assert.assertEquals(new Long(392), cap.getAttribute(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE));
+        Assert.assertTrue(0 < ccap.getSize());
+        Assert.assertTrue(0 < (Long) cap.getAttribute(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE));
         URL contentURL = (URL) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
         File contentFile = new File(contentURL.getPath()).getCanonicalFile();
         Assert.assertTrue("File exists: " + contentFile, contentFile.exists());

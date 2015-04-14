@@ -158,13 +158,16 @@ public class EmbeddedRuntime extends AbstractRuntime {
     }
 
     protected void loadInitialConfigurations(ModuleContext syscontext) {
-        String configs = (String) getProperty(Constants.RUNTIME_CONFIGURATIONS_DIR);
-        if (configs != null) {
-            File configsDir = Paths.get(configs).toFile();
-            if (configsDir.isDirectory()) {
-                initConfigurationAdmin(syscontext, configsDir.getAbsoluteFile());
-            } else {
-                LOGGER.warn("Invalid configuration directory: {}", configsDir);
+        ConfigurationAdmin configAdmin = ServiceLocator.getService(ConfigurationAdmin.class);
+        if (configAdmin != null) {
+            String configs = (String) getProperty(Constants.RUNTIME_CONFIGURATIONS_DIR);
+            if (configs != null) {
+                File configsDir = Paths.get(configs).toFile();
+                if (configsDir.isDirectory()) {
+                    initConfigurationAdmin(syscontext, configsDir.getAbsoluteFile());
+                } else {
+                    LOGGER.warn("Invalid configuration directory: {}", configsDir);
+                }
             }
         }
     }
