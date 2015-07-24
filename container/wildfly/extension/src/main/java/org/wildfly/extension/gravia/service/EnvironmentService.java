@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.server.ServerEnvironment;
 import org.jboss.as.server.ServerEnvironmentService;
 import org.jboss.gravia.provision.spi.RuntimeEnvironment;
@@ -73,11 +72,10 @@ public class EnvironmentService extends AbstractService<Environment> {
     private ServiceRegistration<?> registration;
     private RuntimeEnvironment environment;
 
-    public ServiceController<Environment> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
+    public ServiceController<Environment> install(ServiceTarget serviceTarget) {
         ServiceBuilder<Environment> builder = serviceTarget.addService(GraviaConstants.ENVIRONMENT_SERVICE_NAME, this);
         builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, injectedServerEnvironment);
         builder.addDependency(GraviaConstants.RUNTIME_SERVICE_NAME, Runtime.class, injectedRuntime);
-        builder.addListener(verificationHandler);
         return builder.install();
     }
 
@@ -167,14 +165,14 @@ public class EnvironmentService extends AbstractService<Environment> {
         @Override
         public Set<Capability> findProviders(Requirement requirement) {
             synchronized (cachedResources) {
-                
+
                 Set<Capability> result = cachedResources.findProviders(requirement);
                 if (!result.isEmpty()) {
                     return result;
                 }
-                
+
                 ModuleLoader moduleLoader = Module.getBootModuleLoader();
-                
+
                 result = new HashSet<Capability>();
                 String symbolicName = (String) requirement.getAttribute(IdentityNamespace.IDENTITY_NAMESPACE);
                 VersionRange versionRange = (VersionRange) requirement.getAttribute(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);

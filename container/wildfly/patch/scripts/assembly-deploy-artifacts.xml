@@ -50,6 +50,7 @@
                 <include>*:gravia-resource:jar</include>
                 <include>*:gravia-runtime-api:jar</include>
                 <include>*:gravia-runtime-embedded:jar</include>
+                <include>*:org.osgi.core:jar</include>
                 <include>*:org.osgi.enterprise:jar</include>
             </includes>
             <scope>provided</scope>

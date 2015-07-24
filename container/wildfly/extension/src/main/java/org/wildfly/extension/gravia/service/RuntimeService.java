@@ -23,7 +23,6 @@ import java.io.File;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.server.ServerEnvironment;
 import org.jboss.as.server.ServerEnvironmentService;
 import org.jboss.gravia.Constants;
@@ -53,10 +52,9 @@ public class RuntimeService extends AbstractService<Runtime> {
     private final InjectedValue<ServerEnvironment> injectedServerEnvironment = new InjectedValue<ServerEnvironment>();
     private Runtime runtime;
 
-    public ServiceController<Runtime> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
+    public ServiceController<Runtime> install(ServiceTarget serviceTarget) {
         ServiceBuilder<Runtime> builder = serviceTarget.addService(GraviaConstants.RUNTIME_SERVICE_NAME, this);
         builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, injectedServerEnvironment);
-        builder.addListener(verificationHandler);
         return builder.install();
     }
 

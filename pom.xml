@@ -84,18 +84,20 @@
         <version.apache.karaf>2.3.3</version.apache.karaf>
         <version.apache.tomcat>7.0.42</version.apache.tomcat>
         <version.javax.servlet30.api>3.0.1</version.javax.servlet30.api>
-        <version.jboss.arquillian.core>1.1.2.Final-wildfly-1</version.jboss.arquillian.core>
+        <version.jboss.arquillian.core>1.1.2.Final</version.jboss.arquillian.core>
         <version.jboss.arquillian.osgi>2.1.0.CR15</version.jboss.arquillian.osgi>
         <version.jboss.arquillian.tomcat>1.0.0.CR6</version.jboss.arquillian.tomcat>
         <version.jboss.osgi.metadata>4.0.0.CR1</version.jboss.osgi.metadata>
         <version.jboss.shrinkwrap>1.1.2</version.jboss.shrinkwrap>
         <version.jboss.shrinkwrap.resolver>2.0.0</version.jboss.shrinkwrap.resolver>
-        <version.jboss.wildfly>8.1.0.Final</version.jboss.wildfly>
         <version.junit>4.11</version.junit>
         <version.log4j>1.2.16</version.log4j>
         <version.mockito>1.8.4</version.mockito>
         <version.osgi>5.0.0</version.osgi>
         <version.slf4j>1.6.6</version.slf4j>
+        <version.wildfly>9.0.0.Final</version.wildfly>
+        <version.wildfly.arquillian>1.0.0.Final</version.wildfly.arquillian>
+        <version.wildfly.core>1.0.0.Final</version.wildfly.core>
 
         <!-- Plugin Versions -->
         <version-apache-felix-scr-plugin>1.15.0</version-apache-felix-scr-plugin>
@@ -343,7 +345,7 @@
 
             <!-- WildFly -->
             <dependency>
-                <groupId>org.wildfly</groupId>
+                <groupId>org.wildfly.arquillian</groupId>
                 <artifactId>wildfly-arquillian-container-managed</artifactId>
                 <exclusions>
                     <exclusion>
@@ -351,17 +353,17 @@
                         <artifactId>arquillian-testenricher-osgi</artifactId>
                     </exclusion>
                 </exclusions>
-                <version>${version.jboss.wildfly}</version>
+                <version>${version.wildfly.arquillian}</version>
             </dependency>
             <dependency>
-                <groupId>org.wildfly</groupId>
+                <groupId>org.wildfly.arquillian</groupId>
                 <artifactId>wildfly-arquillian-protocol-jmx</artifactId>
-                <version>${version.jboss.wildfly}</version>
+                <version>${version.wildfly.arquillian}</version>
             </dependency>
             <dependency>
-                <groupId>org.wildfly</groupId>
+                <groupId>org.wildfly.core</groupId>
                 <artifactId>wildfly-server</artifactId>
-                <version>${version.jboss.wildfly}</version>
+                <version>${version.wildfly.core}</version>
             </dependency>
 
             <!-- Other -->
@@ -450,6 +452,7 @@
                             </tag>
                         </tags>
                         <quiet>true</quiet>
+                        <additionalparam>-Xdoclint:none</additionalparam>
                     </configuration>
                 </plugin>
                 <plugin>

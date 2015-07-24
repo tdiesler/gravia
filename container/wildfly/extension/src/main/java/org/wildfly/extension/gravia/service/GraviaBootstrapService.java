@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.gravia.provision.Provisioner;
 import org.jboss.gravia.repository.Repository;
 import org.jboss.gravia.resolver.Resolver;
@@ -69,10 +68,9 @@ public class GraviaBootstrapService extends AbstractService<Void> {
     private Set<ServiceTracker<?, ?>> trackers;
     private Module module;
 
-    public ServiceController<Void> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
+    public ServiceController<Void> install(ServiceTarget serviceTarget) {
         ServiceBuilder<Void> builder = serviceTarget.addService(GraviaConstants.GRAVIA_SUBSYSTEM_SERVICE_NAME, this);
         builder.addDependency(GraviaConstants.RUNTIME_SERVICE_NAME, Runtime.class, injectedRuntime);
-        builder.addListener(verificationHandler);
         return builder.install();
     }
 
@@ -132,7 +130,7 @@ public class GraviaBootstrapService extends AbstractService<Void> {
             module.uninstall();
         }
     }
-    
+
     /**
      * Open service trackers for {@link Resolver}, {@link Repository}, {@link Provisioner}
      */

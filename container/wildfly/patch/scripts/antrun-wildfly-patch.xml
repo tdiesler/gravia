@@ -72,6 +72,9 @@
 			<include name="gravia-runtime-embedded-*.jar" />
        	</fileset>
     </copy>
+    <copy todir="${wildfly.patch.dir}/modules/org/osgi/core/main" overwrite="true">
+        <fileset file="${deploy.artifacts.lib}/org.osgi.core-*.jar" />
+    </copy>
     <copy todir="${wildfly.patch.dir}/modules/org/osgi/enterprise/main" overwrite="true">
         <fileset file="${deploy.artifacts.lib}/org.osgi.enterprise-*.jar" />
     </copy>

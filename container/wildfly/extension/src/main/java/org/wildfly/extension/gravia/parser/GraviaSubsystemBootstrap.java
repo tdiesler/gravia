@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.as.controller.OperationContext;
-import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.server.DeploymentProcessorTarget;
 import org.jboss.as.server.deployment.Phase;
 import org.jboss.gravia.provision.ResourceInstaller;
@@ -57,34 +56,34 @@ public class GraviaSubsystemBootstrap {
     public static final int POST_MODULE_GRAVIA_MODULE_INSTALL = Phase.POST_MODULE_REFLECTION_INDEX + 0x01;
     public static final int INSTALL_GRAVIA_MODULE_START = Phase.INSTALL_DEPLOYMENT_COMPLETE_SERVICE - 0x01;
 
-    public List<ServiceController<?>> getSubsystemServices(OperationContext context, ServiceVerificationHandler verificationHandler) {
+    public List<ServiceController<?>> getSubsystemServices(OperationContext context) {
         List<ServiceController<?>> controllers = new ArrayList<ServiceController<?>>();
-        controllers.add(getBoostrapService(context, verificationHandler));
-        controllers.add(getResourceInstallService(context, verificationHandler));
-        controllers.add(getRuntimeEnvironmentService(context, verificationHandler));
-        controllers.add(getRuntimeService(context, verificationHandler));
-        controllers.add(getSystemContextService(context, verificationHandler));
+        controllers.add(getBoostrapService(context));
+        controllers.add(getResourceInstallService(context));
+        controllers.add(getRuntimeEnvironmentService(context));
+        controllers.add(getRuntimeService(context));
+        controllers.add(getSystemContextService(context));
         return controllers;
     }
 
-    protected ServiceController<?> getBoostrapService(OperationContext context, ServiceVerificationHandler verificationHandler) {
-        return new GraviaBootstrapService().install(context.getServiceTarget(), verificationHandler);
+    protected ServiceController<?> getBoostrapService(OperationContext context) {
+        return new GraviaBootstrapService().install(context.getServiceTarget());
     }
 
-    protected ServiceController<ResourceInstaller> getResourceInstallService(OperationContext context, ServiceVerificationHandler verificationHandler) {
-        return new WildFlyResourceInstaller().install(context.getServiceTarget(), verificationHandler);
+    protected ServiceController<ResourceInstaller> getResourceInstallService(OperationContext context) {
+        return new WildFlyResourceInstaller().install(context.getServiceTarget());
     }
 
-    protected ServiceController<Environment> getRuntimeEnvironmentService(OperationContext context, ServiceVerificationHandler verificationHandler) {
-        return new EnvironmentService().install(context.getServiceTarget(), verificationHandler);
+    protected ServiceController<Environment> getRuntimeEnvironmentService(OperationContext context) {
+        return new EnvironmentService().install(context.getServiceTarget());
     }
 
-    protected ServiceController<Runtime> getRuntimeService(OperationContext context, ServiceVerificationHandler verificationHandler) {
-        return new RuntimeService().install(context.getServiceTarget(), verificationHandler);
+    protected ServiceController<Runtime> getRuntimeService(OperationContext context) {
+        return new RuntimeService().install(context.getServiceTarget());
     }
 
-    protected ServiceController<ModuleContext> getSystemContextService(OperationContext context, ServiceVerificationHandler verificationHandler) {
-        return new ModuleContextService().install(context.getServiceTarget(), verificationHandler);
+    protected ServiceController<ModuleContext> getSystemContextService(OperationContext context) {
+        return new ModuleContextService().install(context.getServiceTarget());
     }
 
     public void addDeploymentUnitProcessors(DeploymentProcessorTarget processorTarget) {

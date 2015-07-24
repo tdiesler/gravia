@@ -37,8 +37,20 @@
 
     <!-- Properties -->
     <properties>
-        <jboss.home>${project.build.directory}/wildfly-${version.jboss.wildfly}</jboss.home>
+        <jboss.home>${project.build.directory}/wildfly-${version.wildfly}</jboss.home>
+        <version.jboss.arquillian.core>1.1.8.Final</version.jboss.arquillian.core>
     </properties>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.arquillian.junit</groupId>
+                <artifactId>arquillian-junit-container</artifactId>
+                <version>${version.jboss.arquillian.core}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     
     <dependencies>
         
@@ -68,7 +80,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wildfly</groupId>
+            <groupId>org.wildfly.arquillian</groupId>
             <artifactId>wildfly-arquillian-container-managed</artifactId>
             <scope>test</scope>
         </dependency>
@@ -106,8 +118,8 @@
                                 <artifactItem>
                                     <groupId>org.wildfly</groupId>
                                     <artifactId>wildfly-dist</artifactId>
-                                    <version>${version.jboss.wildfly}</version>
-                                    <type>tar.gz</type>
+                                    <version>${version.wildfly}</version>
+                                    <type>zip</type>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                 </artifactItem>
@@ -155,6 +167,13 @@
                         <log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration>
                         <target.container>wildfly</target.container>
 			        </systemPropertyVariables>
+                    <excludes>
+                        <exclude>**/ConfigurationAdminTest.*</exclude>
+                        <exclude>**/HttpServiceTest.*</exclude>
+                        <exclude>**/LogServiceTest.*</exclude>
+                        <exclude>**/ProvisionerServiceTest.*</exclude>
+                        <exclude>**/ServiceComponentTest.*</exclude>
+                    </excludes>
 			    </configuration>
 			</plugin>
 	    </plugins>

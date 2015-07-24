@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,6 @@
 
 package org.wildfly.extension.gravia.service;
 
-import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.msc.service.AbstractService;
@@ -46,10 +45,9 @@ public class ModuleContextService extends AbstractService<ModuleContext> {
 
     private ModuleContext syscontext;
 
-    public ServiceController<ModuleContext> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
+    public ServiceController<ModuleContext> install(ServiceTarget serviceTarget) {
         ServiceBuilder<ModuleContext> builder = serviceTarget.addService(GraviaConstants.MODULE_CONTEXT_SERVICE_NAME, this);
         builder.addDependency(GraviaConstants.RUNTIME_SERVICE_NAME, Runtime.class, injectedRuntime);
-        builder.addListener(verificationHandler);
         return builder.install();
     }
 

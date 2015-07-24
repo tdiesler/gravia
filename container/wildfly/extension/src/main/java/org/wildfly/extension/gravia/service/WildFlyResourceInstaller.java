@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 import org.jboss.as.controller.ModelController;
-import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.helpers.standalone.ServerDeploymentHelper;
 import org.jboss.as.controller.client.helpers.standalone.ServerDeploymentManager;
@@ -100,14 +99,13 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
     private ModelControllerClient modelControllerClient;
     private ServiceRegistration<?> registration;
 
-    public ServiceController<ResourceInstaller> install(ServiceTarget serviceTarget, ServiceVerificationHandler verificationHandler) {
+    public ServiceController<ResourceInstaller> install(ServiceTarget serviceTarget) {
         ServiceBuilder<ResourceInstaller> builder = serviceTarget.addService(GraviaConstants.RESOURCE_INSTALLER_SERVICE_NAME, this);
         builder.addDependency(ServerEnvironmentService.SERVICE_NAME, ServerEnvironment.class, injectedServerEnvironment);
         builder.addDependency(GraviaConstants.ENVIRONMENT_SERVICE_NAME, RuntimeEnvironment.class, injectedEnvironment);
         builder.addDependency(GraviaConstants.MODULE_CONTEXT_SERVICE_NAME, ModuleContext.class, injectedModuleContext);
         builder.addDependency(Services.JBOSS_SERVICE_MODULE_LOADER, ServiceModuleLoader.class, injectedServiceModuleLoader);
         builder.addDependency(Services.JBOSS_SERVER_CONTROLLER, ModelController.class, injectedController);
-        builder.addListener(verificationHandler);
         return builder.install();
     }
 
@@ -347,7 +345,7 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
             Resource depres = mapping.get(req);
             if (depres != null) {
                 ModuleIdentifier modid = null;
-                
+
                 // #1 Check the runtime for a deployed module
                 ResourceIdentity resid = depres.getIdentity();
                 Module module = runtime.getModule(resid);
@@ -361,7 +359,7 @@ public class WildFlyResourceInstaller extends AbstractResourceInstaller implemen
                     modid = (ModuleIdentifier) icap.getAttribute(ModuleIdentifier.class.getName());
                 }
                 IllegalStateAssertion.assertNotNull(modid, "Cannot obtain module identifier from: " + depres);
-                
+
                 buffer.append("<module name='" + modid.getName() + "' slot='" + modid.getSlot() + "'/>");
                 LOGGER.info("  {}", modid);
             } else {
