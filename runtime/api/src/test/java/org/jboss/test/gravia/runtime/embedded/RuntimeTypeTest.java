@@ -36,9 +36,6 @@ public class RuntimeTypeTest {
         Assert.assertSame(RuntimeType.KARAF, RuntimeType.getRuntimeType("Karaf"));
         Assert.assertSame(RuntimeType.KARAF, RuntimeType.getRuntimeType("karaf"));
 
-        Assert.assertSame(RuntimeType.TOMCAT, RuntimeType.getRuntimeType("Tomcat"));
-        Assert.assertSame(RuntimeType.TOMCAT, RuntimeType.getRuntimeType("tomcat"));
-
         Assert.assertSame(RuntimeType.WILDFLY, RuntimeType.getRuntimeType("WildFly"));
         Assert.assertSame(RuntimeType.WILDFLY, RuntimeType.getRuntimeType("wildfly"));
 

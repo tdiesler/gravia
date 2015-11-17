@@ -33,7 +33,7 @@ import org.jboss.gravia.utils.IllegalArgumentAssertion;
  */
 public enum RuntimeType {
 
-    KARAF, TOMCAT, WILDFLY, OTHER;
+    KARAF, WILDFLY, OTHER;
 
     public static RuntimeType getRuntimeType() {
         Runtime runtime = RuntimeLocator.getRequiredRuntime();

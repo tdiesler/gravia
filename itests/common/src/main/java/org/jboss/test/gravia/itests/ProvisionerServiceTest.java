@@ -47,8 +47,6 @@ import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.gravia.Constants;
 import org.jboss.gravia.arquillian.container.ContainerSetup;
 import org.jboss.gravia.arquillian.container.managed.ManagedSetupTask;
-import org.jboss.gravia.container.tomcat.WebAppContextListener;
-import org.jboss.gravia.itests.support.AnnotatedContextListener;
 import org.jboss.gravia.itests.support.ArchiveBuilder;
 import org.jboss.gravia.itests.support.HttpRequest;
 import org.jboss.gravia.provision.Provisioner;
@@ -89,7 +87,6 @@ import org.jboss.test.gravia.itests.sub.b.CamelTransformHttpActivator;
 import org.jboss.test.gravia.itests.sub.b.ModuleActivatorB;
 import org.jboss.test.gravia.itests.sub.b1.ModuleStateB;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.service.http.HttpService;
@@ -240,9 +237,6 @@ public class ProvisionerServiceTest {
 
         Provisioner provisioner = ServiceLocator.getRequiredService(Provisioner.class);
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
-
-        // Tomcat does not support jar deployments
-        Assume.assumeFalse(RuntimeType.TOMCAT == RuntimeType.getRuntimeType());
 
         ResourceIdentity identityA = ResourceIdentity.fromString("camel.core.unshared");
         MavenCoordinates mavenid = MavenCoordinates.parse("org.apache.camel:camel-core:jar:2.11.0");
@@ -449,14 +443,12 @@ public class ProvisionerServiceTest {
         ResourceBuilder builderF = new DefaultResourceBuilder();
         ResourceIdentity identityF = ResourceIdentity.create(RESOURCE_F, Version.emptyVersion);
         builderF.addIdentityCapability(identityF);
-        builderF.addContentCapability(deployer.getDeployment(CONTENT_F1), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.TOMCAT.name()));
         builderF.addContentCapability(deployer.getDeployment(CONTENT_F2), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.WILDFLY.name()));
         builderF.addContentCapability(deployer.getDeployment(CONTENT_F3), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.KARAF.name()));
 
         ResourceBuilder builderG = new DefaultResourceBuilder();
         ResourceIdentity identityG = ResourceIdentity.create(RESOURCE_G, Version.emptyVersion);
         builderG.addIdentityCapability(identityG);
-        builderG.addContentCapability(deployer.getDeployment(CONTENT_G1), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.TOMCAT.name()));
         builderG.addContentCapability(deployer.getDeployment(CONTENT_G2), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.WILDFLY.name()));
         builderG.addContentCapability(deployer.getDeployment(CONTENT_G3), null, Collections.singletonMap(CAPABILITY_INCLUDE_RUNTIME_TYPE_DIRECTIVE, RuntimeType.KARAF.name()));
 
@@ -499,7 +491,6 @@ public class ProvisionerServiceTest {
     @Deployment(name = RESOURCE_A, managed = false, testable = false)
     public static Archive<?> getResourceA() {
         final ArchiveBuilder archive = new ArchiveBuilder(RESOURCE_A);
-        archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(RuntimeType.KARAF, BundleActivatorBridge.class);
         archive.addClasses(ModuleActivatorA.class, ModuleStateA.class);
         archive.setManifest(new Asset() {
@@ -546,7 +537,6 @@ public class ProvisionerServiceTest {
     @Deployment(name = RESOURCE_B1, managed = false, testable = false)
     public static Archive<?> getResourceB1() {
         final ArchiveBuilder archive = new ArchiveBuilder(RESOURCE_B1);
-        archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(RuntimeType.KARAF, BundleActivatorBridge.class);
         archive.addClasses(ModuleActivatorB.class);
         archive.setManifest(new Asset() {
@@ -576,7 +566,6 @@ public class ProvisionerServiceTest {
     @Deployment(name = RESOURCE_C, managed = false, testable = false)
     public static Archive<?> getResourceC() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, RESOURCE_C + ".war");
-        archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(CamelTransformHttpActivator.class, BundleActivatorBridge.class);
         archive.setManifest(new Asset() {
             @Override
@@ -606,7 +595,6 @@ public class ProvisionerServiceTest {
     @Deployment(name = RESOURCE_D, managed = false, testable = false)
     public static Archive<?> getResourceD() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, RESOURCE_D + ".war");
-        archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(CamelTransformHttpActivator.class, BundleActivatorBridge.class);
         archive.setManifest(new Asset() {
             @Override
@@ -636,7 +624,6 @@ public class ProvisionerServiceTest {
     @Deployment(name = RESOURCE_E, managed = false, testable = false)
     public static Archive<?> getResourceE() {
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, RESOURCE_E + ".war");
-        archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(CamelTransformHttpActivator.class, BundleActivatorBridge.class);
         archive.setManifest(new Asset() {
             @Override
@@ -718,7 +705,6 @@ public class ProvisionerServiceTest {
     @Deployment(name = CONTENT_G1, managed = false, testable = false)
     public static Archive<?> getContentG1() {
         WebArchive archive = ShrinkWrap.create(WebArchive.class, CONTENT_G1 + ".war");
-        archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(ModuleActivatorB.class);
         archive.setManifest(new Asset() {
             @Override

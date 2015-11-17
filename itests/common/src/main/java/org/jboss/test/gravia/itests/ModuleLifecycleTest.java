@@ -25,7 +25,6 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.itests.support.AnnotatedContextListener;
 import org.jboss.gravia.itests.support.ArchiveBuilder;
 import org.jboss.gravia.runtime.BundleActivatorBridge;
 import org.jboss.gravia.runtime.Module;
@@ -33,7 +32,6 @@ import org.jboss.gravia.runtime.ModuleActivator;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.gravia.runtime.RuntimeLocator;
-import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.runtime.ServiceLocator;
 import org.jboss.gravia.runtime.ServiceReference;
 import org.jboss.gravia.runtime.ServiceRegistration;
@@ -58,7 +56,6 @@ public class ModuleLifecycleTest {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("simple-module");
         archive.addClasses(ModuleLifecycleTest.class, Activator.class);
-        archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {

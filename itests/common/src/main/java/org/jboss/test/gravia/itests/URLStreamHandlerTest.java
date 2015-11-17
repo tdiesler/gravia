@@ -36,7 +36,6 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.itests.support.AnnotatedContextListener;
 import org.jboss.gravia.itests.support.ArchiveBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -65,7 +64,6 @@ public class URLStreamHandlerTest {
     @StartLevelAware(autostart = true)
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("url-handler-test");
-        archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class);
         archive.addClasses(URLStreamHandlerTest.class);
         archive.setManifest(new Asset() {
             @Override

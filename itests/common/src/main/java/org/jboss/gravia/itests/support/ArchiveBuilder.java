@@ -28,7 +28,6 @@ import org.jboss.shrinkwrap.api.container.ManifestContainer;
 import org.jboss.shrinkwrap.api.container.ResourceContainer;
 import org.jboss.shrinkwrap.api.container.WebContainer;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.jboss.shrinkwrap.api.spec.WebArchive;
 
 /**
  * A test archive builder
@@ -43,11 +42,7 @@ public class ArchiveBuilder  {
 
     public ArchiveBuilder(String name) {
         this.name = name;
-        if (getTargetContainer() == RuntimeType.TOMCAT) {
-            archive = ShrinkWrap.create(WebArchive.class, name + ".war");
-        } else {
-            archive = ShrinkWrap.create(JavaArchive.class, name + ".jar");
-        }
+        archive = ShrinkWrap.create(JavaArchive.class, name + ".jar");
     }
 
     public String getName() {

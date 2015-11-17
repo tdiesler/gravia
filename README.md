@@ -9,7 +9,6 @@ Supported Target Containers
 The set of supported target containers includes but is not limited to 
 
 * [Apache Karaf](http://karaf.apache.org/)
-* [Apache Tomcat](http://tomcat.apache.org/)
 * [JBoss WildFly](http://www.wildfly.org/)
 
 Goals
@@ -32,13 +31,12 @@ The Gravia Runtime comes in two flavours
 * [Embedded Runtime](../../wiki/Runtime-Design#embedded-runtime)
 * [OSGi Runtime](../../wiki/Runtime-Design#osgi-runtime)
 
-The Embedded Runtime is used with target containers that do not natively support OSGi (e.g. Tomcat, Wildfly). 
+The Embedded Runtime is used with target containers that do not natively support OSGi (e.g. Wildfly). 
 The OSGi Runtime is used on OSGi containers (e.g. Apache Felix, Equinox)
 
 Links
 -----
 
 * [Gravia API](http://tdiesler.github.io/gravia/1.1/apidocs)
-* [Tomcat Integration](../../wiki/Tomcat-Integration), [Provisioning](../../wiki/Tomcat-Provisioning)
 * [OSGi Integration](../../wiki/OSGi-Integration), [Provisioning](../../wiki/OSGi-Provisioning)
 * [WildFly Integration](../../wiki/WildFly-Integration), [Provisioning](../../wiki/WildFly-Provisioning)

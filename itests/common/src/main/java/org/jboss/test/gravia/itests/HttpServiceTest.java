@@ -33,8 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
-import org.jboss.gravia.container.tomcat.WebAppContextListener;
-import org.jboss.gravia.itests.support.AnnotatedContextListener;
 import org.jboss.gravia.itests.support.ArchiveBuilder;
 import org.jboss.gravia.itests.support.HttpRequest;
 import org.jboss.gravia.resource.ManifestBuilder;
@@ -68,7 +66,6 @@ public class HttpServiceTest {
     public static Archive<?> deployment() {
         final RuntimeType targetContainer = ArchiveBuilder.getTargetContainer();
         final ArchiveBuilder archive = new ArchiveBuilder("http-service");
-        archive.addClasses(AnnotatedContextListener.class, WebAppContextListener.class);
         archive.addClasses(HttpRequest.class);
         archive.setManifest(new Asset() {
             @Override

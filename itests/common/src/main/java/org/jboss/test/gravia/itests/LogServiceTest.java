@@ -24,7 +24,6 @@ import java.io.InputStream;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
-import org.jboss.gravia.itests.support.AnnotatedContextListener;
 import org.jboss.gravia.itests.support.ArchiveBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Resource;
@@ -58,7 +57,6 @@ public class LogServiceTest  {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("logging-test");
         archive.addClasses(LogServiceTest.class);
-        archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class);
         archive.setManifest(new Asset() {
             @Override
             public InputStream openStream() {

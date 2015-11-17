@@ -47,7 +47,13 @@
         <!-- Provided Dependencies -->
         <dependency>
 	        <groupId>org.jboss.gravia</groupId>
-	        <artifactId>gravia-itests-common</artifactId>
+	        <artifactId>gravia-container-common</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.gravia</groupId>
+            <artifactId>gravia-itests-common</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.gravia.container.tomcat;
+package org.jboss.gravia.container.common;
 
 import java.io.IOException;
 import java.net.URL;

@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
-import org.jboss.gravia.itests.support.AnnotatedContextListener;
 import org.jboss.gravia.itests.support.ArchiveBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Resource;
@@ -63,7 +62,6 @@ public class ConfigurationAdminTest  {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("configadmin-test");
         archive.addClasses(ConfigurationAdminTest.class);
-        archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class);
         archive.addClasses(ServiceD.class, ServiceD1.class);
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d.ServiceD.xml");
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.d1.ServiceD1.xml");

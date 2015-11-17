@@ -107,17 +107,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.jboss.gravia</groupId>
-            <artifactId>gravia-container-tomcat-extension</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jboss.gravia</groupId>
-                    <artifactId>gravia-runtime-embedded</artifactId>
-                </exclusion>
-            </exclusions>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>

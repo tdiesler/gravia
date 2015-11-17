@@ -37,7 +37,6 @@ import org.jboss.gravia.resource.ResourceContent;
 import org.jboss.gravia.resource.ResourceIdentity;
 import org.jboss.gravia.runtime.RuntimeType;
 import org.jboss.gravia.utils.IllegalArgumentAssertion;
-import org.jboss.gravia.utils.ResourceUtils;
 
 /**
  * An abstract {@link ResourceInstaller}.
@@ -128,13 +127,7 @@ public abstract class AbstractResourceInstaller implements ResourceInstaller {
         if (runtimeName == null) {
             ResourceIdentity resid = resource.getIdentity();
             String qualifiedName = resid.getSymbolicName() + "-" + resid.getVersion();
-            if (ResourceUtils.isShared(resource)) {
-                runtimeName = qualifiedName + ".jar";
-            } else if (RuntimeType.TOMCAT == RuntimeType.getRuntimeType()) {
-                runtimeName = qualifiedName + ".war";
-            } else {
-                runtimeName = qualifiedName + ".jar";
-            }
+            runtimeName = qualifiedName + ".jar";
         }
         return runtimeName;
     }

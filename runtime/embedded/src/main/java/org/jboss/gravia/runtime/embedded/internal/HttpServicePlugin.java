@@ -35,7 +35,7 @@ public final class HttpServicePlugin extends AbstractRuntimePlugin {
 
     @Override
     public String getBundleActivator() {
-        if (RuntimeType.getRuntimeType() == RuntimeType.TOMCAT || RuntimeType.getRuntimeType() == RuntimeType.WILDFLY) {
+        if (RuntimeType.getRuntimeType() == RuntimeType.WILDFLY) {
             // The HttpService is contained in the http bridge and org.osgi.enterprise
             // Here we preload the HttpService and debug the ClassLoader were it actually got loaded from
             try {

@@ -29,7 +29,6 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.osgi.StartLevelAware;
 import org.jboss.gravia.Constants;
-import org.jboss.gravia.itests.support.AnnotatedContextListener;
 import org.jboss.gravia.itests.support.ArchiveBuilder;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.gravia.resource.Resource;
@@ -65,7 +64,6 @@ public class ServiceComponentTest  {
     public static Archive<?> deployment() {
         final ArchiveBuilder archive = new ArchiveBuilder("scr-test");
         archive.addClasses(ServiceComponentTest.class);
-        archive.addClasses(RuntimeType.TOMCAT, AnnotatedContextListener.class);
         archive.addClasses(ServiceA.class, ServiceA1.class);
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.a.ServiceA.xml");
         archive.addAsResource("OSGI-INF/org.jboss.test.gravia.itests.sub.a1.ServiceA1.xml");

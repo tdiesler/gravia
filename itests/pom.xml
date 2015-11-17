@@ -36,7 +36,6 @@
 		<module>common</module>
         <module>embedded</module>
 		<module>karaf</module>
-		<module>tomcat</module>
         <module>wildfly</module>
 	</modules>
 	
