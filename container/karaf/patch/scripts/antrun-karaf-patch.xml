@@ -90,11 +90,6 @@ org/jboss/gravia/${project.version}/gravia-runtime-osgi-${project.version}.jar=4
 org/jboss/gravia/${project.version}/gravia-repository-${project.version}.jar=41
 org/jboss/gravia/${project.version}/gravia-resolver-${project.version}.jar=41
 org/jboss/gravia/${project.version}/gravia-provision-${project.version}.jar=42
-    	
-#
-# Arquillian OSGi Integration
-# 
-org/jboss/arquillian/osgi/${version.jboss.arquillian.osgi}/arquillian-osgi-bundle-${version.jboss.arquillian.osgi}.jar=50
     </echo>
   	
     <copy file="${karaf.source.dir}/etc/custom.properties" todir="${karaf.patch.dir}/etc" overwrite="true"/>
