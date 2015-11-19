@@ -36,7 +36,11 @@
         <resource-root path="org.apache.felix.http.bridge-@version.apache.felix.http@.jar"/>
         <resource-root path="org.apache.felix.log-@version.apache.felix.log@.jar"/>
         <resource-root path="org.apache.felix.metatype-@version.apache.felix.metatype@.jar"/>
-        <resource-root path="org.apache.felix.scr-@version.apache.felix.scr@.jar"/>
+        <resource-root path="org.apache.felix.scr-@version.apache.felix.scr@.jar">
+            <filter>
+                <exclude path="org/osgi/service/component" />
+            </filter>
+        </resource-root>
     </resources>
 
     <exports>

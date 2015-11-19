@@ -172,7 +172,6 @@
                         <exclude>**/HttpServiceTest.*</exclude>
                         <exclude>**/LogServiceTest.*</exclude>
                         <exclude>**/ProvisionerServiceTest.*</exclude>
-                        <exclude>**/ServiceComponentTest.*</exclude>
                     </excludes>
 			    </configuration>
 			</plugin>
