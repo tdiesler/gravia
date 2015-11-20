@@ -43,10 +43,6 @@
                 <include>*:gravia-container-common:jar</include>
                 <include>*:gravia-container-wildfly-extension:jar</include>
                 <include>*:gravia-container-wildfly-webapp:war</include>
-                <include>*:gravia-provision:jar</include>
-                <include>*:gravia-resolver:jar</include>
-                <include>*:gravia-resource:jar</include>
-                <include>*:gravia-repository:jar</include>
                 <include>*:gravia-resource:jar</include>
                 <include>*:gravia-runtime-api:jar</include>
                 <include>*:gravia-runtime-embedded:jar</include>

@@ -171,7 +171,6 @@
                         <exclude>**/ConfigurationAdminTest.*</exclude>
                         <exclude>**/HttpServiceTest.*</exclude>
                         <exclude>**/LogServiceTest.*</exclude>
-                        <exclude>**/ProvisionerServiceTest.*</exclude>
                     </excludes>
 			    </configuration>
 			</plugin>

@@ -46,8 +46,6 @@ import org.jboss.arquillian.test.spi.context.ClassContext;
 import org.jboss.arquillian.test.spi.context.SuiteContext;
 import org.jboss.gravia.arquillian.container.SetupObserver;
 import org.jboss.gravia.arquillian.container.managed.ManagedSetupTask.ManagedContext;
-import org.jboss.gravia.repository.RepositoryMBean;
-import org.jboss.gravia.utils.MBeanProxy;
 
 /**
  * An Arquillian container setup observer.
@@ -71,10 +69,6 @@ public class ManagedContainerSetupObserver extends SetupObserver<ManagedSetupTas
     @ApplicationScoped
     private InstanceProducer<MBeanServerConnection> mbeanServerInstance;
 
-    @Inject
-    @ApplicationScoped
-    private InstanceProducer<RepositoryMBean> repositoryInstance;
-
     @Override
     @SuppressWarnings("unchecked")
     protected ManagedSetupContext getSetupContext(ObjectStore suiteStore, ObjectStore classStore) {
@@ -88,10 +82,6 @@ public class ManagedContainerSetupObserver extends SetupObserver<ManagedSetupTas
         MBeanServerConnection mbeanServer = getMBeanServerConnection(container);
         if (mbeanServer != null) {
             mbeanServerInstance.set(mbeanServer);
-            if (mbeanServer.isRegistered(RepositoryMBean.OBJECT_NAME)) {
-                RepositoryMBean repository = MBeanProxy.get(mbeanServer, RepositoryMBean.OBJECT_NAME, RepositoryMBean.class);
-                repositoryInstance.set(repository);
-            }
         }
     }
 

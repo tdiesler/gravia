@@ -48,21 +48,6 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.gravia</groupId>
-            <artifactId>gravia-provision</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.gravia</groupId>
-            <artifactId>gravia-repository</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.gravia</groupId>
-            <artifactId>gravia-resolver</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-resource</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -104,7 +89,6 @@
                     <archive>
                         <manifestEntries>
                             <Gravia-Identity>${project.artifactId};version=${project.version}</Gravia-Identity>
-                            <Service-Component>OSGI-INF/org.jboss.gravia.provision.internal.ProvisionerService.xml,OSGI-INF/org.jboss.gravia.repository.internal.RepositoryMBeanService.xml,OSGI-INF/org.jboss.gravia.repository.internal.RepositoryService.xml,OSGI-INF/org.jboss.gravia.resolver.internal.ResolverService.xml</Service-Component>
                         </manifestEntries>
                     </archive>
                 </configuration>

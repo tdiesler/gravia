@@ -67,25 +67,7 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.gravia</groupId>
-            <artifactId>gravia-provision</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.gravia</groupId>
             <artifactId>gravia-resource</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.gravia</groupId>
-            <artifactId>gravia-repository</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.gravia</groupId>
-            <artifactId>gravia-resolver</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

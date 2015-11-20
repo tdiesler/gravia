@@ -19,13 +19,7 @@
  */
 package org.jboss.gravia.arquillian.container.embedded;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 
@@ -47,17 +41,6 @@ import org.junit.Assert;
  */
 public class EmbeddedSetupObserver extends SetupObserver<SetupTask> {
 
-    public static final String[] moduleNames = new String[] { "gravia-provision", "gravia-resolver", "gravia-repository" };
-
-    protected List<URL> getInitialModuleLocations() throws IOException {
-        List<URL> modules = new ArrayList<>();
-        for (String modname : moduleNames) {
-            File modfile = Paths.get("target", "modules", modname + ".jar").toFile();
-            modules.add(modfile.toURI().toURL());
-        }
-        return modules;
-    }
-
     @Override
     public void handleBeforeSuite(BeforeSuite event) throws Throwable {
         super.handleBeforeSuite(event);
@@ -68,10 +51,6 @@ public class EmbeddedSetupObserver extends SetupObserver<SetupTask> {
         runtime = EmbeddedUtils.getEmbeddedRuntime();
         ObjectStore suiteStore = getSuiteObjectStore();
         suiteStore.add(Runtime.class, runtime);
-        for (URL url : getInitialModuleLocations()) {
-            ClassLoader classLoader = EmbeddedSetupObserver.class.getClassLoader();
-            EmbeddedUtils.installAndStartModule(classLoader, url);
-        }
 
         // Do additional setup
         Iterator<EmbeddedRuntimeSetup> itsetup = ServiceLoader.load(EmbeddedRuntimeSetup.class).iterator();

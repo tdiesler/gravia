@@ -36,9 +36,6 @@
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>*:arquillian-osgi-bundle:jar</include>
-                <include>*:gravia-provision:jar</include>
-                <include>*:gravia-repository:jar</include>
-                <include>*:gravia-resolver:jar</include>
                 <include>*:gravia-resource:jar</include>
                 <include>*:gravia-runtime-api:jar</include>
                 <include>*:gravia-runtime-osgi:jar</include>

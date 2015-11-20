@@ -22,11 +22,6 @@
 package org.wildfly.extension.gravia;
 
 import org.jboss.as.server.deployment.AttachmentKey;
-import org.jboss.gravia.provision.Provisioner;
-import org.jboss.gravia.provision.ResourceInstaller;
-import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.resolver.Environment;
-import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.Resource;
 import org.jboss.gravia.runtime.Module;
 import org.jboss.gravia.runtime.ModuleContext;
@@ -49,14 +44,6 @@ public interface GraviaConstants {
     ServiceName ENVIRONMENT_SERVICE_NAME = GRAVIA_BASE_NAME.append("Environment");
     /** The name for the {@link ModuleContext} service */
     ServiceName MODULE_CONTEXT_SERVICE_NAME = GRAVIA_BASE_NAME.append("ModuleContext");
-    /** The name for the {@link Provisioner} service */
-    ServiceName PROVISIONER_SERVICE_NAME = GRAVIA_BASE_NAME.append("Provisioner");
-    /** The name for the {@link Repository} service */
-    ServiceName REPOSITORY_SERVICE_NAME = GRAVIA_BASE_NAME.append("Repository");
-    /** The name for the {@link Resolver} service */
-    ServiceName RESOLVER_SERVICE_NAME = GRAVIA_BASE_NAME.append("Resolver");
-    /** The name for the {@link ResourceInstaller} service */
-    ServiceName RESOURCE_INSTALLER_SERVICE_NAME = GRAVIA_BASE_NAME.append("ResourceInstaller");
     /** The name for the {@link Runtime} service */
     ServiceName RUNTIME_SERVICE_NAME = GRAVIA_BASE_NAME.append("Runtime");
 

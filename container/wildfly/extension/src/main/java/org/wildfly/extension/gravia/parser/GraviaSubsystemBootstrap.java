@@ -26,8 +26,6 @@ import java.util.List;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.server.DeploymentProcessorTarget;
 import org.jboss.as.server.deployment.Phase;
-import org.jboss.gravia.provision.ResourceInstaller;
-import org.jboss.gravia.resolver.Environment;
 import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
 import org.jboss.msc.service.ServiceController;
@@ -36,10 +34,8 @@ import org.wildfly.extension.gravia.deployment.ManifestResourceProcessor;
 import org.wildfly.extension.gravia.deployment.ModuleDependenciesProcessor;
 import org.wildfly.extension.gravia.deployment.ModuleInstallProcessor;
 import org.wildfly.extension.gravia.deployment.ModuleStartProcessor;
-import org.wildfly.extension.gravia.service.EnvironmentService;
 import org.wildfly.extension.gravia.service.GraviaBootstrapService;
 import org.wildfly.extension.gravia.service.ModuleContextService;
-import org.wildfly.extension.gravia.service.WildFlyResourceInstaller;
 import org.wildfly.extension.gravia.service.RuntimeService;
 
 /**
@@ -59,8 +55,6 @@ public class GraviaSubsystemBootstrap {
     public List<ServiceController<?>> getSubsystemServices(OperationContext context) {
         List<ServiceController<?>> controllers = new ArrayList<ServiceController<?>>();
         controllers.add(getBoostrapService(context));
-        controllers.add(getResourceInstallService(context));
-        controllers.add(getRuntimeEnvironmentService(context));
         controllers.add(getRuntimeService(context));
         controllers.add(getSystemContextService(context));
         return controllers;
@@ -68,14 +62,6 @@ public class GraviaSubsystemBootstrap {
 
     protected ServiceController<?> getBoostrapService(OperationContext context) {
         return new GraviaBootstrapService().install(context.getServiceTarget());
-    }
-
-    protected ServiceController<ResourceInstaller> getResourceInstallService(OperationContext context) {
-        return new WildFlyResourceInstaller().install(context.getServiceTarget());
-    }
-
-    protected ServiceController<Environment> getRuntimeEnvironmentService(OperationContext context) {
-        return new EnvironmentService().install(context.getServiceTarget());
     }
 
     protected ServiceController<Runtime> getRuntimeService(OperationContext context) {

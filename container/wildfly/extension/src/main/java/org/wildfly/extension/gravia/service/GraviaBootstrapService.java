@@ -25,20 +25,12 @@ import static org.wildfly.extension.gravia.GraviaExtensionLogger.LOGGER;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-import org.jboss.gravia.provision.Provisioner;
-import org.jboss.gravia.repository.Repository;
-import org.jboss.gravia.resolver.Resolver;
 import org.jboss.gravia.resource.Attachable;
 import org.jboss.gravia.runtime.Module;
-import org.jboss.gravia.runtime.ModuleContext;
 import org.jboss.gravia.runtime.Runtime;
-import org.jboss.gravia.runtime.ServiceReference;
-import org.jboss.gravia.runtime.ServiceTracker;
 import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.ClassLoaderEntriesProvider;
 import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
@@ -47,7 +39,6 @@ import org.jboss.modules.ModuleClassLoader;
 import org.jboss.msc.service.AbstractService;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
-import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
@@ -65,7 +56,6 @@ public class GraviaBootstrapService extends AbstractService<Void> {
 
     private final InjectedValue<Runtime> injectedRuntime = new InjectedValue<Runtime>();
 
-    private Set<ServiceTracker<?, ?>> trackers;
     private Module module;
 
     public ServiceController<Void> install(ServiceTarget serviceTarget) {
@@ -79,12 +69,10 @@ public class GraviaBootstrapService extends AbstractService<Void> {
         LOGGER.info("Activating Gravia Subsystem");
         Runtime runtime = injectedRuntime.getValue();
         installExtensionModule(startContext, runtime);
-        installGraviaServices(startContext, runtime);
     }
 
     @Override
     public void stop(StopContext context) {
-        uninstallGraviaServices();
         uninstallExtensionModule();
     }
 
@@ -129,91 +117,5 @@ public class GraviaBootstrapService extends AbstractService<Void> {
         if (module != null) {
             module.uninstall();
         }
-    }
-
-    /**
-     * Open service trackers for {@link Resolver}, {@link Repository}, {@link Provisioner}
-     */
-    public void installGraviaServices(final StartContext startContext, Runtime runtime) {
-        ModuleContext syscontext = runtime.getModuleContext();
-        trackers = new HashSet<ServiceTracker<?, ?>>();
-        trackers.add(resolverTracker(syscontext, startContext.getChildTarget()));
-        trackers.add(repositoryTracker(syscontext, startContext.getChildTarget()));
-        trackers.add(provisionerTracker(syscontext, startContext.getChildTarget()));
-    }
-
-    /**
-     * Close the service trackers for {@link Resolver}, {@link Repository}, {@link Provisioner}
-     */
-    public void uninstallGraviaServices() {
-        for (ServiceTracker<?, ?> tracker : trackers) {
-            tracker.close();
-        }
-    }
-
-    private ServiceTracker<?, ?> resolverTracker(final ModuleContext syscontext, final ServiceTarget serviceTarget) {
-        ServiceTracker<?, ?> tracker = new ServiceTracker<Resolver, Resolver>(syscontext, Resolver.class, null) {
-
-            ServiceController<Resolver> controller;
-
-            @Override
-            public Resolver addingService(ServiceReference<Resolver> reference) {
-                Resolver resolver = super.addingService(reference);
-                controller = new ResolverService(resolver).install(serviceTarget);
-                return resolver;
-            }
-
-            @Override
-            public void remove(ServiceReference<Resolver> reference) {
-                controller.setMode(Mode.REMOVE);
-                super.remove(reference);
-            }
-        };
-        tracker.open();
-        return tracker;
-    }
-
-    private ServiceTracker<?, ?> repositoryTracker(final ModuleContext syscontext, final ServiceTarget serviceTarget) {
-        ServiceTracker<?, ?> tracker = new ServiceTracker<Repository, Repository>(syscontext, Repository.class, null) {
-
-            ServiceController<Repository> controller;
-
-            @Override
-            public Repository addingService(ServiceReference<Repository> reference) {
-                Repository repository = super.addingService(reference);
-                controller = new RepositoryService(repository).install(serviceTarget);
-                return repository;
-            }
-
-            @Override
-            public void remove(ServiceReference<Repository> reference) {
-                controller.setMode(Mode.REMOVE);
-                super.remove(reference);
-            }
-        };
-        tracker.open();
-        return tracker;
-    }
-
-    private ServiceTracker<?, ?> provisionerTracker(final ModuleContext syscontext, final ServiceTarget serviceTarget) {
-        ServiceTracker<?, ?> tracker = new ServiceTracker<Provisioner, Provisioner>(syscontext, Provisioner.class, null) {
-
-            ServiceController<Provisioner> controller;
-
-            @Override
-            public Provisioner addingService(ServiceReference<Provisioner> reference) {
-                Provisioner provisioner = super.addingService(reference);
-                controller = new ProvisionerService(provisioner).install(serviceTarget);
-                return provisioner;
-            }
-
-            @Override
-            public void remove(ServiceReference<Provisioner> reference) {
-                controller.setMode(Mode.REMOVE);
-                super.remove(reference);
-            }
-        };
-        tracker.open();
-        return tracker;
     }
 }
