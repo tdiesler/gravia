@@ -62,7 +62,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
 
 /**
- * The embedded runtome implemenation
+ * The embedded runtime implemenation
  *
  * @author thomas.diesler@jboss.com
  * @since 27-Sep-2013

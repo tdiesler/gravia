@@ -167,10 +167,6 @@
                         <log4j.configuration>file://${basedir}/src/test/resources/logging.properties</log4j.configuration>
                         <target.container>wildfly</target.container>
 			        </systemPropertyVariables>
-                    <excludes>
-                        <exclude>**/ConfigurationAdminTest.*</exclude>
-                        <exclude>**/LogServiceTest.*</exclude>
-                    </excludes>
 			    </configuration>
 			</plugin>
 	    </plugins>
