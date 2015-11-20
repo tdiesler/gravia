@@ -169,7 +169,6 @@
 			        </systemPropertyVariables>
                     <excludes>
                         <exclude>**/ConfigurationAdminTest.*</exclude>
-                        <exclude>**/HttpServiceTest.*</exclude>
                         <exclude>**/LogServiceTest.*</exclude>
                     </excludes>
 			    </configuration>

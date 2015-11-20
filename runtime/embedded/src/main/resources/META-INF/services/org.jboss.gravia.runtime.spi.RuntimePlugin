@@ -1,3 +1,2 @@
 org.jboss.gravia.runtime.embedded.internal.ConfigurationAdminPlugin
 org.jboss.gravia.runtime.embedded.internal.ServiceComponentsPlugin
-org.jboss.gravia.runtime.embedded.internal.HttpServicePlugin

@@ -48,7 +48,7 @@ public class ModuleLifecycleTest {
         Assert.assertEquals(1, callCount.incrementAndGet());
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Set<Module> modules = runtime.getModules();
-        Assert.assertEquals("Unexpected modules: " + modules, 4, modules.size());
+        Assert.assertEquals("Unexpected modules: " + modules, 3, modules.size());
     }
 
     @Before
@@ -56,7 +56,7 @@ public class ModuleLifecycleTest {
         Assert.assertEquals(2, callCount.incrementAndGet());
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Set<Module> modules = runtime.getModules();
-        Assert.assertEquals("Unexpected modules: " + modules, 4, modules.size());
+        Assert.assertEquals("Unexpected modules: " + modules, 3, modules.size());
     }
 
     @Test
@@ -64,6 +64,6 @@ public class ModuleLifecycleTest {
         Assert.assertEquals(3, callCount.incrementAndGet());
         Runtime runtime = RuntimeLocator.getRequiredRuntime();
         Set<Module> modules = runtime.getModules();
-        Assert.assertEquals("Unexpected modules: " + modules, 4, modules.size());
+        Assert.assertEquals("Unexpected modules: " + modules, 3, modules.size());
     }
 }
