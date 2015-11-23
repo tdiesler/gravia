@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -130,21 +131,26 @@ public class EmbeddedRuntime extends AbstractRuntime {
 
     protected List<Module> installPluginModules() {
         List<Module> pluginModules = new ArrayList<Module>();
-        ClassLoader classLoader = getClass().getClassLoader();
-        ServiceLoader<RuntimePlugin> services = ServiceLoader.load(RuntimePlugin.class, EmbeddedRuntime.class.getClassLoader());
-        Iterator<RuntimePlugin> iterator = services.iterator();
-        while (iterator.hasNext()) {
-            RuntimePlugin plugin = iterator.next();
-            try {
-                Module module = plugin.installPluginModule(this, classLoader);
-                if (module != null) {
-                    pluginModules.add(module);
+        for (ClassLoader classLoader : getPluginClassLoaders()) {
+            ServiceLoader<RuntimePlugin> services = ServiceLoader.load(RuntimePlugin.class, classLoader);
+            Iterator<RuntimePlugin> iterator = services.iterator();
+            while (iterator.hasNext()) {
+                RuntimePlugin plugin = iterator.next();
+                try {
+                    Module module = plugin.installPluginModule(this, classLoader);
+                    if (module != null) {
+                        pluginModules.add(module);
+                    }
+                } catch (ModuleException ex) {
+                    LOGGER.error("Cannot load plugin: " + plugin.getClass().getName(), ex);
                 }
-            } catch (ModuleException ex) {
-                LOGGER.error("Cannot load plugin: " + plugin.getClass().getName(), ex);
             }
         }
         return pluginModules;
+    }
+
+    protected List<ClassLoader> getPluginClassLoaders() {
+        return Collections.singletonList(EmbeddedRuntime.class.getClassLoader());
     }
 
     protected void startPluginModules(List<Module> pluginModules) {

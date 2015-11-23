@@ -35,6 +35,7 @@ import org.jboss.gravia.runtime.spi.AbstractModule;
 import org.jboss.gravia.runtime.spi.ClassLoaderEntriesProvider;
 import org.jboss.gravia.runtime.spi.ManifestHeadersProvider;
 import org.jboss.gravia.runtime.spi.ModuleEntriesProvider;
+import org.jboss.gravia.utils.IllegalStateAssertion;
 import org.jboss.modules.ModuleClassLoader;
 import org.jboss.msc.service.AbstractService;
 import org.jboss.msc.service.ServiceBuilder;
@@ -86,11 +87,12 @@ public class GraviaBootstrapService extends AbstractService<Void> {
             Enumeration<URL> resources = classLoader.getResources(JarFile.MANIFEST_NAME);
             while (resources.hasMoreElements()) {
                 URL nextURL = resources.nextElement();
-                if (nextURL.getPath().contains("wildfly-extension")) {
+                if (nextURL.getPath().contains("gravia-container-wildfly-extension")) {
                     extensionURL = nextURL;
                     break;
                 }
             }
+            IllegalStateAssertion.assertNotNull(extensionURL, "Manifest for extension module not found");
             Manifest manifest = new Manifest(extensionURL.openStream());
             Dictionary<String, String> headers = new ManifestHeadersProvider(manifest).getHeaders();
             module = runtime.installModule(classLoader, headers);
