@@ -81,12 +81,10 @@
         <version.apache.felix.scr>1.6.2</version.apache.felix.scr>
         <version.apache.felix.scr.ds.annotations>1.2.4</version.apache.felix.scr.ds.annotations>
         <version.apache.felix.scr.generator>1.8.0</version.apache.felix.scr.generator>
-        <version.apache.karaf>2.3.3</version.apache.karaf>
-        <version.apache.tomcat>7.0.42</version.apache.tomcat>
+        <version.apache.karaf>2.4.3</version.apache.karaf>
         <version.javax.servlet30.api>3.0.1</version.javax.servlet30.api>
         <version.jboss.arquillian.core>1.1.10.Final</version.jboss.arquillian.core>
         <version.jboss.arquillian.osgi>2.1.0.Final</version.jboss.arquillian.osgi>
-        <version.jboss.arquillian.tomcat>1.0.0.CR6</version.jboss.arquillian.tomcat>
         <version.jboss.osgi.metadata>4.0.0.CR1</version.jboss.osgi.metadata>
         <version.jboss.shrinkwrap>1.1.2</version.jboss.shrinkwrap>
         <version.jboss.shrinkwrap.resolver>2.0.0</version.jboss.shrinkwrap.resolver>
@@ -252,11 +250,6 @@
                 <version>${version.jboss.arquillian.osgi}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss.arquillian.container</groupId>
-                <artifactId>arquillian-tomcat-managed-7</artifactId>
-                <version>${version.jboss.arquillian.tomcat}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.jboss.osgi.metadata</groupId>
                 <artifactId>jbosgi-metadata</artifactId>
                 <version>${version.jboss.osgi.metadata}</version>
@@ -329,18 +322,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>${version.slf4j}</version>
-            </dependency>
-
-            <!-- Tomcat -->
-            <dependency>
-                <groupId>org.apache.tomcat</groupId>
-                <artifactId>tomcat-catalina</artifactId>
-                <version>${version.apache.tomcat}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat</groupId>
-                <artifactId>tomcat-catalina-ant</artifactId>
-                <version>${version.apache.tomcat}</version>
             </dependency>
 
             <!-- WildFly -->

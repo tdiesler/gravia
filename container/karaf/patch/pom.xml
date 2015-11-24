@@ -138,7 +138,7 @@
                 <inherited>false</inherited>
                 <executions>
                     <execution>
-                        <id>build-tomcat-patch</id>
+                        <id>build-karaf-patch</id>
                         <goals>
                             <goal>run</goal>
                         </goals>

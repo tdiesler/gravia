@@ -117,7 +117,7 @@ public interface Constants  {
     String RUNTIME_STORAGE_DEFAULT = "gravia-store";
 
     /**
-     * A string value representing the type of the runtime (e.g. tomcat,wildfly,karaf,etc)
+     * A string value representing the type of the runtime (e.g. wildfly,karaf,etc)
      */
     String RUNTIME_TYPE = "org.jboss.gravia.runtime.type";
 
