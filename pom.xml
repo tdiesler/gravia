@@ -375,11 +375,18 @@
                         </instructions>
                     </configuration>
                     <extensions>true</extensions>
+                    <configuration>
+                        <manifestLocation>${project.build.directory}/generated-sources/bundle/META-INF</manifestLocation>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
                     <version>${version-apache-felix-scr-plugin}</version>
+                    <configuration>
+                        <generateAccessors>false</generateAccessors>
+                        <outputDirectory>${project.build.directory}/generated-sources/scr</outputDirectory>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
